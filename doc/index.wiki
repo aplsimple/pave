@@ -1,0 +1,12 @@
+Just to play.
+
+Download links:
+  *  zip file of pave source:
+    <a href="http://chiselapp.com/user/aplsimple/repository/pave/uv/pave.zip">pave.zip</a>
+  *  demo video:
+    <a href="http://chiselapp.com/user/aplsimple/repository/pave/uv/test2pave.mp4">test2pave.mp4</a>
+To download, right-click a link and choose <i>"Save link as..."
+
+<br><br>
+<img src="https://chiselapp.com/user/aplsimple/repository/pave/raw/61560329c59a4b0c?m=image/png"/>  Further details:
+[https://aplsimple.github.io/en/tcl/pave|pave description]
