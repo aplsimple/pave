@@ -10,7 +10,6 @@ package require Tk
 
 set pavedir [file join [file normalize [file dirname $::argv0]] ..]
 source [file join $pavedir paveinput.tcl]
-source [file join $pavedir obbit.tcl]
 
 namespace eval t {
 

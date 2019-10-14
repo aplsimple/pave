@@ -1,7 +1,7 @@
 # pave
 
-The pave is sort of wrapper around the grid and pack Tcl/Tk geometry managers.
+The *pave* is sort of wrapper around the grid and pack Tcl/Tk geometry managers.
 
-Details:
+Docs:
 
-https://aplsimple.github.io/en/tcl/pave
+[Full description](<https://aplsimple.github.io/en/tcl/pave)

@@ -54,7 +54,11 @@
 package require Tk
 package require widget::calendar
 
+source [file join [file dirname [info script]] obbit.tcl]
+
 oo::class create PaveMe {
+
+  mixin ObjectTheming ObjectParsingUtils
 
   variable _pav
 
@@ -172,8 +176,8 @@ oo::class create PaveMe {
 
   method ExpandOptions {options} {
 
+#      " - "     ""
     set options [string map {
-      " - "     ""
       " -st "   " -sticky "
       " -com "  " -command "
       " -t "    " -text "
@@ -208,6 +212,118 @@ oo::class create PaveMe {
 
   #########################################################################
   #
+  # Fill the file content combobox
+
+  method FillFCOmbobox {attrs} {
+
+    proc readFCO {fname} {
+      # Reads a file's content.
+      # Returns a list of (non-empty) lines of the file.
+      if {[catch {set chan [open $fname]}]} {
+        error "\npaveme.tcl: can't open \"$fname\"\n"
+      }
+      set fconts [read $chan]
+      close $chan
+      set retval {}
+      foreach ln [split $fconts \n] {
+        if {$ln!={}} {lappend retval $ln}
+      }
+      return $retval
+    }
+
+    proc contFCO {fcoline opts} {
+      # Given a file's line and options,
+      # cuts a substring from the line.
+      lassign [my parseOptionsFile 1 $opts \
+        -list {} -div1 {} -div2 {} -pos {} -len {}] opts
+      lassign $opts - - - div1 - div2 - pos - len
+      set ldv1 [string length $div1]
+      set ldv2 [string length $div2]
+      set i1 [expr {[string first $div1 $fcoline]+$ldv1}]
+      set i2 [expr {[string first $div2 $fcoline]-1}]
+      if {$ldv1 && $ldv2} {
+        set retval [string range $fcoline $i1 $i2]
+      } elseif {$ldv1} {
+        set retval [string range $fcoline $i1 end]
+      } elseif {$ldv2} {
+        set retval [string range $fcoline 0 $i2]
+      } elseif {$pos!={} && $len!={}} {
+        set retval [string range $fcoline $pos $pos+[incr len -1]]
+      } elseif {$pos!={}} {
+        set retval [string range $fcoline $pos end]
+      } elseif {$len!={}} {
+        set retval [string range $fcoline 0 $len-1]
+      } else {
+        set retval $fcoline
+      }
+      return $retval
+    }
+
+    set dvd1 "\\@"
+    set ldv1 [string length $dvd1]
+    set filecontents {}
+    set optionlists {}
+    set tplvalues ""
+    lassign [my parseOptionsFile 0 $attrs -values ""] values
+    lassign $values -> values
+    if {[string first $dvd1 $values]<0} { ;# if 1 file, dvd1
+      set values "$dvd1$values$dvd1"      ;# may be omitted
+    }
+    # get: files' contents, files' options, template line
+    while {1} {
+      set i1 [string first $dvd1 $values]
+      set i2 [string first $dvd1 $values $i1+1]
+      if {$i1>=0 && $i2>=0} {
+        incr i1 $ldv1
+        append tplvalues [string range $values 0 $i1-1]
+        set fdata [string range $values $i1 $i2-1]
+        lassign [my parseOptionsFile 1 $fdata \
+          -list {} -div1 {} -div2 {} -pos {} -len {}] fopts fname
+        lappend filecontents [readFCO $fname]
+        lappend optionlists $fopts
+        set values [string range $values $i2+$ldv1 end]
+      } else {
+        append tplvalues $values
+        break
+      }
+    }
+    # fill the combobox lines, using files' contents and options
+    if {[set leno [llength $optionlists]]} {
+      set newvalues ""
+      set ilin 0
+      lassign $filecontents firstFCO
+      foreach fcoline $firstFCO { ;# lines of first file for a base
+        set line ""
+        set tplline $tplvalues
+        for {set io 0} {$io<$leno} {incr io} {
+          set opts [lindex $optionlists $io]
+          if {$ilin==0} {  ;# 1st cycle: add items from -list option
+            lassign $opts - list1
+            foreach l1 $list1 {append newvalues "\{$l1\} "}
+          }
+          set i1 [string first $dvd1 $tplline]
+          if {$i1>=0} {
+            append line [string range $tplline 0 $i1-1] \
+              [contFCO $fcoline $opts]
+            set tplline [string range $tplline $i1+$ldv1 end]
+          } else {
+            break
+          }
+          set fcoline [lindex [lindex $filecontents $io+1] $ilin]
+        }
+        append newvalues "\{$line$tplline\} "
+        incr ilin
+      }
+      # replace old 'values' attribute with the new 'values'
+      lassign [my parseOptionsFile 2 $attrs -values \
+        [string trimright $newvalues]] attrs
+    }
+    return $attrs
+
+  }
+
+  #########################################################################
+  #
   # Get the widget type based on 2 initial letters of its name
 
   method GetWidgetType {namefull options attrs} {
@@ -229,6 +345,11 @@ oo::class create PaveMe {
       "cbx" {set widget "ttk::combobox"}
       "ent" {set widget "ttk::entry"}
       "enT" {set widget "entry"}
+      "fco" { 
+        # file content combobox
+        set widget "ttk::combobox"
+        set attrs [my FillFCOmbobox $attrs]
+      }
       "fil" -
       "fis" -
       "dir" -
@@ -576,6 +697,7 @@ oo::class create PaveMe {
       "men*" - "Men*" { set typ menuBar }
       "too*" - "Too*" { set typ toolBar }
       "sta*" - "Sta*" { set typ statusBar }
+      "fcc*" - "Fcc*" { set typ filecontentCombo }
       default {
         return $args
       }
@@ -654,8 +776,7 @@ oo::class create PaveMe {
         $menupath add cascade -label [lindex $v2 0] {*}[lrange $v2 1 end] -menu $menuitem -underline $ampos
         continue
       } else {
-        puts -nonewline stderr "Erroneous \"$v1\" for \"$nam\""
-        return -code error
+        error "\npaveme.tcl: erroneous \"$v1\" for \"$nam\"\n"
       }
       set lwidgets [linsert $lwidgets [incr itmp] $wid1 $wid2]
       incr itmp
@@ -1092,12 +1213,16 @@ oo::class create PaveMe {
         foreach tagi $tags pos $tagpos len $taglen {
           lassign $tagi tag
           if {[string first "\<$tag\>" $line]==0} {
-            if {$pos != "0"} { error "Mismatched \<$tag\> in line $irow." }
+            if {$pos != "0"} {
+              error "\npaveme.tcl: mismatched \<$tag\> in line $irow.\n"
+            }
             lset tagpos $i $nrnc
             set line [string range $line $len+2 end]
             break
           } elseif {[string first "\</$tag\>" $line]==0} {
-            if {$pos == "0"} { error "Mismatched \</$tag\> in line $irow." }
+            if {$pos == "0"} {
+              error "\npaveme.tcl: mismatched \</$tag\> in line $irow.\n"
+            }
             lappend taglist [list $i $pos $nrnc]
             lset tagpos $i 0
             set line [string range $line $len+3 end]
