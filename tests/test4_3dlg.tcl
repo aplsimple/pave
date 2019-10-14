@@ -2,7 +2,6 @@
 
 set pavedir [file join [file normalize [file dirname $::argv0]] ..]
 source [file join $pavedir paveinput.tcl]
-source [file join $pavedir obbit.tcl]
 
 ttk::style theme use clam
 
@@ -17,16 +16,16 @@ set fontbold "-font \"-weight bold\""
 pdlg window $winf {
   {frAU - - 1 6   {-st new} {-relief groove -borderwidth 1}}
   {frAU.v_00 - - 1 1}
-  {frAU.laB0 frAU.v_00 T 1 1 - {-t "This TKE plugin allows you to create the shortcuts bound to existing ones. Thus you can enable localized shortcuts."}}
-  {frAU.laB1 frAU.laB0 T 1 1 - {-t "You can also make a miscellany that contains: event handler(s), menu invoker(s), command caller(s)."}}
-  {frAU.laB2 frAU.laB1 T 1 1 - {-t "Press the shortcut in the ID field. Confirm your choice by pressing Enter / Return key."}}
+  {frAU.laB0 frAU.v_00 T 1 1 {} {-t "This TKE plugin allows you to create the shortcuts bound to existing ones. Thus you can enable localized shortcuts."}}
+  {frAU.laB1 frAU.laB0 T 1 1 {} {-t "You can also make a miscellany that contains: event handler(s), menu invoker(s), command caller(s)."}}
+  {frAU.laB2 frAU.laB1 T 1 1 {} {-t "Press the shortcut in the ID field. Confirm your choice by pressing Enter / Return key."}}
   {frAU.v_0 frAU.laB2 T 1 1}
   {v_0 frAU T 1 6}
-  {laB1 v_0 T 1 2 - {-t " Group info " $fontbold}}
+  {laB1 v_0 T 1 2 {} {-t " Group info " $fontbold}}
   {laB2 laB1 T 1 1 {-st e} {-t "Name:"}}
   {entOrig laB2 L 1 1 {-st we -padx 5 -cw 3} {-tvar adsh__No}}
   {v_1 laB2 T 1 2}
-  {laB3 v_1 T 1 1 - {-t " Shortcut info " $fontbold}}
+  {laB3 v_1 T 1 1 {} {-t " Shortcut info " $fontbold}}
   {laB4 laB3 T 1 1 {-st e} {-t "Name:"}}
   {entName laB4 L 1 1 {-st we -padx 5} {-tvar adsh__Na}}
   {laB5 laB4 T 1 1 {-st e} {-t "Shortcut ID:"}}
@@ -43,7 +42,7 @@ pdlg window $winf {
   {texDesc - - 1 1 {pack -side left -expand 1 -fill both -in $winf.fraDesc} {-h 8 -w 50 -state disabled -wrap word}}
   {sbvDesc texDesc L 1 1 {pack -in $winf.fraDesc}}
   {v_3 laB53 T 1 2}
-  {laBSort v_3 T 1 1 - {-t " Options " $fontbold}}
+  {laBSort v_3 T 1 1 {} {-t " Options " $fontbold}}
   {frAOpt laBSort L 1 1 {-st nsew}}
   {chbActive - - 1 1 {-in $winf.frAOpt} {-t " Active " -var adsh__active}}
   {chbAuto chbActive L 1 1 {-in $winf.frAOpt} {-t " AutoStart " -var adsh__auto}}

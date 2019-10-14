@@ -11,12 +11,11 @@ package require Tk
 
 set pavedir [file join [file normalize [file dirname $::argv0]] ..]
 source [file join $pavedir pavedialog.tcl]
-source [file join $pavedir obbit.tcl]
 
 namespace eval t {
 
   # variables used in layouts
-  variable v 1 v2 1 c1 0 c2 0 c3 0 en1 "" en2 "" tv 1 tv2 "enter value" sc 0 sc2 0
+  variable v 1 v2 1 c1 0 c2 0 c3 0 en1 "" en2 "" tv 1 tv2 "enter value" sc 0 sc2 0 cb3 "Content of test2_fco.dat"
   variable fil1 "" fis1 "" dir1 "" clr1 "" fon1 "" dat1 ""
   variable ans0 0 ans1 0 ans2 0 ans3 0
   variable lvar {white blue "dark red" black #112334 #fefefe
@@ -86,7 +85,6 @@ namespace eval t {
     trace add variable t::sc write "::t::tracer ::t::sc"
 
     # making main window object and dialog object
-    oo::define PaveMe {mixin ObjectTheming}
     PaveDialog create pdlg .win $::pavedir
     PaveMe create pave
     pave makeWindow .win "Preferences"
@@ -268,8 +266,7 @@ namespace eval t {
       {frAT.sbV frAT.textNT L - - {pack}}
       {frAT.sbH frAT.textNT T - - {pack}}
     } .win.fNB.nb.f4 {
-      {v_0 - - - - {pack} {-h 20}}
-      {can - - - - {pack} {-h 200 -w 360}
+      {can - - - - {pack} {-h 160 -w 360}
         {} {eval {
           ##################################################################
           # This code is taken from Tk's demos/ctext.tcl
@@ -285,27 +282,36 @@ namespace eval t {
             mkTextConfigPie $c 140 70 $i1 -angle  $i2 Yellow
           }
         }}}
-      {seh - - - - {pack -pady 9 -fill x}}
-      {v_1 - - - - {pack} {-h 3}}
+      {seh - - - - {pack -pady 7 -fill x}}
       {lab - - - - {pack} {-tvar t::sc2}}
       {sca - - - - {pack} {-length 500 -o horiz -var t::sc -from 0 -to 100}}
-      {seh2 - - - - {pack -pady 9 -fill x}}
-      {v_2 - - - - {pack} {-h 3}}
+      {seh2 - - - - {pack -pady 7 -fill x}}
       {spx - - - - {pack} {-tvar t::tv -from 1 -to 9 -w 5 -justify center}}
-      {seh3 - - - - {pack -pady 9 -fill x}}
-      {v_3 - - - - {pack} {-h 3}}
+      {seh3 - - - - {pack -pady 7 -fill x}}
       {lab1 - - - - {pack} {-t "Combobox is sort of separate widget. Indeed it's very hard to theme its ideal colors for all cases :(
 
 Pay attention please at its behavior when you:
-
-1) at first switch the theming on and then open its list
-2) at first open its list and then switch the theming on
-3) use readonly mode of it
-"}}
+  1) at first switch the theming on and then open its list
+  2) at first open its list and then switch the theming on
+  3) use readonly mode of it"}}
+      {v_1 - - - - {pack} {-h 3}}
       {cbx1 - - - - {pack} {-tvar cb1 -values {MENU EVENT COMMAND}}}
-      {seh4 - - - - {pack -pady 9 -fill x}}
-      {v_4 - - - - {pack} {-h 3}}
+      {v_2 - - - - {pack} {-h 3}}
       {cbx4 - - - - {pack} {-tvar cb2 -values {MENU-readonly EVENT-readonly COMMAND-readonly} -state readonly}}
+      {seh5 - - - - {pack -pady 9 -fill x}}
+      {lab2 - - - - {pack} {-t "File content combobox (fco) contains text file(s) content. Its 'values' attribute is set like this:
+  -values {TEXT1 \\@-div1 \" <\" -div2 > test1.txt\\@ TEXT2 \\@-pos 0 -len 7 -list {a b c} test2.txt\\@ ...}
+where:
+  TEXT1, TEXT2, ... TEXTN - optional text snippets outside of \\@ ... \\@ data sets
+  \\@ ... \\@ - data set for a file, containing the file name and (optionally) its preceding options:
+      -div1, -div2 - dividers to cut substrings from file lines:
+          if -div1 omitted, from the beginning; if -div2 omitted, to the end of line
+      -pos, -len - position and length of substring to cut:
+          if -pos omitted, -len characters from the beginning; if -len omitted, to the end of line
+      -list - a list of items to put directly into the combobox
+  If there is only a single data set and no TEXT, the \\@ marks may be omitted."}}
+      {v_3 - - - - {pack} {-h 3}}
+      {fco - - - - {pack} {-tvar t::cb3 -w 88 -values {COMMIT: \@-div1 " \[" -div2 "\] " test2_fco.dat\@   INFO: \@-pos 22 -list {{Content of test2_fco.dat} {another item} trunk DOC} test2_fco.dat\@}}}
       {siz - - - - {pack -side bottom -anchor se}}
     } .win.fNB.nb2.f1 {
 
@@ -398,6 +404,7 @@ Pay attention please at its behavior when you:
     c1  = $t::c1
     c2  = $t::c2
     c3  = $t::c3
+    cb3 = $t::cb3
     en1 = $t::en1
     en2 = $t::en2
     fil1= $t::fil1

@@ -1,3 +1,5 @@
+#! /usr/bin/env tclsh
+
 package require Tk
 
 # This test 1 demonstrates how easily the standard dialog "Search & Replace"
