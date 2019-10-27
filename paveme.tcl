@@ -75,6 +75,7 @@ oo::class create PaveMe {
     set _pav(bgbut) [ttk::style lookup TButton -background]
     set _pav(fgtxt) [ttk::style lookup TEntry -foreground]
     set _pav(prepost) {}
+    set _pav(widgetaltopts) {}
     if {$_pav(fgtxt)=="black" || $_pav(fgtxt)=="#000000"} {
       set _pav(bgtxt) white
     } else {
@@ -231,12 +232,11 @@ oo::class create PaveMe {
       return $retval
     }
 
-    proc contFCO {fcoline opts} {
+    proc contFCO {fcoline opts args} {
       # Given a file's line and options,
       # cuts a substring from the line.
-      lassign [my parseOptionsFile 1 $opts \
-        -list {} -div1 {} -div2 {} -pos {} -len {}] opts
-      lassign $opts - - - div1 - div2 - pos - len
+      lassign [my parseOptionsFile 1 $opts {*}$args] opts
+      lassign $opts - - - div1 - div2 - pos - len - ret
       set ldv1 [string length $div1]
       set ldv2 [string length $div2]
       set i1 [expr {[string first $div1 $fcoline]+$ldv1}]
@@ -256,7 +256,7 @@ oo::class create PaveMe {
       } else {
         set retval $fcoline
       }
-      return $retval
+      return [list $retval $ret]
     }
 
     set dvd1 "\\@"
@@ -264,12 +264,14 @@ oo::class create PaveMe {
     set filecontents {}
     set optionlists {}
     set tplvalues ""
+    set retpos ""
     lassign [my parseOptionsFile 0 $attrs -values ""] values
     lassign $values -> values
     if {[string first $dvd1 $values]<0} { ;# if 1 file, dvd1
       set values "$dvd1$values$dvd1"      ;# may be omitted
     }
     # get: files' contents, files' options, template line
+    set lopts "-list {} -div1 {} -div2 {} -pos {} -len {} -ret 0"
     while {1} {
       set i1 [string first $dvd1 $values]
       set i2 [string first $dvd1 $values $i1+1]
@@ -277,8 +279,7 @@ oo::class create PaveMe {
         incr i1 $ldv1
         append tplvalues [string range $values 0 $i1-1]
         set fdata [string range $values $i1 $i2-1]
-        lassign [my parseOptionsFile 1 $fdata \
-          -list {} -div1 {} -div2 {} -pos {} -len {}] fopts fname
+        lassign [my parseOptionsFile 1 $fdata {*}$lopts] fopts fname
         lappend filecontents [readFCO $fname]
         lappend optionlists $fopts
         set values [string range $values $i2+$ldv1 end]
@@ -303,8 +304,17 @@ oo::class create PaveMe {
           }
           set i1 [string first $dvd1 $tplline]
           if {$i1>=0} {
-            append line [string range $tplline 0 $i1-1] \
-              [contFCO $fcoline $opts]
+            lassign [contFCO $fcoline $opts {*}$lopts] retline ret
+            if {$ret ne "0"} {
+              set p1 [expr {[string length $line]+$i1}]
+              if {$io<($leno-1)} {
+                set p2 [expr {$p1+[string length $retline]-1}]
+              } else {
+                set p2 end
+              }
+              set retpos "-retpos $p1:$p2"
+            }
+            append line [string range $tplline 0 $i1-1] $retline
             set tplline [string range $tplline $i1+$ldv1 end]
           } else {
             break
@@ -318,7 +328,7 @@ oo::class create PaveMe {
       lassign [my parseOptionsFile 2 $attrs -values \
         [string trimright $newvalues]] attrs
     }
-    return $attrs
+    return "$attrs $retpos"
 
   }
 
@@ -349,6 +359,13 @@ oo::class create PaveMe {
         # file content combobox
         set widget "ttk::combobox"
         set attrs [my FillFCOmbobox $attrs]
+        # -retpos sets a substring to cut from the -tvar variable
+        lassign [my parseOptionsFile 0 $attrs -tvar "" -retpos ""] tmp
+        lassign $tmp - tvarname - retpos
+        if {$retpos ne ""} {
+          lappend _pav(widgetaltopts) [list -retpos $tvarname $retpos]
+        }
+        set attrs [my RemoveSomeOptions $attrs -retpos]
       }
       "fil" -
       "fis" -
@@ -697,7 +714,6 @@ oo::class create PaveMe {
       "men*" - "Men*" { set typ menuBar }
       "too*" - "Too*" { set typ toolBar }
       "sta*" - "Sta*" { set typ statusBar }
-      "fcc*" - "Fcc*" { set typ filecontentCombo }
       default {
         return $args
       }
@@ -1136,6 +1152,16 @@ oo::class create PaveMe {
     after 50 [list focus -force $opt(-focus)]
     tkwait variable ${_pav(ns)}PN::AR($win)
     grab release $win
+    # process alternative options
+    foreach aop $_pav(widgetaltopts) {
+      lassign $aop optnam v1 v2
+      switch $optnam {
+        -retpos { ;# a range to cut from -tvar variable
+          lassign [split $v2 :] p1 p2
+          set $v1 [string range [set $v1] $p1 $p2]
+        }
+      }
+    }
     return [set [set _ ${_pav(ns)}PN::AR($win)]]
 
   }

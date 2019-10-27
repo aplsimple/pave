@@ -71,11 +71,16 @@ oo::class create PaveInput {
       set ff [my fieldname $name]
       switch $typ {
         cb {
-          if {![info exist $vv]} {catch {lassign $valopts $vv}}
+          if {![info exist $vv]} {catch {set $vv ""}}
+          set vlist {}
           foreach vo [lrange $valopts 1 end] {
             lappend vlist $vo
           }
-          lappend inopts [list $ff - - - - "pack -fill x $gopts" "-tvar $vv -value \{$vlist\} $attrs"]
+          lappend inopts [list $ff - - - - "pack -fill x $gopts" "-tvar $vv -values \{$vlist\} $attrs"]
+        }
+        fc {
+          if {![info exist $vv]} {catch {set $vv ""}}
+          lappend inopts [list $ff - - - - "pack -fill x $gopts" "-tvar $vv -values \{$valopts\} $attrs"]
         }
         ra {
           if {![info exist $vv]} {catch {lassign $valopts $vv}}
