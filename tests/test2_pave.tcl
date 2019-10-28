@@ -300,19 +300,19 @@ Pay attention please at its behavior when you:
       {cbx4 - - - - {pack} {-tvar cb2 -values {MENU-readonly EVENT-readonly COMMAND-readonly} -state readonly}}
       {seh5 - - - - {pack -pady 9 -fill x}}
       {lab2 - - - - {pack} {-t "File content combobox (fco) contains text file(s) content. Its 'values' attribute is set like this:
-  -values {TEXT1 \\@-div1 \" <\" -div2 > -ret true test1.txt\\@ TEXT2 \\@-pos 0 -len 7 -list {a b c} test2.txt\\@ ...}
+  -values {TEXT1 /@-div1 \" <\" -div2 > -ret true test1.txt/@ TEXT2 /@-pos 0 -len 7 -list {a b c} test2.txt/@ ...}
 where:
-  TEXT1, TEXT2, ... TEXTN - optional text snippets outside of \\@ ... \\@ data sets
-  \\@ ... \\@ - data set for a file, containing the file name and (optionally) its preceding options:
+  TEXT1, TEXT2, ... TEXTN - optional text snippets outside of /@ ... /@ data sets
+  /@ ... /@ - data set for a file, containing the file name and (optionally) its preceding options:
       -div1, -div2 - dividers to cut substrings from file lines:
           if -div1 omitted, from the beginning; if -div2 omitted, to the end of line
       -pos, -len - position and length of substring to cut:
           if -pos omitted, -len characters from the beginning; if -len omitted, to the end of line
       -list - a list of items to put directly into the combobox
       -ret - if set to true, means that the field is returned instead of full string
-  If there is only a single data set and no TEXT, the \\@ marks may be omitted."}}
+  If there is only a single data set and no TEXT, the /@ marks may be omitted."}}
       {v_3 - - - - {pack} {-h 3}}
-      {fco - - - - {pack} {-tvar t::cb3 -w 88 -values {COMMIT: \@-div1 " \[" -div2 "\] " -ret true test2_fco.dat\@   INFO: \@-pos 22 -list {{Content of test2_fco.dat} {another item} trunk DOC} test2_fco.dat\@}}}
+      {fco - - - - {pack} {-tvar t::cb3 -w 88 -values {COMMIT: /@-div1 " \[" -div2 "\] " -ret true test2_fco.dat/@   INFO: /@-pos 22 -list {{Content of test2_fco.dat} {another item} trunk DOC} test2_fco.dat/@}}}
       {siz - - - - {pack -side bottom -anchor se}}
     } .win.fNB.nb2.f1 {
 

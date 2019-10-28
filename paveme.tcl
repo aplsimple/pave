@@ -197,13 +197,13 @@ oo::class create PaveMe {
   # Remove some options from the options
   # Input:
   #   options - string of all options
-  #   removed - list of removed options
+  #   args - list of removed options
 
-  method RemoveSomeOptions {options removed} {
+  method RemoveSomeOptions {options args} {
 
     set resopts ""
     foreach {opt val} [list {*}$options] {
-      if {[lsearch $removed $opt] < 0} {
+      if {[lsearch $args $opt] < 0} {
         append resopts " $opt {$val}"
       }
     }
@@ -259,7 +259,7 @@ oo::class create PaveMe {
       return [list $retval $ret]
     }
 
-    set dvd1 "\\@"
+    set dvd1 "/@"
     set ldv1 [string length $dvd1]
     set filecontents {}
     set optionlists {}
@@ -360,12 +360,16 @@ oo::class create PaveMe {
         set widget "ttk::combobox"
         set attrs [my FillFCOmbobox $attrs]
         # -retpos sets a substring to cut from the -tvar variable
-        lassign [my parseOptionsFile 0 $attrs -tvar "" -retpos ""] tmp
-        lassign $tmp - tvarname - retpos
+        lassign [my parseOptionsFile 0 $attrs -tvar "" -retpos "" \
+          -inpval ""] tmp
+        lassign $tmp - tvarname - retpos - inpval
         if {$retpos ne ""} {
           lappend _pav(widgetaltopts) [list -retpos $tvarname $retpos]
         }
-        set attrs [my RemoveSomeOptions $attrs -retpos]
+        if {$inpval ne ""} {
+          set $tvarname $inpval
+        }
+        set attrs [my RemoveSomeOptions $attrs -retpos -inpval]
       }
       "fil" -
       "fis" -

@@ -74,13 +74,13 @@ Abort or retry the reading of Pushkin? Cancel if not sure." RETRY -g +325+325 {*
   }
 
   proc test8 {args} {
-    # initialize some variables
-    set var1 [dlg varname cbx1]
-    set var2 [dlg varname fco1]
-    if {![info exists $var1]} {
-      set $var1 {Mother}
-      set $var2 {Content of test2_fco.dat}
-    }
+    # initialize some variables - moved to -inpval option
+    #set var1 [dlg varname cbx1]
+    #set var2 [dlg varname fco1]
+    #if {![info exists $var1]} {
+      #set $var1 {Mother}
+      #set $var2 {Content of test2_fco.dat}
+    #}
     return [dlg input - "Dialog INPUT" {
       seh1 {{} {-pady 9}} {}
       ent1 {{Enter general info........}} {}
@@ -96,7 +96,7 @@ Abort or retry the reading of Pushkin? Cancel if not sure." RETRY -g +325+325 {*
       seh3 {{} {-pady 9}} {}
       spx1 {{Spinbox from 0 to 99......} {} {-from 0 -to 99}} {}
       cbx1 {{Combobox of relations.....} {} {-h 7}} {Son Father Mother Son Daughter Brother Sister Uncle Aunt Cousin "Second cousin" "1000th cousin"}
-      fco1 {{Combobox of file content..} {} {-h 7}} {CHECKIN: \@-div1 " \[" -div2 "\] " test2_fco.dat\@   INFO: \@-pos 22 -list {{Content of test2_fco.dat} {another item} trunk DOC} test2_fco.dat\@}
+      fco1 {{Combobox of file content..} {} {-h 7 -inpval {Content of test2_fco.dat}}} {CHECKIN: /@-div1 " \[" -div2 "\] " test2_fco.dat/@   INFO: /@-pos 22 -list {{Content of test2_fco.dat} {another item} trunk DOC} test2_fco.dat/@}
       seh4 {{} {-pady 9}} {}
       tex1 {{Text field................} {} {-h 4 -w 55}} {It's a sample of
 multiline entry field aka
