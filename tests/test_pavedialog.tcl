@@ -95,8 +95,9 @@ Abort or retry the reading of Pushkin? Cancel if not sure." RETRY -g +325+325 {*
       rad1 {{Check the radio button....}} {Big Giant Big Small "None of these"}
       seh3 {{} {-pady 9}} {}
       spx1 {{Spinbox from 0 to 99......} {} {-from 0 -to 99}} {}
-      cbx1 {{Combobox of relations.....} {} {-h 7}} {Son Father Mother Son Daughter Brother Sister Uncle Aunt Cousin "Second cousin" "1000th cousin"}
-      fco1 {{Combobox of file content..} {} {-h 7 -inpval {Content of test2_fco.dat}}} {CHECKIN: /@-div1 " \[" -div2 "\] " test2_fco.dat/@   INFO: /@-pos 22 -list {{Content of test2_fco.dat} {another item} trunk DOC} test2_fco.dat/@}
+      cbx1 {{Combobox of relations.....} {} {-h 7 -inpval Mother}} {Son Father Mother Son Daughter Brother Sister Uncle Aunt Cousin "Second cousin" "1000th cousin"}
+      fco1 {{Combobox of file content..} {} {-h 7 -inpval {test2_fco.dat}}} {/@-div1 " \[" -div2 "\] " -ret 1 test2_fco.dat/@ \
+        INFO: /@-pos 22 -list {{test2_fco.dat} {other item} trunk DOC} test2_fco.dat/@}
       seh4 {{} {-pady 9}} {}
       tex1 {{Text field................} {} {-h 4 -w 55}} {It's a sample of
 multiline entry field aka

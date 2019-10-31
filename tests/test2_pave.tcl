@@ -15,7 +15,7 @@ source [file join $pavedir pavedialog.tcl]
 namespace eval t {
 
   # variables used in layouts
-  variable v 1 v2 1 c1 0 c2 0 c3 0 en1 "" en2 "" tv 1 tv2 "enter value" sc 0 sc2 0 cb3 "Content of test2_fco.dat"
+  variable v 1 v2 1 c1 0 c2 0 c3 0 en1 "" en2 "" tv 1 tv2 "enter value" sc 0 sc2 0 cb3 "Content of test2_fco.dat" lv1 {}
   variable fil1 "" fis1 "" dir1 "" clr1 "" fon1 "" dat1 ""
   variable ans0 0 ans1 0 ans2 0 ans3 0
   variable lvar {white blue "dark red" black #112334 #fefefe
@@ -295,9 +295,9 @@ Pay attention please at its behavior when you:
   2) at first open its list and then switch the theming on
   3) use readonly mode of it"}}
       {v_1 - - - - {pack} {-h 3}}
-      {cbx1 - - - - {pack} {-tvar cb1 -values {MENU EVENT COMMAND}}}
+      {cbx1 - - - - {pack} {-tvar ::cb1 -inpval EVENT -values {MENU EVENT COMMAND}}}
       {v_2 - - - - {pack} {-h 3}}
-      {cbx4 - - - - {pack} {-tvar cb2 -values {MENU-readonly EVENT-readonly COMMAND-readonly} -state readonly}}
+      {cbx4 - - - - {pack} {-tvar ::cb2 -inpval MENU-readonly -values {MENU-readonly EVENT-readonly COMMAND-readonly} -state readonly}}
       {seh5 - - - - {pack -pady 9 -fill x}}
       {lab2 - - - - {pack} {-t "File content combobox (fco) contains text file(s) content. Its 'values' attribute is set like this:
   -values {TEXT1 /@-div1 \" <\" -div2 > -ret true test1.txt/@ TEXT2 /@-pos 0 -len 7 -list {a b c} test2.txt/@ ...}
@@ -324,9 +324,15 @@ where:
       {chb2 chb1 T 1 2 {-st w} {-t "Match case"  -var t::c2}}
       {chb3 chb2 T 1 2 {-st w} {-t "Wrap around" -var t::c3}}
       {sev1 chb1 L 3 1 }
-      {labB3 sev1 L 1 1 {-st we} {-t "Direction:"}}
-      {rad1 labB3 T 1 1 {-st we} {-t "Down" -var t::v -value 1}}
-      {rad2 rad1 L 1 1 {-st we} {-t "Up"   -var t::v -value 2}}
+      {labB3 sev1 L 1 1 {-st w} {-t "Direction:"}}
+      {rad1 labB3 T 1 1 {-st w} {-t "Down" -var t::v -value 1}}
+      {rad2 rad1 L 1 1 {-st w} {-t "Up"   -var t::v -value 2}}
+      {v_ chb3 T 1 5}
+      {frAflb v_ T 1 5 {-st ew -pady 10} {-state disabled}}
+      {frAflb.laB - - - - {pack -side left -anchor nw} {-t "Listbox of file content:  \n\nSee also:\nGeneral/Misc. tab"}}
+      {frAflb.Flb - - - - {pack -side left -fill x -expand 1} {-lvar ::t::lv1 -w 50 -values {/@-div1 " \[" -div2 "\] " test2_fco.dat/@   INFO: /@-pos 22 -ret 1 -list {{Content of test2_fco.dat} {another item} trunk DOC} test2_fco.dat/@}}}
+      {frAflb.sbV frAflb.flb L - - {pack -side left}}
+      {frAflb.sbH frAflb.flb T - - {pack -side left}}
     } .win.fNB.nb2.f2 {
       {lab - - - - {pack -expand 1 -fill both} {-t "Some text of 2nd View" \
       -font "-weight bold -size 11"}}
@@ -362,13 +368,12 @@ where:
     .win.fNB.nb3 add [ttk::frame .win.fNB.nb3.f1] -text "Editor options"
     pave window .win.fNB.nb3.f1 $lst3
 
-    # 4th and other frames are even less efforts applied
-    ttk::notebook .win.fNB.nb4
-    pack [ttk::label .win.fNB.nb4.labB -text "Nothing to see..." \
-      -foreground blue -font "-weight bold -size 12"] -expand 1 -fill both
-    ttk::notebook .win.fNB.nb5
-    ttk::notebook .win.fNB.nb6
-    ttk::notebook .win.fNB.nb7
+    # 4th and other frames mean even less efforts applied
+    foreach {nn inf} {4 Files 5 Tools 6 "Key mappings" 7 Misc} {
+      ttk::notebook .win.fNB.nb$nn
+      pack [ttk::label .win.fNB.nb$nn.labB -text "$inf here..." \
+        -foreground blue -font "-weight bold -size 12"] -expand 1
+    }
 
     # the general layout of window (main frames and buttons):
     pave window .win {
@@ -398,22 +403,24 @@ where:
 
     # getting result and clearance
     set res [pave res .win]
-    destroy .win
     puts "
     v   = $t::v
     v2  = $t::v2
     c1  = $t::c1
     c2  = $t::c2
     c3  = $t::c3
-    cb3 = $t::cb3
-    en1 = $t::en1
-    en2 = $t::en2
-    fil1= $t::fil1
-    fis1= $t::fis1
-    dir1= $t::dir1
-    fon1= $t::fon1
+    cb3 = \"$t::cb3\"
+    en1 = \"$t::en1\"
+    en2 = \"$t::en2\"
+    fil1= \"$t::fil1\"
+    fis1= \"$t::fis1\"
+    dir1= \"$t::dir1\"
+    fon1= \"$t::fon1\"
     clr1= $t::clr1
-    dat1= $t::dat1"
+    dat1= $t::dat1
+    lvar= \"$t::lvar\"
+    lv1 = \"$t::lv1\""
+    destroy .win
     PaveDialog destroy
     PaveMe destroy
     return $res

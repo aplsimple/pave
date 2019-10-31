@@ -1,11 +1,18 @@
-14:12:45 [a386b5f937] *CURRENT* mixin ObjectParsingUtils (user: apl tags: fcc_widget)
+=== 2019-10-29 ===
+15:21:16 [b735d00534] *CURRENT* flb widget appears on the scene (user: apl tags: trunk)
+=== 2019-10-27 ===
+14:15:36 [af36792a6c] cleaning a bit (user: apl tags: trunk)
+13:12:29 [83b6b1677b] added -retpos option for fco widget (user: apl tags: trunk)
+08:41:31 [b8b35ea3e3] fco widget in paveinput.tcl (user: apl tags: trunk)
+=== 2019-10-14 ===
+05:50:40 [2160cd2c3b] README, LICENSE updated (user: apl tags: trunk)
+05:10:03 [21b548606d] -list option for fco widget (user: apl tags: trunk)
+=== 2019-10-13 ===
+16:17:20 [dceedfdc38] *MERGE* MERGED fco widget (user: apl tags: trunk)
+16:14:40 [da9a61c950] "-" cancelled for Tk options, {} used instead; FillFCOmbobox corrected; tests
+         updated (user: apl tags: fcc_widget)
+12:46:52 [475e3b3d9f] method FillFCOmbobox (user: apl tags: fcc_widget)
+=== 2019-10-12 ===
+14:12:45 [a386b5f937] mixin ObjectParsingUtils (user: apl tags: fcc_widget)
 13:11:24 [ad02eb668e] added filecontentCombo widget type (user: apl tags: fcc_widget)
-13:01:52 [629a6c7f2a] fcc_widget (user: apl tags: trunk)
-12:47:50 [68222e46b8] *MERGE* Merged (user: apl tags: trunk)
-12:39:22 [e8caad0868] pafeinput.tcl: editfile, obbit.tcl: ObjectParsingUtils (user: apl tags: OBBIT_ParsingUtils)
-05:24:56 [dc3972e3da] (no comment) (user: apl tags: trunk)
-05:20:28 [f37bb0ade9] updated README.md (user: apl tags: DOC)
-05:17:12 [a1e744ecd4] title of doc/index.md (user: apl tags: DOC)
-19:31:25 [219b3c0a19] *BRANCH* added LICENSE.txt (user: apl)
-14:43:48 [f46d40bf31] README.md updated (user: apl)
-14:36:58 [3250622202] docs done (user: apl tags: DOC)
+--- entry limit (11) reached ---
