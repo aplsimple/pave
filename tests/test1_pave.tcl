@@ -1,6 +1,7 @@
 #! /usr/bin/env tclsh
 
 package require Tk
+lappend auto_path ".."; package require pave
 
 ###########################################################################
 #
@@ -16,9 +17,7 @@ if {$::tcl_platform(platform) == "windows"} {
   wm geometry . 0x0
 }
 ttk::style theme use clam
-set pavedir [file normalize [file dirname $::argv0]]
-source [file join $pavedir .. paveme.tcl]
-PaveMe create pave
+pave::PaveMe create pave
 set win .win
 pave makeWindow $win.fra "Find and Replace (+ Stay on top)"
 set v1 [set v2 1]

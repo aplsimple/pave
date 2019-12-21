@@ -1,6 +1,7 @@
 #! /usr/bin/env tclsh
 
 package require Tk
+lappend auto_path ".."; package require pave
 
 #-------------------------------------------------------------------------
 #
@@ -48,9 +49,6 @@ package require Tk
 #
 #-------------------------------------------------------------------------
 
-set pavedir [file join [file normalize [file dirname $::argv0]] ..]
-source [file join $pavedir paveme.tcl]
-
 if {$::tcl_platform(platform) == "windows"} {
   wm attributes . -alpha 0.0
 } else {
@@ -59,7 +57,7 @@ if {$::tcl_platform(platform) == "windows"} {
 }
 ttk::style theme use clam
 
-PaveMe create pave
+pave::PaveMe create pave
 pave makeWindow .win "Test - Original layout "
 pave window .win {
   {butA -   - 2 1 "-st nsew" {-t A}}

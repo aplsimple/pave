@@ -1,14 +1,12 @@
 #! /usr/bin/env wish
 
-set pavedir [file join [file normalize [file dirname $::argv0]] ..]
-source [file join $pavedir paveinput.tcl]
+lappend auto_path ".."; package require pave
 
 ttk::style theme use clam
 
 set win .win
 set winf $win.fra
-oo::define PaveMe {mixin ObjectTheming}
-PaveDialog create pdlg "" $pavedir
+pave::PaveDialog create pdlg
 pdlg makeWindow $winf "Adding Shortcuts"
 pdlg themingWindow . \
   white #364c64 #d2d2d2 #292a2a white #4a6984 #182020 #dcdad5 #02ffff #00a0f0
@@ -72,7 +70,7 @@ destroy $win
 
 #======================================================
 
-  PaveInput create dlg "" $pavedir
+  pave::PaveInput create dlg
     set res [dlg input ques "My site" {
       entLogin {{Login......}} {}
       entPassw {{Password...} {} {-show *}} {}

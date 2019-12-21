@@ -8,15 +8,17 @@
 ###########################################################################
 
 package require Tk
+catch {package require tooltip} ;# may be absent
 
-set pavedir [file join [file normalize [file dirname $::argv0]] ..]
-source [file join $pavedir pavedialog.tcl]
+lappend auto_path ".."; package require pave
 
 namespace eval t {
 
+  source [file join [file dirname [info script]] test2_img.tcl]
+
   # variables used in layouts
   variable v 1 v2 1 c1 0 c2 0 c3 0 en1 "" en2 "" tv 1 tv2 "enter value" sc 0 sc2 0 cb3 "Content of test2_fco.dat" lv1 {}
-  variable fil1 "" fis1 "" dir1 "" clr1 "" fon1 "" dat1 ""
+  variable fil1 "" fis1 "" dir1 "" clr1 "" fon1 "" dat1 "" ftx1 ""
   variable ans0 0 ans1 0 ans2 0 ans3 0
   variable lvar {white blue "dark red" black #112334 #fefefe
   "sea green" "hot pink" cyan aqua "olive drab" snow wheat  }
@@ -71,25 +73,28 @@ namespace eval t {
 
   proc test2 {} {
 
+    set ::t::ftx1 $::argv0
     variable pdlg
     variable pave
+    pave::PaveInput create pdlg .win
+    pave::PaveInput create pave .win
+    set ::t::filetxt [pave readTextFile $::t::ftx1]
+
     variable arrayTab
     array set arrayTab {}
     # initializing images for toolbar
     foreach {I i} {i 1 i 2 I 3 I 4} {
-      image create photo ${I}mg$i \
-        -file [file join [file dirname $::argv0] "icon$i.png"]
+      image create photo ${I}mg$i -data [set t::img${i}_b64]
     }
     set ::bgst [ttk::style lookup TScrollbar -troughcolor]
     ttk::style conf TLabelframe -labelmargins {5 10 1 1} -relief ridge -padding 4
     trace add variable t::sc write "::t::tracer ::t::sc"
 
     # making main window object and dialog object
-    PaveDialog create pdlg .win $::pavedir
-    PaveMe create pave
+    pave configure edge "@@"
     pave makeWindow .win "Preferences"
 
-    # before general layout we make the notebook
+    # before general layout, make the notebook
     ttk::frame .win.fNB
     ttk::notebook .win.fNB.nb
     ttk::notebook .win.fNB.nb2
@@ -116,7 +121,7 @@ namespace eval t {
       #
       # Comments are marked by "#" as the 1st character of layout record.
       #
-      # A menubar can de defined in any place of window layout because
+      # A menubar can be defined in any place of window layout because
       # it is assigned to a whole window.
       # }
       ####################################################################
@@ -141,26 +146,30 @@ namespace eval t {
       {labBfon1 labBdir1 T 1 1 {-st e} {-t "Pick a font:"}}
       {labBclr1 labBfon1 T 1 1 {-st e} {-t "Pick a color:"}}
       {labBdat1 labBclr1 T 1 1 {-st e} {-t "Pick a date:"}}
-      {fil1 labBfil1 L 1 9 {} {-tvar t::fil1 -title {Pick a file}}}
-      {fis1 labBfis1 L 1 9 {} {-tvar t::fis1 -title {Pick a file to save as}}}
+      {labBftx1 labBdat1 T 1 1 {-st ne -ipady 8}
+        {-t "Pick a file to view:\n\n\n\nBut the first one\nonly may be\nmodified!"}}
+      {fil1 labBfil1 L 1 9 {} {-tvar t::fil1 -title {Pick a file}
+        -filetypes {{{Tcl scripts} .tcl} {{All files} .* }}}}
+      {fis1 labBfis1 L 1 9 {} {-tvar t::fis1 -title {Save as}}}
       {dir1 labBdir1 L 1 9 {} {-tvar t::dir1 -title {Pick a directory}}}
       {fon1 labBfon1 L 1 9 {} {-tvar t::fon1 -title {Pick a font}}}
       {clr1 labBclr1 L 1 9 {} {-tvar t::clr1 -title {Pick a color}}}
       {dat1 labBdat1 L 1 9 {} {-tvar t::dat1 -title {Pick a date} -dateformat %Y.%m.%d}}
-      {labB4 labBdat1 T 3 9 {-st ewns -rw 1} {-t "Some others options can be below"}}
+      {ftx1 labBftx1 L 1 9 {} {-h 7 -ro 0 -tvar ::t::ftx1 -title {Pick a file to view} -filetypes {{{Tcl scripts} .tcl} {{Text files} {.txt .test}}} -wrap word -tooltip "After choosing a file\nthe text will be read-only."}}
+      {labB4 labBftx1 T 3 9 {-st ewns -rw 1} {-t "Some others options can be below"}}
     } .win.fNB.nb.f2 {
 
       ####################################################################
       # {#               2ND TAB (DEMO OF ttk::panewindow)               }
       ####################################################################
       {tool - - - - {pack -side top} {-array {
-            img1 {"::t::toolButt 1"}
+            img1 {"::t::toolButt 1" -tooltip "Start progress"}
             h_ 3
-            img2 {"::t::toolButt 2"}
+            img2 {"::t::toolButt 2" -tooltip "Stop progress"}
             sev 7
-            Img3 {"::t::toolButt 3" -state disabled}
+            Img3 {"::t::toolButt 3" -tooltip "Restore initial theme" -state disabled}
             h_ 1
-            Img4 {"::t::toolButt 4"}
+            Img4 {"::t::toolButt 4" -tooltip "Change theme"}
       }}}
       {stat - - - - {pack -side bottom} {-array {
             {Row:  -foreground #004080 -background $::bgst -font {-slant italic -size 10}} 7
@@ -179,9 +188,9 @@ namespace eval t {
       {fra.pan.panR - - - - {} {-orient vertical} {add}}
       {.lfrT - - - - {} {-t Progress} {add}}
       {.lfrT.Pro - - - - {pack -fill both -expand 1} {-mode indeterminate} {} {~ start}}
-      {.lfrB - - - - {} {-t "Text of [file tail $::argv0]"} {add} {}}
-      {.lfrB.Text - - - - {pack -side left -expand 1 -fill both} {-borderwidth 0 -w 76}}
-      {.lfrB.sbv .lfrB.text L - - {pack -fill y}}
+      {.lfrB - - - - {} {-t "Text of $::t::ftx1"} {add} {}}
+      {.lfrB.Text - - - - {pack -side left -expand 1 -fill both} {-borderwidth 0 -w 76 -wrap word}}
+      {.lfrB.sbv .lfrB.text L - - {pack}}
     } .win.fNB.nb.f3 {
 
       ####################################################################
@@ -261,8 +270,8 @@ namespace eval t {
       ####################################################################
       {frAT fra1 T 1 2 {-st nsew -rw 1 -pady 7}}
       {frAT.laB - - - - {pack -side left -anchor nw} {-t "text & scrollbars \
-\n\nas above, i.e.\nnot  ttk::scrollbar"}}
-      {frAT.TextNT - - - - {pack -side left -expand 1 -fill both} {-h 11 -wrap none}}
+\n\nas above, i.e.\nnot  ttk::scrollbar\n\ntext is read-only"}}
+      {frAT.TextNT - - - - {pack -side left -expand 1 -fill both} {-h 11 -wrap none -rotext ::t::filetxt}}
       {frAT.sbV frAT.textNT L - - {pack}}
       {frAT.sbH frAT.textNT T - - {pack}}
     } .win.fNB.nb.f4 {
@@ -288,31 +297,26 @@ namespace eval t {
       {seh2 - - - - {pack -pady 7 -fill x}}
       {spx - - - - {pack} {-tvar t::tv -from 1 -to 9 -w 5 -justify center}}
       {seh3 - - - - {pack -pady 7 -fill x}}
-      {lab1 - - - - {pack} {-t "Combobox is sort of separate widget. Indeed it's very hard to theme its ideal colors for all cases :(
-
-Pay attention please at its behavior when you:
-  1) at first switch the theming on and then open its list
-  2) at first open its list and then switch the theming on
-  3) use readonly mode of it"}}
+      {lab1 - - - - {pack} {-t "Combobox is sort of separate widget."}}
       {v_1 - - - - {pack} {-h 3}}
       {cbx1 - - - - {pack} {-tvar ::cb1 -inpval EVENT -values {MENU EVENT COMMAND}}}
       {v_2 - - - - {pack} {-h 3}}
       {cbx4 - - - - {pack} {-tvar ::cb2 -inpval MENU-readonly -values {MENU-readonly EVENT-readonly COMMAND-readonly} -state readonly}}
       {seh5 - - - - {pack -pady 9 -fill x}}
       {lab2 - - - - {pack} {-t "File content combobox (fco) contains text file(s) content. Its 'values' attribute is set like this:
-  -values {TEXT1 /@-div1 \" <\" -div2 > -ret true test1.txt/@ TEXT2 /@-pos 0 -len 7 -list {a b c} test2.txt/@ ...}
+  -values {TEXT1 @@-div1 \" <\" -div2 > -ret true test1.txt@@ TEXT2 @@-pos 0 -len 7 -list {a b c} test2.txt@@ ...}
 where:
-  TEXT1, TEXT2, ... TEXTN - optional text snippets outside of /@ ... /@ data sets
-  /@ ... /@ - data set for a file, containing the file name and (optionally) its preceding options:
+  TEXT1, TEXT2, ... TEXTN - optional text snippets outside of @@ ... @@ data sets
+  @@ ... @@ - data set for a file, containing the file name and (optionally) its preceding options:
       -div1, -div2 - dividers to cut substrings from file lines:
           if -div1 omitted, from the beginning; if -div2 omitted, to the end of line
       -pos, -len - position and length of substring to cut:
           if -pos omitted, -len characters from the beginning; if -len omitted, to the end of line
       -list - a list of items to put directly into the combobox
       -ret - if set to true, means that the field is returned instead of full string
-  If there is only a single data set and no TEXT, the /@ marks may be omitted."}}
+  If there is only a single data set and no TEXT, the @@ marks may be omitted. The @@ marks are configured."}}
       {v_3 - - - - {pack} {-h 3}}
-      {fco - - - - {pack} {-tvar t::cb3 -w 88 -values {COMMIT: /@-div1 " \[" -div2 "\] " -ret true test2_fco.dat/@   INFO: /@-pos 22 -list {{Content of test2_fco.dat} {another item} trunk DOC} test2_fco.dat/@}}}
+      {fco - - - - {pack} {-tvar t::cb3 -w 88 -tooltip "The 'fco' combobox contains:\n 1)  four literal lines\n  2) data from 'test2_fco.dat' file" -values {COMMIT: @@-div1 " \[" -div2 "\] " -ret true test2_fco.dat@@   INFO: @@-pos 22 -list {{Content of test2_fco.dat} {another item} trunk DOC} test2_fco.dat@@}}}
       {siz - - - - {pack -side bottom -anchor se}}
     } .win.fNB.nb2.f1 {
 
@@ -329,25 +333,24 @@ where:
       {rad2 rad1 L 1 1 {-st w} {-t "Up"   -var t::v -value 2}}
       {v_ chb3 T 1 5}
       {frAflb v_ T 1 5 {-st ew -pady 10} {-state disabled}}
+      {frAflb.butView - - - - {pack -side right -anchor nw -pady 5} {-t "View the file" -com  t::viewfile -tooltip "Opens a stand-alone viewer of the file\nthe listbox' data are taken from."}}
+      {frAflb.lab - - - - {pack -side right -anchor nw -pady 9} {-t " "}}
       {frAflb.laB - - - - {pack -side left -anchor nw} {-t "Listbox of file content:  \n\nSee also:\nGeneral/Misc. tab"}}
-      {frAflb.Flb - - - - {pack -side left -fill x -expand 1} {-lvar ::t::lv1 -w 50 -values {/@-div1 " \[" -div2 "\] " test2_fco.dat/@   INFO: /@-pos 22 -ret 1 -list {{Content of test2_fco.dat} {another item} trunk DOC} test2_fco.dat/@}}}
-      {frAflb.sbV frAflb.flb L - - {pack -side left}}
-      {frAflb.sbH frAflb.flb T - - {pack -side left}}
+      {frAflb.flb - - - - {pack -side left -fill x -expand 1} {-lvar ::t::lv1 -w 50 -tooltip "The 'flb' listbox contains:\n 1)  four literal lines\n  2) data from 'test2_fco.dat' file" -values {@@-div1 " \[" -div2 "\] " test2_fco.dat@@   INFO: @@-pos 22 -ret 1 -list {{Content of test2_fco.dat} {another item} trunk DOC} test2_fco.dat@@}}}
+      {frAflb.sbv frAflb.flb L - - {pack -side left}}
+      {frAflb.sbh frAflb.flb T - - {pack -side left}}
     } .win.fNB.nb2.f2 {
       {lab - - - - {pack -expand 1 -fill both} {-t "Some text of 2nd View" \
       -font "-weight bold -size 11"}}
     }
 
-    # name of Text is uppercased, so we can use the Text method to get its name
+    # text widget's name is uppercased, so we can use the Text method
 #?  set wtex .win.fNB.nb.f2.fra.pan.panR.lfrB.text
     set wtex [pave Text]
     # bindings and contents for text widget
     bind $wtex <ButtonRelease> [list t::textPos $wtex]
     bind $wtex <KeyRelease> [list t::textPos $wtex]
-    set ch [open $::argv0]
-    $wtex replace 1.0 end [set txt [read $ch]]
-    [pave TextNT] replace 1.0 end $txt
-    close $ch
+    $wtex replace 1.0 end $::t::filetxt
     # we can use the Lframe method to get its name, similar to Text
 #?  fillclock .win.fNB.nb.f2.fra.pan.panL.lframe
     fillclock [pave Lframe]
@@ -404,6 +407,11 @@ where:
     # getting result and clearance
     set res [pave res .win]
     puts "
+    text file name = \"$::t::ftx1\"
+    text file contents =
+-------------------------------
+[pave getTextContent ::t::ftx1]
+-------------------------------
     v   = $t::v
     v2  = $t::v2
     c1  = $t::c1
@@ -419,10 +427,10 @@ where:
     clr1= $t::clr1
     dat1= $t::dat1
     lvar= \"$t::lvar\"
-    lv1 = \"$t::lv1\""
+    lv1 = \"$t::lv1\"
+    "
     destroy .win
-    PaveDialog destroy
-    PaveMe destroy
+    pave::PaveInput destroy
     return $res
   }
 
@@ -459,8 +467,7 @@ where:
 
   # imitating save & exit function
   proc okProc {} {
-    pdlg ok info "SAVE" "Saving changes...\nCurtain." \
-      -weight bold -size 16 -c "medium sea green"
+    pdlg ok info "SAVE" "Saving changes...\nCurtain." -weight bold -size 16
     pave res .win 1
   }
 
@@ -475,14 +482,18 @@ where:
       [pave Menu] entryconfigure 2 -font {-slant italic -size 10}
       [pave BuT_Img3] configure -state disabled
       [pave BuT_Img4] configure -state normal
-    } else {
-      pdlg ok info "TOOL-$num" "\nPressed toolbutton #$num.\n"
+    } elseif {$num == 2} {
+      [pave Pro] stop
+      .win.fNB.nb tab 3 -state disabled
+    } elseif {$num == 1} {
+      [pave Pro] start
+      .win.fNB.nb tab 3 -state normal
     }
     [pave Menu] entryconfigure 2 -state [[pave BuT_Img3] cget -state]
     [pave File] entryconfigure 2 -state [[pave BuT_Img4] cget -state]
     [pave File] entryconfigure 3 -state [[pave BuT_Img4] cget -state]
     if {$num == 4} {
-      pave themingWindow .win \
+      pave themingWindow . \
         white #364c64 white #383e41 white #4a6984 grey #364c64 #02ffff #00a0f0
     }
   }
@@ -515,9 +526,9 @@ where:
   proc textPos {txt} {
     catch {
       lassign [split [$txt index insert] .] r c
-      .win.fNB.nb.f2.labstat1 configure -text $r
-      .win.fNB.nb.f2.labstat2 configure -text [incr c]
-      .win.fNB.nb.f2.labstat3 configure -text [$txt get \
+      [pave Labstat1] configure -text $r
+      [pave Labstat2] configure -text [incr c]
+      [pave Labstat3] configure -text [$txt get \
         [$txt index "insert linestart"] [$txt index "insert lineend"]]
     }
   }
@@ -525,25 +536,36 @@ where:
   # filling the menu
   proc fillMenu {} {
     set m .win.menu.file
-    $m add command -label "Open..." -command {error "this is just a demo: no action has been defined for the \"Open...\" entry"}
-    $m add command -label "New" -command {error "this is just a demo: no action has been defined for the \"New\" entry"}
-    $m add command -label "Save" -command {error "this is just a demo: no action has been defined for the \"Save\" entry"}
-    $m add command -label "Save As..." -command {error "this is just a demo: no action has been defined for the \"Save As...\" entry"}
+    $m add command -label "Open..." -command {::t::msg info "this is just a demo:\nno action has been defined for the \"Open...\" entry"}
+    $m add command -label "New" -command {::t::msg info "this is just a demo:\nno action has been defined for the \"New\" entry"}
+    $m add command -label "Save" -command {::t::msg info "this is just a demo:\nno action has been defined for the \"Save\" entry"}
+    $m add command -label "Save As..." -command {::t::msg info "this is just a demo:\nno action has been defined for the \"Save As...\" entry"}
     $m add separator
     $m add command -label "Quit" -command {::t::pave res .win 0}
     set m .win.menu.edit
-    $m add command -label "Cut" -command {error "this is just a demo: no action"}
-    $m add command -label "Copy" -command {error "this is just a demo: no action"}
-    $m add command -label "Paste" -command {error "this is just a demo: no action"}
+    $m add command -label "Cut" -command {::t::msg ques "this is just a demo: no action"}
+    $m add command -label "Copy" -command {::t::msg warn "this is just a demo: no action"}
+    $m add command -label "Paste" -command {::t::msg err "this is just a demo: no action"}
     set m .win.menu.help
-    $m add command -label "User Guide" -command {error "this is just a demo: no action"}
+    $m add command -label "User Guide" -command {::t::msg info "this is just a demo: no action"}
   }
 
 proc tracer {varname args} {
-    set ::t::sc2 [expr round($::t::sc)]
+  set ::t::sc2 [expr round($::t::sc)]
 }
 
+proc viewfile {} {
+  set res [pdlg editviewFile test2_fco.dat "" -w 74 -h 20 -rotext ::temp]
+#  set res [pdlg editviewFile test2_fco.dat "" -w 74 -h 20 -ro 0 -rotext ::temp -weight bold -size 14]
+  puts "\n------------\nResult: $res.\nContent:\n$::temp\n------------\n"
+  unset ::temp
 }
+
+proc msg {icon message} {
+  pdlg ok $icon [string toupper $icon] \n$message\n
+}
+
+} ;# end of namespace
 
 ###########################################################################
 # Run the tests
@@ -561,4 +583,3 @@ ttk::style theme use clam
 puts "result of test2 = [t::test2]"
 
 exit
-

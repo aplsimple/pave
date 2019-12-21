@@ -8,8 +8,7 @@
 
 package require Tk
 
-set pavedir [file join [file normalize [file dirname $::argv0]] ..]
-source [file join $pavedir paveinput.tcl]
+lappend auto_path ".."; package require pave
 
 namespace eval t {
 
@@ -121,7 +120,7 @@ if {$::tcl_platform(platform) == "windows"} {
 ttk::style theme use clam
 
 # firstly show dialogs without checkboxes
-PaveInput create dlg "" $pavedir
+pave::PaveInput create dlg
 
 set dn "Don't show this again"
 puts "ok  = [t::test1 -weight bold -size 8 -text 1]"
@@ -153,5 +152,5 @@ while 1 {
     break
   }
 }
-PaveInput  destroy
+pave::PaveInput  destroy
 exit
