@@ -481,15 +481,15 @@ oo::class create pave::PaveDialog {
       set prevp "T"
     }
     # add the message lines
-    set il [set maxl 0]
+    set il [set maxw 0]
     if {$readonly} {
       # only for messaging (not for editing):
       set msg [string map {\\n \n} $msg]
     }
     foreach m [split $msg \n] {
       set m [string map {$ \$ \" \'\'} $m]
-      if {[set ml [string length $m]] > $maxl} {
-        set maxl $ml
+      if {[set mw [string length $m]] > $maxw} {
+        set maxw $mw
       }
       incr il
       if {!$textmode} {
@@ -510,16 +510,22 @@ oo::class create pave::PaveDialog {
       set prevw fraM
     } elseif {$textmode} {
       # here is text widget (in fraM frame)
-      set maxl [expr {max($maxl,20)}]
-      if {[info exists charheight]} {set il $charheight}
-      if {[info exists charwidth]}  {
-        lassign $charwidth w2 w1
-        set maxl [expr {min($maxl,$w2)}]  ;# high limit
-        if {$w1!=""} { set maxl [expr {max($maxl,$w1)}] }  ;# low limit
+      proc vallimits {val lowlimit isset limits} {
+        set val [expr {max($val,$lowlimit)}]
+        if {$isset} {
+          upvar $limits lim
+          lassign $lim l1 l2
+          set val [expr {min($val,$l1)}] ;# forced low
+          if {$l2 ne ""} {set val [expr {max($val,$l2)}]} ;# forced high
+        }
+        return $val
       }
+      set il [vallimits $il 1 [info exists charheight] charheight]
+      set maxw [vallimits $maxw 20 [info exists charwidth] charwidth]
+      rename vallimits ""
       lappend widlist [list fraM $prevh T 10 7 "-st nswe -pady 3 -rw 1"]
       lappend widlist {TexM - - 1 7 {pack -side left -expand 1 -fill both -in \
-        $_pdg(win).dia.fra.fraM} {-h $il -w $maxl $optsFontM $optsMisc -wrap word}}
+        $_pdg(win).dia.fra.fraM} {-h $il -w $maxw $optsFontM $optsMisc -wrap word}}
       lappend widlist {sbv texM L 1 1 {pack -in $_pdg(win).dia.fra.fraM}}
       set prevw fraM
     }

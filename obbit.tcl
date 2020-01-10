@@ -89,7 +89,7 @@ oo::class create pave::ObjectTheming {
   mixin pave::ObjectProperty
 
   constructor {args} {
-    # _OT_Init _OT_Opts _OT_OldOpts must be global in ObjectTheming class
+    # _OT_Init _OT_Opts _OT_OldOpts must be static in ObjectTheming class
     # because they are applied to a whole application, not to a widget
     classvar _OT_Init _OT_Opts _OT_OldOpts
     array set _OT_Opts {}
@@ -452,7 +452,7 @@ oo::class create pave::ObjectTheming {
       return $disopt
     }
     set opts {-foreground -foreground -background -background}
-    set ts2 [set ts3 [set opts2 [set opts3 ""]]]
+    lassign "" ts2 ts3 opts2 opts3
     switch -- $typ {
       "buT" {set ts TButton}
       "chB" {set ts TCheckbutton

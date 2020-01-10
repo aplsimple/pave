@@ -147,7 +147,7 @@ namespace eval t {
       {labBclr1 labBfon1 T 1 1 {-st e} {-t "Pick a color:"}}
       {labBdat1 labBclr1 T 1 1 {-st e} {-t "Pick a date:"}}
       {labBftx1 labBdat1 T 1 1 {-st ne -ipady 8}
-        {-t "Pick a file to view:\n\n\n\nBut the first one\nonly may be\nmodified!"}}
+        {-t "Pick a file to view:\n\n\n\nBut the first 'view'\nmay be modified!"}}
       {fil1 labBfil1 L 1 9 {} {-tvar t::fil1 -title {Pick a file}
         -filetypes {{{Tcl scripts} .tcl} {{All files} .* }}}}
       {fis1 labBfis1 L 1 9 {} {-tvar t::fis1 -title {Save as}}}
@@ -308,7 +308,7 @@ namespace eval t {
 where:
   TEXT1, TEXT2, ... TEXTN - optional text snippets outside of @@ ... @@ data sets
   @@ ... @@ - data set for a file, containing the file name and (optionally) its preceding options:
-      -div1, -div2 - dividers to cut substrings from file lines:
+      -div1, -div2 - dividers to filter file lines and to cut substrings from them:
           if -div1 omitted, from the beginning; if -div2 omitted, to the end of line
       -pos, -len - position and length of substring to cut:
           if -pos omitted, -len characters from the beginning; if -len omitted, to the end of line
@@ -316,7 +316,7 @@ where:
       -ret - if set to true, means that the field is returned instead of full string
   If there is only a single data set and no TEXT, the @@ marks may be omitted. The @@ marks are configured."}}
       {v_3 - - - - {pack} {-h 3}}
-      {fco - - - - {pack} {-tvar t::cb3 -w 88 -tooltip "The 'fco' combobox contains:\n 1)  four literal lines\n  2) data from 'test2_fco.dat' file" -values {COMMIT: @@-div1 " \[" -div2 "\] " -ret true test2_fco.dat@@   INFO: @@-pos 22 -list {{Content of test2_fco.dat} {another item} trunk DOC} test2_fco.dat@@}}}
+      {fco - - - - {pack} {-tvar t::cb3 -w 88 -tooltip "The \"fco\" combobox contains:\n 1)  four literal lines\n  2) data from 'test2_fco.dat' file" -values {COMMIT: @@-div1 " \[" -div2 "\] " -ret true test2_fco.dat@@   INFO: @@-pos 22 -list {{Content of test2_fco.dat} {another item} trunk DOC} test2_fco.dat@@}}}
       {siz - - - - {pack -side bottom -anchor se}}
     } .win.fNB.nb2.f1 {
 
@@ -365,7 +365,7 @@ where:
     }
     foreach b {6 7 8 9 a b c d e f g h i} p {5 6 7 8 9 a b c d e f g h} {
       lappend lst3 [list but$b but$p T 1 1 {-st we} \
-        {-t "more..." -com "t::pdlg ok warn M More..."}]
+        {-t "more..." -com "t::pdlg ok warn M More...[incr ::iMORE] -text 1 -w 10"}]
     }
     ttk::notebook .win.fNB.nb3
     .win.fNB.nb3 add [ttk::frame .win.fNB.nb3.f1] -text "Editor options"
@@ -555,8 +555,8 @@ proc tracer {varname args} {
 }
 
 proc viewfile {} {
-  set res [pdlg editviewFile test2_fco.dat "" -w 74 -h 20 -rotext ::temp]
-#  set res [pdlg editviewFile test2_fco.dat "" -w 74 -h 20 -ro 0 -rotext ::temp -weight bold -size 14]
+  set res [pdlg vieweditFile test2_fco.dat "" -h {1 20} -w {1 74} -rotext ::temp]
+#  set res [pdlg vieweditFile test2_fco.dat "" -w 74 -h 20 -ro 0 -rotext ::temp -weight bold -size 14]
   puts "\n------------\nResult: $res.\nContent:\n$::temp\n------------\n"
   unset ::temp
 }

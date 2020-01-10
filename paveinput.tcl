@@ -34,7 +34,7 @@
 
 package require Tk
 
-package provide pave 1.4
+package provide pave 1.5
 
 source [file join [file dirname [info script]] pavedialog.tcl]
 
@@ -119,7 +119,8 @@ oo::class create pave::PaveInput {
           lappend inopts [list fraM.fra$name.sbv$name $ff L - - "pack -fill y"]
         }
         la {
-          lappend inopts [list $ff - - - - "pack $gopts" "$attrs"]
+          if {$prompt ne ""} { set prompt "-t \"$prompt\" " } ;# prompt as -text
+          lappend inopts [list $ff - - - - "pack $gopts" "$prompt$attrs"]
           continue
         }
         default {
@@ -163,8 +164,8 @@ oo::class create pave::PaveInput {
     return $res
   }
 
-  # edit/view a file
-  method editviewFile {fname {prepost ""} args} {
+  # view/edit a file
+  method vieweditFile {fname {prepost ""} args} {
     return [my editfile $fname "" "" "" $prepost {*}$args]
   }
 
