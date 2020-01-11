@@ -3,38 +3,38 @@
 
  # ---------------------  -head as message (without any widgets)
  #% exec lxterminal -e \
- #%   tclsh /home/apl/PG/github/pave/pavecli.tcl ques "For sale 1" \
+ #%   tclsh /home/apl/PG/github/pave/apavecli.tcl ques "For sale 1" \
  #%   {} -head " Some item1\n Some item2\n Some item3\n \
  #%     _____________________\n Продано !!!" \
  #%     -weight bold -size 15 -family Courier &
 
  # ---------------------  prompt for lab1 and -t attribute for lab2
  #% exec lxterminal -e \
- #%   tclsh /home/apl/PG/github/pave/pavecli.tcl ques "For sale 2" \
+ #%   tclsh /home/apl/PG/github/pave/apavecli.tcl ques "For sale 2" \
  #%   { lab1 {"Some item1\nSome item2\nSome item3" {-anchor n} { \
  #%     -font "-size 15 -family Courier"}} {} \
  #%     lab2 {{} {} {-t "_____________________\n     Продано !!!" \
  #%     -font "-weight bold -size 15 -family Courier"}} {} } &
 
  # ---------------------  #%'s making a command
- #% exec lxterminal -e \
- #%   tclsh /home/apl/PG/github/pave/pavecli.tcl ques "My site 1" \
+ #-% exec lxterminal -e \
+ #%   tclsh /home/apl/PG/github/pave/apavecli.tcl ques "My site 1" \
  #%   { entLogin {"Login......"} {} \
  #%     entPassw {"Password..."  {} {-show *}} {} \
  #%   } -weight bold -head "Enter to register:" \
  #%   == LOGIN PASSW &
 
  # ---------------------  the same command made with \
- #% exec lxterminal -e \
-    tclsh /home/apl/PG/github/pave/pavecli.tcl ques "My site 2" \
+ #-% exec lxterminal -e \
+    tclsh /home/apl/PG/github/pave/apavecli.tcl ques "My site 2" \
     { entLogin {"Login......"} {} \
       entPassw {"Password..."  {} {-show *}} {} \
     } -weight bold -head "Enter to register:" \
     == LOGIN PASSW &
 
  # ---------------------  widgets + lab + head
- #% exec lxterminal -e \
-    tclsh /home/apl/PG/github/pave/pavecli.tcl "" "PaveCLI test:" \
+ #-% exec lxterminal -e \
+    tclsh /home/apl/PG/github/pave/apavecli.tcl "" "PaveCLI test:" \
     {    ent1  {"   Find: "} {"$::EN1 2 3"}    ent2  {"Replace: "} \
     {"$::EN2 $::EN4"}  labo {{} {-anchor w} {-t "\\nOptions:" -font \
     {-weight bold}}}  {}    radA  {{Match:   }} {{RE  } Exact "Glob" \
@@ -47,4 +47,3 @@
 #> doctest
 
 #--------------------------------------------------------------------
-

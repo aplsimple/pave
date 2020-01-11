@@ -1,2 +1,2 @@
 
-package ifneeded pave 1.5 [list source [file join $dir paveinput.tcl]]
+package ifneeded apave 2.0 [list source [file join $dir apaveinput.tcl]]

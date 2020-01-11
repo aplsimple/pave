@@ -1,12 +1,13 @@
 #! /usr/bin/env wish
 
-lappend auto_path ".."; package require pave
+lappend auto_path ".."; package require apave
 
 ttk::style theme use clam
 
+apave::initWM
 set win .win
 set winf $win.fra
-pave::PaveDialog create pdlg
+apave::APaveDialog create pdlg
 pdlg makeWindow $winf "Adding Shortcuts"
 pdlg themingWindow . \
   white #364c64 #d2d2d2 #292a2a white #4a6984 #182020 #dcdad5 #02ffff #00a0f0
@@ -33,7 +34,7 @@ pdlg window $winf {
   {cbxTyp laB12 L 1 1 {-st w -padx 5 -cw 3} {-tvar adsh__Typ -width 10 -values {MENU EVENT COMMAND} -state readonly}}
   {laB52 laB12 T 1 1 {-st en -rw 1} {-t "Contents:"}}
   {fraComm laB52 L 1 1 {-st nswe -padx 5} {}}
-  {texComm - - 1 1 {pack -side left -expand 1 -fill both -in $winf.fraComm} {-h 6 -w 50 -wrap word}}
+  {texComm - - 1 1 {pack -side left -expand 1 -fill both -in $winf.fraComm} {-h 6 -w 50 -wrap word -tabnext $winf.chbActive}}
   {sbvComm texComm L 1 1 {pack -in $winf.fraComm}}
   {laB53 laB52 T 1 1 {-st en -rw 1} {-t "Description:"}}
   {fraDesc laB53 L 1 1 {-st nswe -padx 5} {}}
@@ -70,30 +71,36 @@ destroy $win
 
 #======================================================
 
-  pave::PaveInput create dlg
-    set res [dlg input ques "My site" {
-      entLogin {{Login......}} {}
-      entPassw {{Password...} {} {-show *}} {}
-    } -weight bold -head "\n Enter to register here:"]
+  set login "mylogin"
+  apave::APaveInput create dlg
+    set res [dlg input ques "My site" [list \
+      entLogin {{Login......}} "{$::login}" \
+      entPassw {{Password...} {} {-show *}} {} \
+    ] -weight bold -head "\n Enter to register here:"]
   puts $res
   dlg destroy
 
 #======================================================
 
   set win .win2
-  set fil1 "Some-file-name"
+  set fil0 "Some-file-name-0"
+  set fil1 "Some-file-name-1"
   pdlg makeWindow $win.fra "Find and Replace"
   pdlg window $win.fra {
-{fraM - - - - {pack  -fill x}}
-{fra2 - - - - {pack  -fill x}}
-{fraM.laBent1 - - - - {pack -side left} {-t "Enter file name:"}}
-{fraM.ent1 - - - - {pack -side right -expand 1 -fill x}}
-{fra2.laBent1 - - - - {pack -side left} {-t "Choose file:"}}
+{fraM - - - - {pack -fill x}}
+{fra2 - - - - {pack -fill x}}
+{fra3 - - - - {pack -fill x} {-relief raised}}
+{fraM.lab0 - - - - {pack -pady 10} 
+  {-t {  Demo for $\::fil0 and $\::fil1 values (and $ as dollar)  }}}
+{fraM.labent1 - - - - {pack -side left} {-t "Enter file name:"}}
+{fraM.Ent1 - - - - {pack -side right -expand 1 -fill x} {-tvar ::fil0}}
+{fra2.v_0 - - - - {pack -pady 3}}
+{fra2.labent1 - - - - {pack -side left} {-t "Choose file:"}}
 {fra2.fil1 - - - - {pack -side right -expand 1 -fill x}
-{-tvar ::fil1 -title {Pick a file}}
+{-tvar ::fil1 -title {Pick a file}}}
+{fra3.but - - - - {pack -padx 4 -pady 4 -side right} {-t Close -comm exit}}
 }
-  }
-  set res [pdlg showModal $win]
+  set res [pdlg showModal $win -focus [pdlg Ent1]]
   puts $res
   pdlg destroy
 

@@ -1,7 +1,7 @@
 #! /usr/bin/env tclsh
 
 package require Tk
-lappend auto_path ".."; package require pave
+lappend auto_path ".."; package require apave
 
 #-------------------------------------------------------------------------
 #
@@ -49,15 +49,8 @@ lappend auto_path ".."; package require pave
 #
 #-------------------------------------------------------------------------
 
-if {$::tcl_platform(platform) == "windows"} {
-  wm attributes . -alpha 0.0
-} else {
-  wm attributes . -type splash
-  wm geometry . 0x0
-}
-ttk::style theme use clam
-
-pave::PaveMe create pave
+apave::initWM
+apave::APave create pave
 pave makeWindow .win "Test - Original layout "
 pave window .win {
   {butA -   - 2 1 "-st nsew" {-t A}}
@@ -106,6 +99,6 @@ pave window .win3 {
   {butK butJ L 1 1 "-st nsew" {-t K}}
 }
 pave showModal .win3 -geometry +960+400
-PaveMe destroy
+pave destroy
 exit
 

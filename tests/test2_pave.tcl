@@ -10,7 +10,7 @@
 package require Tk
 catch {package require tooltip} ;# may be absent
 
-lappend auto_path ".."; package require pave
+lappend auto_path ".."; package require apave
 
 namespace eval t {
 
@@ -73,11 +73,12 @@ namespace eval t {
 
   proc test2 {} {
 
+    apave::initWM
     set ::t::ftx1 $::argv0
     variable pdlg
     variable pave
-    pave::PaveInput create pdlg .win
-    pave::PaveInput create pave .win
+    apave::APaveInput create pdlg .win
+    apave::APaveInput create pave .win
     set ::t::filetxt [pave readTextFile $::t::ftx1]
 
     variable arrayTab
@@ -155,7 +156,7 @@ namespace eval t {
       {fon1 labBfon1 L 1 9 {} {-tvar t::fon1 -title {Pick a font}}}
       {clr1 labBclr1 L 1 9 {} {-tvar t::clr1 -title {Pick a color}}}
       {dat1 labBdat1 L 1 9 {} {-tvar t::dat1 -title {Pick a date} -dateformat %Y.%m.%d}}
-      {ftx1 labBftx1 L 1 9 {} {-h 7 -ro 0 -tvar ::t::ftx1 -title {Pick a file to view} -filetypes {{{Tcl scripts} .tcl} {{Text files} {.txt .test}}} -wrap word -tooltip "After choosing a file\nthe text will be read-only."}}
+      {ftx1 labBftx1 L 1 9 {} {-h 7 -ro 0 -tvar ::t::ftx1 -title {Pick a file to view} -filetypes {{{Tcl scripts} .tcl} {{Text files} {.txt .test}}} -wrap word -tooltip "After choosing a file\nthe text will be read-only." -tabnext .win.fral.butGen}}
       {labB4 labBftx1 T 3 9 {-st ewns -rw 1} {-t "Some others options can be below"}}
     } .win.fNB.nb.f2 {
 
@@ -189,7 +190,7 @@ namespace eval t {
       {.lfrT - - - - {} {-t Progress} {add}}
       {.lfrT.Pro - - - - {pack -fill both -expand 1} {-mode indeterminate} {} {~ start}}
       {.lfrB - - - - {} {-t "Text of $::t::ftx1"} {add} {}}
-      {.lfrB.Text - - - - {pack -side left -expand 1 -fill both} {-borderwidth 0 -w 76 -wrap word}}
+      {.lfrB.Text - - - - {pack -side left -expand 1 -fill both} {-borderwidth 0 -w 76 -wrap word -tabnext .win.fral.butGen}}
       {.lfrB.sbv .lfrB.text L - - {pack}}
     } .win.fNB.nb.f3 {
 
@@ -271,7 +272,7 @@ namespace eval t {
       {frAT fra1 T 1 2 {-st nsew -rw 1 -pady 7}}
       {frAT.laB - - - - {pack -side left -anchor nw} {-t "text & scrollbars \
 \n\nas above, i.e.\nnot  ttk::scrollbar\n\ntext is read-only"}}
-      {frAT.TextNT - - - - {pack -side left -expand 1 -fill both} {-h 11 -wrap none -rotext ::t::filetxt}}
+      {frAT.TextNT - - - - {pack -side left -expand 1 -fill both} {-h 11 -wrap none -rotext ::t::filetxt -tabnext .win.fral.butGen}}
       {frAT.sbV frAT.textNT L - - {pack}}
       {frAT.sbH frAT.textNT T - - {pack}}
     } .win.fNB.nb.f4 {
@@ -381,8 +382,8 @@ where:
     # the general layout of window (main frames and buttons):
     pave window .win {
       {fral - - 8 1   {-st nes -rw 1}}
-      {.but1 -       - 1 1 {-st we} {-t "General" -com "t::chanTab nb"}}
-      {.but2 fral.but1 T 1 1 {-st we} {-t "View" -com "t::chanTab nb2"}}
+      {.butGen - - 1 1 {-st we} {-t "General" -com "t::chanTab nb"}}
+      {.but2 fral.butGen T 1 1 {-st we} {-t "View" -com "t::chanTab nb2"}}
       {.but3 fral.but2 T 1 1 {-st we} {-t "Editor" -com "t::chanTab nb3"}}
       {.but4 fral.but3 T 1 1 {-st we} {-t "Files" -com "t::chanTab nb4"}}
       {.but5 fral.but4 T 1 1 {-st we} {-t "Tools" -com "t::chanTab nb5"}}
@@ -391,9 +392,9 @@ where:
       {.fra  fral.but7 T 1 1 {-st we -rw 10} {-h 30.m}}
       {buth fral T 1 1 {-st e} {-t "Help"    -com t::helpProc}}
       {frau buth L 1 1 {-st nswe -cw 10} {-w 60.m}}
-      {but1 frau L 1 1 {-st e} {-t "Apply"  -com t::applyProc}}
-      {but2 but1 L 1 1 {-st e} {-t "Cancel" -com t::cancelProc}}
-      {but3 but2 L 1 1 {-st e} {-t "OK"     -com t::okProc}}
+      {butApply frau L 1 1 {-st e} {-t "Apply"  -com t::applyProc}}
+      {butCancel butApply L 1 1 {-st e} {-t "Cancel" -com t::cancelProc}}
+      {butOK butCancel L 1 1 {-st e} {-t "OK"     -com t::okProc}}
       {fNB fral L 8 9 {-st nsew}}
     }
 
@@ -430,7 +431,7 @@ where:
     lv1 = \"$t::lv1\"
     "
     destroy .win
-    pave::PaveInput destroy
+    apave::APaveInput destroy
     return $res
   }
 

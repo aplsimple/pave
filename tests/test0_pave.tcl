@@ -1,20 +1,13 @@
 #! /usr/bin/env tclsh
 
 package require Tk
-lappend auto_path ".."; package require pave
+lappend auto_path ".."; package require apave
 
 # This test 1 demonstrates how easily the standard dialog "Search & Replace"
 # can be created by means of the pave.
 
-if {$::tcl_platform(platform) == "windows"} {
-  wm attributes . -alpha 0.0
-} else {
-  wm attributes . -type splash
-  wm geometry . 0x0
-}
-ttk::style theme use clam
-
-pave::PaveMe create pave
+apave::initWM
+apave::APave create pave
 set win .win
 pave makeWindow $win.fra "Find and Replace"
 set v1 [set v2 1]
