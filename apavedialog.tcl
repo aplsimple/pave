@@ -309,6 +309,40 @@ oo::class create apave::APaveDialog {
   }
 
   #########################################################################
+  # Initialize the search in the text (ctrlf=1 when called by Ctrl+F)
+
+  method InitFindInText { {ctrlf 0} } {
+
+    set txt [my TexM]
+    if {$ctrlf} {  ;# Ctrl+F moves cursor 1 char ahead
+      ::tk::TextSetCursor $txt [$txt index "insert -1 char"]
+    }
+    if {[set ${_pdg(ns)}PD::fnd] eq ""} {
+      if {![catch {$txt tag ranges sel} seltxt]} {
+        if {[set forword [expr {$seltxt eq ""}]]} {
+          set pos  [$txt index "insert wordstart"]
+          set pos2 [$txt index "insert wordend"]
+          set seltxt [string trim [$txt get $pos $pos2]]
+          if {![string is wordchar -strict $seltxt]} {
+            # when cursor just at the right of word: take the word at the left
+            set pos  [$txt index "insert -1 char wordstart"]
+            set pos2 [$txt index "insert -1 char wordend"]
+          }
+        } else {
+          lassign $seltxt pos pos2
+        }
+        catch {
+          set seltxt [$txt get $pos $pos2]
+          if {[set sttrim [string trim $seltxt]] ne ""} {
+            if {$forword} {set seltxt $sttrim}
+            set ${_pdg(ns)}PD::fnd $seltxt
+          }
+        }
+      }
+    }
+  }
+
+  #########################################################################
   # Find string in text (donext=1 means 'from current position')
 
   method FindInText {{donext 0}} {
@@ -554,7 +588,7 @@ oo::class create apave::APaveDialog {
            bind \[[self] Entfind\] <KP_Enter> {[self] FindInText}
            bind \[[self] Entfind\] <FocusIn> {\[[self] Entfind\] selection range 0 end}
            bind $_pdg(win).dia <F3> {[self] FindInText 1}
-           bind $_pdg(win).dia <Control-f> \"focus \[[self] Entfind\]\"
+           bind $_pdg(win).dia <Control-f> \"[self] InitFindInText 1; focus \[[self] Entfind\]\"
            bind \[[self] TexM\] <Button-3> \{
              tk_popup \[[self] TexM\].popupMenu %X %Y \}
            set pop \[[self] TexM\].popupMenu"
@@ -565,7 +599,7 @@ oo::class create apave::APaveDialog {
               -command \"event generate \[[self] TexM\] <<Copy>>\"
              \$pop add separator
              \$pop add command -accelerator Ctrl+F -label \"Find first\" \\
-              -command \"focus \[[self] Entfind\]\"
+              -command \"[self] InitFindInText; focus \[[self] Entfind\]\"
              \$pop add command -accelerator F3 -label \"Find next\" \\
               -command \"[self] FindInText 1\"
              \$pop add separator
@@ -599,7 +633,7 @@ oo::class create apave::APaveDialog {
               -command \"[self] LinesMove +1 0\"
              \$pop add separator
              \$pop add command -accelerator Ctrl+F -label \"Find first\" \\
-              -command \"focus \[[self] Entfind\]\"
+              -command \"[self] InitFindInText; focus \[[self] Entfind\]\"
              \$pop add command -accelerator F3 -label \"Find next\" \\
               -command \"[self] FindInText 1\"
              \$pop add separator
@@ -608,7 +642,7 @@ oo::class create apave::APaveDialog {
             "
           oo::objdefine [self] export DoubleText DeleteLine LinesMove
         }
-        oo::objdefine [self] export FindInText Pdg
+        oo::objdefine [self] export FindInText InitFindInText Pdg
       } else {
         lappend widlist [list h__ h_3 L 1 4 "-cw 1"]
       }
@@ -657,7 +691,7 @@ oo::class create apave::APaveDialog {
           set focusnow [my TexM]
           catch "::tk::TextSetCursor $focusnow $curpos"
           foreach k {w W} \
-            {catch "bind $focusnow <Control-$k> {[my Pdg defb1] invoke}"}
+            {catch "bind $focusnow <Control-$k> {[my Pdg defb1] invoke; break}"}
         }
       }
       if {$readonly} {
@@ -684,7 +718,7 @@ oo::class create apave::APaveDialog {
     catch "$binds"
     my showModal $_pdg(win).dia \
       -focus $focusnow -geometry $geometry {*}$root -ontop $ontop
-    oo::objdefine [self] unexport FindInText DoubleText DeleteLine Pdg
+    oo::objdefine [self] unexport FindInText InitFindInText DoubleText DeleteLine Pdg
     set pdgeometry [winfo geometry $_pdg(win).dia]
     # the dialog's result is defined by "pave res" + checkbox's value
     set res [my res $_pdg(win).dia]

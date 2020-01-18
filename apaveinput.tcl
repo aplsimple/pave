@@ -2,7 +2,7 @@
 #
 # This script contains the APaveInput class that allows:
 #   - to create input dialogs
-#   - to edit text files
+#   - to view/edit text files
 #
 # Use for input dialogs:
 #   package require apave
@@ -34,7 +34,7 @@
 
 package require Tk
 
-package provide apave 2.0
+package provide apave 2.1
 
 source [file join [file dirname [info script]] apavedialog.tcl]
 
@@ -46,11 +46,35 @@ oo::class create apave::APaveInput {
   superclass apave::APaveDialog
 
   variable _pdg
+  variable _savedvv
 
   constructor {args} {
+    set _savedvv [list]
     next {*}$args
   }
 
+  destructor {
+    my initInput
+  }
+
+  # initialize input
+  # (clear variables made in previous session)
+  method initInput {} {
+    foreach {vn vv} $_savedvv {
+      catch {unset $vn}
+    }
+    set _savedvv [list]
+  }
+
+  # return variables made and filled in previous session
+  # as a list of elements {varname varvalue}
+  # where varname is of form: [namespace current]::var$widgetname
+  method varInput {} {
+    return $_savedvv
+  }
+
+  # input dialog
+  # (layout a set of common widgets: entry, checkbox, radiobuttons etc.)
   method input {icon ttl iopts args} {
 
     set pady "-pady 2"
@@ -131,7 +155,7 @@ oo::class create apave::APaveInput {
         }
       }
       if {![info exist $vv]} {set $vv ""}
-      lappend savedvv $vv [set $vv]
+      lappend _savedvv $vv [set $vv]
     }
     if {![string match "*-focus *" $args]} {
       # find 1st entry/text to be focused
@@ -157,7 +181,7 @@ oo::class create apave::APaveInput {
     set res [my Query $icon $ttl {} "butOK $titleOK 1 $butCancel" butOK \
       $inopts [my PrepArgs $args]]
     if {[lindex $res 0]!=1} {  ;# restore old values if OK not chosen
-      foreach {vn vv} $savedvv {
+      foreach {vn vv} $_savedvv {
         set $vn $vv
       }
     }
@@ -175,6 +199,7 @@ oo::class create apave::APaveInput {
       return false
     }
     set newfile 0
+    set filetxt ""
     if {[catch {set filetxt [read [set ch [open $fname]]]}]} {
       if {[catch {close [open $fname w]} err]} {
         puts "ERROR: couldn't create '$fname':\n$err"

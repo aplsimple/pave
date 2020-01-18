@@ -5,10 +5,10 @@
 #
 ###########################################################################
 
-lappend auto_path ".."; package require pave
+lappend auto_path ".."; package require apave
 
 oo::class create SomeClass {
-  mixin pave::ObjectProperty
+  mixin apave::ObjectProperty
   variable _OP_Properties
   method summary {} {
     puts "Instances: [set obj [info class instances SomeClass]]"

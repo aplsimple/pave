@@ -8,7 +8,7 @@
 
 package require Tk
 
-lappend auto_path ".."; package require pave
+lappend auto_path ".."; package require apave
 
 namespace eval t {
 
@@ -120,7 +120,7 @@ if {$::tcl_platform(platform) == "windows"} {
 ttk::style theme use clam
 
 # firstly show dialogs without checkboxes
-pave::PaveInput create dlg
+apave::APaveInput create dlg
 
 set dn "Don't show this again"
 puts "ok  = [t::test1 -weight bold -size 8 -text 1]"
