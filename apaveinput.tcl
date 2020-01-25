@@ -77,6 +77,9 @@ oo::class create apave::APaveInput {
   # (layout a set of common widgets: entry, checkbox, radiobuttons etc.)
   method input {icon ttl iopts args} {
 
+    if {$iopts ne {}} {
+      my initInput  ;# clear away all internal vars
+    }
     set pady "-pady 2"
     lappend inopts [list fraM + T 1 98 "-st new $pady -rw 1"]
     set savedvv [list]
