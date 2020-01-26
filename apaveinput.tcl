@@ -34,7 +34,7 @@
 
 package require Tk
 
-package provide apave 2.1
+package provide apave 2.2
 
 source [file join [file dirname [info script]] apavedialog.tcl]
 
@@ -45,6 +45,7 @@ oo::class create apave::APaveInput {
 
   superclass apave::APaveDialog
 
+  variable _pav
   variable _pdg
   variable _savedvv
 
@@ -64,6 +65,7 @@ oo::class create apave::APaveInput {
       catch {unset $vn}
     }
     set _savedvv [list]
+    set _pav(widgetopts) [list]
   }
 
   # return variables made and filled in previous session
@@ -71,6 +73,15 @@ oo::class create apave::APaveInput {
   # where varname is of form: [namespace current]::var$widgetname
   method varInput {} {
     return $_savedvv
+  }
+
+  # return variables' values
+  method valueInput {} {
+    set _values {}
+    foreach {vnam -} [my varInput] {
+      lappend _values [set $vnam]
+    }
+    return $_values
   }
 
   # input dialog

@@ -73,35 +73,57 @@ Abort or retry the reading of Pushkin? Cancel if not sure." RETRY -g +325+325 {*
   }
 
   proc test8 {args} {
-    # initialize some variables - moved to -inpval option
-    #set var1 [dlg varname cbx1]
-    #set var2 [dlg varname fco1]
-    #if {![info exists $var1]} {
-      #set $var1 {Mother}
-      #set $var2 {Content of test2_fco.dat}
-    #}
-    return [dlg input - "Dialog INPUT" {
-      seh1 {{} {-pady 9}} {}
-      ent1 {{Enter general info........}} {}
-      fil1 {{Choose a file to read.....}} {}
-      fis1 {{Choose a file to save.....}} {}
-      dir1 {{Choose a directory........}} {}
-      fon1 {{Choose a font.............}} {}
-      clr1 {{Choose a color............}} {}
-      dat1 {{Choose a date.............}} {}
-      seh2 {{} {-pady 9}} {}
-      chb1 {{Check the demo checkbox...}} {}
-      rad1 {{Check the radio button....}} {Big Giant Big Small "None of these"}
-      seh3 {{} {-pady 9}} {}
-      spx1 {{Spinbox from 0 to 99......} {} {-from 0 -to 99}} {}
-      cbx1 {{Combobox of relations.....} {} {-h 7 -inpval Mother}} {Son Father Mother Son Daughter Brother Sister Uncle Aunt Cousin "Second cousin" "1000th cousin"}
-      fco1 {{Combobox of file content..} {} {-h 7 -inpval {test2_fco.dat}}} {/@-div1 " \[" -div2 "\] " -ret 1 test2_fco.dat/@ \
-        INFO: /@-pos 22 -list {{test2_fco.dat} {other item} trunk DOC} test2_fco.dat/@}
-      seh4 {{} {-pady 9}} {}
-      tex1 {{Text field................} {} {-h 4 -w 55}} {It's a sample of
+    # initialize variables
+    if {![info exist ::t8ent1]} {
+      lassign "" ::t8ent1 ::t8fil1 ::t8fis1 ::t8dir1 ::t8fon1 ::t8clr1 ::t8dat1 ::t8chb1 ::t8rad1 ::t8spx1 ::t8cbx1 ::t8fco1
+      set ::t8tex1 {It's a sample of
 multiline entry field aka
 - text\n- memo\n- note}
-    } -size 14 -weight bold -head "Entries, choosers, switchers, boxes..." {*}$args]
+    }
+    # various methods are used while setting the values of widgets' vars:
+    #   [list $varname] and "{$varname}" for strings
+    #   $varname for integers and booleans
+    #   $::t8tex1 for text
+    set res [dlg input - "Dialog INPUT" [list \
+      seh1 {{} {-pady 9}} {} \
+      ent1 {{Enter general info........}} [list $::t8ent1] \
+      fil1 {{Choose a file to read.....}} [list $::t8fil1] \
+      fis1 {{Choose a file to save.....}} "{$::t8fis1}" \
+      dir1 {{Choose a directory........}} "{$::t8dir1}" \
+      fon1 {{Choose a font.............}} "{$::t8fon1}" \
+      clr1 {{Choose a color............}} "{$::t8clr1}" \
+      dat1 {{Choose a date.............}} "{$::t8dat1}" \
+      seh2 {{} {-pady 9}} {} \
+      chb1 {{Check the demo checkbox...}} $::t8chb1 \
+      rad1 {{Check the radio button....}} [list "$::t8rad1" Giant Big Small "None of these"] \
+      seh3 {{} {-pady 9}} {} \
+      spx1 {{Spinbox from 0 to 99......} {} {-from 0 -to 99}} $::t8spx1 \
+      cbx1 [list {Combobox of relations.....} {} [list -h 7 -inpval $::t8cbx1]] \
+        [list - Father Mother Son Daughter Brother Sister Uncle Aunt Cousin "Second cousin" "1000th cousin"] \
+      fco1 [list {Combobox of file content..} {} [list -h 7 -inpval $::t8fco1]] {/@-div1 " \[" -div2 "\] " -ret 1 test2_fco.dat/@ \
+        INFO: /@-pos 22 -list {{test2_fco.dat} {other item} trunk DOC} test2_fco.dat/@} \
+      seh4 {{} {-pady 9}} {} \
+      tex1 {{Text field................} {} {-h 4 -w 55}} $::t8tex1 \
+    ] -size 14 -weight bold -head "Entries, choosers, switchers, boxes..." {*}$args]
+    lassign [dlg valueInput] ::t8ent1 ::t8fil1 ::t8fis1 ::t8dir1 ::t8fon1 ::t8clr1 ::t8dat1 ::t8chb1 ::t8rad1 ::t8spx1 ::t8cbx1 ::t8fco1 ::t8tex1
+    return $res
+  }
+
+  proc test9 {args} {
+    # example from pave docs:
+    if {![info exist ::login]} {
+      set ::login "aplsimple"
+      set ::password "12q`\"\{7qweeklmd"
+    }
+    set res [dlg input ques "My site" [list \
+      entLogin {{Login......}} [list $::login] \
+      entPassw {{Password...} {} {-show *}} [list $::password] \
+    ] -weight bold -head "\n Enter to register here:" {*}$args]
+    if {[lindex $res 0] eq "1"} {
+      lassign [dlg valueInput] ::login ::password
+      puts "login=$::login, password=$::password"
+    }
+    return $res
   }
 
 }
@@ -131,16 +153,17 @@ puts "rc  = [t::test5 -weight bold -size 16]"
 puts "arc = [t::test6 -weight bold -size 18]"
 puts "msc = [t::test7 -size 20]"
 puts "inp = [t::test8 -g +375+375]"
+puts "pavedoc = [t::test9 -g +375+375]"
 
 dlg themingWindow . \
   white #364c64 #d2d2d2 #292a2a white #4a6984 grey #364c64 #02ffff #00a0f0
 
 # show dialogs with checkboxes, in cycle
-lassign {0 0 0 0 0 0 0 0} r1 r2 r3 r4 r5 r6 r7 r8
+lassign {0 0 0 0 0 0 0 0} r1 r2 r3 r4 r5 r6 r7 r8 r9
 while 1 {
   puts --------------------------------
   set totr 0
-  foreach {n type} {1 OK 2 YN 3 OC 4 YNC 5 RC 6 ARC 7 MSC 8 INP} {
+  foreach {n type} {1 OK 2 YN 3 OC 4 YNC 5 RC 6 ARC 7 MSC 8 INP 9 PAVEDOC} {
     eval "if \{\$r$n < 10\} \{set r$n \[lindex \[t::test$n -ch \
          \"\$dn\"\] 0\]\}; puts \"$type = \$r$n\" ; incr totr \[expr \$r$n / 10\]"
   }
@@ -152,5 +175,6 @@ while 1 {
     break
   }
 }
-pave::PaveInput  destroy
+
+apave::APaveInput  destroy
 exit
