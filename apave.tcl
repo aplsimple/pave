@@ -1016,11 +1016,8 @@ oo::class create apave::APave {
     set attrs_ret [set _pav(prepost) {}]
     foreach {a v} $attrs {
       switch $a {
-        -disabledtext {
+        -disabledtext - -rotext - -lbxsel - -cbxsel {
           # get a text of disabled widget processed below in "Post"
-          lappend _pav(prepost) [list $a [string trim $v {\{\}}]]
-        }
-        -rotext {
           # processed below in "Post"
           lappend _pav(prepost) [list $a [string trim $v {\{\}}]]
         }
@@ -1056,6 +1053,18 @@ oo::class create apave::APave {
             }
           }
           my readonlyWidget $w
+        }
+        -lbxsel {
+          set v [lsearch -glob [$w get 0 end] "$v*"]
+          if {$v>=0} {
+            $w selection set $v
+            $w yview $v
+          }
+        }
+        -cbxsel {
+          set cbl [$w cget -values]
+          set v [lsearch -glob $cbl "$v*"]
+          if {$v>=0} { $w set [lindex $cbl $v] }
         }
       }
     }

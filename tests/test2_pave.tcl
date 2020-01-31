@@ -236,7 +236,7 @@ namespace eval t {
       {.frAsc.scA - - - - {pack -side right} {-orient horizontal -w 12 -sliderlength 20 -length 238 -var t::sc}}
       {.frALB fra1.frAsc T 1 1}
       {.frALB.laB - - - - {pack -side left -anchor nw} {-t "listbox of colors  "}}
-      {.frALB.lbx - - - - {pack -side left -fill x -expand 1} {-lvar t::lvar -h 5 -w 30}}
+      {.frALB.lbx - - - - {pack -side left -fill x -expand 1} {-lvar t::lvar -h 5 -w 30 -lbxsel dark}}
       {.frALB.sbV fra1.frALB.lbx L - - {pack}}
 
       ####################################################################
@@ -337,7 +337,7 @@ where:
       {frAflb.butView - - - - {pack -side right -anchor nw -pady 5} {-t "View the file" -com  t::viewfile -tooltip "Opens a stand-alone viewer of the file\nthe listbox' data are taken from."}}
       {frAflb.lab - - - - {pack -side right -anchor nw -pady 9} {-t " "}}
       {frAflb.laB - - - - {pack -side left -anchor nw} {-t "Listbox of file content:  \n\nSee also:\nGeneral/Misc. tab"}}
-      {frAflb.flb - - - - {pack -side left -fill x -expand 1} {-lvar ::t::lv1 -w 50 -tooltip "The 'flb' listbox contains:\n 1)  four literal lines\n  2) data from 'test2_fco.dat' file" -values {@@-div1 " \[" -div2 "\] " test2_fco.dat@@   INFO: @@-pos 22 -ret 1 -list {{Content of test2_fco.dat} {another item} trunk DOC} test2_fco.dat@@}}}
+      {frAflb.flb - - - - {pack -side left -fill x -expand 1} {-lvar ::t::lv1 -lbxsel Cont -w 50 -tooltip "The 'flb' listbox contains:\n 1)  four literal lines\n  2) data from 'test2_fco.dat' file" -values {@@-div1 " \[" -div2 "\] " test2_fco.dat@@   INFO: @@-pos 22 -ret 1 -list {{Content of test2_fco.dat} {another item} trunk DOC} test2_fco.dat@@}}}
       {frAflb.sbv frAflb.flb L - - {pack -side left}}
       {frAflb.sbh frAflb.flb T - - {pack -side left}}
     } .win.fNB.nb2.f2 {

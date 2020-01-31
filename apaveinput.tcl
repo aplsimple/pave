@@ -119,13 +119,31 @@ oo::class create apave::APaveInput {
       set vv [my varname $name]
       set ff [my fieldname $name]
       switch $typ {
+        lb {
+          set vlist {}
+          foreach vo [lrange $valopts 1 end] {
+            lappend vlist $vo
+          }
+          set $vv $vlist
+          lappend attrs -lvar $vv
+          if {[set vsel [lindex $valopts 0]] ni {"" "-"}} {
+            lappend attrs -lbxsel $vsel
+          }
+          lappend inopts [list $ff - - - - \
+            "pack -side left -expand 1 -fill both $gopts" $attrs]
+          lappend inopts [list fraM.fra$name.sbv$name $ff L - - "pack -fill y"]
+        }
         cb {
           if {![info exist $vv]} {catch {set $vv ""}}
           set vlist {}
           foreach vo [lrange $valopts 1 end] {
             lappend vlist $vo
           }
-          lappend inopts [list $ff - - - - "pack -fill x $gopts" "-tvar $vv -values \{$vlist\} $attrs"]
+          lappend attrs -tvar $vv -values $vlist
+          if {[set vsel [lindex $valopts 0]] ni {"" "-"}} {
+            lappend attrs -cbxsel $vsel
+          }
+          lappend inopts [list $ff - - - - "pack -fill x $gopts" $attrs]
         }
         fc {
           if {![info exist $vv]} {catch {set $vv ""}}

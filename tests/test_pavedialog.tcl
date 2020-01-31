@@ -75,7 +75,9 @@ Abort or retry the reading of Pushkin? Cancel if not sure." RETRY -g +325+325 {*
   proc test8 {args} {
     # initialize variables
     if {![info exist ::t8ent1]} {
-      lassign "" ::t8ent1 ::t8fil1 ::t8fis1 ::t8dir1 ::t8fon1 ::t8clr1 ::t8dat1 ::t8chb1 ::t8rad1 ::t8spx1 ::t8cbx1 ::t8fco1
+      lassign "" ::t8ent1 ::t8fil1 ::t8fis1 ::t8dir1 ::t8fon1 ::t8clr1 ::t8dat1 ::t8chb1 ::t8rad1 ::t8spx1
+      set ::t8lbx1 [set ::t8cbx1 Second]
+      set ::t8fco1 test2_fco.dat
       set ::t8tex1 {It's a sample of
 multiline entry field aka
 - text\n- memo\n- note}
@@ -84,6 +86,7 @@ multiline entry field aka
     #   [list $varname] and "{$varname}" for strings
     #   $varname for integers and booleans
     #   $::t8tex1 for text
+    set rellist {- Father Mother Son Daughter Brother Sister Uncle Aunt Cousin {Big Brother} "Second cousin" "1000th cousin"}
     set res [dlg input - "Dialog INPUT" [list \
       seh1 {{} {-pady 9}} {} \
       ent1 {{Enter general info........}} [list $::t8ent1] \
@@ -98,14 +101,14 @@ multiline entry field aka
       rad1 {{Check the radio button....}} [list "$::t8rad1" Giant Big Small "None of these"] \
       seh3 {{} {-pady 9}} {} \
       spx1 {{Spinbox from 0 to 99......} {} {-from 0 -to 99}} $::t8spx1 \
-      cbx1 [list {Combobox of relations.....} {} [list -h 7 -inpval $::t8cbx1]] \
-        [list - Father Mother Son Daughter Brother Sister Uncle Aunt Cousin "Second cousin" "1000th cousin"] \
-      fco1 [list {Combobox of file content..} {} [list -h 7 -inpval $::t8fco1]] {/@-div1 " \[" -div2 "\] " -ret 1 test2_fco.dat/@ \
+      lbx1 [list {Listbox of relations......} {} [list -h 4 -lbxsel $::t8lbx1]] $rellist \
+      cbx1 [list {Combobox of relations.....} {} [list -h 7 -cbxsel $::t8cbx1]] $rellist \
+      fco1 [list {Combobox of file content..} {} [list -h 7 -cbxsel $::t8fco1]] {/@-div1 " \[" -div2 "\] " -ret 1 test2_fco.dat/@ \
         INFO: /@-pos 22 -list {{test2_fco.dat} {other item} trunk DOC} test2_fco.dat/@} \
       seh4 {{} {-pady 9}} {} \
       tex1 {{Text field................} {} {-h 4 -w 55}} $::t8tex1 \
     ] -size 14 -weight bold -head "Entries, choosers, switchers, boxes..." {*}$args]
-    lassign [dlg valueInput] ::t8ent1 ::t8fil1 ::t8fis1 ::t8dir1 ::t8fon1 ::t8clr1 ::t8dat1 ::t8chb1 ::t8rad1 ::t8spx1 ::t8cbx1 ::t8fco1 ::t8tex1
+    lassign [dlg valueInput] ::t8ent1 ::t8fil1 ::t8fis1 ::t8dir1 ::t8fon1 ::t8clr1 ::t8dat1 ::t8chb1 ::t8rad1 ::t8spx1 ::t8lbx1 ::t8cbx1 ::t8fco1 ::t8tex1
     return $res
   }
 
@@ -119,7 +122,7 @@ multiline entry field aka
       entLogin {{Login......}} [list $::login] \
       entPassw {{Password...} {} {-show *}} [list $::password] \
     ] -weight bold -head "\n Enter to register here:" {*}$args]
-    if {[lindex $res 0] eq "1"} {
+    if {[lindex $res 0]} {
       lassign [dlg valueInput] ::login ::password
       puts "login=$::login, password=$::password"
     }
