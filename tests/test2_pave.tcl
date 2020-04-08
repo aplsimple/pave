@@ -80,7 +80,68 @@ namespace eval t {
     apave::APaveInput create pdlg .win
     apave::APaveInput create pave .win
     set ::t::filetxt [pave readTextFile $::t::ftx1]
-
+    set ::t::tblcols {
+      0 {Name of widget} left \
+      0 Type left \
+      0 X right \
+      0 Y right
+    }
+    set ::t::tbllist {
+      {"but" "ttk::button" 1 1}
+      {"buT" "button" 2 2}
+      {"can" "canvas" 3 3}
+      {"chb" "ttk::checkbutton" 4 4}
+      {"chB" "checkbutton" 5 5}
+      {"cbx fco" "ttk::combobox" 23 2}
+      {"ent" "ttk::entry" 212 6}
+      {"enT" "entry" 45 7}
+      {"fil" - 1 0}
+      {"fis" - 2 0}
+      {"dir" - 3 0}
+      {"fon" - 4 0}
+      {"clr" - 5 0}
+      {"dat" - 6 0}
+      {"sta" - 7 0}
+      {"too" - 8 0}
+      {"fra" "ttk::frame" 9 0}
+      {"ftx" "ttk::labelframe" 1234 6}
+      {"frA" "frame" 11 22}
+      {"lab" "ttk::label" 77 8}
+      {"laB" "label" 3 5}
+      {"lfr" "ttk::labelframe" 7 88}
+      {"lfR" "labelframe" 9 00}
+      {"lbx flb" "listbox" 99 89}
+      {"meb" "ttk::menubutton" 5 7}
+      {"meB" "menubutton" 7 89}
+      {"not" "ttk::notebook" 8 654}
+      {"pan" "ttk::panedwindow" 324 6}
+      {"pro" "ttk::progressbar" 2 5}
+      {"rad" "ttk::radiobutton" 8 765}
+      {"raD" "radiobutton" 4 21}
+      {"sca" "ttk::scale" 1 23}
+      {"scA" "scale" 43 6}
+      {"sbh" "ttk::scrollbar" 98 7}
+      {"sbH" "scrollbar" 543 245}
+      {"sbv" "ttk::scrollbar" 98 65}
+      {"sbV" "scrollbar" 43 578}
+      {"seh" "ttk::separator" 98 32}
+      {"sev" "ttk::separator" 34 7}
+      {"siz" "ttk::sizegrip" 863 867}
+      {"spx" "ttk::spinbox" 78 654}
+      {"spX" "spinbox" 98 212}
+      {"tbl" "tablelist::tablelist" 435 76}
+      {"tex" "text" 87 333}
+      {"tre" "ttk::treeview" 86 2}
+      {"h_*" "horizontal spacer" 98 3223}
+      {"v_*" "vertical spacer" 356 79}
+    }
+    set ilv 0
+    foreach lv $::t::tbllist {
+      lassign $lv - - l2 l3
+      set ::t::tbllist [lreplace $::t::tbllist $ilv $ilv [lreplace $lv 2 3 \
+        [string range "000$l2" end-3 end]  [string range "000$l3" end-3 end]]]
+      incr ilv
+    }
     variable arrayTab
     array set arrayTab {}
     # initializing images for toolbar
@@ -156,8 +217,12 @@ namespace eval t {
       {fon1 labBfon1 L 1 9 {} {-tvar t::fon1 -title {Pick a font}}}
       {clr1 labBclr1 L 1 9 {} {-tvar t::clr1 -title {Pick a color}}}
       {dat1 labBdat1 L 1 9 {} {-tvar t::dat1 -title {Pick a date} -dateformat %Y.%m.%d}}
-      {ftx1 labBftx1 L 1 9 {} {-h 7 -ro 0 -tvar ::t::ftx1 -title {Pick a file to view} -filetypes {{{Tcl scripts} .tcl} {{Text files} {.txt .test}}} -wrap word -tooltip "After choosing a file\nthe text will be read-only." -tabnext .win.fral.butGen}}
-      {labB4 labBftx1 T 3 9 {-st ewns -rw 1} {-t "Some others options can be below"}}
+      {ftx1 labBftx1 L 1 9 {} {-h 7 -ro 0 -tvar ::t::ftx1 -title {Pick a file to view} -filetypes {{{Tcl scripts} .tcl} {{Text files} {.txt .test}}} -wrap word -tooltip "After choosing a file\nthe text will be read-only." -tabnext "[my Tbl1]"}}
+      {labtbl1 labBftx1 T 1 1 {-st e} {-t "Tablelist widget:"}}
+      {frAT labtbl1 L 1 9 {-st ew -pady 15}}
+      {frAT.Tbl1 - - - - {pack -side left -fill x -expand 1} {-h 7 -lvar ::t::tbllist  -lbxsel but -columns {$::t::tblcols}}}
+      {frAT.sbv frAT.tbl1 L - - {pack}}
+      {labB4 labtbl1 T 3 9 {-st ewns -rw 1} {-t "Some others options can be below"}}
     } .win.fNB.nb.f2 {
 
       ####################################################################
@@ -346,14 +411,12 @@ where:
     }
 
     # text widget's name is uppercased, so we can use the Text method
-#?  set wtex .win.fNB.nb.f2.fra.pan.panR.lfrB.text
     set wtex [pave Text]
     # bindings and contents for text widget
     bind $wtex <ButtonRelease> [list t::textPos $wtex]
     bind $wtex <KeyRelease> [list t::textPos $wtex]
     $wtex replace 1.0 end $::t::filetxt
     # we can use the Lframe method to get its name, similar to Text
-#?  fillclock .win.fNB.nb.f2.fra.pan.panL.lframe
     fillclock [pave Lframe]
 
     # 3d frame - "Options" (not too much efforts applied ;^)
@@ -429,6 +492,7 @@ where:
     dat1= $t::dat1
     lvar= \"$t::lvar\"
     lv1 = \"$t::lv1\"
+    Tbl1 selected = [lindex $::t::tbllist {*}[[pave Tbl1] curselection]]
     "
     destroy .win
     apave::APaveInput destroy

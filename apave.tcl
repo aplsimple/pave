@@ -52,6 +52,7 @@
 # proc d {args} {tk_messageBox -title "INFO" -icon info -message "$args"}
 
 package require Tk
+package require tablelist
 package require widget::calendar
 catch {package require tooltip} ;# optional (though necessary everywhere:)
 
@@ -491,6 +492,10 @@ oo::class create apave::APave {
       "siz" {set widget "ttk::sizegrip"}
       "spx" {set widget "ttk::spinbox"}
       "spX" {set widget "spinbox"}
+      "tbl" { ;# tablelist
+        set widget "tablelist::tablelist"
+        set attrs "-labelcommand tablelist::sortByColumn -stretch all $attrs"
+      }
       "tex" {                       ;# Tk 8.6.7 restored "-undo 0"
         set widget "text"           ;# of text widget by default
         set attrs "-undo 1 $attrs"  ;# => here undo is enabled by default
@@ -1059,6 +1064,7 @@ oo::class create apave::APave {
           if {$v>=0} {
             $w selection set $v
             $w yview $v
+            $w activate $v
           }
         }
         -cbxsel {
@@ -1139,6 +1145,16 @@ oo::class create apave::APave {
 
   #########################################################################
   #
+  # Set focus on a widget (possibly, assigned with [my Widget])
+
+  method setFocus {wnext} {
+
+      focus [subst $wnext]
+
+  }
+
+  #########################################################################
+  #
   # Get additional commands (for non-standard attributes)
 
   method AdditionalCommands {w attrsName} {
@@ -1158,7 +1174,7 @@ oo::class create apave::APave {
     }
     if {[set wnext [my getOption -tabnext {*}$attrs]] ne ""} {
       after idle [list bind $w <Key> \
-        [list if {{%K} == {Tab}} "focus $wnext ; break" ]]
+        [list if {{%K} == {Tab}} "[self] setFocus $wnext ; break" ]]
       set attrs [my RemoveSomeOptions $attrs -tabnext]
     }
     return $addcomms
