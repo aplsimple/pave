@@ -34,7 +34,7 @@
 
 package require Tk
 
-package provide apave 2.3
+package provide apave 2.4
 
 source [file join [file dirname [info script]] apavedialog.tcl]
 
@@ -192,11 +192,11 @@ oo::class create apave::APaveInput {
     if {![string match "*-focus *" $args]} {
       # find 1st entry/text to be focused
       foreach io $iopts {
-        if {[set _ [string range [set n [lindex $io 0]] 0 1]]=="en" || $_ in {te fc cb ra ch}} {
+        if {[set _ [string range [set n [lindex $io 0]] 0 1]] eq "en" || $_ in {te fc cb ra ch}} {
           set args "$args -focus *$n"
           break
         }
-        if {$_=="fi" || $_=="di" || $_=="fo" || $_=="cl"} {
+        if {$_ in {fi di fo cl}} { ;# choosers (file, dir, font, color)
           set args "$args -focus *ent$n"
           break
         }

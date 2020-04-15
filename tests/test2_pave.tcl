@@ -1,4 +1,4 @@
-#! /usr/bin/env wish
+#! /usr/bin/env tclsh
 
 ###########################################################################
 #
@@ -218,7 +218,7 @@ namespace eval t {
       {clr1 labBclr1 L 1 9 {} {-tvar t::clr1 -title {Pick a color}}}
       {dat1 labBdat1 L 1 9 {} {-tvar t::dat1 -title {Pick a date} -dateformat %Y.%m.%d}}
       {ftx1 labBftx1 L 1 9 {} {-h 7 -ro 0 -tvar ::t::ftx1 -title {Pick a file to view} -filetypes {{{Tcl scripts} .tcl} {{Text files} {.txt .test}}} -wrap word -tooltip "After choosing a file\nthe text will be read-only." -tabnext "[my Tbl1]"}}
-      {labtbl1 labBftx1 T 1 1 {-st e} {-t "Tablelist widget:"}}
+      {labtbl1 labBftx1 T 1 1 {-st e} {-t "Tablelist widget:\n\n(click on titles\nto sort)"}}
       {frAT labtbl1 L 1 9 {-st ew -pady 15}}
       {frAT.Tbl1 - - - - {pack -side left -fill x -expand 1} {-h 7 -lvar ::t::tbllist  -lbxsel but -columns {$::t::tblcols}}}
       {frAT.sbv frAT.tbl1 L - - {pack}}
@@ -398,9 +398,8 @@ where:
       {rad1 labB3 T 1 1 {-st w} {-t "Down" -var t::v -value 1}}
       {rad2 rad1 L 1 1 {-st w} {-t "Up"   -var t::v -value 2}}
       {v_ chb3 T 1 5}
-      {frAflb v_ T 1 5 {-st ew -pady 10} {-state disabled}}
-      {frAflb.butView - - - - {pack -side right -anchor nw -pady 5} {-t "View the file" -com  t::viewfile -tooltip "Opens a stand-alone viewer of the file\nthe listbox' data are taken from."}}
-      {frAflb.lab - - - - {pack -side right -anchor nw -pady 9} {-t " "}}
+      {frAflb v_ T 1 5 {-st ew -pady 10} {}}
+      {frAflb.butView - - - - {pack -side right -anchor nw -padx 9} {-t "View the file" -com  t::viewfile -tooltip "Opens a stand-alone viewer of the file\nthe listbox' data are taken from."}}
       {frAflb.laB - - - - {pack -side left -anchor nw} {-t "Listbox of file content:  \n\nSee also:\nGeneral/Misc. tab"}}
       {frAflb.flb - - - - {pack -side left -fill x -expand 1} {-lvar ::t::lv1 -lbxsel Cont -w 50 -tooltip "The 'flb' listbox contains:\n 1)  four literal lines\n  2) data from 'test2_fco.dat' file" -values {@@-div1 " \[" -div2 "\] " test2_fco.dat@@   INFO: @@-pos 22 -ret 1 -list {{Content of test2_fco.dat} {another item} trunk DOC} test2_fco.dat@@}}}
       {frAflb.sbv frAflb.flb L - - {pack -side left}}
