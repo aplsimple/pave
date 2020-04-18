@@ -128,7 +128,7 @@ oo::class create apave::APave {
     }
     proc WinResize {win} {
       # restrict the window's sizes (fixing Tk's issue with a menubar)
-      if {[lindex [$win configure -menu] 4]!=""} {
+      if {[lindex [$win configure -menu] 4] ne ""} {
         lassign [split [wm geometry $win] x+] w y
         lassign [wm minsize $win] wmin ymin
         if {$w<$wmin && $y<$ymin} {
@@ -285,7 +285,7 @@ oo::class create apave::APave {
       } else {
         set retval {}
         foreach ln [split [my readTextFile $fname "" 1] \n] {
-          if {$ln!={}} {lappend retval $ln}
+          if {$ln ne {}} {lappend retval $ln}
         }
       }
       return $retval
@@ -309,11 +309,11 @@ oo::class create apave::APave {
       } elseif {$ldv2} {
         if {$i2<0} {return $edge}
         set retval [string range $fline 0 $i2]
-      } elseif {$pos!={} && $len!={}} {
+      } elseif {$pos ne {} && $len ne {}} {
         set retval [string range $fline $pos $pos+[incr len -1]]
-      } elseif {$pos!={}} {
+      } elseif {$pos ne {}} {
         set retval [string range $fline $pos end]
-      } elseif {$len!={}} {
+      } elseif {$len ne {}} {
         set retval [string range $fline 0 $len-1]
       } else {
         set retval $fline
@@ -479,6 +479,7 @@ oo::class create apave::APave {
         }
         set attrs "[my FCfieldAttrs $wnamefull $attrs -lvar]"
         set attrs "[my ListboxesAttrs $wnamefull $attrs]"
+        my AddPopupAttr $wnamefull attrs -entrypop 1
       }
       "meb" {set widget "ttk::menubutton"}
       "meB" {set widget "menubutton"}
@@ -529,7 +530,11 @@ oo::class create apave::APave {
       }
       "tex" {                       ;# Tk 8.6.7 restored "-undo 0"
         set widget "text"           ;# of text widget by default
-        set attrs "-undo 1 $attrs"  ;# => here undo is enabled by default
+        set attrs "-undo 1 $attrs" ;# undo is enabled
+        if {[my getOption -textpop {*}$attrs] eq ""} {
+          my AddPopupAttr $wnamefull attrs -textpop \
+            [expr {[my getOption -rotext {*}$attrs] ne ""}] -- disabled
+        }
       }
       "tre" {set widget "ttk::treeview"}
       "h_*" { ;# horizontal spacer
@@ -541,6 +546,10 @@ oo::class create apave::APave {
         set options "-st ns -rsz 3 -pady 3 $options"
       }
       default {set widget ""}
+    }
+    if {$nam3 in {cbx ent enT fco spx spX}} {
+      ;# entry-like widgets need their popup menu
+      my AddPopupAttr $wnamefull attrs -entrypop 0 readonly disabled
     }
     if {[string first "pack" [string trimleft $pack]]==0} {
       set options $pack
@@ -628,7 +637,7 @@ oo::class create apave::APave {
     res _pav(moveall) _pav(tonemoves)}]} {
       set res [tk_chooseColor -initialcolor $_pav(initialcolor) {*}$args]
     }
-    if {$res!=""} {
+    if {$res ne ""} {
       set _pav(initialcolor) [set $tvar $res]
     }
     return $res
@@ -725,9 +734,9 @@ oo::class create apave::APave {
         [file exist [set res [file nativename $res]]]} {
           set $ftxvar [my readTextFile $res]
           if {[winfo exist $txtnam]} {
-            my readonlyWidget $txtnam 0
+            my readonlyWidget $txtnam false
             my displayTaggedText $txtnam $ftxvar
-            my readonlyWidget $txtnam 1
+            my readonlyWidget $txtnam true
             set wid [string range $txtnam \
              0 [string last . $txtnam]]$wid
             $wid configure -text "$res"
@@ -795,7 +804,9 @@ oo::class create apave::APave {
       lset args 6 $attrs1
       append addattrs2 " -filetypes {$filetypes}"
     }
-    switch -glob [my rootwname $name] {
+    set an ""
+    lassign [my LowercaseWidgetName $name] n
+    switch -glob [my rootwname $n] {
       "fil*" { set chooser "tk_getOpenFile" }
       "fis*" { set chooser "tk_getSaveFile" }
       "dir*" { set chooser "tk_chooseDirectory" }
@@ -806,6 +817,7 @@ oo::class create apave::APave {
         if {$tvar ne "" && [info exist $tvar]} {
           append addattrs " -t [set $tvar]"
         }
+        set an "tex"
       }
       "clr*" { set chooser "colorChooser"
         set wpar "-parent $w" ;# specific for color chooser (gets parent of $w)
@@ -814,6 +826,8 @@ oo::class create apave::APave {
         return $args
       }
     }
+    my MakeWidgetName $w $name $an
+    set name $n
     set tvar [set vv [set addopt ""]]
     set attmp [list]
     foreach {nam val} $attrs1 {
@@ -1006,7 +1020,7 @@ oo::class create apave::APave {
     if {[string index $name 0]=="."} {
       for {set i2 [expr {$i-1}]} {$i2 >=0} {incr i2 -1} {
         lassign [lindex $lwidgets $i2] name2
-        if {[string index $name2 0]!="."} {
+        if {[string index $name2 0] ne "."} {
           set wname "$name2$name"
           lassign [my LowercaseWidgetName $name] name
           set name "$name2$name"
@@ -1023,19 +1037,70 @@ oo::class create apave::APave {
   # Make an exported method named after root widget, if it's uppercased,
   # e.g. fra1.fra2.fra3.Entry1 -> method Entry1 {...}
 
-  method MakeWidgetName {w name} {
+  method MakeWidgetName {w name {an {}}} {
 
     set root1 [string index [my rootwname $name] 0]
     if {[string is upper $root1]} {
       lassign [my LowercaseWidgetName $name] name method
       if {[catch {info object definition [self] $method}]} {
         oo::objdefine [self] "
-          method $method args {return $w.$name}
+          method $method {} {return $w.$an$name}
           export $method"
       }
     }
     return [set ${_pav(ns)}PN::wn $w.$name]
 
+  }
+
+  #########################################################################
+  # add the attribute to call a popup menu for an editable widget
+
+  method AddPopupAttr {w attrsName atRO isRO args} {
+
+    upvar 1 $attrsName attrs
+    lassign $args state state2
+    if {$state2 ne ""} {
+      if {[my getOption -state {*}$attrs] eq $state2} return
+      set isRO [expr {$isRO || [my getOption -state {*}$attrs] eq $state}]
+    }
+    if {$isRO} { append atRO "RO" }
+    append attrs " $atRO $w"
+  }
+
+  #########################################################################
+  # make a popup menu for an editable widget
+
+  method makePopup {w {isRO false} {istext false} {tearoff false}} {
+
+    set pop $w.popupMenu
+    catch {
+      menu $pop -tearoff $tearoff
+    }
+    $pop delete 0 end
+    if {$isRO} {
+      $pop add command -accelerator Ctrl+C -label "Copy" \
+            -command "event generate $w <<Copy>>"
+    } else {
+      $pop add command -accelerator Ctrl+X -label "Cut" \
+            -command "event generate $w <<Cut>>"
+      $pop add command -accelerator Ctrl+C -label "Copy" \
+            -command "event generate $w <<Copy>>"
+      $pop add command -accelerator Ctrl+V -label "Paste" \
+            -command "event generate $w <<Paste>>"
+      if {$istext} {
+        $pop add separator
+        $pop add command -accelerator Ctrl+Z -label "Undo" \
+              -command "event generate $w <<Undo>>"
+        $pop add command -accelerator Ctrl+Shift+Z -label "Redo" \
+              -command "event generate $w <<Redo>>"
+      }
+    }
+    if {$istext} {
+      $pop add separator
+      $pop add command -accelerator Ctrl+A -label "Select All" \
+        -command "$w tag add sel 1.0 end"
+    }
+    bind $w <Button-3> [list tk_popup $w.popupMenu %X %Y]
   }
 
   #########################################################################
@@ -1055,7 +1120,8 @@ oo::class create apave::APave {
     set attrs_ret [set _pav(prepost) {}]
     foreach {a v} $attrs {
       switch $a {
-        -disabledtext - -rotext - -lbxsel - -cbxsel - -ListboxSel {
+        -disabledtext - -rotext - -lbxsel - -cbxsel - \
+        -entrypop - -entrypopRO - -textpop - -textpopRO - -ListboxSel {
           # attributes specific to apave, processed below in "Post"
           lappend _pav(prepost) [list $a [string trim $v {\{\}}]]
         }
@@ -1070,7 +1136,7 @@ oo::class create apave::APave {
 
   #########################################################################
   #
-  # Post (for comments, refer to "Pre" above)
+  # Post processing actions (for comments, refer to "Pre" above)
 
   method Post {w attrs} {
 
@@ -1081,6 +1147,7 @@ oo::class create apave::APave {
           $w configure -state normal
           my displayTaggedText $w v {}
           $w configure -state disabled
+          my readonlyWidget $w false
         }
         -rotext {
           if {[info exist v]} {
@@ -1090,7 +1157,7 @@ oo::class create apave::APave {
               my displayTaggedText $w v {}
             }
           }
-          my readonlyWidget $w
+          my readonlyWidget $w true
         }
         -lbxsel {
           set v [lsearch -glob [$w get 0 end] "$v*"]
@@ -1108,6 +1175,16 @@ oo::class create apave::APave {
         -ListboxSel {
           bind $v <<ListboxSelect>> [list [namespace current]::ListboxSelect %W]
         }
+        -entrypop - -entrypopRO {
+          if {[winfo exists $v]} {
+            my makePopup $v [expr {$a eq "-entrypopRO"}]
+          }
+        }
+        -textpop - -textpopRO {
+          if {[winfo exists $v]} {
+            my makePopup $v [expr {$a eq "-textpopRO"}] true
+          }
+        }
       }
     }
 
@@ -1115,7 +1192,7 @@ oo::class create apave::APave {
 
   #########################################################################
   #
-  # Switch on/off a widget's readonly state
+  # Switch on/off a widget's readonly state - for text widget
   # See also: https://wiki.tcl-lang.org/page/Read-only+text+widget
 
   method readonlyWidget {w {on true}} {
@@ -1136,6 +1213,7 @@ oo::class create apave::APave {
       rename ::$w ""
       rename ::$w.internal ::$w
     }
+    my makePopup $w $on true
 
   }
 
@@ -1226,7 +1304,7 @@ oo::class create apave::APave {
     set lwidgets [list]
     # comments be skipped
     foreach lst $inplists {
-      if {[string index [string index $lst 0] 0]!="#"} {
+      if {[string index [string index $lst 0] 0] ne "#"} {
         lappend lwidgets $lst
       }
     }
@@ -1331,7 +1409,7 @@ oo::class create apave::APave {
       if {$neighbor ne "#"} {
         set options [my GetOptions $w $options $row $rowspan $col $colspan]
         set pack [string trim $options]
-        if {$add1!=""} {
+        if {$add1 ne ""} {
           set comm "[winfo parent $wname] add $wname [string range $add1 4 end]"
           {*}$comm
         } elseif {[string first "pack" $pack]==0} {
@@ -1341,7 +1419,7 @@ oo::class create apave::APave {
              -columnspan $colspan -padx 1 -pady 1 {*}$options
         }
       }
-      if {$comm1!=""} {
+      if {$comm1 ne ""} {
         set comm1 [string map [list ~. $wname. "~ " "$wname "] $comm1]
         {*}$comm1
       }
@@ -1505,6 +1583,20 @@ oo::class create apave::APave {
 
   #########################################################################
   #
+  # Set the text widget's contents
+
+  method setTextContents {w conts} {
+
+    if { [set state [$w cget -state]] ne "normal"} {
+      $w configure -state normal
+    }
+    $w replace 1.0 end $conts
+    $w edit reset
+    if { $state ne "normal" } { $w configure -state $state }
+  }
+
+  #########################################################################
+  #
   # Get the tag positions in the contsName text and display it in w text
   # widget. The lines in contsName are divided by \n. The tags in tags
   # variable are "pure" ones i.e. for <b>..</b> the tags list contains "b".
@@ -1515,7 +1607,7 @@ oo::class create apave::APave {
 
     upvar $contsName conts
     if {$tags eq ""} {
-      $w replace 1.0 end $conts
+      my setTextContents $w $conts
       return
     }
     set taglist [set tagpos [set taglen [list]]]
@@ -1544,7 +1636,7 @@ oo::class create apave::APave {
         foreach tagi $tags pos $tagpos len $taglen {
           lassign $tagi tag
           if {[string first "\<$tag\>" $line]==0} {
-            if {$pos != "0"} {
+            if {$pos ne "0"} {
               error "\npaveme.tcl: mismatched \<$tag\> in line $irow.\n"
             }
             lset tagpos $i $nrnc
@@ -1580,6 +1672,7 @@ oo::class create apave::APave {
       lassign [lindex $tags $i] tag opts
       $w tag add $tag $p1 $p2
     }
+    $w edit reset
 
   }
 

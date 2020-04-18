@@ -10,7 +10,8 @@
 package require Tk
 catch {package require tooltip} ;# may be absent
 
-lappend auto_path ".."; package require apave
+lappend auto_path "..";
+set ::apaveversion [package require apave]
 
 namespace eval t {
 
@@ -154,7 +155,7 @@ namespace eval t {
 
     # making main window object and dialog object
     pave configure edge "@@"
-    pave makeWindow .win "Preferences"
+    pave makeWindow .win "Preferences: apave v$::apaveversion"
 
     # before general layout, make the notebook
     ttk::frame .win.fNB
@@ -217,7 +218,7 @@ namespace eval t {
       {fon1 labBfon1 L 1 9 {} {-tvar t::fon1 -title {Pick a font}}}
       {clr1 labBclr1 L 1 9 {} {-tvar t::clr1 -title {Pick a color}}}
       {dat1 labBdat1 L 1 9 {} {-tvar t::dat1 -title {Pick a date} -dateformat %Y.%m.%d}}
-      {ftx1 labBftx1 L 1 9 {} {-h 7 -ro 0 -tvar ::t::ftx1 -title {Pick a file to view} -filetypes {{{Tcl scripts} .tcl} {{Text files} {.txt .test}}} -wrap word -tooltip "After choosing a file\nthe text will be read-only." -tabnext "[my Tbl1]"}}
+      {Ftx1 labBftx1 L 1 9 {} {-h 7 -ro 0 -tvar ::t::ftx1 -title {Pick a file to view} -filetypes {{{Tcl scripts} .tcl} {{Text files} {.txt .test}}} -wrap word -tooltip "After choosing a file\nthe text will be read-only." -tabnext "[my Tbl1]"}}
       {labtbl1 labBftx1 T 1 1 {-st e} {-t "Tablelist widget:\n\n(click on titles\nto sort)"}}
       {frAT labtbl1 L 1 9 {-st ew -pady 15}}
       {frAT.Tbl1 - - - - {pack -side left -fill x -expand 1} {-h 7 -lvar ::t::tbllist  -lbxsel but -columns {$::t::tblcols}}}
@@ -414,7 +415,9 @@ where:
     # bindings and contents for text widget
     bind $wtex <ButtonRelease> [list t::textPos $wtex]
     bind $wtex <KeyRelease> [list t::textPos $wtex]
-    $wtex replace 1.0 end $::t::filetxt
+    pave setTextContents $wtex $::t::filetxt
+    # at first, Ftx1 widget is editable
+    pave makePopup [pave Ftx1] false true
     # we can use the Lframe method to get its name, similar to Text
     fillclock [pave Lframe]
 
