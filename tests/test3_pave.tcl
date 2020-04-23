@@ -1,7 +1,11 @@
 #! /usr/bin/env tclsh
 
 package require Tk
-lappend auto_path ".."; package require apave
+
+set ::testdirname [file normalize [file dirname [info script]]]
+catch {cd $::testdirname}
+lappend auto_path "$::testdirname/.."
+package require apave
 
 #-------------------------------------------------------------------------
 #

@@ -1,7 +1,11 @@
 #! /usr/bin/env tclsh
 
 package require Tk
-lappend auto_path ".."; package require apave
+
+set ::testdirname [file normalize [file dirname [info script]]]
+catch {cd $::testdirname}
+lappend auto_path "$::testdirname/.."
+package require apave
 
 # This test 1 demonstrates how easily the standard dialog "Search & Replace"
 # can be created by means of the pave.
@@ -35,7 +39,8 @@ pave window $win.fra {
   {sev2 ent1 L 8 1 }
   {but1 sev2 L 1 1 {-st we} {-t "Find" -com "::pave res $win 1"}}
   {but2 but1 T 1 1 {-st we} {-t "Find All" -com "::pave res $win 2"}}
-  {but3 but2 T 1 1 {-st we} {-t "Replace"  -com "::pave res $win 3"}}
+  {lab_ but2 T 2 1}
+  {but3 lab_ T 1 1 {-st we} {-t "Replace"  -com "::pave res $win 3"}}
   {but4 but3 T 1 1 {-st nwe} {-t "Replace All" -com "::pave res $win 4"}}
   {seh3 but4 T 1 1 {-st ewn}}
   {but5 seh3 T 3 1 {-st we} {-t "Close" -com "::pave res $win 0"}}

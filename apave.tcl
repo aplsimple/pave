@@ -57,14 +57,46 @@ package require widget::calendar
 catch {package require tooltip} ;# optional (though necessary everywhere:)
 
 namespace eval apave {
+
   variable apaveDir [file dirname [info script]]
-  variable appIcon ""
+  variable _AP_ICO { none "info" err warn ques no retry folder \
+    OpenFile SaveFile font color font date help home undo redo run tools \
+    "file" find search view edit config misc cut copy paste plus minus \
+    add change delete double replace up down "exit" ok yes cancel }
+  variable _AP_IMG
+  array set _AP_IMG {}
+
+  # Get a defined icon's image or list of icons
+  proc iconImage {{icon ""}} {
+    variable _AP_ICO
+    if {$icon eq ""} {return $_AP_ICO}
+    proc imagename {icon} {   # Get a defined icon's image name
+      return _AP_IMG(img$icon)
+    }
+    variable apaveDir
+    variable _AP_IMG
+    if {[array size _AP_IMG] == 0} {
+      # Make images of icons
+      source [file join $apaveDir apaveimg.tcl]
+      foreach ic $_AP_ICO {
+        image create photo [imagename $ic] -data [set _AP_IMG($ic)]
+      }
+    }
+    if {$icon ni $_AP_ICO} { set icon [lindex $_AP_ICO 0] }
+    return [imagename $icon]
+  }
+
   # Set application's icon
   proc setAppIcon {win {winicon ""}} {
-    variable appIcon
-    if {$winicon ne ""} { set appIcon [image create photo -file $winicon] }
+    set appIcon ""
+    if {$winicon ne ""} {
+      if {[catch {set appIcon [image create photo -file $winicon]}]} {
+        catch { set appIcon [image create photo -data $winicon] }
+      }
+    }
     if {$appIcon ne ""} { wm iconphoto $win $appIcon }
   }
+
   # Initialize wish session
   proc initWM {} {
     if {$::tcl_platform(platform) == "windows"} {
@@ -73,6 +105,10 @@ namespace eval apave {
       wm withdraw .
     }
     try {ttk::style theme use clam}
+    # configure separate widget types
+    ttk::style configure TButton \
+      -anchor center -width -8 -relief raised -borderwidth 1 -padding 1
+    ttk::style configure TLabel -borderwidth 0 -padding 1
   }
 }
 
@@ -216,6 +252,15 @@ oo::class create apave::APave {
 
     return ""
 
+  }
+
+  #########################################################################
+  #
+  # Get icon attributes for buttons, menus etc.
+
+  method IconA {icon} {
+
+    return "-image [apave::iconImage $icon] -compound left"
   }
 
   #########################################################################
@@ -419,6 +464,35 @@ oo::class create apave::APave {
 
   #########################################################################
   #
+  # Get the button's icon based on its text and name (e.g. butOK)
+
+  method AddButtonIcon {w attrsName} {
+
+    upvar 1 $attrsName attrs
+    set txt [my getOption -t {*}$attrs]
+    if {$txt eq ""} { set txt [my getOption -text {*}$attrs] }
+    set im ""
+    set icolist [list {exit abort} {exit close} \
+      {SaveFile save} {OpenFile open}]
+    # ok, yes, cancel, apply buttons should be at the end of list
+    # as their texts can be renamed (e.g. "Help" in e_menu's "About")
+    lappend icolist {*}[apave::iconImage] {yes apply}
+    foreach icon $icolist {
+      lassign $icon ic1 ic2
+      # text of button is of highest priority at defining its icon
+      if {[string match -nocase $ic1 $txt] || \
+          [string match -nocase but$ic1 $w] || \
+          ($ic2 ne "" && ( \
+          [string match -nocase but$ic2 $w] || \
+          [string match -nocase $ic2 $txt]))} {
+        append attrs " [my IconA $ic1]"
+        break
+      }
+    }
+  }
+
+  #########################################################################
+  #
   # Get the widget type based on 2 initial letters of its name
 
   method GetWidgetType {wnamefull options attrs} {
@@ -432,8 +506,14 @@ oo::class create apave::APave {
     set name [my rootwname $wnamefull]
     set nam3 [string tolower [string index $name 0]][string range $name 1 2]
     switch -glob $nam3 {
-      "but" {set widget "ttk::button"}
-      "buT" {set widget "button"}
+      "but" {
+        set widget "ttk::button"
+        my AddButtonIcon $name attrs
+      }
+      "buT" {
+        set widget "button"
+        my AddButtonIcon $name attrs
+        }
       "can" {set widget "canvas"}
       "chb" {set widget "ttk::checkbutton"}
       "chB" {set widget "checkbutton"}
@@ -712,7 +792,7 @@ oo::class create apave::APave {
     set isfilename 0
     set ftxvar [my getOption -ftxvar {*}$args]
     set args [my RemoveSomeOptions $args -ftxvar]
-    if {[set isviewer [expr {$nchooser=="fileViewer"} ? 1 : 0]]} {
+    if {[set isviewer [expr {$nchooser=="ftx_OpenFile"} ? 1 : 0]]} {
       set nchooser "tk_getOpenFile"
     }
     if {$nchooser=="fontChooser" || $nchooser=="colorChooser" \
@@ -720,10 +800,10 @@ oo::class create apave::APave {
       set nchooser "my $nchooser $tvar"
     } elseif {$nchooser=="tk_getOpenFile" || $nchooser=="tk_getSaveFile"} {
       if {[set fn [set $tvar]]==""} {set dn [pwd]} {set dn [file dirname $fn]}
-      set args "-initialfile {$fn} -initialdir $dn [my ParentOpt] $args"
+      set args "-initialfile \"$fn\" -initialdir \"$dn\" [my ParentOpt] $args"
       incr isfilename
     } elseif {$nchooser=="tk_chooseDirectory"} {
-      set args "-initialdir {[set $tvar]} [my ParentOpt] $args"
+      set args "-initialdir \"[set $tvar]\" [my ParentOpt] $args"
       incr isfilename
     }
     set res [{*}$nchooser {*}$args]
@@ -813,7 +893,7 @@ oo::class create apave::APave {
       "fon*" { set chooser "fontChooser" }
       "dat*" { set chooser "dateChooser" }
       "ftx*" {
-        set chooser [set view "fileViewer"]
+        set chooser [set view "ftx_OpenFile"]
         if {$tvar ne "" && [info exist $tvar]} {
           append addattrs " -t [set $tvar]"
         }
@@ -869,8 +949,12 @@ oo::class create apave::APave {
     } else {
       set entf [list [my Transname ent $name] - - - - "pack -side left -expand 1 -fill x -in $w.$name" "$attrs1 $tvar"]
     }
+    set icon "folder"
+    foreach ic {"OpenFile" "SaveFile" "font" "color" "font" "date"} {
+      if {[string first $ic $chooser] >= 0} {set icon $ic; break}
+    }
     set com "[self] chooser $chooser \{$vv\} $addopt $wpar $addattrs2"
-    set butf [list [my Transname buT $name] - - - - "pack -side right -anchor n -in $w.$name -padx 1" "-com \{$com\} -t \{. . .\} -font \{-weight bold -size 5\} -fg $_pav(fgbut) -bg $_pav(bgbut)"]
+    set butf [list [my Transname buT $name] - - - - "pack -side right -anchor n -in $w.$name -padx 1" "-com \{$com\} -compound none -image [apave::iconImage $icon] -font \{-weight bold -size 5\} -fg $_pav(fgbut) -bg $_pav(bgbut)"]
     if {$view ne ""} {
       set scrolh [list [my Transname sbh $name] $txtnam T - - "pack -in $w.$name" ""]
       set scrolv [list [my Transname sbv $name] $txtnam L - - "pack -in $w.$name" ""]
@@ -1078,26 +1162,26 @@ oo::class create apave::APave {
     }
     $pop delete 0 end
     if {$isRO} {
-      $pop add command -accelerator Ctrl+C -label "Copy" \
+      $pop add command {*}[my IconA copy] -accelerator Ctrl+C -label "Copy" \
             -command "event generate $w <<Copy>>"
     } else {
-      $pop add command -accelerator Ctrl+X -label "Cut" \
+      $pop add command {*}[my IconA cut] -accelerator Ctrl+X -label "Cut" \
             -command "event generate $w <<Cut>>"
-      $pop add command -accelerator Ctrl+C -label "Copy" \
+      $pop add command {*}[my IconA copy] -accelerator Ctrl+C -label "Copy" \
             -command "event generate $w <<Copy>>"
-      $pop add command -accelerator Ctrl+V -label "Paste" \
+      $pop add command {*}[my IconA paste] -accelerator Ctrl+V -label "Paste" \
             -command "event generate $w <<Paste>>"
       if {$istext} {
         $pop add separator
-        $pop add command -accelerator Ctrl+Z -label "Undo" \
+        $pop add command {*}[my IconA undo] -accelerator Ctrl+Z -label "Undo" \
               -command "event generate $w <<Undo>>"
-        $pop add command -accelerator Ctrl+Shift+Z -label "Redo" \
+        $pop add command {*}[my IconA redo] -accelerator Ctrl+Shift+Z -label "Redo" \
               -command "event generate $w <<Redo>>"
       }
     }
     if {$istext} {
       $pop add separator
-      $pop add command -accelerator Ctrl+A -label "Select All" \
+      $pop add command {*}[my IconA none] -accelerator Ctrl+A -label "Select All" \
         -command "$w tag add sel 1.0 end"
     }
     bind $w <Button-3> [list tk_popup $w.popupMenu %X %Y]

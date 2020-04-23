@@ -1,8 +1,11 @@
-#! /usr/bin/env wish
+#! /usr/bin/env tclsh
 
-lappend auto_path ".."; package require apave
+package require Tk
 
-ttk::style theme use clam
+set ::testdirname [file normalize [file dirname [info script]]]
+catch {cd $::testdirname}
+lappend auto_path "$::testdirname/.."
+package require apave
 
 apave::initWM
 set win .win

@@ -5,7 +5,7 @@
 # The ObjectProperty class allows to mix-in into
 # an object the getter and setter of properties.
 #
-# The ThemingManager class allows to change the ttk widgets' style.
+# The ObjectTheming class allows to change the ttk widgets' style.
 # For now it's only a bit of what should be, it needs to be enhanced a lot.
 #
 # The ObjectUtils class provides methods to extract option values... and
@@ -308,9 +308,6 @@ oo::class create apave::ObjectTheming {
         my Ttk_style map $typ $v1 [list {*}$v2]
       }
     }
-    # at last, separate widget types
-    ttk::style configure TButton \
-      -anchor center -width -11 -padding 3 -relief raised -borderwidth 2
     set _OT_Init 0
 
   }

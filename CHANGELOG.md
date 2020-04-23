@@ -1,6 +1,15 @@
 # Last changes:
 
 
+Version `2.6 (23 Apr'20)`
+
+  - icons added for buttons, menus, choosers
+  - ttk::button, ttk::label configured in apave::initWM
+  - symbolic ID of buttons may be passed to misc dialog
+  - tests/*.tcl modified
+  - BUGFIX: corrected -initialfile, -initialdir for file/dir choosers
+
+
 Version `2.5 (18 Apr'20)`
 
   - text and entry-like widgets (cbx ent fco spx) got their popup menu

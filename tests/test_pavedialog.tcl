@@ -1,4 +1,4 @@
-#! /usr/bin/env wish
+#! /usr/bin/env tclsh
 
 ###########################################################################
 #
@@ -8,7 +8,10 @@
 
 package require Tk
 
-lappend auto_path ".."; package require apave
+set ::testdirname [file normalize [file dirname [info script]]]
+catch {cd $::testdirname}
+lappend auto_path "$::testdirname/.."
+package require apave
 
 namespace eval t {
 
@@ -68,8 +71,8 @@ Abort or retry the reading of Pushkin? Cancel if not sure." RETRY -g +325+325 {*
 
   proc test7 {args} {
     return [dlg misc info "Dialog MSC" "\nAsk for HELLO\n" \
-      {Hello 1 {Bye baby} 2 Misc3 3 Misc4 4 "Misc 5" 5 Cancel 0 } \
-      1 -g +350+350 {*}$args]
+      {Home 1 {Run me, drink not} run Undo 3 Redo 4 Help 5 Cancel 0 } \
+      run -g +350+350 {*}$args]
   }
 
   proc test8 {args} {
@@ -134,15 +137,7 @@ multiline entry field aka
 ###########################################################################
 # Run the tests
 
-# In the "real life", the parent window is visible.
-# Here we hide it to run tests with "wish" being invisible.
-if {$::tcl_platform(platform) == "windows"} {
-  wm attributes . -alpha 0.0
-} else {
-  wm attributes . -type splash
-  wm geometry . 0x0
-}
-ttk::style theme use clam
+apave::initWM
 
 # firstly show dialogs without checkboxes
 apave::APaveInput create dlg
@@ -165,13 +160,19 @@ dlg themingWindow . \
 lassign {0 0 0 0 0 0 0 0} r1 r2 r3 r4 r5 r6 r7 r8 r9
 while 1 {
   puts --------------------------------
-  set totr 0
+  set curr [set totr 0]
   foreach {n type} {1 OK 2 YN 3 OC 4 YNC 5 RC 6 ARC 7 MSC 8 INP 9 PAVEDOC} {
-    eval "if \{\$r$n < 10\} \{set r$n \[lindex \[t::test$n -ch \
-         \"\$dn\"\] 0\]\}; puts \"$type = \$r$n\" ; incr totr \[expr \$r$n / 10\]"
+    if {[set r$n]<10} {
+      puts "$type = [set r$n [lindex [t::test$n -ch "$dn"] 0]]"
+      if {![string is integer [set r$n]]} {
+        set r$n [expr {[string last 10 [set r$n]]>0} ? 10 : 0]
+      }
+    }
+    incr curr [expr [set r$n] / 10]
+    incr totr
   }
   ;# cycle till none be shown
-  if {$totr >= 8} break
+  if {$curr == $totr} break
   # ask for continuation anyway
   if {[lindex [dlg yesno warn "UFF..." "\n Break the dance? \n" NO \
       -g +350+350 -weight bold -size 22 -c "ghost white"] 0] == 1} {

@@ -10,16 +10,21 @@
 package require Tk
 catch {package require tooltip} ;# may be absent
 
-lappend auto_path "..";
-set ::apaveversion [package require apave]
+set ::testdirname [file normalize [file dirname [info script]]]
+namespace eval t {
+  source [file join $::testdirname test2_img.tcl]
+}
+set ::t::ftx1 [file normalize [info script]]
+
+catch {cd $::testdirname}
+lappend auto_path "$::testdirname/.."
+package require apave
 
 namespace eval t {
 
-  source [file join [file dirname [info script]] test2_img.tcl]
-
   # variables used in layouts
   variable v 1 v2 1 c1 0 c2 0 c3 0 en1 "" en2 "" tv 1 tv2 "enter value" sc 0 sc2 0 cb3 "Content of test2_fco.dat" lv1 {}
-  variable fil1 "" fis1 "" dir1 "" clr1 "" fon1 "" dat1 "" ftx1 ""
+  variable fil1 "" fis1 "" dir1 "" clr1 "" fon1 "" dat1 ""
   variable ans0 0 ans1 0 ans2 0 ans3 0
   variable lvar {white blue "dark red" black #112334 #fefefe
   "sea green" "hot pink" cyan aqua "olive drab" snow wheat  }
@@ -75,7 +80,6 @@ namespace eval t {
   proc test2 {} {
 
     apave::initWM
-    set ::t::ftx1 $::argv0
     variable pdlg
     variable pave
     apave::APaveInput create pdlg .win
@@ -155,7 +159,7 @@ namespace eval t {
 
     # making main window object and dialog object
     pave configure edge "@@"
-    pave makeWindow .win "Preferences: apave v$::apaveversion"
+    pave makeWindow .win "Preferences: apave v[package versions apave]"
 
     # before general layout, make the notebook
     ttk::frame .win.fNB
@@ -243,10 +247,10 @@ namespace eval t {
             {" Column:"  -foreground #004080 -background $::bgst -font {-slant italic -size 10}} 5
             {"" -foreground #004080 -background $::bgst -font {-slant italic -size 10}} 30
       }}}
-      {lab1 - - - - {pack -pady 7} {-t \
+      {lab1 - - - - {pack -pady 0} {-t \
       "It's a bit modified Tk's demos/ttkpane.tcl" -font "-weight bold -size 12"}}
       {lab2 - - - - {pack} {-t "This demonstration shows off a nested set of themed paned windows. Their sizes can be changed by grabbing the area between each contained pane and dragging the divider." -wraplength 4i -justify left}}
-      {fra - - - - {pack -side bottom -fill both -expand 1 -pady 4}}
+      {fra - - - - {pack -side bottom -fill both -expand 1 -pady 0}}
       {fra.pan - - - - {pack -side bottom -fill both -expand 1} {-orient horizontal}}
       {fra.pan.panL - - - - {} {-orient vertical} {add}}
       {.lfrT - - - - {} {-t Button} {add}}
@@ -256,7 +260,7 @@ namespace eval t {
       {.lfrT - - - - {} {-t Progress} {add}}
       {.lfrT.Pro - - - - {pack -fill both -expand 1} {-mode indeterminate} {} {~ start}}
       {.lfrB - - - - {} {-t "Text of $::t::ftx1"} {add} {}}
-      {.lfrB.Text - - - - {pack -side left -expand 1 -fill both} {-borderwidth 0 -w 76 -wrap word -tabnext .win.fral.butGen}}
+      {.lfrB.Text - - - - {pack -side left -expand 1 -fill both} {-borderwidth 0 -w 76 -wrap word -tabnext .win.fral.butHome}}
       {.lfrB.sbv .lfrB.text L - - {pack}}
     } .win.fNB.nb.f3 {
 
@@ -266,7 +270,7 @@ namespace eval t {
       {fra1 - - 1 1 {-st w}}
       {.laB0  - - 1 1 {-st w} {-t "Enabled widgets"}}
       {.laB  fra1.laB0 T 1 1 {-st w -pady 7} {-t "label" -font "-weight bold -size 11"}}
-      {.buT fra1.laB T 1 1 {-st w} {-t "button" -w 10 -comm ::t::Pressed}
+      {.buTRun fra1.laB T 1 1 {-st w} {-t "button" -w -20 -comm ::t::Pressed}
         {} {eval {
           puts "This is just a demo. Take it easy."
           ##################################################################
@@ -275,17 +279,17 @@ namespace eval t {
           # HERE we have a demo procedure (for previous -comm option)
           ##################################################################
           proc ::t::Pressed {} {
-            if {[[::t::pave BuTdis] cget -text]!="button"} return
-            set bg [[::t::pave BuTdis] cget -background]
-            [::t::pave BuTdis] config -text "P R E S S E D"
+            if {[[::t::pave BuTRun] cget -text]!="button"} return
+            set bg [[::t::pave BuTRun] cget -background]
+            [::t::pave BuTRun] config -text "P R E S S E D"
             for {set i 0} {$i<500} {incr i 100} {
-              after $i {[::t::pave BuTdis] config -background #292a2a}
-              after [expr $i+50] "[::t::pave BuTdis] config -background $bg"
+              after $i {[::t::pave BuTRun] config -background #292a2a}
+              after [expr $i+50] "[::t::pave BuTRun] config -background $bg"
             }
-            after 800 [list [::t::pave BuTdis] config -text button]
+            after 800 [list [::t::pave BuTRun] config -text button]
           }
         }}}
-      {.chB fra1.buT T 1 1 {-st w -pady 7} {-t "  checkbutton"}}
+      {.chB fra1.buTRun T 1 1 {-st w -pady 7} {-t "  checkbutton"}}
       {.frAE fra1.chB T 1 1 {-st w}}
       {.frAE.laB - - 1 1 {-st w} {-t "entry "}}
       {.frAE.enT fra1.frAE.laB L 1 1 {-st w -pady 7} {-tvar t::tv2}}
@@ -311,8 +315,8 @@ namespace eval t {
       {labFR # # # # # {-t "labeled frame" -font "-weight bold -size 11" -state disabled -foreground gray}}
       {lfr1 fra1 L 1 1 {-st we -cw 1} {-t "Disabled counterparts"}}
       {.laB - - 1 1 {-st w } {-t "label" -font "-weight bold -size 11" -state disabled}}
-      {.BuTdis lfr1.laB T 1 1 {-st w} {-t "button" -w 10 -state disabled}}
-      {.chB lfr1.buTdis T 1 1 {-st w -pady 7} {-t " checkbutton" -state disabled}}
+      {.BuTRun lfr1.laB T 1 1 {-st w} {-t "button" -w -100 -state disabled}}
+      {.chB lfr1.buTRun T 1 1 {-st w -pady 7} {-t " checkbutton" -state disabled}}
       {.frAE lfr1.chB T 1 1 {-st w} {-state disabled}}
       {.frAE.laB - - 1 1 {-st w} {-t "entry " -state disabled}}
       {.frAE.enT lfr1.frAE.laB L 1 1 {-st w -pady 7} {-tvar t::tv2 -state disabled}}
@@ -338,7 +342,7 @@ namespace eval t {
       {frAT fra1 T 1 2 {-st nsew -rw 1 -pady 7}}
       {frAT.laB - - - - {pack -side left -anchor nw} {-t "text & scrollbars \
 \n\nas above, i.e.\nnot  ttk::scrollbar\n\ntext is read-only"}}
-      {frAT.TextNT - - - - {pack -side left -expand 1 -fill both} {-h 11 -wrap none -rotext ::t::filetxt -tabnext .win.fral.butGen}}
+      {frAT.TextNT - - - - {pack -side left -expand 1 -fill both} {-h 8 -wrap none -rotext ::t::filetxt -tabnext .win.fral.butHome}}
       {frAT.sbV frAT.textNT L - - {pack}}
       {frAT.sbH frAT.textNT T - - {pack}}
     } .win.fNB.nb.f4 {
@@ -383,7 +387,8 @@ where:
       -ret - if set to true, means that the field is returned instead of full string
   If there is only a single data set and no TEXT, the @@ marks may be omitted. The @@ marks are configured."}}
       {v_3 - - - - {pack} {-h 3}}
-      {fco - - - - {pack} {-tvar t::cb3 -w 88 -tooltip "The \"fco\" combobox contains:\n 1)  four literal lines\n  2) data from 'test2_fco.dat' file" -values {COMMIT: @@-div1 " \[" -div2 "\] " -ret true test2_fco.dat@@   INFO: @@-pos 22 -list {{Content of test2_fco.dat} {another item} trunk DOC} test2_fco.dat@@}}}
+      {fco - - - - {pack} {-tvar t::cb3 -w 88 -tooltip "This 'fco' combobox contains: \
+      \n  1) four literal lines\n  2) data from 'test2_fco.dat' file" -values {COMMIT: @@-div1 " \[" -div2 "\] " -ret true test2_fco.dat@@   INFO: @@-pos 22 -list {{Content of test2_fco.dat} {another item} trunk DOC} test2_fco.dat@@}}}
       {siz - - - - {pack -side bottom -anchor se}}
     } .win.fNB.nb2.f1 {
 
@@ -447,15 +452,15 @@ where:
     # the general layout of window (main frames and buttons):
     pave window .win {
       {fral - - 8 1   {-st nes -rw 1}}
-      {.butGen - - 1 1 {-st we} {-t "General" -com "t::chanTab nb"}}
-      {.but2 fral.butGen T 1 1 {-st we} {-t "View" -com "t::chanTab nb2"}}
-      {.but3 fral.but2 T 1 1 {-st we} {-t "Editor" -com "t::chanTab nb3"}}
-      {.but4 fral.but3 T 1 1 {-st we} {-t "Files" -com "t::chanTab nb4"}}
-      {.but5 fral.but4 T 1 1 {-st we} {-t "Tools" -com "t::chanTab nb5"}}
-      {.but6 fral.but5 T 1 1 {-st we} {-t "Key maps" -com "t::chanTab nb6"}}
-      {.but7 fral.but6 T 1 1 {-st we} {-t "Misc" -com "t::chanTab nb7"}}
-      {.fra  fral.but7 T 1 1 {-st we -rw 10} {-h 30.m}}
-      {buth fral T 1 1 {-st e} {-t "Help"    -com t::helpProc}}
+      {.butHome - - 1 1 {-st we} {-t "General" -com "t::chanTab nb"}}
+      {.but2 fral.butHome T 1 1 {-st we} {-t "View" -com "t::chanTab nb2"}}
+      {.butEdit fral.but2 T 1 1 {-st we} {-t "Editor" -com "t::chanTab nb3"}}
+      {.butFile fral.butEdit T 1 1 {-st we} {-t "Files" -com "t::chanTab nb4"}}
+      {.but5 fral.butFile T 1 1 {-st we} {-t "Tools" -com "t::chanTab nb5"}}
+      {.butConfig fral.but5 T 1 1 {-st we} {-t "Key maps" -com "t::chanTab nb6"}}
+      {.butMisc fral.butConfig T 1 1 {-st we} {-t "Misc" -com "t::chanTab nb7"}}
+      {.fra  fral.butMisc T 1 1 {-st we -rw 10} {-h 30.m}}
+      {buth fral T 1 1 {-st we} {-t "Help" -com t::helpProc}}
       {frau buth L 1 1 {-st nswe -cw 10} {-w 60.m}}
       {butApply frau L 1 1 {-st e} {-t "Apply"  -com t::applyProc}}
       {butCancel butApply L 1 1 {-st e} {-t "Cancel" -com t::cancelProc}}
@@ -468,7 +473,7 @@ where:
     # Open the window at last
     set ::t::curTab ""
     chanTab nb
-    set res [pave showModal .win -geometry +300+80 -decor 1 -onclose t::exitProc]
+    set res [pave showModal .win -geometry +300+20 -decor 1 -onclose t::exitProc]
 
     # getting result and clearance
     set res [pave res .win]
@@ -524,7 +529,7 @@ where:
   # imitating cancel function
   proc cancelProc {} {
     if {$t::ans2<10} {
-      set t::ans2 [lindex [pdlg yesno warn "CANCEL" \
+      set t::ans2 [lindex [pdlg yesnocancel warn "CANCEL" \
         "\nCancel all changes?\n" NO -ch "Don't show again"] 0]
       if {$t::ans2==1 || $t::ans2==11} {
         pave res .win 0

@@ -1,3 +1,4 @@
+#! /usr/bin/env tclsh
 ###########################################################################
 #
 # This script contains testing samples for the ObjectProperty class that
@@ -5,7 +6,10 @@
 #
 ###########################################################################
 
-lappend auto_path ".."; package require apave
+set ::testdirname [file normalize [file dirname [info script]]]
+catch {cd $::testdirname}
+lappend auto_path "$::testdirname/.."
+package require apave
 
 oo::class create SomeClass {
   mixin apave::ObjectProperty

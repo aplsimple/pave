@@ -1,5 +1,5 @@
 
-#% doctest - to be sourced in pavecli.tcl
+#% doctest - to be sourced in apavecli.tcl
 
  # ---------------------  -head as message (without any widgets)
  #% exec lxterminal -e \
@@ -17,7 +17,7 @@
  #%     -font "-weight bold -size 15 -family Courier"}} {} } &
 
  # ---------------------  #%'s making a command
- #-% exec lxterminal -e \
+ #% exec lxterminal -e \
  #%   tclsh /home/apl/PG/github/pave/apavecli.tcl ques "My site 1" \
  #%   { entLogin {"Login......"} {} \
  #%     entPassw {"Password..."  {} {-show *}} {} \
@@ -25,7 +25,7 @@
  #%   == LOGIN PASSW &
 
  # ---------------------  the same command made with \
- #-% exec lxterminal -e \
+ #% exec lxterminal -e \
     tclsh /home/apl/PG/github/pave/apavecli.tcl ques "My site 2" \
     { entLogin {"Login......"} {} \
       entPassw {"Password..."  {} {-show *}} {} \
@@ -33,7 +33,7 @@
     == LOGIN PASSW &
 
  # ---------------------  widgets + lab + head
- #-% exec lxterminal -e \
+ #% exec lxterminal -e \
     tclsh /home/apl/PG/github/pave/apavecli.tcl "" "PaveCLI test:" \
     {    ent1  {"   Find: "} {"$::EN1 2 3"}    ent2  {"Replace: "} \
     {"$::EN2 $::EN4"}  labo {{} {-anchor w} {-t "\\nOptions:" -font \
