@@ -1,13 +1,14 @@
 # Last changes:
 
 
-Version `2.6 (23 Apr'20)`
+Version `2.6.1 (23 Apr'20)`
 
   - icons added for buttons, menus, choosers
   - ttk::button, ttk::label configured in apave::initWM
   - symbolic ID of buttons may be passed to misc dialog
   - tests/*.tcl modified
-  - BUGFIX: corrected -initialfile, -initialdir for file/dir choosers
+  - BUGFIX: fixed -initialfile, -initialdir for file/dir choosers
+  - BUGFIX: fixed an issue with focusing at mass keypressing (Esc e.g.)
 
 
 Version `2.5 (18 Apr'20)`

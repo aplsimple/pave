@@ -1620,7 +1620,7 @@ oo::class create apave::APave {
     if {$ontop>0} {
       wm attributes $win -topmost 1
     }
-    after 50 [list focus -force $opt(-focus)]
+    after 50 [list if "\[winfo exist $opt(-focus)\]" "focus -force $opt(-focus)"]
     tkwait variable ${_pav(ns)}PN::AR($win)
     grab release $win
     my GetOutputValues
