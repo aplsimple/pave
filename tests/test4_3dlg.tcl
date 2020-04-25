@@ -68,8 +68,8 @@ pdlg window $winf {
   {fra2.butOK fra2.butApply L 1 1 {} {-t "Save" -com "adsh__doSaveExit"}}
   {fra2.butCancel fra2.butOK L 1 1 {} {-t "Exit" -com "exit"}}
 }
-pdlg setTextContents $winf.texComm "Testing..."
-pdlg setTextContents $winf.texDesc "Disabled text..."
+pdlg displayText $winf.texComm "Testing..."
+pdlg displayText $winf.texDesc "Disabled text..."
 pdlg showModal $win -focus $winf.entOrig -geometry +100+100 -decor 1
 destroy $win
 

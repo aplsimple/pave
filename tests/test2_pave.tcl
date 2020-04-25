@@ -420,7 +420,7 @@ where:
     # bindings and contents for text widget
     bind $wtex <ButtonRelease> [list t::textPos $wtex]
     bind $wtex <KeyRelease> [list t::textPos $wtex]
-    pave setTextContents $wtex $::t::filetxt
+    pave displayText $wtex $::t::filetxt
     # at first, Ftx1 widget is editable
     pave makePopup [pave Ftx1] false true
     # we can use the Lframe method to get its name, similar to Text
