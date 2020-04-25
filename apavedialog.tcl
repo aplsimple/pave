@@ -52,6 +52,7 @@ oo::class create apave::APaveDialog {
   variable _pdg
 
   constructor {{win ""} args} {
+
     # keep the 'important' data of APaveDialog object in array
     array set _pdg {}
     # dialogs are bound to "$win" window e.g. ".mywin.fra", default "" means .
@@ -66,7 +67,6 @@ oo::class create apave::APaveDialog {
 
     catch "namespace delete ${_pdg(ns)}PD"
     if {[llength [self next]]} { next {*}$args }
-
   }
 
   #########################################################################
@@ -97,42 +97,50 @@ oo::class create apave::APaveDialog {
   #     -text 1 - sets the text widget to show a message
 
   method PrepArgs {args} {
+
     # make a list of args
     foreach a $args { lappend res $a }
     return $res
   }
 
   method ok {icon ttl msg args} {
+
     return [my Query $icon $ttl $msg {butOK OK 1} butOK {} [my PrepArgs $args]]
   }
 
   method okcancel {icon ttl msg {defb OK} args} {
+
     return [my Query $icon $ttl $msg \
       {butOK OK 1 butCANCEL Cancel 0} but$defb {} [my PrepArgs $args]]
   }
 
   method yesno {icon ttl msg {defb YES} args} {
+
     return [my Query $icon $ttl $msg \
       {butYES Yes 1 butNO No 0} but$defb {} [my PrepArgs $args]]
   }
 
   method yesnocancel {icon ttl msg {defb YES} args} {
+
     return [my Query $icon $ttl $msg \
       {butYES Yes 1 butNO No 2 butCANCEL Cancel 0} but$defb {} [my PrepArgs $args]]
   }
 
   method retrycancel {icon ttl msg {defb RETRY} args} {
+
     return [my Query $icon $ttl $msg \
       {butRETRY Retry 1 butCANCEL Cancel 0} but$defb {} [my PrepArgs $args]]
   }
 
   method abortretrycancel {icon ttl msg {defb RETRY} args} {
+
     return [my Query $icon $ttl $msg \
       {butABORT Abort 1 butRETRY Retry 2 butCANCEL \
       Cancel 0} but$defb {} [my PrepArgs $args]]
   }
 
   method misc {icon ttl msg butts {defb ""} args} {
+
     # butts is a list of pairs "title of button" "number/ID of button"
     foreach {nam num} $butts {
       lappend apave_msc_bttns but$num "$nam" $num
@@ -147,6 +155,7 @@ oo::class create apave::APaveDialog {
 
   # Get a value of _pdg(name)
   method Pdg {name} {
+
     return $_pdg($name)
   }
 
@@ -154,16 +163,19 @@ oo::class create apave::APaveDialog {
 
   # Get a field name
   method fieldname {name} {
+
     return fraM.fra$name.$name
   }
 
   # Get variable name associated with a field name
   method varname {name} {
+
     return [namespace current]::var$name
   }
 
   # Get values of entries passed (or set) in -tvar
   method vals {lwidgets} {
+
     set res [set vars [list]]
     foreach wl $lwidgets {
       set vv [my varname [my rootwname [lindex $wl 0]]]
@@ -186,6 +198,7 @@ oo::class create apave::APaveDialog {
   # 1. Set contents of text fields (after creating them)
   # 2. Get contents of text fields (before exiting)
   method setgettexts {oper w iopts lwidgets} {
+
     if {$iopts eq ""} return
     foreach widg $lwidgets {
       set wname [lindex $widg 0]
@@ -199,6 +212,7 @@ oo::class create apave::APaveDialog {
         }
       }
     }
+    return
   }
 
   #########################################################################
@@ -223,6 +237,7 @@ oo::class create apave::APaveDialog {
     }
     set _pdg(defb1) $_pdg(win).dia.fra.$defb1
     set _pdg(defb2) $_pdg(win).dia.fra.$defb2
+    return
   }
 
   ###################################################################
@@ -252,6 +267,7 @@ oo::class create apave::APaveDialog {
     set duptext [$txt get $pos $pos2]
     $txt insert $pos3 $duptext
     if {$dobreak} {return -code break}
+    return
   }
 
   #########################################################################
@@ -263,6 +279,7 @@ oo::class create apave::APaveDialog {
     lassign [my GetLine $txt insert] linestart lineend
     $txt delete $linestart $lineend
     if {$dobreak} {return -code break}
+    return
   }
 
   #########################################################################
@@ -302,6 +319,7 @@ oo::class create apave::APaveDialog {
       }
       if {$dobreak} {return -code break}
     }
+    return
   }
 
   #########################################################################
@@ -336,6 +354,7 @@ oo::class create apave::APaveDialog {
         }
       }
     }
+    return
   }
 
   #########################################################################
@@ -361,6 +380,7 @@ oo::class create apave::APaveDialog {
     } else {
       bell -nice
     }
+    return
   }
 
   #########################################################################
@@ -408,7 +428,7 @@ oo::class create apave::APaveDialog {
         # take colors by their theme names
         if {[info exist $val]} {set val [set $val]}
       }
-      switch $opt {
+      switch -- $opt {
         -H -
         -head {
           set head [string map {$ \$ \" \'\'} $val]
@@ -777,7 +797,6 @@ oo::class create apave::APaveDialog {
       return [list $result ${w}x${h}+${x}+${y} $textcont [string trim $inopts]]
     }
     return "$result$textcont$inopts"
-
   }
 
 }

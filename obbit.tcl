@@ -107,7 +107,7 @@ oo::class create apave::ObjectTheming {
     if {![catch {set oldval [ttk::style $oper $ts $opt]}]} {
       catch {ttk::style $oper $ts $opt $val}
       if {$oldval=="" && $oper=="configure"} {
-        switch $opt {
+        switch -- $opt {
           -foreground - -background {
             set oldval [ttk::style $oper . $opt]
           }
@@ -319,7 +319,7 @@ oo::class create apave::ObjectTheming {
 
     classvar _OT_Init _OT_Opts _OT_OldOpts
     foreach {oper ts opt val} $_OT_OldOpts {
-      switch $oper {
+      switch -- $oper {
         map -
         configure {
           ttk::style $oper $ts $opt $val
@@ -381,7 +381,7 @@ oo::class create apave::ObjectTheming {
   method NonThemedWidgets {selector} {
 
     classvar _OT_Init _OT_Opts _OT_OldOpts
-    switch $selector {
+    switch -- $selector {
       entry {
         return [list entry text listbox spinbox]
       }
@@ -430,7 +430,7 @@ oo::class create apave::ObjectTheming {
       set disopt ""
       if {[info exist _OT_Opts(disabled,0)]} {
         set typ [string range [lindex [split $typ .] end] 0 2]
-        switch $typ {
+        switch -- $typ {
           frA - lfR {
             append disopt " " $_OT_Opts(disabled,2)
           }

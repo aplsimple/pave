@@ -95,6 +95,7 @@ namespace eval apave {
       }
     }
     if {$appIcon ne ""} { wm iconphoto $win $appIcon }
+    return
   }
 
   # Initialize wish session
@@ -109,6 +110,7 @@ namespace eval apave {
     ttk::style configure TButton \
       -anchor center -width -8 -relief raised -borderwidth 1 -padding 1
     ttk::style configure TLabel -borderwidth 0 -padding 1
+    return
   }
 }
 
@@ -121,6 +123,7 @@ oo::class create apave::APave {
   variable _pav
 
   constructor {args} {
+
     # keep the 'important' data of Pave object in array
     array set _pav {}
     set _pav(ns) [namespace current]::
@@ -148,21 +151,28 @@ oo::class create apave::APave {
     # https://stackoverflow.com/questions/54804964/proc-in-tcl-ooclass
     #
     # See also: https://wiki.tcl-lang.org/page/listbox+selection
+
     proc ListboxSelect {W} {
+
       selection clear -displayof $W
       selection own -command {} $W
       selection handle -type UTF8_STRING \
         $W [list [namespace current]::ListboxHandle $W]
       selection handle \
         $W [list [namespace current]::ListboxHandle $W]
+      return
     }
+
     proc ListboxHandle {W offset maxChars} {
+
       set list {}
       foreach index [$W curselection] { lappend list [$W get $index] }
       set text [join $list \n]
       return [string range $text $offset [expr {$offset+$maxChars-1}]]
     }
+
     proc WinResize {win} {
+
       # restrict the window's sizes (fixing Tk's issue with a menubar)
       if {[lindex [$win configure -menu] 4] ne ""} {
         lassign [split [wm geometry $win] x+] w y
@@ -178,8 +188,11 @@ oo::class create apave::APave {
         }
         wm geometry $win $corrgeom
       }
+      return
     }
+
     if {[llength [self next]]} { next {*}$args }
+    return
   }
 
   #########################################################################
@@ -189,7 +202,6 @@ oo::class create apave::APave {
   method iswindows {} {
 
     return [expr {$::tcl_platform(platform) == "windows"} ? 1: 0]
-
   }
 
   #########################################################################
@@ -200,7 +212,7 @@ oo::class create apave::APave {
   method configure {args} {
 
     foreach {optnam optval} $args { set _pav($optnam) $optval }
-
+    return
   }
 
   #########################################################################
@@ -221,7 +233,6 @@ oo::class create apave::APave {
       set y [expr {$scrh - $h}]
     }
     return +$x+$y
-
   }
 
   #########################################################################
@@ -231,7 +242,6 @@ oo::class create apave::APave {
   method rootwname {name} {
 
     return [lindex [split $name .] end]
-
   }
 
   #########################################################################
@@ -241,7 +251,6 @@ oo::class create apave::APave {
   method NonTtkTheme {win} {
 
     return
-
   }
 
   #########################################################################
@@ -251,7 +260,6 @@ oo::class create apave::APave {
   method NonTtkStyle {typ {dsbl 0}} {
 
     return ""
-
   }
 
   #########################################################################
@@ -269,7 +277,6 @@ oo::class create apave::APave {
 
   method ExpandOptions {options} {
 
-#      " - "     ""
     set options [string map {
       " -st "   " -sticky "
       " -com "  " -command "
@@ -281,7 +288,6 @@ oo::class create apave::APave {
       " -lvar " " -listvariable "
     } " $options"]
     return $options
-
   }
 
   #########################################################################
@@ -313,7 +319,6 @@ oo::class create apave::APave {
     }
     if {$iv ne ""} { set $vn $iv }
     return [my RemoveSomeOptions $attrs -retpos -inpval]
-
   }
 
   #########################################################################
@@ -323,6 +328,7 @@ oo::class create apave::APave {
   method FCfieldValues {wnamefull attrs} {
 
     proc readFCO {fname} {
+
       # Reads a file's content.
       # Returns a list of (non-empty) lines of the file.
       if {$fname eq ""} {
@@ -337,6 +343,7 @@ oo::class create apave::APave {
     }
 
     proc contFCO {fline opts edge args} {
+
       # Given a file's line and options,
       # cuts a substring from the line.
       lassign [my parseOptionsFile 1 $opts {*}$args] opts
@@ -442,7 +449,6 @@ oo::class create apave::APave {
         [string trimright $newvalues]] attrs
     }
     return "$attrs $retpos"
-
   }
 
   #########################################################################
@@ -489,6 +495,7 @@ oo::class create apave::APave {
         break
       }
     }
+    return
   }
 
   #########################################################################
@@ -505,7 +512,7 @@ oo::class create apave::APave {
     set pack $options
     set name [my rootwname $wnamefull]
     set nam3 [string tolower [string index $name 0]][string range $name 1 2]
-    switch -glob $nam3 {
+    switch -glob -- $nam3 {
       "but" {
         set widget "ttk::button"
         my AddButtonIcon $name attrs
@@ -637,7 +644,6 @@ oo::class create apave::APave {
     set options [string trim $options]
     set attrs   [string trim $attrs]
     return [list $widget $options $attrs $nam3 $disabled]
-
   }
 
   #########################################################################
@@ -649,7 +655,7 @@ oo::class create apave::APave {
 
     set opts ""
     foreach {opt val} [list {*}$options] {
-      switch $opt {
+      switch -- $opt {
         -rw  { my SpanConfig $w row $row $rowspan -weight $val }
         -cw  { my SpanConfig $w column $col $colspan -weight $val }
         -rsz { my SpanConfig $w row $row $rowspan -minsize $val}
@@ -659,7 +665,6 @@ oo::class create apave::APave {
     }
     # Get other grid options
     return [my ExpandOptions $opts]
-
   }
 
   #########################################################################
@@ -670,7 +675,7 @@ oo::class create apave::APave {
 
     set opts [list]
     foreach {opt val} [list {*}$options] {
-      switch $opt {
+      switch -- $opt {
         -t - -text {
           ;# these options need translating \\n to \n
           set val [subst  -nocommands -novariables $val]
@@ -682,7 +687,6 @@ oo::class create apave::APave {
       append opts [my NonTtkStyle $nam3 1]
     }
     return $opts
-
   }
 
   method SpanConfig {w rcnam rc rcspan opt val} {
@@ -691,7 +695,6 @@ oo::class create apave::APave {
       eval [grid ${rcnam}configure $w $i $opt $val]
     }
     return
-
   }
 
   #########################################################################
@@ -701,7 +704,6 @@ oo::class create apave::APave {
 
     if {$_pav(modalwin)=="."} {set wpar $w} {set wpar $_pav(modalwin)}
     return "-parent $wpar"
-
   }
 
   #########################################################################
@@ -721,7 +723,6 @@ oo::class create apave::APave {
       set _pav(initialcolor) [set $tvar $res]
     }
     return $res
-
   }
 
   #########################################################################
@@ -742,7 +743,6 @@ oo::class create apave::APave {
       {*}$args -command [namespace current]::applyFont
     set res [tk fontchooser show]
     return $font
-
   }
 
   #########################################################################
@@ -780,7 +780,6 @@ oo::class create apave::APave {
       set _pav(clnddate) [set $tvar]
     }
     return $_pav(clnddate)
-
   }
 
   #########################################################################
@@ -792,7 +791,7 @@ oo::class create apave::APave {
     set isfilename 0
     set ftxvar [my getOption -ftxvar {*}$args]
     set args [my RemoveSomeOptions $args -ftxvar]
-    if {[set isviewer [expr {$nchooser=="ftx_OpenFile"} ? 1 : 0]]} {
+    if {$nchooser eq "ftx_OpenFile"} {
       set nchooser "tk_getOpenFile"
     }
     if {$nchooser=="fontChooser" || $nchooser=="colorChooser" \
@@ -820,13 +819,14 @@ oo::class create apave::APave {
             set wid [string range $txtnam \
              0 [string last . $txtnam]]$wid
             $wid configure -text "$res"
+            ::tk::TextSetCursor $txtnam 1.0
             update
           }
         }
       }
       set $tvar $res
     }
-
+    return $res
   }
 
   #########################################################################
@@ -841,7 +841,6 @@ oo::class create apave::APave {
       set name $typ$name
     }
     return $name
-
   }
 
   #########################################################################
@@ -849,19 +848,23 @@ oo::class create apave::APave {
   # Set/get text content variable
 
   method SetContentVariable {tvar txtnam name} {
+
     return [set _pav(textcont,$tvar) $tvar*$txtnam*$name]
   }
 
   method GetContentVariable {tvar} {
+
     return $_pav(textcont,$tvar)
   }
 
   method SplitContentVariable {ftxvar} {
+
     return [split $ftxvar *]
   }
 
   # Get text content
   method getTextContent {tvar} {
+
     lassign [my SplitContentVariable [my GetContentVariable $tvar]] \
       -> txtnam wid
     return [string trimright [$txtnam get 1.0 end]]
@@ -886,7 +889,7 @@ oo::class create apave::APave {
     }
     set an ""
     lassign [my LowercaseWidgetName $name] n
-    switch -glob [my rootwname $n] {
+    switch -glob -- [my rootwname $n] {
       "fil*" { set chooser "tk_getOpenFile" }
       "fis*" { set chooser "tk_getSaveFile" }
       "dir*" { set chooser "tk_chooseDirectory" }
@@ -950,7 +953,7 @@ oo::class create apave::APave {
       set entf [list [my Transname ent $name] - - - - "pack -side left -expand 1 -fill x -in $w.$name" "$attrs1 $tvar"]
     }
     set icon "folder"
-    foreach ic {"OpenFile" "SaveFile" "font" "color" "font" "date"} {
+    foreach ic {OpenFile SaveFile font color date} {
       if {[string first $ic $chooser] >= 0} {set icon $ic; break}
     }
     set com "[self] chooser $chooser \{$vv\} $addopt $wpar $addattrs2"
@@ -972,7 +975,6 @@ oo::class create apave::APave {
       incr lwlen 2
     }
     return $args
-
   }
 
   #########################################################################
@@ -984,7 +986,7 @@ oo::class create apave::APave {
     upvar 1 $r0 w $r1 i $r2 lwlen $r3 lwidgets
     lassign $args name neighbor posofnei rowspan colspan options1 attrs1
     set wpar ""
-    switch -glob [my rootwname $name] {
+    switch -glob -- [my rootwname $name] {
       "men*" - "Men*" { set typ menuBar }
       "too*" - "Too*" { set typ toolBar }
       "sta*" - "Sta*" { set typ statusBar }
@@ -1076,7 +1078,6 @@ oo::class create apave::APave {
     }
     incr lwlen [expr {$itmp - $i}]
     return $args
-
   }
 
   #########################################################################
@@ -1088,7 +1089,6 @@ oo::class create apave::APave {
     set root [my rootwname $name]
     return [list [string range $name 0 [string last . $name]][string tolower \
       [string index $root 0]][string range $root 1 end] $root]
-
   }
 
   #########################################################################
@@ -1113,7 +1113,6 @@ oo::class create apave::APave {
       }
     }
     return [list $name $wname]
-
   }
 
   #########################################################################
@@ -1133,7 +1132,6 @@ oo::class create apave::APave {
       }
     }
     return [set ${_pav(ns)}PN::wn $w.$name]
-
   }
 
   #########################################################################
@@ -1149,6 +1147,7 @@ oo::class create apave::APave {
     }
     if {$isRO} { append atRO "RO" }
     append attrs " $atRO $w"
+    return
   }
 
   #########################################################################
@@ -1185,6 +1184,7 @@ oo::class create apave::APave {
         -command "$w tag add sel 1.0 end"
     }
     bind $w <Button-3> [list tk_popup $w.popupMenu %X %Y]
+    return
   }
 
   #########################################################################
@@ -1203,7 +1203,7 @@ oo::class create apave::APave {
     upvar 1 $refattrs attrs
     set attrs_ret [set _pav(prepost) {}]
     foreach {a v} $attrs {
-      switch $a {
+      switch -- $a {
         -disabledtext - -rotext - -lbxsel - -cbxsel - \
         -entrypop - -entrypopRO - -textpop - -textpopRO - -ListboxSel {
           # attributes specific to apave, processed below in "Post"
@@ -1215,7 +1215,7 @@ oo::class create apave::APave {
       }
     }
     set attrs $attrs_ret
-
+    return
   }
 
   #########################################################################
@@ -1226,7 +1226,7 @@ oo::class create apave::APave {
 
     foreach pp $_pav(prepost) {
       lassign $pp a v
-      switch $a {
+      switch -- $a {
         -disabledtext {
           $w configure -state normal
           my displayTaggedText $w v {}
@@ -1271,7 +1271,7 @@ oo::class create apave::APave {
         }
       }
     }
-
+    return
   }
 
   #########################################################################
@@ -1298,7 +1298,7 @@ oo::class create apave::APave {
       rename ::$w.internal ::$w
     }
     my makePopup $w $on true
-
+    return
   }
 
   #########################################################################
@@ -1310,7 +1310,7 @@ oo::class create apave::APave {
 
     foreach aop $_pav(widgetopts) {
       lassign $aop optnam vn v1 v2
-      switch $optnam {
+      switch -- $optnam {
         -lbxname { ;# to get a listbox's value, its methods are used
           lassign [$vn curselection] s1
           if {$s1 eq {}} {set s1 0}
@@ -1338,7 +1338,7 @@ oo::class create apave::APave {
         }
       }
     }
-
+    return
   }
 
   #########################################################################
@@ -1347,8 +1347,8 @@ oo::class create apave::APave {
 
   method setFocus {wnext} {
 
-      focus [subst $wnext]
-
+    focus [subst $wnext]
+    return
   }
 
   #########################################################################
@@ -1376,7 +1376,6 @@ oo::class create apave::APave {
       set attrs [my RemoveSomeOptions $attrs -tabnext]
     }
     return $addcomms
-
   }
 
   #########################################################################
@@ -1529,7 +1528,6 @@ oo::class create apave::APave {
       }
     }
     return $lwidgets
-
   }
 
   # Process "win & list-of-widgets" pairs
@@ -1540,7 +1538,6 @@ oo::class create apave::APave {
       lappend res {*}[my Window $w $lwidgets]
     }
     return $res
-
   }
 
   #########################################################################
@@ -1625,7 +1622,6 @@ oo::class create apave::APave {
     grab release $win
     my GetOutputValues
     return [set [set _ ${_pav(ns)}PN::AR($win)]]
-
   }
 
   #########################################################################
@@ -1639,7 +1635,6 @@ oo::class create apave::APave {
     }
     set ${_pav(ns)}PN::AR($win) $r
     return
-
   }
 
   #########################################################################
@@ -1662,7 +1657,6 @@ oo::class create apave::APave {
     }
     wm title $wtop $ttl
     return $wtop
-
   }
 
   #########################################################################
@@ -1677,6 +1671,7 @@ oo::class create apave::APave {
     $w replace 1.0 end $conts
     $w edit reset
     if { $state ne "normal" } { $w configure -state $state }
+    return
   }
 
   #########################################################################
@@ -1757,7 +1752,7 @@ oo::class create apave::APave {
       $w tag add $tag $p1 $p2
     }
     $w edit reset
-
+    return
   }
 
 }
