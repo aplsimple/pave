@@ -15,7 +15,7 @@ pdlg makeWindow $winf "Adding Shortcuts"
 pdlg themingWindow . \
   white #364c64 #d2d2d2 #292a2a white #4a6984 #182020 #dcdad5 #02ffff #00a0f0
 set fontbold "-font \"-weight bold\""
-pdlg window $winf {
+pdlg paveWindow $winf {
   {frAU - - 1 6   {-st new} {-relief groove -borderwidth 1}}
   {frAU.v_00 - - 1 1}
   {frAU.laB0 frAU.v_00 T 1 1 {} {-t "This TKE plugin allows you to create the shortcuts bound to existing ones. Thus you can enable localized shortcuts."}}
@@ -90,9 +90,9 @@ destroy $win
   set fil0 "Some-file-name-0"
   set fil1 "Some-file-name-1"
   pdlg makeWindow $win.fra "Find and Replace"
-  pdlg window $win.fra {
+  pdlg paveWindow $win.fra {
 {fraM - - - - {pack -fill x}}
-{fra2 - - - - {pack -fill x}}
+{fra2 - - - - {pack -fill both -expand 1}}
 {fra3 - - - - {pack -fill x} {-relief raised}}
 {fraM.lab0 - - - - {pack -pady 10} 
   {-t {  Demo for $\::fil0 and $\::fil1 values (and $ as dollar)  }}}

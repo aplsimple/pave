@@ -56,7 +56,7 @@ package require apave
 apave::initWM
 apave::APave create pave
 pave makeWindow .win "Test - Original layout "
-pave window .win {
+pave paveWindow .win {
   {butA -   - 2 1 "-st nsew" {-t A}}
   {butB butA L 1 4 "-st nsew" {-t B}}
   {butC butB T 1 1 "-st nsew" {-t C}}
@@ -72,7 +72,7 @@ pave window .win {
 wm geometry .win +2+200
 
 pave makeWindow .win2 "Test1 - \"A2\" widget added"
-pave window .win2 {
+pave paveWindow .win2 {
   {butA -   - 2 1 "-st nsew" {-t A}}
   {but2 butA L 2 1 "-st nsew" {-t A2 -w 2}}
   {butB but2 L 1 4 "-st nsew" {-t B}}
@@ -89,7 +89,7 @@ pave window .win2 {
 wm geometry .win2 +464+300
 
 pave makeWindow .win3 "Test2 - \"A\" widget enlarged"
-pave window .win3 {
+pave paveWindow .win3 {
   {butA -   - 2 2 "-st nsew -csz 20" {-t A}}
   {butB butA L 1 4 "-st nsew" {-t B}}
   {butC butB T 1 1 "-st nsew" {-t "CCCP-ick me to close" -com exit}}

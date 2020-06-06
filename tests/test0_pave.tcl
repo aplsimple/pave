@@ -17,7 +17,7 @@ pave makeWindow $win.fra "Find and Replace"
 set v1 [set v2 1]
 set c1 [set c2 [set c3 0]]
 set en1 [set en2 ""]
-pave window $win.fra {
+pave paveWindow $win.fra {
   {lab1 - - 1 1    {-st es}  {-t "Find: "}}
   {ent1 lab1 L 1 9 {-st wes} {-tvar ::en1}}
   {lab2 lab1 T 1 1 {-st es}  {-t "Replace: "}}

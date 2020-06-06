@@ -81,6 +81,7 @@ Abort or retry the reading of Pushkin? Cancel if not sure." RETRY -g +325+325 {*
       lassign "" ::t8ent1 ::t8fil1 ::t8fis1 ::t8dir1 ::t8fon1 ::t8clr1 ::t8dat1 ::t8chb1 ::t8rad1 ::t8spx1
       set ::t8lbx1 [set ::t8cbx1 Second]
       set ::t8fco1 test2_fco.dat
+      set ::t8opc1 "multi word example"
       set ::t8tex1 {It's a sample of
 multiline entry field aka
 - text\n- memo\n- note}
@@ -106,12 +107,16 @@ multiline entry field aka
       spx1 {{Spinbox from 0 to 99......} {} {-from 0 -to 99}} $::t8spx1 \
       lbx1 [list {Listbox of relations......} {} [list -h 4 -lbxsel $::t8lbx1]] $rellist \
       cbx1 [list {Combobox of relations.....} {} [list -h 7 -cbxsel $::t8cbx1]] $rellist \
+      opc1 {{Option cascade............}} [list $::t8opc1 \
+        {{color red green blue -- {{other colors} yellow magenta cyan \
+        | #52CB2F #FFA500 #CB2F6A | #FFC0CB #90EE90 #8B6914}} \
+        {hue dark medium light} -- {{multi word example}} ok} ] \
       fco1 [list {Combobox of file content..} {} [list -h 7 -cbxsel $::t8fco1]] {/@-div1 " \[" -div2 "\] " -ret 1 test2_fco.dat/@ \
         INFO: /@-pos 22 -list {{test2_fco.dat} {other item} trunk DOC} test2_fco.dat/@} \
       seh4 {{} {-pady 9}} {} \
-      tex1 {{Text field................} {} {-h 4 -w 55}} $::t8tex1 \
+      tex1 {{Text field................} {} {-h 4 -w 55 -tabnext OK}} $::t8tex1 \
     ] -size 14 -weight bold -head "Entries, choosers, switchers, boxes..." {*}$args]
-    lassign [dlg valueInput] ::t8ent1 ::t8fil1 ::t8fis1 ::t8dir1 ::t8fon1 ::t8clr1 ::t8dat1 ::t8chb1 ::t8rad1 ::t8spx1 ::t8lbx1 ::t8cbx1 ::t8fco1 ::t8tex1
+    lassign [dlg valueInput] ::t8ent1 ::t8fil1 ::t8fis1 ::t8dir1 ::t8fon1 ::t8clr1 ::t8dat1 ::t8chb1 ::t8rad1 ::t8spx1 ::t8lbx1 ::t8cbx1 ::t8opc1 ::t8fco1 ::t8tex1
     return $res
   }
 
@@ -141,7 +146,6 @@ apave::initWM
 
 # firstly show dialogs without checkboxes
 apave::APaveInput create dlg
-
 set dn "Don't show this again"
 puts "ok  = [t::test1 -weight bold -size 8 -text 1]"
 puts "yn  = [t::test2 -weight bold -size 10 -text 1 -ch $dn]"
@@ -150,20 +154,21 @@ puts "ync = [t::test4 -weight bold -size 14 -text 1 -width 30 -height 6 -fg gree
 puts "rc  = [t::test5 -weight bold -size 16]"
 puts "arc = [t::test6 -weight bold -size 18]"
 puts "msc = [t::test7 -size 20]"
-puts "inp = [t::test8 -g +375+375]"
+puts "inp = [t::test8 -g +375+375 -focus en*dir*]"
 puts "pavedoc = [t::test9 -g +375+375]"
-
-dlg themingWindow . \
-  white #364c64 #d2d2d2 #292a2a white #4a6984 grey #364c64 #02ffff #00a0f0
 
 # show dialogs with checkboxes, in cycle
 lassign {0 0 0 0 0 0 0 0} r1 r2 r3 r4 r5 r6 r7 r8 r9
+set clrsc 0
+set clrscdark [list 0 1 4 5 8 9 12 13 16 17 20 21 29 30 31 32 35 39 40 41 42]
 while 1 {
+  dlg csSet [lindex $clrscdark $clrsc]
+  if {[incr clrsc] == [llength $clrscdark]} {set clrsc 0}
   puts --------------------------------
   set curr [set totr 0]
   foreach {n type} {1 OK 2 YN 3 OC 4 YNC 5 RC 6 ARC 7 MSC 8 INP 9 PAVEDOC} {
     if {[set r$n]<10} {
-      puts "$type = [set r$n [lindex [t::test$n -ch "$dn"] 0]]"
+      puts "$type = [set r$n [lindex [t::test$n -ch "$dn" -centerme 0] 0]]"
       if {![string is integer [set r$n]]} {
         set r$n [expr {[string last 10 [set r$n]]>0} ? 10 : 0]
       }

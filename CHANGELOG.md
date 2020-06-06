@@ -1,5 +1,78 @@
 # Last changes:
 
+Version `2.9b4 (1 Jun'20)`
+
+  - 'tcl' sort of widget (to make Tcl code in widget list)
+  - -msgLab option of input dialog
+  - \n and \t  for 'tex'
+  - tkwait visibility added
+  - ::tk::PlaceWindow supported
+  - a bit of new CS
+  - renaming CS methods
+  - 'setFocus' finds -tabnext widget by glob match, e.g. OK for a button
+  - 'setDefaultAttrs' to set default attributes
+  - 'pobj paveWindow' is preferred to the old 'pobj window' (kept on for
+    compatibility)
+  - 'UpdateSelectAttrs' allows to change selection atrributes in run-time;
+    well fit to set "!fosus color" of -selectfg/bg for some non-ttk widgets
+  - sequence of the previous:
+    initial selectfg/bg set to "!fosus color" for lbx/tbl/flb/spX/cbx/fco
+  - cbx colors amended
+  - -ALL option for lbx/tbl/flb: if true, it returns a list of 3 items -
+    index, selection, item list (by default, only selection is returned)
+  - 'subst' for -array option, to pass a variable value
+  - test2_pave.tcl adjusted, for these two changes
+  - F2 hotkey added to choosers' entries (fil, dir etc.)
+  - "-takefocus 0" as default for choosers' buttons (fil, dir etc.)
+  - changed 3 icons (none, color, retry) to work in some Tk
+  - coloring of TNotebook.Tab modified
+
+
+Version `2.8 (24 May'20)`
+
+  - 'nbk' widget type for ttk::notebook
+  - 'pack forget' for layouts
+  - blinking by default bg removed
+  - popup menus got their coloring with CS
+  - 'themingPopup' method to solve all popup CS issues
+  - 'subst vars' allowed in value fields of 'input' dialog
+  - -activefg/bg for non-ttk buttons
+  - statusbar layout corrected (.neighbor allowed, as old neighbor)
+  - test2_pave.tcl got icons & new statusbar (the old in comments)
+
+
+Version `2.7 (22 May'20)`
+
+  - color schemes added
+  - cs (color scheme) argument of APave / APaveDialog / APaveInput constructor
+  - opc (tk_optionCascade) widget added to APave
+  - opc (tk_optionCascade) may be used in too (toolbar) widget
+  - opc (tk_optionCascade) widget added to APaveInput ("input" dialog)
+  - but (ttk::button) may be used in too (toolbar) widget, with -image
+  - fco widget allows -RE (regexp) to filter records
+  - tbl (tablelist::tablelist) color-schemed
+  - appIcon: -data preferred to -file
+  - initPOP: popup menu with Menu key
+  - showModal: disables shadowing; removes blinking by default bg; -themed arg.
+  - removeOptions: can remove options without value
+  - ttk::button style configured
+  - -centerme option of dialogs added (centering relative to a caller's window)
+  - -focusback option of dialogs added (restoring an old focus of a caller)
+  - "edit modified false" placed nearby "edit reset"
+  - "label::tooltip" as a button "-text" may be used to show tooltips
+  - save/don't save/cancel at exiting editor
+  - text selection used by "Find first" of editor's popup menu
+  - -a option (additional options) for message labels of non-text dialogs
+  - lbx and tex widgets made sizeable vertically in APaveInput
+  - configTooltip method to configure fb, bg etc. attributes of tooltips
+  - test2_pave.tcl: opc widgets & color schemes added, toolbar, editor etc.
+  - test_pavedialog.tcl: opc widget & color schemes added
+  - setting 1st widget amended (uppercase names checked)
+  - destructors amended
+  - BUGFIX: color chooser failed after 1st incorrect input color
+  - BUGFIX: editor's "Save" button not shown at "-readonly 0 -rotext var"
+  - massive clean-ups
+
 
 Version `2.6.3 (25 Apr'20)`
 
