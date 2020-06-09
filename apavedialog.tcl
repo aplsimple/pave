@@ -267,8 +267,8 @@ oo::class create ::apave::APaveDialog {
       set neighbor $but
       set pos L
     }
-    set _pdg(defb1) $_pdg(win).dia.fra.$defb1
-    set _pdg(defb2) $_pdg(win).dia.fra.$defb2
+    lassign [my LowercaseWidgetName $_pdg(win).dia.fra.$defb1] _pdg(defb1)
+    lassign [my LowercaseWidgetName $_pdg(win).dia.fra.$defb2] _pdg(defb2)
     return
   }
 
@@ -283,9 +283,24 @@ oo::class create ::apave::APaveDialog {
   }
 
   #########################################################################
+
+  method pasteText {} {
+
+    # Removes a selection at pasting
+    # (the absence of this feature is very perpendicular of Tk's paste)
+
+    set txt [my TexM]
+    set err [catch {$txt tag ranges sel} sel]
+    if {!$err && [llength $sel]==2} {
+      lassign $sel pos pos2
+      $txt delete $pos $pos2
+    }
+  }
+
+  #########################################################################
   # Double a current line or a selection
 
-  method DoubleText {{dobreak 1}} {
+  method doubleText {{dobreak 1}} {
 
     set txt [my TexM]
     set err [catch {$txt tag ranges sel} sel]
@@ -305,7 +320,7 @@ oo::class create ::apave::APaveDialog {
   #########################################################################
   # Delete a current line
 
-  method DeleteLine {{dobreak 1}} {
+  method deleteLine {{dobreak 1}} {
 
     set txt [my TexM]
     lassign [my GetLine $txt insert] linestart lineend
@@ -317,7 +332,7 @@ oo::class create ::apave::APaveDialog {
   #########################################################################
   # Move a current line or lines of selection up/down
 
-  method LinesMove {to {dobreak 1}} {
+  method linesMove {to {dobreak 1}} {
 
     proc NewRow {ind rn} {
       set i [string first . $ind]
@@ -674,12 +689,13 @@ oo::class create ::apave::APaveDialog {
         } else {
           # make bindings and popup menu for text widget
           append binds "
-            bind $wt <Control-d> {[self] DoubleText}
-            bind $wt <Control-D> {[self] DoubleText}
-            bind $wt <Control-y> {[self] DeleteLine}
-            bind $wt <Control-Y> {[self] DeleteLine}
-            bind $wt <Alt-Up>    {[self] LinesMove -1}
-            bind $wt <Alt-Down>  {[self] LinesMove +1}
+            bind $wt <<Paste>> {+ [self] pasteText}
+            bind $wt <Control-d> {[self] doubleText}
+            bind $wt <Control-D> {[self] doubleText}
+            bind $wt <Control-y> {[self] deleteLine}
+            bind $wt <Control-Y> {[self] deleteLine}
+            bind $wt <Alt-Up>    {[self] linesMove -1}
+            bind $wt <Alt-Down>  {[self] linesMove +1}
             menu \$pop
              \$pop add command [my IconA cut] -accelerator Ctrl+X -label \"Cut\" \\
               -command \"event generate $wt <<Cut>>\"
@@ -689,13 +705,13 @@ oo::class create ::apave::APaveDialog {
               -command \"event generate $wt <<Paste>>\"
              \$pop add separator
              \$pop add command [my IconA double] -accelerator Ctrl+D -label \"Double selection\" \\
-              -command \"[self] DoubleText 0\"
+              -command \"[self] doubleText 0\"
              \$pop add command [my IconA delete] -accelerator Ctrl+Y -label \"Delete line\" \\
-              -command \"[self] DeleteLine 0\"
+              -command \"[self] deleteLine 0\"
              \$pop add command [my IconA up] -accelerator Alt+Up -label \"Line(s) up\" \\
-              -command \"[self] LinesMove -1 0\"
+              -command \"[self] linesMove -1 0\"
              \$pop add command [my IconA down] -accelerator Alt+Down -label \"Line(s) down\" \\
-              -command \"[self] LinesMove +1 0\"
+              -command \"[self] linesMove +1 0\"
              \$pop add separator
              \$pop add command [my IconA find] -accelerator Ctrl+F -label \"Find first\" \\
               -command \"[self] InitFindInText; focus \[[self] Entfind\]\"
@@ -705,7 +721,6 @@ oo::class create ::apave::APaveDialog {
              \$pop add command [my IconA SaveFile] -accelerator Ctrl+W \\
              -label \"Save and exit\" -command \"\[[self] Pdg defb1\] invoke\"
             "
-          oo::objdefine [self] export DoubleText DeleteLine LinesMove
         }
         lappend args -onclose [namespace current]::exitEditor
         oo::objdefine [self] export FindInText InitFindInText Pdg
@@ -744,12 +759,12 @@ oo::class create ::apave::APaveDialog {
     }
     # after creating widgets - show dialog texts if any
     my setgettexts set $_pdg(win).dia.fra $inopts $widlist
-    set focusnow $_pdg(win).dia.fra.$defb
+    lassign [my LowercaseWidgetName $_pdg(win).dia.fra.$defb] focusnow
     if {$textmode} {
       my displayTaggedText [my TexM] msg $tags
-      if {$defb eq "butTEXT"} {
+      if {$defb eq "ButTEXT"} {
         if {$readonly} {
-          set focusnow [my Pdg defb1]
+          lassign [my LowercaseWidgetName [my Pdg defb1]] focusnow
         } else {
           set focusnow [my TexM]
           catch "::tk::TextSetCursor $focusnow $curpos"
@@ -766,7 +781,7 @@ oo::class create ::apave::APaveDialog {
         lassign $w widname
         lassign [my LowercaseWidgetName $widname] wn rn
         if {[string match $focusmatch $rn]} {
-          set focusnow $_pdg(win).dia.fra.$wn
+          lassign [my LowercaseWidgetName $_pdg(win).dia.fra.$wn] focusnow
           break
         }
       }
@@ -775,7 +790,7 @@ oo::class create ::apave::APaveDialog {
     set args [my removeOptions $args -focus]
     my showModal $_pdg(win).dia -themed [string length $themecolors]\
       -focus $focusnow -geometry $geometry {*}$root -ontop $ontop {*}$args
-    oo::objdefine [self] unexport FindInText InitFindInText DoubleText DeleteLine Pdg
+    oo::objdefine [self] unexport FindInText InitFindInText Pdg
     set pdgeometry [winfo geometry $_pdg(win).dia]
     # the dialog's result is defined by "pave res" + checkbox's value
     set res [set result [my res $_pdg(win).dia]]
@@ -822,4 +837,3 @@ oo::class create ::apave::APaveDialog {
   }
 
 }
-

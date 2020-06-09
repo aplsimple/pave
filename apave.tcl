@@ -388,14 +388,15 @@ oo::class create ::apave::APave {
   method ExpandOptions {options} {
 
     set options [string map {
-      " -st "   " -sticky "
-      " -com "  " -command "
-      " -t "    " -text "
-      " -w "    " -width "
-      " -h "    " -height "
-      " -var "  " -variable "
+      " -st " " -sticky "
+      " -com " " -command "
+      " -t " " -text "
+      " -w " " -width "
+      " -h " " -height "
+      " -var " " -variable "
       " -tvar " " -textvariable "
       " -lvar " " -listvariable "
+      " -ro " " -readonly "
     } " $options"]
     return $options
   }
@@ -599,7 +600,7 @@ oo::class create ::apave::APave {
     # Invokes a button's action after a timeout.
     #   w - button's path
     #   tmo - timeout in sec.
-    #   lbl - optional label, where second to wait are displayed
+    #   lbl - optional label, where seconds to wait are displayed
 
     if {$tmo>0} {
       catch {set lbl [my $lbl]}
@@ -619,10 +620,9 @@ oo::class create ::apave::APave {
   #
   # Get the button's icon based on its text and name (e.g. butOK)
 
-  method AddButtonAttrs {w attrsName} {
+  method AddButtonIcon {w attrsName} {
 
     upvar 1 $attrsName attrs
-    # at first, make an icon
     set txt [my getOption -t {*}$attrs]
     if {$txt eq ""} { set txt [my getOption -text {*}$attrs] }
     set im ""
@@ -667,11 +667,11 @@ oo::class create ::apave::APave {
     switch -glob -- $nam3 {
       "but" {
         set widget "ttk::button"
-        my AddButtonAttrs $name attrs
+        my AddButtonIcon $name attrs
       }
       "buT" {
         set widget "button"
-        my AddButtonAttrs $name attrs
+        my AddButtonIcon $name attrs
         }
       "can" {set widget "canvas"}
       "chb" {set widget "ttk::checkbutton"}
@@ -763,6 +763,13 @@ oo::class create ::apave::APave {
           my AddPopupAttr $wnamefull attrs -textpop \
             [expr {[my getOption -rotext {*}$attrs] ne ""}] -- disabled
         }
+        lassign [my parseOptions $attrs -ro "" -readonly "" -rotext ""] r1 r2 r3
+        set b1 [expr [string is boolean -strict $r1]]
+        set b2 [expr [string is boolean -strict $r2]]
+        if {($b1 && $r1) || ($b2 && $r2) || \
+        ($r3 ne "" && !($b1 && !$r1) && !($b2 && !$r2))} {
+          set attrs "-takefocus 0 $attrs"
+        }
       }
       "tre" {set widget "ttk::treeview"}
       "h_*" {set widget "ttk::frame"}
@@ -849,7 +856,7 @@ oo::class create ::apave::APave {
     # Returns a path to the widget.
     #
     # See also:
-    #   https://wiki.tcl-lang.org/page/tk_optionCascade
+    #   [wiki.tcl-lang.org](https://wiki.tcl-lang.org/page/tk_optionCascade)
 
     if {![info exists $vname]} {
       set it [lindex $items 0]
@@ -1639,16 +1646,32 @@ oo::class create ::apave::APave {
   #
   # Set focus on a widget (possibly, assigned with [my Widget])
 
-  method setFocus {w wnext} {
+  method setFocus {w wnext {wnext0 ""}} {
 
-    set ws [subst $wnext]
+    if {$wnext eq ""} return
+    if {[winfo exist $wnext]} {
+      focus $wnext  ;# direct path to the next widget
+      return
+    }
+    # try to find the next widget in hierarchy of widgets
+    set ws $wnext
+    if {$wnext0 eq ""} {
+      # get the real next widget (wnext can be uppercased or calculated)
+      catch {set wnext [subst $wnext]}
+      if {![string match "my *" $wnext]} {
+        catch {set wnext [my [my rootwname $wnext]]}
+      }
+      my setFocus $w $wnext $wnext
+    } else {
+      set wnext $wnext0
+    }
     foreach wn [winfo children $w] {
-      if {[string match "*$wnext" $wn] || [string match "*$ws" $wn]} {
-        set wnext $wn
-        break
+      my setFocus $wn $wnext $wnext0
+      if {[string match "*.$wnext" $wn] || [string match "*.$ws" $wn]} {
+        focus $wn
+        return
       }
     }
-    if {[winfo exist $wnext]} {focus $wnext}
     return
   }
 
@@ -1785,12 +1808,13 @@ oo::class create ::apave::APave {
         set attrs [string map {\" \\\"} [my ExpandOptions $attrs]]
         # for scrollbars - set up the scrolling commands
         if {$widget in {"ttk::scrollbar" "scrollbar"}} {
+          lassign [my LowercaseWidgetName $neighbor] neighbor
           if {$posofnei=="L"} {
-            $w.$neighbor config -yscrollcommand "$w.$name set"
+            $w.$neighbor config -yscrollcommand "$wname set"
             set attrs "$attrs -com \\\{$w.$neighbor yview\\\}"
             append options " -side right -fill y -after $w.$neighbor"
           } elseif {$posofnei=="T"} {
-            $w.$neighbor config -xscrollcommand "$w.$name set"
+            $w.$neighbor config -xscrollcommand "$wname set"
             set attrs "$attrs -com \\\{$w.$neighbor xview\\\}"
             append options " -side bottom -fill x -before $w.$neighbor"
           }

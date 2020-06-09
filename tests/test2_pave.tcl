@@ -7,13 +7,13 @@
 #
 ###########################################################################
 
-package require Tk
+set tcltk_version "Tcl/Tk [package require Tk]"
 catch {package require tooltip} ;# may be absent
 
 set ::testdirname [file normalize [file dirname [info script]]]
 cd $::testdirname
 lappend auto_path "$::testdirname/.." "$::testdirname"
-set apave_version "apave v[package require apave]"
+set apave_version "apave [package require apave]"
 
 namespace eval t {
 
@@ -574,7 +574,7 @@ where:
   proc cancelProc {} {
     if {$t::ans2<10} {
       set t::ans2 [lindex [pdlg yesnocancel warn "CANCEL" \
-        "\nCancel all changes?\n" NO -ch "Don't show again"] 0]
+        "\nDiscard all changes?\n" NO -ch "Don't show again"] 0]
       if {$t::ans2==1 || $t::ans2==11} {
         pave res .win 0
       }
@@ -635,7 +635,8 @@ where:
       }
       set ic [expr {$cs>20 ? 3 : 2}]  ;# "|" was added
       set ::t::opcc [pave optionCascade_text [lindex $::t::opcColors $cs+$ic]]
-      .win.fra.fra.nbk tab .win.fra.fra.nbk.f5 -text " Color scheme: $cs "
+      .win.fra.fra.nbk tab .win.fra.fra.nbk.f5 -text \
+      " Color scheme $cs: [pave csGetName $cs]"
     }
     tooltip::tooltip [pave BuT_Img4] \
       "Next is $::t::nextcs: [pave csGetName $::t::nextcs]"
@@ -698,8 +699,10 @@ where:
     $m add command -label "Copy" -command {::t::msg warn "this is just a demo: no action"}
     $m add command -label "Paste" -command {::t::msg err "this is just a demo: no action"}
     set m .win.menu.help
-    $m add command -label "About" -command [list ::t::msg info "  It's a demo of <red> $::apave_version </red> package.\n\n  Details on the apave:
-    \n  https://aplsimple.github.io/en/tcl/pave\n\n  License: MIT." -t 1 -w 43 -tags ::t::textTags]
+    $m add command -label "About" -command [list ::t::msg info "  It's a demo of <red> $::apave_version </red> package.\n\n  Details on the apave: \
+    \n  https://aplsimple.github.io/en/tcl/pave\n\n  License: MIT.
+    \n  <red> $::tcltk_version </red>
+    \n  <red> $::tcl_platform(os) $::tcl_platform(osVersion) </red>" -t 1 -w 43 -tags ::t::textTags]
   }
 
   proc tracer {varname args} {

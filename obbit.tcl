@@ -50,7 +50,7 @@ namespace eval ::apave {
 {Sleepy #daefd0 #D0D0D2 #43484a #2E3436 #CB956D #626D71 #f8f8f8 #ffffff grey #cbae70 #B09869 #1e1e1e - #3b4143 #000 #001 #002 #003 #004 #005 #006 #007}
 {African black black #ffca8a #ffffb4 brown #855d4c #ffff9c red grey SaddleBrown #3b1516 #f9b777 - #ffe7a7 #000 #001 #002 #003 #004 #005 #006 #007}
 {Florid black darkgreen lightgrey white brown green yellow red grey darkcyan darkgreen lightgreen - #dff4df #000 #001 #002 #003 #004 #005 #006 #007}
-{Inkpot #8888C9 #AFC2FF #11111a #1E1E27 #a4a4e5 #4E4E8F #fdfdfd #ffffff grey #545495 #fdfdfd #4E4E8F - #292936 #000 #001 #002 #003 #004 #005 #006 #007}
+{Inkpot #d3d3ff #AFC2FF #05050e #1E1E27 #a4a4e5 #4E4E8F #fdfdfd #ffffff grey #545495 #fdfdfd #4E4E8F - #292936 #000 #001 #002 #003 #004 #005 #006 #007}
 {TKE-Default white white black #282828 white blue white #9fa608 grey orange white black - #383838 #000 #001 #002 #003 #004 #005 #006 #007}
 {TKE-AnatomyOfGrey #dfdfdf #ffffff #000000 #282828 #ffffff #b4b4b4 black #4e5044 grey orange #ffffff #000000 - #363636 #000 #001 #002 #003 #004 #005 #006 #007}
 {TKE-Aurora #ececec #ececec #302e40 #4e4b68 #ececec #aeabc8 #0d0a27 #ffffff grey orange #ececec #302e40 - #434259 #000 #001 #002 #003 #004 #005 #006 #007}
@@ -75,7 +75,7 @@ namespace eval ::apave {
 {TKE-oscuro #f1f1f1 #f1f1f1 #344545 #526d6d #f1f1f1 #9aabab black #e87e88 grey orange #f1f1f1 #344545 - #475E5E #000 #001 #002 #003 #004 #005 #006 #007}
 {TKE-YellowStone #0000ff #00003c #fdf9d0 #d5d2af #00003c #706d4a white #85836e grey orange #00003c #fdf9d0 - #DBD8B5 #000 #001 #002 #003 #004 #005 #006 #007}
 }
-#RUNF1: ./tests/test2_pave.tcl 26 11 12
+#RUNF1: ./tests/test2_pave.tcl 20 11 12
 
   set ::apave::_CS_(NONCS) -2
   set ::apave::_CS_(MINCS) -1
@@ -247,15 +247,15 @@ oo::class create ::apave::ObjectUtils {
     # Initializes _PU_opts variable.
     #   args - passed arguments
     #
-    # When ObjectUtils used as a separate class and args[0]
-    # equals to "-NONE", args[1] means the new -NONE constant.
+    # If ObjectUtils used as a separate class and 1st of args
+    # equals to "-NONE", then 2nd of args means the new -NONE constant.
     #
     # The -NONE constant is a "default value" for single options
     # and equals to "=NONE=" by default.
     #
     # Examples:
-    #   ObjectUtils create obj1
-    #   ObjectUtils create obj2 -NONE <NONE>
+    #     ObjectUtils create obj1
+    #     ObjectUtils create obj2 -NONE <NONE>
     #
     # When ObjectUtils used as mixin, the constructor
     # would pass its arguments to the next constructor.
@@ -378,8 +378,8 @@ oo::class create ::apave::ObjectUtils {
     #   args - option list
     # Returns an option value or "".
     # Example:
-    #   set options [list -name some -value "any value" -tooltip "some tip"]
-    #   set optvalue [my getOption -tooltip {*}$options]
+    #     set options [list -name some -value "any value" -tooltip "some tip"]
+    #     set optvalue [my getOption -tooltip {*}$options]
 
     lassign [my parseOptions $args $optname ""] optvalue
     return $optvalue
