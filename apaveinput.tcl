@@ -5,7 +5,7 @@
 #   - to view/edit text files
 #
 # Use for input dialogs:
-#   package require apave
+#   package require apave  ;# or 'source apaveinput.tcl'
 #   ::apave::APaveInput create pinp $win
 #   pinp input $icon $ttl $iopts $args
 # where:
@@ -34,7 +34,7 @@
 
 package require Tk
 
-package provide apave 2.9.0
+package provide apave 2.9.2
 
 source [file join [file dirname [info script]] apavedialog.tcl]
 
@@ -51,20 +51,28 @@ oo::class create ::apave::APaveInput {
 
   constructor {args} {
 
+    # Creates APaveInput object.
+    #   win - window's name (path)
+    #   args - additional arguments
+
     set _savedvv [list]
     if {[llength [self next]]} { next {*}$args }
   }
 
   destructor {
 
+    # Clears variables used in the object.
+
     my initInput
     unset _savedvv
     if {[llength [self next]]} next
   }
 
-  # initialize input
-  # (clear variables made in previous session)
+  #########################################################################
+
   method initInput {} {
+
+    # Initializes input and clears variables made in previous session.
 
     foreach {vn vv} $_savedvv {
       catch {unset $vn}
@@ -74,16 +82,22 @@ oo::class create ::apave::APaveInput {
     return
   }
 
-  # return variables made and filled in previous session
-  # as a list of elements {varname varvalue}
-  # where varname is of form: [namespace current]::var$widgetname
+  #########################################################################
+
   method varInput {} {
+
+    # Gets variables made and filled in a previous session
+    # as a list of "varname varvalue" pairs where varname
+    # is of form: namespace::var$widgetname.
 
     return $_savedvv
   }
 
-  # return variables' values
+  #########################################################################
+
   method valueInput {} {
+
+    # Gets input variables' values.
 
     set _values {}
     foreach {vnam -} [my varInput] {
@@ -92,15 +106,29 @@ oo::class create ::apave::APaveInput {
     return $_values
   }
 
-  # input dialog
-  # (layout a set of common widgets: entry, checkbox, radiobuttons etc.)
+  #########################################################################
+
   method input {icon ttl iopts args} {
+
+    # Makes and runs an input dialog.
+    #  icon - icon (omitted if equals to "")
+    #  ttl - title of window
+    #  iopts - list of widgets and their attributes
+    #  args - list of dialog's attributes
+    #
+    # The `iopts` contains lists of three items:
+    #   name - name of widgets
+    #   prompt - prompt for entering data
+    #   valopts - value options
+    #
+    # The `valopts` is a list specific for a widget's type, however
+    # a first item of `valopts` is always an initial input value.
 
     if {$iopts ne {}} {
       my initInput  ;# clear away all internal vars
     }
     set pady "-pady 2"
-    if {[set focusopt [my getOption -focus {*}$args]] ne ""} {
+    if {[set focusopt [::apave::getOption -focus {*}$args]] ne ""} {
       set focusopt "-focus $focusopt"
     }
     lappend inopts [list fraM + T 1 98 "-st nsew $pady -rw 1"]
@@ -122,15 +150,15 @@ oo::class create ::apave::APaveInput {
       if {[string match "*Mono*" "[font families]"]} {
         set Mfont "Mono"
       } else {
-        set Mfont "Courier"
+        set Mfont TkFixedFont ;#"Courier"
       }
       if {$typ in {lb te tb}} {  ;# the widgets sized vertically
         lappend inopts [list fraM.fra$name - - - - "pack -expand 1 -fill both"]
       } else {
         lappend inopts [list fraM.fra$name - - - - "pack -fill x"]
       }
-      set vv [my varname $name]
-      set ff [my fieldname $name]
+      set vv [my VarName $name]
+      set ff [my FieldName $name]
       if {$typ ne "la"} {
         if {$focusopt eq ""} {
           if {$typ in {fi di cl fo da}} {
@@ -145,7 +173,8 @@ oo::class create ::apave::APaveInput {
         if {$typ in {lb tb te}} {set anc nw} {set anc w}
         lappend inopts [list fraM.fra$name.labB$name - - - - \
           "pack -side left -anchor $anc -padx 3" \
-          "-t \"$prompt\" -font \"-family $Mfont -size 10\""]
+          "-t \"$prompt\" -font \
+          \"-family $Mfont -size [::apave::paveObj basicFontSize]\""]
       }
       # for most widgets:
       #   1st item of 'valopts' list is the current value
@@ -156,8 +185,8 @@ oo::class create ::apave::APaveInput {
         catch {set vsel [subst -nocommands -noback $vsel]}
         set vlist [lrange $valopts 1 end]
       }
-      if {[set msgLab [my getOption -msgLab {*}$attrs]] ne ""} {
-        set attrs [my removeOptions $attrs -msgLab]
+      if {[set msgLab [::apave::getOption -msgLab {*}$attrs]] ne ""} {
+        set attrs [::apave::removeOptions $attrs -msgLab]
       }
       # define a current widget's info
       switch -- $typ {
@@ -205,7 +234,7 @@ oo::class create ::apave::APaveInput {
             set disattr "-disabledtext \{[set $vv]\}"
           } elseif {[dict exist $attrs -readonly] && [dict get $attrs -readonly] || [dict exist $attrs -ro] && [dict get $attrs -ro]} {
             set disattr "-rotext \{[set $vv]\}"
-            set attrs [my removeOptions $attrs -readonly -ro]
+            set attrs [::apave::removeOptions $attrs -readonly -ro]
           } else {
             set disattr ""
           }
@@ -226,14 +255,14 @@ oo::class create ::apave::APaveInput {
       }
       if {$msgLab ne ""} {
         lassign $msgLab lab msg
-        set lab [my parentwname [lindex $inopts end 0]].$lab
+        set lab [my parentWName [lindex $inopts end 0]].$lab
         if {$msg ne ""} {set msg "-t {$msg}"}
         lappend inopts [list $lab - - - - "pack -side right -expand 1 -fill x" $msg]
       }
       if {![info exist $vv]} {set $vv ""}
       lappend _savedvv $vv [set $vv]
     }
-    lassign [my parseOptions $args -titleOK OK -titleCANCEL Cancel \
+    lassign [::apave::parseOptions $args -titleOK OK -titleCANCEL Cancel \
       -centerme ""] titleOK titleCANCEL centerme
     if {$titleCANCEL eq ""} {
       set butCancel ""
@@ -245,7 +274,7 @@ oo::class create ::apave::APaveInput {
     } else {
       set centerme "-centerme $centerme"
     }
-    set args [my removeOptions $args -titleOK -titleCANCEL -centerme]
+    set args [::apave::removeOptions $args -titleOK -titleCANCEL -centerme]
     lappend args {*}$focusopt
     set res [my Query $icon $ttl {} "butOK $titleOK 1 $butCancel" butOK \
       $inopts [my PrepArgs $args] "" {*}$centerme]
@@ -258,14 +287,36 @@ oo::class create ::apave::APaveInput {
     return $res
   }
 
-  # view/edit a file
+  #########################################################################
+
   method vieweditFile {fname {prepost ""} args} {
+
+    # Views or edits a file.
+    #   fname - name of file
+    #   prepost - a command performing before and after creating a dialog
+    #   args - additional options
+    # It's a sort of stub for calling *editfile* method.
+    # See also: editfile
 
     return [my editfile $fname "" "" "" $prepost {*}$args]
   }
 
-  # edit/view a file with a set of main colors
+  #########################################################################
+
   method editfile {fname fg bg cc {prepost ""} args} {
+
+    # Edits or views a file with a set of main colors
+    #   fname - name of file
+    #   fg - foreground color of text widget
+    #   bg - background color of text widget
+    #   cc - caret's color of text widget
+    #   prepost - a command performing before and after creating a dialog
+    #   args - additional options (`-readonly 1` for viewing the file).
+    #
+    # If *fg* isn't empty, all three colors are used to color a text.
+    #
+    # See also:
+    # [aplsimple.github.io](https://aplsimple.github.io/en/tcl/pave/index.html)
 
     if {$fname eq ""} {
       return false
@@ -281,7 +332,7 @@ oo::class create ::apave::APaveInput {
     } else {
       close $ch
     }
-    lassign [my parseOptions $args -rotext "" -readonly 1 -ro 1] \
+    lassign [::apave::parseOptions $args -rotext "" -readonly 1 -ro 1] \
       rotext readonly ro
     set btns "Exit 0"  ;# by default 'view' mode
     set oper VIEW
@@ -316,6 +367,7 @@ oo::class create ::apave::APaveInput {
 }
 
 # ------------------------------------------------------------------------
+# A bit of apave procedures
 
 proc ::apave::paveObj {com args} {
 

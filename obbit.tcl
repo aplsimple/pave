@@ -6,10 +6,6 @@
 # an object the getter and setter of properties.
 #
 # The ObjectTheming class allows to change the ttk widgets' style.
-# For now it's only a bit of what should be, it needs to be enhanced a lot.
-#
-# The ObjectUtils class provides methods to extract option values... and
-# other useful methods.
 #
 ###########################################################################
 
@@ -18,10 +14,16 @@ package require Tk
 namespace eval ::apave {
 
   # variables global to apave objects:
+
+  # - common options/constants of apave utils
+  variable _PU_opts
+  array set _PU_opts [list -NONE =NONE=]
   # - main color scheme data
-  variable ::apave::_CS_; array set ::apave::_CS_ [list]
+  variable ::apave::_CS_
+  array set ::apave::_CS_ [list]
   # - current color scheme data
-  variable ::apave::_C_; array set ::apave::_C_ [list]
+  variable ::apave::_C_
+  array set ::apave::_C_ [list]
   set ::apave::_CS_(initall) 1
   set ::apave::_CS_(initWM) 1
   set ::apave::_CS_(!FG) #000000
@@ -87,96 +89,298 @@ namespace eval ::apave {
   set ::apave::_CS_(def_FontSize) [font config $::apave::_CS_(defFont) -size]
   set ::apave::_CS_(fs) $::apave::_CS_(def_FontSize)
   set ::apave::_CS_(untouch) [list]
+}
 
-  # Initialize system popup if possible
-  proc initPOP {w} {
-    bind $w <KeyPress> {
-      if {"%K" eq "Menu"} {
-        if {[winfo exists [set w [focus]]]} {
-          event generate $w <Button-3> -rootx [winfo pointerx .] \
-           -rooty [winfo pointery .]
-        }
+#########################################################################
+
+proc ::iswindows {} {
+
+  # Checks if the platform is MS Windows.
+  return [expr {$::tcl_platform(platform) eq "windows"} ? 1: 0]
+}
+
+#########################################################################
+
+proc ::apave::initPOP {w} {
+
+  # Initializes system popup menu (if possible) to call it in a window.
+  #   w - window's name
+
+  bind $w <KeyPress> {
+    if {"%K" eq "Menu"} {
+      if {[winfo exists [set w [focus]]]} {
+        event generate $w <Button-3> -rootx [winfo pointerx .] \
+         -rooty [winfo pointery .]
       }
     }
   }
+}
 
-  # Initialize wish session
-  proc initWM {} {
-    if {!$::apave::_CS_(initWM)} return
-    set ::apave::_CS_(initWM) 0
-    if {$::tcl_platform(platform) == "windows"} {
-      wm attributes . -alpha 0.0
-    } else {
-      wm withdraw .
-    }
-    ttk::style map "." \
-      -selectforeground [list !focus $::apave::_CS_(!FG)] \
-      -selectbackground [list !focus $::apave::_CS_(!BG)]
-    # configure separate widget types
-    try {ttk::style theme use clam}
-    ttk::style configure TButton \
-      -anchor center -width -8 -relief raised -borderwidth 1 -padding 1
-    ttk::style configure TLabel -borderwidth 0 -padding 1
-    ttk::style configure TMenubutton -width 0 -padding 0
-    catch { tooltip::tooltip fade true }
-    initPOP .
-    return
+#########################################################################
+
+proc ::apave::initWM {} {
+
+  # Initializes Tcl/Tk session. Used to be called at the beginning of it.
+
+  if {!$::apave::_CS_(initWM)} return
+  set ::apave::_CS_(initWM) 0
+  if {$::tcl_platform(platform) == "windows"} {
+    wm attributes . -alpha 0.0
+  } else {
+    wm withdraw .
   }
+  ttk::style map "." \
+    -selectforeground [list !focus $::apave::_CS_(!FG)] \
+    -selectbackground [list !focus $::apave::_CS_(!BG)]
+  # configure separate widget types
+  try {ttk::style theme use clam}
+  ttk::style configure TButton \
+    -anchor center -width -8 -relief raised -borderwidth 1 -padding 1
+  ttk::style configure TLabel -borderwidth 0 -padding 1
+  ttk::style configure TMenubutton -width 0 -padding 0
+  catch { tooltip::tooltip fade true }
+  initPOP .
+  return
+}
 
+#########################################################################
 
-  #--------------------------------------------------------------------------
+proc ::apave::cs_Non {} {
 
-  proc cs_Non {} {
+  # Gets non-existent CS index
 
-    # Gets non-existent CS index
+  return $::apave::_CS_(NONCS)
+}
 
-    return $::apave::_CS_(NONCS)
-  }
+#########################################################################
 
-  #--------------------------------------------------------------------------
+proc ::apave::cs_Min {} {
 
-  proc cs_Min {} {
+  # Gets a minimum index of available color schemes
 
-    # Gets a minimum index of available color schemes
+  return $::apave::_CS_(MINCS)
+}
 
-    return $::apave::_CS_(MINCS)
-  }
+proc ::apave::cs_Max {} {
 
-  proc cs_Max {} {
+  # Gets a maximum index of available color schemes
 
-    # Gets a maximum index of available color schemes
-
-    return $::apave::_CS_(MAXCS)
-  }
-
-  #initWM
-
+  return $::apave::_CS_(MAXCS)
 }
 
 ###########################################################################
 
-# 0th bit: Little things
+proc ::apave::getN {sn {defn 0} {min ""} {max ""}} {
 
-namespace eval ::apave {
+  # Gets a number from a string
+  #   sn - string containing a number
+  #   defn - default value when sn is not a number
+  #   min - minimal value allowed
+  #   max - maximal value allowed
 
-  proc getN {sn {defn 0} {min ""} {max ""}} {
-
-    # Gets a number from a string
-    #   sn - string containing a number
-    #   defn - default value when sn is not a number (optional)
-    #   min - minimal value allowed (optional)
-    #   max - maximal value allowed (optional)
-
-    if {$sn eq "" || [catch {set sn [expr {$sn}]}]} {set sn $defn}
-    if {$max ne ""} {
-      set sn [expr {min($max,$sn)}]
-    }
-    if {$min ne ""} {
-      set sn [expr {max($min,$sn)}]
-    }
-    return $sn
+  if {$sn eq "" || [catch {set sn [expr {$sn}]}]} {set sn $defn}
+  if {$max ne ""} {
+    set sn [expr {min($max,$sn)}]
   }
+  if {$min ne ""} {
+    set sn [expr {max($min,$sn)}]
+  }
+  return $sn
+}
 
+###########################################################################
+
+proc ::apave::parseOptionsFile {strict inpargs args} {
+
+  # Parses argument list containing options and (possibly) a file name.
+  #   strict - if 0, 'args' options will be only counted for,
+  #              other options are skipped
+  #   strict - if 1, only 'args' options are allowed,
+  #              all the rest of inpargs to be a file name
+  #          - if 2, the 'args' options replace the
+  #              appropriate options of 'inpargs'
+  #   inpargs - list of options, values and a file name
+  #   args  - list of default options
+  #
+  # The inpargs list contains:
+  #   - option names beginning with "-"
+  #   - option values following their names (may be missing)
+  #   - "--" denoting the end of options
+  #   - file name following the options (may be missing)
+  #
+  # The *args* parameter contains the pairs:
+  #   - option name (e.g., "-dir")
+  #   - option default value
+  #
+  # If the *args* option value is equal to =NONE=, the *inpargs* option
+  # is considered to be a single option without a value and,
+  # if present in inpargs, its value is returned as "yes".
+  #
+  # If any option of *inpargs* is absent in *args* and strict==1,
+  # the rest of *inpargs* is considered to be a file name.
+  #
+  # The proc returns a list of two items:
+  #   - an option list got from args/inpargs according to 'strict'
+  #   - a file name from inpargs or {} if absent
+  #
+  # Examples see in tests/obbit.test.
+
+  variable _PU_opts
+  set actopts true
+  array set argarray "$args yes yes" ;# maybe, tail option without value
+  if {$strict==2} {
+    set retlist $inpargs
+  } else {
+    set retlist $args
+  }
+  set retfile {}
+  for {set i 0} {$i < [llength $inpargs]} {incr i} {
+    set parg [lindex $inpargs $i]
+    if {$actopts} {
+      if {$parg=="--"} {
+        set actopts false
+      } elseif {[catch {set defval $argarray($parg)}]} {
+        if {$strict==1} {
+          set actopts false
+          append retfile $parg " "
+        } else {
+          incr i
+        }
+      } else {
+        if {$strict==2} {
+          if {$defval == $_PU_opts(-NONE)} {
+            set defval yes
+          }
+          incr i
+        } else {
+          if {$defval == $_PU_opts(-NONE)} {
+            set defval yes
+          } else {
+            set defval [lindex $inpargs [incr i]]
+          }
+        }
+        set ai [lsearch -exact $retlist $parg]
+        incr ai
+        set retlist [lreplace $retlist $ai $ai $defval]
+      }
+    } else {
+      append retfile $parg " "
+    }
+  }
+  return [list $retlist [string trimright $retfile]]
+}
+
+###########################################################################
+
+proc ::apave::parseOptions {inpargs args} {
+
+  # Parses argument list containing options.
+  #  inpargs - list of options and values
+  #  args  - list of option/defaultvalue repeated pairs
+  #
+  # It's the same as parseOptionsFile, excluding the file name stuff.
+  #
+  # Returns a list of options' values, according to args.
+  #
+  # See also: parseOptionsFile
+
+  lassign [::apave::parseOptionsFile 0 $inpargs {*}$args] tmp
+  foreach {nam val} $tmp {
+    lappend retlist $val
+  }
+  return $retlist
+}
+
+###########################################################################
+
+proc ::apave::getOption {optname args} {
+
+  # Extracts one option from an option list.
+  #   optname - option name
+  #   args - option list
+  # Returns an option value or "".
+  # Example:
+  #     set options [list -name some -value "any value" -tooltip "some tip"]
+  #     set optvalue [::apave::getOption -tooltip {*}$options]
+
+  lassign [::apave::parseOptions $args $optname ""] optvalue
+  return $optvalue
+}
+
+###########################################################################
+
+proc ::apave::putOption {optname optvalue args} {
+
+  # Replaces or adds one option to an option list.
+  #   optname - option name
+  #   optvalue - option value
+  #   args - option list
+  # Returns an updated option list.
+
+  set optlist {}
+  set doadd true
+  foreach {a v} $args {
+    if {$a eq $optname} {
+      set v $optvalue
+      set doadd false
+    }
+    lappend optlist $a $v
+  }
+  if {$doadd} {lappend optlist $optname $optvalue}
+  return $optlist
+}
+
+#########################################################################
+
+proc ::apave::removeOptions {options args} {
+
+  # Removes some options from a list of options.
+  #   options - list of options and values
+  #   args - list of option names to remove
+  #
+  # The `options` may contain "key value" pairs and "alone" options
+  # without values.
+  #
+  # To remove "key value" pairs, `key` should be an exact name.
+  #
+  # To remove an "alone" option, `key` should be a glob pattern with `*`.
+
+  foreach key $args {
+    if {[set i [lsearch -exact $options $key]]>-1} {
+      catch {
+        # remove a pair "option value"
+        set options [lreplace $options $i $i]
+        set options [lreplace $options $i $i]
+      }
+    } elseif {[string first * $key]>=0 && \
+      [set i [lsearch -glob $options $key]]>-1} {
+      # remove an option only
+      set options [lreplace $options $i $i]
+    }
+  }
+  return $options
+}
+
+###########################################################################
+
+proc ::apave::readTextFile {fileName {varName ""} {doErr 0}} {
+
+  # Reads a text file.
+  #   fileName - file name
+  #   varName - variable name for file content or ""
+  #   doErr - if 'true', exit at errors with error message
+  #
+  # Returns file contents or "".
+
+  if {$varName ne ""} {upvar $varName fvar}
+  if {[catch {set chan [open $fileName]} e]} {
+    if {$doErr} {error "\n readTextFile: can't open \"$fileName\"\n $e"}
+    set fvar ""
+  } else {
+    set fvar [read $chan]
+    close $chan
+  }
+  return $fvar
 }
 
 ###########################################################################
@@ -215,7 +419,18 @@ oo::class create ::apave::ObjectProperty {
     if {[llength [self next]]} next
   }
 
+  ###########################################################################
+
   method setProperty {name args} {
+
+    # Sets a property's value.
+    #   name - name of property
+    #   args - value of property
+    #
+    # If *args* is omitted, the method returns a property's value.
+    #
+    # If *args* is set, the method sets a property's value as $args.
+
     switch [llength $args] {
       0 {return [my getProperty $name]}
       1 {return [set _OP_Properties($name) $args]}
@@ -225,7 +440,18 @@ oo::class create ::apave::ObjectProperty {
     return -code error
   }
 
+  ###########################################################################
+
   method getProperty {name {defvalue ""}} {
+
+    # Gets a property's value.
+    #   name - name of property
+    #   defvalue - default value
+    #
+    # If the property had been set, the method returns its value.
+    #
+    # Otherwise, the method returns the default value (`$defvalue`).
+
     if [info exists _OP_Properties($name)] {
       return $_OP_Properties($name)
     }
@@ -235,235 +461,11 @@ oo::class create ::apave::ObjectProperty {
 }
 
 ###########################################################################
-#
-# Another bit: Parsing utilities.
-
-oo::class create ::apave::ObjectUtils {
-
-  variable _PU_opts
-
-  constructor {args} {
-
-    # Initializes _PU_opts variable.
-    #   args - passed arguments
-    #
-    # If ObjectUtils used as a separate class and 1st of args
-    # equals to "-NONE", then 2nd of args means the new -NONE constant.
-    #
-    # The -NONE constant is a "default value" for single options
-    # and equals to "=NONE=" by default.
-    #
-    # Examples:
-    #     ObjectUtils create obj1
-    #     ObjectUtils create obj2 -NONE <NONE>
-    #
-    # When ObjectUtils used as mixin, the constructor
-    # would pass its arguments to the next constructor.
-
-    array set _PU_opts [list -NONE =NONE=]
-    if {[llength [self next]]} {
-      next {*}$args
-    } elseif {[llength $args]>1 && [lindex $args 0]=="-NONE"} {
-      set _PU_opts(-NONE) [lindex $args 1]
-    }
-    return
-  }
-
-  destructor {
-    array unset _PU_opts
-    if {[llength [self next]]} next
-  }
-
-  method parseOptions {inpargs args} {
-
-    # Parses argument list containing options.
-    #  inpargs - list of options and values
-    #  args  - list of option/defaultvalue repeated pairs
-    #
-    # It's the same as parseOptionsFile, excluding the file name stuff.
-    #
-    # Returns a list of options' values, according to args.
-    #
-    # See also: parseOptionsFile
-
-    lassign [my parseOptionsFile 0 $inpargs {*}$args] tmp
-    foreach {nam val} $tmp {
-      lappend retlist $val
-    }
-    return $retlist
-  }
-
-  method parseOptionsFile {strict inpargs args} {
-
-    # Parses argument list containing options and (possibly) a file name.
-    #   strict - if 0, 'args' options will be only counted for,
-    #              other options are skipped
-    #   strict - if 1, only 'args' options are allowed,
-    #              all the rest of inpargs to be a file name
-    #          - if 2, the 'args' options replace the
-    #              appropriate options of 'inpargs'
-    #   inpargs - list of options, values and a file name
-    #   args  - list of default options
-    #
-    # The inpargs list contains:
-    #   - option names beginning with "-"
-    #   - option values following their names (may be missing)
-    #   - "--" denoting the end of options
-    #   - file name following the options (may be missing)
-    #
-    # The args parameter contains the pairs:
-    #   - option name (e.g., "-dir")
-    #   - option default value
-    # If the args option value is equal to =NONE=, the inpargs option
-    # is considered to be a single option without a value and,
-    # if present in inpargs, its value is returned as "yes".
-    #
-    # Returns a list of two items:
-    #   - an option list got from args/inpargs according to 'strict'
-    #   - a file name from inpargs or {} if absent
-    #
-    # If any option of inpargs is absent in args and strict==1,
-    # the rest of inpargs is considered to be a file name.
-    #
-    # Examples see in tests/obbit.test.
-
-    set actopts true
-    array set argarray "$args yes yes" ;# maybe, tail option without value
-    if {$strict==2} {
-      set retlist $inpargs
-    } else {
-      set retlist $args
-    }
-    set retfile {}
-    for {set i 0} {$i < [llength $inpargs]} {incr i} {
-      set parg [lindex $inpargs $i]
-      if {$actopts} {
-        if {$parg=="--"} {
-          set actopts false
-        } elseif {[catch {set defval $argarray($parg)}]} {
-          if {$strict==1} {
-            set actopts false
-            append retfile $parg " "
-          } else {
-            incr i
-          }
-        } else {
-          if {$strict==2} {
-            if {$defval == $_PU_opts(-NONE)} {
-              set defval yes
-            }
-            incr i
-          } else {
-            if {$defval == $_PU_opts(-NONE)} {
-              set defval yes
-            } else {
-              set defval [lindex $inpargs [incr i]]
-            }
-          }
-          set ai [lsearch -exact $retlist $parg]
-          incr ai
-          set retlist [lreplace $retlist $ai $ai $defval]
-        }
-      } else {
-        append retfile $parg " "
-      }
-    }
-    return [list $retlist [string trimright $retfile]]
-  }
-
-  method getOption {optname args} {
-
-    # Extracts one option from an option list.
-    #   optname - option name
-    #   args - option list
-    # Returns an option value or "".
-    # Example:
-    #     set options [list -name some -value "any value" -tooltip "some tip"]
-    #     set optvalue [my getOption -tooltip {*}$options]
-
-    lassign [my parseOptions $args $optname ""] optvalue
-    return $optvalue
-  }
-
-  method putOption {optname optvalue args} {
-
-    # Replaces or adds one option to an option list.
-    #   optname - option name
-    #   optvalue - option value
-    #   args - option list
-    # Returns an updated option list.
-
-    set optlist {}
-    set doadd true
-    foreach {a v} $args {
-      if {$a eq $optname} {
-        set v $optvalue
-        set doadd false
-      }
-      lappend optlist $a $v
-    }
-    if {$doadd} {lappend optlist $optname $optvalue}
-    return $optlist
-  }
-
-  #########################################################################
-  #
-  # Remove some options from the options
-  # Input:
-  #   options - string of all options
-  #   args - list of removed options
-  # Prerequisite:
-  #   options are set as a list of pairs (key value)
-
-  method removeOptions {options args} {
-
-    foreach key $args {
-      if {[set i [lsearch -exact $options $key]]>-1} {
-        catch {
-          # remove a pair "option value"
-          set options [lreplace $options $i $i]
-          set options [lreplace $options $i $i]
-        }
-      } elseif {[string first * $key]>=0 && \
-        [set i [lsearch -glob $options $key]]>-1} {
-        # remove an option only
-        set options [lreplace $options $i $i]
-      }
-    }
-    return $options
-  }
-
-  #########################################################################
-  #
-  # Read a text file
-  #   fileName - file name
-  #   varName - variable name for file content or ""
-  #   doErr - if 'true', exit at errors with error message
-  # Returns file contents or "".
-
-  method readTextFile {fileName {varName ""} {doErr 0}} {
-
-    if {$varName ne ""} {upvar $varName fvar}
-    if {[catch {set chan [open $fileName]}]} {
-      if {$doErr} {
-        error "\npaveme.tcl: can't open \"$fileName\"\n"
-      }
-      set fvar ""
-    } else {
-      set fvar [read $chan]
-      close $chan
-    }
-    return $fvar
-  }
-
-}
-
-###########################################################################
-# Another bit - manager for theming (might be enhanced a lot)
+# Another bit - theming manager
 
 oo::class create ::apave::ObjectTheming {
 
-  mixin ::apave::ObjectProperty ::apave::ObjectUtils
+  mixin ::apave::ObjectProperty
 
   constructor {args} {
     my InitCS
@@ -475,9 +477,11 @@ oo::class create ::apave::ObjectTheming {
     if {[llength [self next]]} next
   }
 
-  # --------------------------------------------------------------------
+  ###########################################################################
 
   method InitCS {} {
+
+    # Initializes the color scheme processing.
 
     if {$::apave::_CS_(initall)} {
       my basicFontSize 10 ;# initialize main font size
@@ -488,9 +492,24 @@ oo::class create ::apave::ObjectTheming {
     return
   }
 
+  ###########################################################################
+
   method Main_Style {tfg1 tbg1 tfg2 tbg2 tfgS tbgS bclr tc fA bA bD} {
 
     # Sets main colors of application
+    #   tfg1 - main foreground
+    #   tbg1 - main background
+    #   tfg2 - not used
+    #   tbg2 - not used
+    #   tfgS - selectforeground
+    #   tbgS - selectbackground
+    #   bclr - bordercolor
+    #   tc - troughcolor
+    #   fA - foreground active
+    #   bA - background active
+    #   bD - background disabled
+    #
+    # The *foreground disabled* is set as `grey`.
 
     catch {font delete apaveFontMono}
     catch {font delete apaveFontDef}
@@ -511,8 +530,15 @@ oo::class create ::apave::ObjectTheming {
       -foreground       [list disabled grey active $fA]
   }
 
-  # Set the new style options
+  ###########################################################################
+
   method Ttk_style {oper ts opt val} {
+
+    # Sets a new style options.
+    #   oper - command of ttk::style ("map" or "configure")
+    #   ts - type of style to be configurated
+    #   opt - option's name
+    #   val - option's value
 
     if {![catch {set oldval [ttk::style $oper $ts $opt]}]} {
       catch {ttk::style $oper $ts $opt $val}
@@ -549,7 +575,7 @@ oo::class create ::apave::ObjectTheming {
     return $theme
   }
 
-  #--------------------------------------------------------------------------
+  ###########################################################################
 
   method csCurrent {} {
 
@@ -558,12 +584,12 @@ oo::class create ::apave::ObjectTheming {
     return $::apave::_CS_(index)
   }
 
-  #--------------------------------------------------------------------------
+  ###########################################################################
 
   method ColorScheme {{ncolor ""}} {
 
     # Gets a full record of color scheme from a list of available ones
-    #  ncolor - index of color scheme
+    #   ncolor - index of color scheme
 
     if {"$ncolor" eq "" || $ncolor<0} {
       # basic color scheme: get colors from a current ttk::style colors
@@ -575,15 +601,15 @@ oo::class create ::apave::ObjectTheming {
         set bA $::apave::_CS_(def_bA)
       } else {
         set ::apave::_CS_(index) $::apave::_CS_(NONCS)
-        lassign [my parseOptions [ttk::style configure .] \
+        lassign [::apave::parseOptions [ttk::style configure .] \
           -foreground #000000 -background #d9d9d9 \
           -selectforeground #ffffff -selectbackground #4a6984 \
           -troughcolor #c3c3c3] fg bg fS bS tc
-        lassign [my parseOptions [ttk::style map . -background] \
+        lassign [::apave::parseOptions [ttk::style map . -background] \
           disabled #d9d9d9 active #ececec] bD bA
-        lassign [my parseOptions [ttk::style map . -foreground] \
+        lassign [::apave::parseOptions [ttk::style map . -foreground] \
           disabled #a3a3a3] fD
-        lassign [my parseOptions [ttk::style map . -selectbackground] \
+        lassign [::apave::parseOptions [ttk::style map . -selectbackground] \
           !focus #9e9a91] bclr
         set ::apave::_CS_(def_fg) $fg
         set ::apave::_CS_(def_bg) $bg
@@ -602,35 +628,44 @@ oo::class create ::apave::ObjectTheming {
     return [lindex $::apave::_CS_(ALL) $ncolor]
   }
 
-  #--------------------------------------------------------------------------
+  ###########################################################################
 
   method csGet {{ncolor ""}} {
 
     # Gets a color scheme's colors
-    #  ncolor - index of color scheme
+    #   ncolor - index of color scheme
 
     if {$ncolor eq ""} {set ncolor [my csCurrent]}
     return [lrange [my ColorScheme $ncolor] 1 end]
   }
 
-  #--------------------------------------------------------------------------
+  ###########################################################################
 
   method csGetName {{ncolor 0}} {
 
     # Gets a color scheme's name
-    #  ncolor - index of color scheme
-    if {$ncolor==$::apave::_CS_(MINCS)} {
+    #   ncolor - index of color scheme
+
+    if {$ncolor < $::apave::_CS_(MINCS)} {
+      return "Default"
+    } elseif {$ncolor == $::apave::_CS_(MINCS)} {
       return "Basic"
     }
     return [lindex [my ColorScheme $ncolor] 0]
   }
 
-  #--------------------------------------------------------------------------
+  ###########################################################################
 
   method csSet {{ncolor 0} {win .} args} {
 
     # Sets a color scheme and applies it to Tk/Ttk widgets.
-    #  ncolor - index of color scheme (0 through $::apave::_CS_(MAXCS))
+    #   ncolor - index of color scheme (0 through $::apave::_CS_(MAXCS))
+    #   win - window's name
+    #   args - list of colors if ncolor=""
+    #
+    # The `args` can be set as "-doit". In this case the method does set
+    # the `ncolor` color scheme (otherwise it doesn't set the CS if it's
+    # already of the same `ncolor`).
 
     # The clrtitf, clrinaf etc. had been designed for e_menu. And as such,
     # they can be used directly, outside of this "color scheming" UI.
@@ -646,6 +681,7 @@ oo::class create ::apave::ObjectTheming {
     #
     # In color scheming, these colors are transformed to be consistent
     # with Tk/Ttk's color mechanics.
+    #
     # Additionally, "grey" color is used as "border color/disabled foreground".
     #
     # Returns a list of colors used by the color scheme.
@@ -680,11 +716,11 @@ oo::class create ::apave::ObjectTheming {
     return [list $fg $bg $fE $bE $fS $bS $hh $gr $cc $ht $tfgI $tbgI $fM $bM]
   }
 
-  #--------------------------------------------------------------------------
+  ###########################################################################
 
   method configTooltip {fg bg args} {
 
-    # Configurates colors and other attributes of tooltip
+    # Configurates colors and other attributes of tooltip.
     #  fg - foreground
     #  bg - background
     #  args - other attributes
@@ -697,7 +733,7 @@ oo::class create ::apave::ObjectTheming {
     return
   }
 
-  #--------------------------------------------------------------------------
+  ###########################################################################
 
   method csAdd {newcs {setnew true}} {
 
@@ -707,9 +743,14 @@ oo::class create ::apave::ObjectTheming {
     #
     # Does not register the CS, if it is already registered.
     #
+    # Returns an index of current CS.
+    #
     # See also:
     #   themeWindow
 
+    if {[llength $newcs]<4} {
+      set newcs [my ColorScheme]  ;# CS should be defined
+    }
     lassign $newcs name tfg2 tfg1 tbg2 tbg1 tfhh - - tcur grey bclr
     set found $::apave::_CS_(NONCS)
     for {set i $::apave::_CS_(MINCS)} {$i<=$::apave::_CS_(MAXCS)} {incr i} {
@@ -720,14 +761,17 @@ oo::class create ::apave::ObjectTheming {
         break
       }
     }
-    if {$found == $::apave::_CS_(NONCS)} {
+    if {$found == $::apave::_CS_(MINCS) && [my csCurrent] == $::apave::_CS_(NONCS)} {
+      set setnew false ;# no moves from default CS to 'basic'
+    } elseif {$found == $::apave::_CS_(NONCS)} {
       lappend ::apave::_CS_(ALL) $newcs
       set found [incr ::apave::_CS_(MAXCS)]
     }
     if {$setnew} {set ::apave::_CS_(index) [set ::apave::_CS_(old) $found]}
-    return
+    return [my csCurrent]
   }
-  #--------------------------------------------------------------------------
+
+  ###########################################################################
 
   method themeWindow {win {tfg1 ""} {tbg1 ""} {tfg2 ""} {tbg2 ""} {tfgS ""}
     {tbgS ""} {tfgD ""} {tbgD ""} {tcur ""} {bclr ""}
@@ -735,16 +779,24 @@ oo::class create ::apave::ObjectTheming {
     {isCS true} args} {
 
     # Changes a Tk style (theming a bit)
-    #   tfg1/tbg1 - fore/background for themed widgets (main stock)
-    #   tfg2/tbg2 - fore/background for themed widgets (enter data stock)
-    #   tfgS/tbgS - fore/background for selection
-    #   tfgD/tbgD - fore/background for disabled themed widgets
-    #   tcur      - insertion cursor color
-    #   bclr      - hotkey/border color
-    #   thlp      - help color
-    #   tfgI/tbgI - fore/background for external CS
-    #   tfgM/tbgM - fore/background for menus
-    #   args      - other options
+    #   win - window's name
+    #   tfg1 - foreground for themed widgets (main stock)
+    #   tbg1 - background for themed widgets (main stock)
+    #   tfg2 - foreground for themed widgets (enter data stock)
+    #   tbg2 - background for themed widgets (enter data stock)
+    #   tfgS - foreground for selection
+    #   tbgS - background for selection
+    #   tfgD - foreground for disabled themed widgets
+    #   tbgD - background for disabled themed widgets
+    #   tcur - insertion cursor color
+    #   bclr - hotkey/border color
+    #   thlp - help color
+    #   tfgI - foreground for external CS
+    #   tbgI - background for external CS
+    #   tfgM - foreground for menus
+    #   tbgM - background for menus
+    #   isCS - true, if the colors are taken from a CS
+    #   args - other options
     #
     # The themeWindow can be used outside of "color scheme" UI.
     # E.g., in TKE editor, e_menu and add_shortcuts plugins use it to
@@ -922,14 +974,17 @@ oo::class create ::apave::ObjectTheming {
     return
   }
 
-  #--------------------------------------------------------------------------
-  # some widgets (e.g. listbox) need a work-around to set
-  # attributes for selection in run-time
+  ###########################################################################
 
   method UpdateSelectAttrs {w} {
 
+    # Updates attributes for selection.
+    #   w - window's name
+    # Some widgets (e.g. listbox) need a work-around to set
+    # attributes for selection in run-time, namely at focusing in/out.
+
     if { [string first "-selectforeground" [bind $w "<FocusIn>"]] < 0} {
-      set com "lassign \[[self] parseOptions \[ttk::style configure .\] \
+      set com "lassign \[::apave::parseOptions \[ttk::style configure .\] \
         -selectforeground $::apave::_CS_(!FG) \
         -selectbackground $::apave::_CS_(!BG)\] fS bS;"
       bind $w <FocusIn> "+ $com $w configure \
@@ -940,12 +995,12 @@ oo::class create ::apave::ObjectTheming {
     return
   }
 
-  #--------------------------------------------------------------------------
+  ###########################################################################
 
   method untouchWidgets {args} {
 
     # Makes non-ttk widgets to be untouched by coloring
-    #   args - list of widget globs (e.g. {.frame.* .h1 .h2})
+    #   args - list of widget globs (e.g. {.em.fr.win.* .em.fr.h1 .em.fr.h2})
     #
     # See also:
     #   themeNonThemed
@@ -953,7 +1008,7 @@ oo::class create ::apave::ObjectTheming {
     foreach u $args {lappend ::apave::_CS_(untouch) $u}
   }
 
-  #--------------------------------------------------------------------------
+  ###########################################################################
 
   method themeNonThemed {win} {
 
@@ -988,7 +1043,7 @@ oo::class create ::apave::ObjectTheming {
                 }
               }
             }
-            set nam3 [string range [my rootwname $w1] 0 2]
+            set nam3 [string range [my ownWName $w1] 0 2]
             if {$nam3 in {lbx tbl flb enT spX tex}} {
               my UpdateSelectAttrs $w1
             }
@@ -999,10 +1054,13 @@ oo::class create ::apave::ObjectTheming {
     return
   }
 
-  #--------------------------------------------------------------------------
-  # List the non-themed widgets to process here
+  ###########################################################################
 
   method NonThemedWidgets {selector} {
+
+    # Lists the non-themed widgets to process in apave.
+    #   selector - sets a widget group to return as a list
+    # The `selector` can be `entry`, `button` or `all`.
 
     switch -- $selector {
       entry {
@@ -1017,11 +1075,12 @@ oo::class create ::apave::ObjectTheming {
       scrollbar tablelist]
   }
 
-  #--------------------------------------------------------------------------
-  #
-  # Theme for non-ttk widgets
+  ###########################################################################
 
   method NonTtkTheme {win} {
+
+    # Calls themeWindow to color non-ttk widgets.
+    #   win - window's name
 
     if {[info exists ::apave::_C_(.,tfg1)] &&
     $::apave::_CS_(expo,tfg1) ne "-"} {
@@ -1046,12 +1105,14 @@ oo::class create ::apave::ObjectTheming {
     return
   }
 
-  #--------------------------------------------------------------------------
-  #
-  # Style for non-ttk widgets
-  # Input: "typ" is the same as in "APave GetWidgetType" method
+  ###########################################################################
 
   method NonTtkStyle {typ {dsbl 0}} {
+
+    # Makes styling for non-ttk widgets.
+    #   typ - widget's type (the same as in "APave::GetWidgetType" method)
+    #   dsbl - `1` for disabled; `2` for readonly; otherwise for all widgets
+    # See also: APave::GetWidgetType
 
     if {$dsbl} {
       set disopt ""
@@ -1131,9 +1192,15 @@ oo::class create ::apave::ObjectTheming {
     return $att
   }
 
-  #--------------------------------------------------------------------------
+  ###########################################################################
 
   method ThemePopup {mnu args} {
+
+    # Recursively configures popup menus.
+    #   mnu - menu's name (path)
+    #   args - options of configuration
+    # See also: themePopup
+
     if {[set last [$mnu index end]] ne "none"} {
       for {set i 0} {$i <= $last} {incr i} {
         switch -- [$mnu type $i] {
@@ -1144,7 +1211,12 @@ oo::class create ::apave::ObjectTheming {
     }
   }
 
+  ###########################################################################
+
   method themePopup {mnu} {
+
+    # Configures a popup menu so that its colors accord with a current CS.
+    #   mnu - menu's name (path)
 
     if {[my csCurrent] == $::apave::_CS_(NONCS)} return
     lassign [my csGet] - fg - - - bgS fgS - - - - - - bg
@@ -1153,7 +1225,7 @@ oo::class create ::apave::ObjectTheming {
       -activeforeground $fgS -activebackground $bgS
   }
 
-  #--------------------------------------------------------------------------
+  ###########################################################################
 
   method basicFontSize {{fs 0}} {
 
@@ -1170,7 +1242,7 @@ oo::class create ::apave::ObjectTheming {
     }
   }
 
-  #--------------------------------------------------------------------------
+  ###########################################################################
 
   method basicTextFont {{textfont ""}} {
 

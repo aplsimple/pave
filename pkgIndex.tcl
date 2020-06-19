@@ -1,5 +1,5 @@
 
-package ifneeded apave 2.9.0 [list source [file join $dir apaveinput.tcl]]
+package ifneeded apave 2.9.2 [list source [file join $dir apaveinput.tcl]]
 
 # A short intro (for Ruff! docs generator:)
 
@@ -12,10 +12,12 @@ namespace eval apave {
   The *apave* isn't designed to replace the existing Tk geometry managers (place, pack, grid). Rather the apave tries to simplify the window layout by using their best, by means of:
   
    - joining the power of grid and pack
-   - uniting the creation of widgets with their layout (and mostly their configuration)
+   - uniting a creation of widgets with their layout (and mostly their configuration)
    - minimizing a coder's efforts at creating / modifying / removing widgets
    - setting a natural tab order of widgets
    - theming both ttk and non-ttk widgets
+   - centralizing things like icons or popup menus
+   - providing 'mega-attributes', right up to the user-defined ones
    - providing 'mega-widgets'
 
   The *apave* is implemented as *APave oo::class*, so that you can enhance it with your own inherited / mixin-ed class.
@@ -25,10 +27,10 @@ namespace eval apave {
   *APaveDialog oo::class* and *APaveInput oo::class* that allow you:
 
    - to call a variety of dialogs, optionally using a "Don't show again" checkbox and a tagged text
-   - to use a variety of widgets in dialogs, with entry, text (incl. readonly and stand-alone), combobox (incl. file content), spinbox, listbox, file listbox, option cascade, checkbutton, radiobutton and label (incl. title).
+   - to use a variety of widgets in dialogs, with entry, text (incl. readonly and stand-alone), combobox (incl. file content), spinbox, listbox, file listbox, option cascade, tablelist, checkbutton, radiobutton and label (incl. title)
    - to resize windows neatly (however strange, not done in Tk standard dialogs)
 
-    The theming facility of *apave* is enabled by *ObjectTheming oo::class* which embraces both ttk and non-ttk widgets, as seen on Demo (20.3 Mb).
+  The theming facility of *apave* is enabled by *ObjectTheming oo::class* which embraces both ttk and non-ttk widgets.
   
   Along with standard widgets, the mentioned *apave* classes provide a batch of following 'mega-widgets':
   

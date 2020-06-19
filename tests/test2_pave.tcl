@@ -15,6 +15,9 @@ cd $::testdirname
 lappend auto_path "$::testdirname/.." "$::testdirname"
 set apave_version "apave [package require apave]"
 
+set ::emdir [file normalize [file join $::testdirname ../../e_menu]]
+catch {source [file join $::emdir e_menu.tcl]}
+
 namespace eval t {
 
   variable ftx1 [file join $::testdirname [file tail [info script]]]
@@ -82,7 +85,7 @@ namespace eval t {
     apave::APaveInput create pave .win $::t::newCS
     pave configTooltip black yellow -font {-size 11}
     if {!$firstin} {pave basicFontSize $::t::fontsz}
-    set ::t::filetxt [pave readTextFile $::t::ftx1]
+    set ::t::filetxt [::apave::readTextFile $::t::ftx1]
     set ::t::tblcols {
       0 {Name of widget} left \
       0 Type left \
@@ -106,13 +109,15 @@ namespace eval t {
     array set arrayTab {}
     # initializing images for toolbar
     set imgl [::apave::iconImage]
-    foreach {i icon} {0 retry 1 add 2 delete 3 undo 4 redo} {
+    set imgused 0
+    foreach {i icon} {0 retry 1 add 2 delete 3 undo 4 redo 5 run} {
       image create photo Img$i -data [::apave::iconData $icon]
+      incr imgused
     }
     set ::t::toolList ""
     for {set i 0} {$i<[llength $imgl]} {incr i} {
       set icon [lindex $imgl $i]
-      set img "Img[expr {$i+5}]"
+      set img "Img[expr {$i+$imgused}]"
       if {[catch {image create photo $img -data [::apave::iconData $icon]}]} {
         image create photo $img -data [::apave::iconData none]
       }
@@ -237,6 +242,9 @@ namespace eval t {
             Img2 {{::t::toolBut 2} -tooltip "Stop progress"}
             sev 7
             h_ 1
+            Img5 {{::t::e_menu} -tooltip "Run e_menu"}
+            sev 7
+            h_ 1
             Img3 {{::t::toolBut 3 \[set ::t::prevcs\]}}
             h_ 1
             opcTool {::t::opcc ::t::opcColors {-width 20} {t::opcToolPre %a} -command t::opcToolPost -tooltip "Current color scheme"}
@@ -246,7 +254,10 @@ namespace eval t {
             ChbRestart {-var ::t::restart -t "Restart" -tooltip "To restart test2\nif CS changes"}
             sev 8
             h_ 1
-            spX  {-tvar ::t::fontsz -command {::t::toolBut 4 -3} -from 9 -to 12 -w 3 -justify center -tooltip "Font size 9..12"}
+            spX  {-tvar ::t::fontsz -command {::t::toolBut 4 -3} -from 9 -to 12 -w 3 -justify center -tooltip "Font size 9..12" -myown {
+              puts "\nA local/global configuration may be set with -myown attribute, e.g.\
+              \n  %w configure -bg yellow -font {-weight bold}\
+              \n  ::NS::GLOBAL_CONFIG %w"}}
       }}}
       {# remove this comment to view another way to make a statusbar:
        stat - - - - {pack -side bottom} {-array {
@@ -486,7 +497,7 @@ where:
 
     # icons of top toolbar
     for {set i 0} {$i<[llength $imgl]} {incr i} {
-      [pave BuT_Img[expr {$i+5}]] configure -command \
+      [pave BuT_Img[expr {$i+$imgused}]] configure -command \
         [list ::t::msg info "This is just a demo.\nIcon $i: [lindex $imgl $i]"]
     }
 
@@ -587,6 +598,10 @@ where:
     pave res .win 1
   }
 
+  proc restartHint {cs} {
+    return "\nRestart with CS = \"$cs [pave csGetName $cs]\", font size = [t::pave basicFontSize] ?\nIt's a good choice, as the CS would be properly set up.\n"
+  }
+
   # imitating the toolbar functions
   proc toolBut {num {cs -2} {starting false}} {
     if {$num in {3 4}} {
@@ -613,8 +628,7 @@ where:
       if {!$starting && $::t::restart} {
         if {$t::ans4<10} {
           set t::ans4 [lindex [pdlg yesnocancel warn "RESTART" \
-            "\nRestart with CS = \"$cs [pave csGetName $cs]\" ?\n" NO \
-            -ch "Don't show again"] 0]
+            [restartHint $cs] NO -ch "Don't show again"] 0]
         }
         if {$t::ans4==1 || $t::ans4==11} {
           pave res .win [set ::t::newCS $cs]
@@ -634,7 +648,7 @@ where:
         set ::t::nextcs [apave::cs_Min]
       }
       set ic [expr {$cs>20 ? 3 : 2}]  ;# "|" was added
-      set ::t::opcc [pave optionCascade_text [lindex $::t::opcColors $cs+$ic]]
+      set ::t::opcc [pave optionCascadeText [lindex $::t::opcColors $cs+$ic]]
       .win.fra.fra.nbk tab .win.fra.fra.nbk.f5 -text \
       " Color scheme $cs: [pave csGetName $cs]"
     }
@@ -700,9 +714,14 @@ where:
     $m add command -label "Paste" -command {::t::msg err "this is just a demo: no action"}
     set m .win.menu.help
     $m add command -label "About" -command [list ::t::msg info "  It's a demo of <red> $::apave_version </red> package.\n\n  Details on the apave: \
-    \n  https://aplsimple.github.io/en/tcl/pave\n\n  License: MIT.
-    \n  <red> $::tcltk_version </red>
-    \n  <red> $::tcl_platform(os) $::tcl_platform(osVersion) </red>" -t 1 -w 43 -tags ::t::textTags]
+
+  https://aplsimple.github.io/en/tcl/pave\n\n  License: MIT.
+  _______________________________________
+
+  <red> $::tcltk_version </red>
+
+  <red> $::tcl_platform(os) $::tcl_platform(osVersion) </red>
+" -t 1 -w 43 -tags ::t::textTags]
   }
 
   proc tracer {varname args} {
@@ -764,9 +783,19 @@ where:
 
   proc restartit {} {
     if {[set cs [pave csCurrent]]==[apave::cs_Non]} {set cs [apave::cs_Min]}
-    if {[pdlg yesno warn "RESTART" \
-    "\nRestart with CS = \"$cs [pave csGetName $cs]\" ?\n"]} {
+    if {[pdlg yesno warn "RESTART" [restartHint $cs]]} {
       pave res .win [set ::t::newCS $cs]
+    }
+  }
+
+  proc e_menu {} {
+    if {[namespace exists ::em]} {
+      set cs [pave csCurrent]
+      ::em::main -prior 1 -modal 1 -remain 1 "md=~/.tke/plugins/e_menu/menus" m=utils.mnu "f=[info script]" "PD=~/PG/e_menu_PD.txt" "s=none" b=chromium h=~/DOC/www.tcl.tk/man/tcl8.6 "tt=xterm -fs 12 -geometry 90x30+400+100" t=1 w=25 g=+420+170 c=$cs
+      set cs2 [pave csCurrent]
+      if {$cs!=$cs2} {toolBut 4 $cs2}
+    } else {
+      pdlg ok $icon ERROR " Not found e_menu.tcl in directory:\n $::emdir" -t 1
     }
   }
 
@@ -775,7 +804,8 @@ where:
 ###########################################################################
 # Run the test
 
-puts "This is just a demo. Take it easy."
+puts "\nThis is just a demo. Take it easy."
+set test2script $::t::ftx1
 apave::initWM
 if {$::argc==3} {
   lassign $::argv ::t::newCS ::t::fontsz t::ans4
@@ -783,9 +813,9 @@ if {$::argc==3} {
   set ::t::newCS [apave::cs_Non]
 }
 set test2res [t::test2_pave]
-puts "result of test2 = $test2res"
+puts "\nResult of test2 = $test2res\n[string repeat - 77]"
 if {$::t::newCS!=[apave::cs_Non]} {  ;# at restart, newCS is set
-  exec tclsh $::t::ftx1 $::t::newCS $::t::fontsz $t::ans4 &
+  exec tclsh $test2script $::t::newCS $::t::fontsz $t::ans4 &
 }
 apave::APaveInput destroy
 namespace delete apave
