@@ -2022,8 +2022,8 @@ oo::class create ::apave::APave {
     if {[set wnext [::apave::getOption -tabnext {*}$attrs]] ne ""} {
       set wnext [string trim $wnext "\{\}"]
       if {$wnext eq "0"} {set wnext $wdg} ;# disables Tab on this widget
-      after idle [list bind $wdg <Key> \
-        [list if {{%K} == {Tab}} "[self] focusNext $w $wnext ; break" ]]
+      after idle [list if "\[winfo exists $wdg\]" [list bind $wdg <Key> \
+        [list if {{%K} == {Tab}} "[self] focusNext $w $wnext ; break" ] ] ]
       set attrs [::apave::removeOptions $attrs -tabnext]
     }
     return $addcomms
