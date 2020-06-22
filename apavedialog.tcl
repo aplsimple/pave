@@ -562,6 +562,7 @@ oo::class create ::apave::APaveDialog {
     # [aplsimple.github.io](https://aplsimple.github.io/en/tcl/pave/index.html)
 
     if {[winfo exists $_pdg(win).dia]} {
+      puts "$_pdg(win).dia already exists: select other root window"
       return 0
     }
     # remember the focus (to restore it after closing the dialog)
@@ -594,7 +595,7 @@ oo::class create ::apave::APaveDialog {
         -c - -color {append optsLabel " -foreground {$val}"}
         -a { ;# additional grid options of message labels
           append optsGrid " $val" }
-        -centerme {lappend args -centerme $val}
+        -cm - -centerme {lappend args -centerme $val}
         -t - -text {set textmode $val}
         -tags {
           upvar 2 $val _tags

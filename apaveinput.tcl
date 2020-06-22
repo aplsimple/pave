@@ -34,7 +34,7 @@
 
 package require Tk
 
-package provide apave 2.9.3
+package provide apave 2.9.4
 
 source [file join [file dirname [info script]] apavedialog.tcl]
 
@@ -133,6 +133,7 @@ oo::class create ::apave::APaveInput {
     }
     lappend inopts [list fraM + T 1 98 "-st nsew $pady -rw 1"]
     set savedvv [list]
+    set frameprev ""
     foreach {name prompt valopts} $iopts {
       if {$name eq ""} continue
       lassign $prompt prompt gopts attrs
@@ -142,6 +143,8 @@ oo::class create ::apave::APaveInput {
         lappend inopts [list fraM.$name - - - - "pack -fill x $gopts"]
         continue
       }
+      set toprev [::apave::getOption -toprev {*}$attrs]
+      set attrs [::apave::removeOptions $attrs -toprev]
       set tvar "-tvar"
       switch -- $typ {
         ch { set tvar "-var" }
@@ -152,15 +155,17 @@ oo::class create ::apave::APaveInput {
       } else {
         set Mfont TkFixedFont ;#"Courier"
       }
+      set framename fraM.fra$name
       if {$typ in {lb te tb}} {  ;# the widgets sized vertically
-        lappend inopts [list fraM.fra$name - - - - "pack -expand 1 -fill both"]
+        lappend inopts [list $framename - - - - "pack -expand 1 -fill both"]
       } else {
-        lappend inopts [list fraM.fra$name - - - - "pack -fill x"]
+        lappend inopts [list $framename - - - - "pack -fill x"]
       }
       set vv [my VarName $name]
       set ff [my FieldName $name]
-      if {$typ ne "la"} {
-        if {$focusopt eq ""} {
+      if {$typ ne "la" && $toprev eq ""} {
+        set takfoc [::apave::parseOptions $attrs -takefocus 1]
+        if {$focusopt eq "" && $takfoc} {
           if {$typ in {fi di cl fo da}} {
             set _ en*$name  ;# 'entry-like mega-widgets'
           } elseif {$typ eq "ft"} {
@@ -210,7 +215,7 @@ oo::class create ::apave::APaveInput {
         }
         fc {
           if {![info exist $vv]} {catch {set $vv ""}}
-          lappend inopts [list $ff - - - - "pack -fill x $gopts" "-tvar $vv -values \{$valopts\} $attrs"]
+          lappend inopts [list $ff - - - - "pack -side left -expand 1 -fill x $gopts" "-tvar $vv -values \{$valopts\} $attrs"]
         }
         op {
           set $vv $vsel
@@ -246,6 +251,14 @@ oo::class create ::apave::APaveInput {
           lappend inopts [list $ff - - - - "pack $gopts" "$prompt$attrs"]
           continue
         }
+        bu {
+          if {$prompt ne ""} { set prompt "-t \"$prompt\" " } ;# prompt as -text
+          if {$toprev eq ""} {
+            lappend inopts [list $ff - - - - "pack -side left -expand 1 -fill both $gopts" "$prompt$attrs"]
+          } else {
+            lappend inopts [list $frameprev.$name - - - - "pack -side left $gopts" "$prompt$attrs"]
+          }
+        }
         default {
           lappend inopts [list $ff - - - - "pack -side right -expand 1 -fill x $gopts" "$tvar $vv $attrs"]
           if {$vv ne ""} {
@@ -261,6 +274,7 @@ oo::class create ::apave::APaveInput {
       }
       if {![info exist $vv]} {set $vv ""}
       lappend _savedvv $vv [set $vv]
+      set frameprev $framename
     }
     lassign [::apave::parseOptions $args -titleOK OK -titleCANCEL Cancel \
       -centerme ""] titleOK titleCANCEL centerme
@@ -280,8 +294,8 @@ oo::class create ::apave::APaveInput {
     set res [my Query $icon $ttl {} "butOK $titleOK 1 $butCancel" butOK \
     $inopts [my PrepArgs $args] "" {*}$centerme]} e]} {
       catch {destroy $_pdg(win).dia}  ;# Query's window
-      ::apave::paveObj ok err "ERROR" "\n$e\n"\
-        -t 1 -head "\nAPaveInput returned an error:\n" -hfg red -weight bold
+      ::apave::paveObj ok err "ERROR" "\n$e\n" \
+        -t 1 -head "\nAPaveInput returned an error: \n" -hfg red -weight bold
       return 0
     }
     if {[lindex $res 0]!=1} {  ;# restore old values if OK not chosen
