@@ -595,7 +595,7 @@ oo::class create ::apave::APaveDialog {
         -c - -color {append optsLabel " -foreground {$val}"}
         -a { ;# additional grid options of message labels
           append optsGrid " $val" }
-        -cm - -centerme {lappend args -centerme $val}
+        -centerme {lappend args -centerme $val}
         -t - -text {set textmode $val}
         -tags {
           upvar 2 $val _tags

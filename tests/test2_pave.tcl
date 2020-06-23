@@ -254,7 +254,7 @@ namespace eval t {
             ChbRestart {-var ::t::restart -t "Restart" -tooltip "To restart test2\nif CS changes"}
             sev 8
             h_ 1
-            spX  {-tvar ::t::fontsz -command {::t::toolBut 4 -3} -from 9 -to 12 -w 3 -justify center -tooltip "Font size 9..12" -myown {
+            spX  {-tvar ::t::fontsz -command {::t::toolBut 4 -3} -from 8 -to 16 -w 3 -justify center -tooltip "Font size 8..16" -myown {
               puts "\nA local/global configuration may be set with -myown attribute, e.g.\
               \n  %w configure -bg yellow -font {-weight bold}\
               \n  ::NS::GLOBAL_CONFIG %w"}}
@@ -270,14 +270,14 @@ namespace eval t {
       {lab2 - - - - {pack} {-t "This demonstration shows off a nested set of themed paned windows. Their sizes can be changed by grabbing the area between each contained pane and dragging the divider." -wraplength 4i -justify left}}
       {fra - - - - {pack -side bottom -fill both -expand 1 -pady 0}}
       {fra.pan - - - - {pack -side bottom -fill both -expand 1} {-orient horizontal}}
-      {fra.pan.panL - - - - {} {-orient vertical} {add}}
-      {.lfrT - - - - {} {-t Button} {add}}
+      {fra.pan.panL - - - - {add} {-orient vertical}}
+      {.lfrT - - - - {add} {-t Button}}
       {.lfrT.but - - - - {} {-t "Press Me" -com "t::pdlg ok info {Button Pressed} {That hurt...} -root .win -head {Ouch! Wow!\nMiau!} -weight bold -timeout {5 Lab1}" }}
-      {.Lframe - - - - {} {-t Clocks} {add}}
-      {fra.pan.panR - - - - {} {-orient vertical} {add}}
-      {.lfrT - - - - {} {-t Progress} {add}}
-      {.lfrT.Pro - - - - {pack -fill both -expand 1} {-mode indeterminate} {} {~ start}}
-      {.lfrB - - - - {} {-t "Text of $::t::ftx1"} {add} {}}
+      {.Lframe - - - - {add} {-t Clocks}}
+      {fra.pan.panR - - - - {add} {-orient vertical}}
+      {.lfrT - - - - {add} {-t Progress}}
+      {.lfrT.Pro - - - - {pack -fill both -expand 1} {-mode indeterminate} {%w start}}
+      {.lfrB - - - - {add} {-t "Text of $::t::ftx1"}}
       {.lfrB.stat - - - - {pack -side bottom} {-array {
             {Row:       -font {-slant italic -size 10}} 7
             {" Column:" -font {-slant italic -size 10}} 5
@@ -293,12 +293,12 @@ namespace eval t {
       {fra1 - - 1 1 {-st w}}
       {.laB0  - - 1 1 {-st w} {-t "Enabled widgets"}}
       {.laB  fra1.laB0 T 1 1 {-st w -pady 1} {-t "label" -font "-weight bold -size 11"}}
-      {.buTRun fra1.laB T 1 1 {-st w} {-t "button" -com ::t::Pressed}
-        {} {eval {
+      {.buTRun fra1.laB T 1 1 {-st w} {-t "button" -com ::t::Pressed} 
+        {eval {
           ##################################################################
           # The last element of widget record is Tcl command being the last.
           # executed, i.e. after making the current widget.
-          # HERE we have a demo procedure (for previous -comm option)
+          # Here is a definition of procedure that makes a button to blink.
           ##################################################################
           proc ::t::Pressed {} {
             if {[[::t::pave BuTRun] cget -text]!="button"} return
@@ -369,7 +369,7 @@ namespace eval t {
       {frAT.sbH frAT.textNT T - - {pack}}
     } .win.fra.fra.nbk.f4 {
       {can - - - - {pack} {-h 130 -w 360}
-        {} {eval {
+        {eval {
           ##################################################################
           # This code is taken from Tk's demos/ctext.tcl
           proc mkTextConfigPie {w x y a option value color} {
@@ -799,7 +799,7 @@ where:
     }
   }
 
-} ;# end of namespace
+} ;# end of ::t namespace
 
 ###########################################################################
 # Run the test

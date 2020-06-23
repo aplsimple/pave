@@ -50,7 +50,7 @@ namespace eval ::apave {
 {Sandy         #211D1C #27201F #FEFAEB #F7EEC5 #523A0A #82744F #FFFFFF  #B66425 grey    #B66425 #FFFFFF #82744F - #e4dbb2 #000 #001 #002 #003 #004 #005 #006 #007}
 {Darcula #a6a6a6 #A1ACB6 #272727 #303030 #B09869 #2F5692 #EDC881 #a0a0a0 grey #f0a471 #B09869 #1e1e1e - #444444 #000 #001 #002 #003 #004 #005 #006 #007}
 {Sleepy #daefd0 #D0D0D2 #43484a #2E3436 #CB956D #626D71 #f8f8f8 #ffffff grey #cbae70 #B09869 #1e1e1e - #3b4143 #000 #001 #002 #003 #004 #005 #006 #007}
-{African black black #ffca8a #ffffb4 brown #855d4c #ffff9c red grey SaddleBrown #3b1516 #f9b777 - #ffe7a7 #000 #001 #002 #003 #004 #005 #006 #007}
+{African black black #ffe2a2 #ffffb4 brown #855d4c #ffff9c red grey SaddleBrown #3b1516 #f9b777 - #ffe7a7 #000 #001 #002 #003 #004 #005 #006 #007}
 {Florid black darkgreen lightgrey white brown green yellow red grey darkcyan darkgreen lightgreen - #dff4df #000 #001 #002 #003 #004 #005 #006 #007}
 {Inkpot #d3d3ff #AFC2FF #05050e #1E1E27 #a4a4e5 #4E4E8F #fdfdfd #ffffff grey #545495 #fdfdfd #4E4E8F - #292936 #000 #001 #002 #003 #004 #005 #006 #007}
 {TKE-Default white white black #282828 white blue white #9fa608 grey orange white black - #383838 #000 #001 #002 #003 #004 #005 #006 #007}

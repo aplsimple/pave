@@ -55,10 +55,10 @@ catch {package require tooltip} ;# optional (though necessary everywhere:)
 
 namespace eval ::apave {
 
-  ;# default grid options & attributes of widgets
+  ;# default grid options & attributes of widgets (no abbreviations here)
   variable _Defaults [dict create \
     "but" {{} {}} \
-    "buT" {{} {-w -20 -pady 1}} \
+    "buT" {{} {-width -20 -pady 1}} \
     "can" {{} {}} \
     "chb" {{} {}} \
     "chB" {{} {-relief sunken -padx 6 -pady 2}} \
@@ -77,8 +77,8 @@ namespace eval ::apave {
     "fra" {{} {}} \
     "ftx" {{} {}} \
     "frA" {{} {}} \
-    "lab" {{-st w} {}} \
-    "laB" {{-st w} {}} \
+    "lab" {{-sticky w} {}} \
+    "laB" {{-sticky w} {}} \
     "lfr" {{} {}} \
     "lfR" {{} {-relief groove}} \
     "lbx" {{} {}} \
@@ -93,12 +93,12 @@ namespace eval ::apave {
     "raD" {{} {-padx 6 -pady 2}} \
     "sca" {{} {-orient horizontal}} \
     "scA" {{} {-orient horizontal}} \
-    "sbh" {{-st ew} {-orient horizontal -takefocus 0}} \
-    "sbH" {{-st ew} {-orient horizontal -takefocus 0}} \
-    "sbv" {{-st ns} {-orient vertical -takefocus 0}} \
-    "sbV" {{-st ns} {-orient vertical -takefocus 0}} \
-    "seh" {{-st ew} {-orient horizontal}} \
-    "sev" {{-st ns} {-orient vertical}} \
+    "sbh" {{-sticky ew} {-orient horizontal -takefocus 0}} \
+    "sbH" {{-sticky ew} {-orient horizontal -takefocus 0}} \
+    "sbv" {{-sticky ns} {-orient vertical -takefocus 0}} \
+    "sbV" {{-sticky ns} {-orient vertical -takefocus 0}} \
+    "seh" {{-sticky ew} {-orient horizontal}} \
+    "sev" {{-sticky ns} {-orient vertical}} \
     "siz" {{} {}} \
     "spx" {{} {}} \
     "spX" {{} {}} \
@@ -107,8 +107,8 @@ namespace eval ::apave {
                -showseparators 1}} \
     "tex" {{} {-undo 1 -maxundo 0 -highlightthickness 2 -insertwidth 0.6m}} \
     "tre" {{} {}} \
-    "h_" {{-st ew -csz 3 -padx 3} {}} \
-    "v_" {{-st ns -rsz 3 -pady 3} {}}]
+    "h_" {{-sticky ew -csz 3 -padx 3} {}} \
+    "v_" {{-sticky ns -rsz 3 -pady 3} {}}]
   variable apaveDir [file dirname [info script]]
   variable _AP_ICO { none folder OpenFile SaveFile font color date help home \
     undo redo run tools file find search replace view edit config misc \
@@ -492,30 +492,6 @@ oo::class create ::apave::APave {
 
     # Expands shortened options.
 
-    #? set res ""
-    #? foreach {optname optvalue} $options {
-      #? switch -- $optname {
-        #? -st     {set opt -sticky}
-        #? -com    {set opt -command}
-        #? -t      {set opt -text}
-        #? -w      {set opt -width}
-        #? -h      {set opt -height}
-        #? -var    {set opt -variable}
-        #? -tvar   {set opt -textvariable}
-        #? -lvar   {set opt -listvariable}
-        #? -ro     {set opt -readonly}
-        #? -my     {set opt -myown}
-        #? -cm     {set opt -centerme}
-        #? default {set opt $optname}
-      #? }
-      #? if {$optvalue eq ""} {
-        #? append res " $opt"
-      #? } else {
-        #? append res " $opt {$optvalue}"
-      #? }
-    #? }
-    #? return [string trimleft $res]
-
     set options [string map {
       " -st " " -sticky "
       " -com " " -command "
@@ -526,8 +502,6 @@ oo::class create ::apave::APave {
       " -tvar " " -textvariable "
       " -lvar " " -listvariable "
       " -ro " " -readonly "
-      " -my " " -myown "
-      " -cm " " -centerme "
     } " $options"]
     return $options
   }
@@ -1008,7 +982,16 @@ oo::class create ::apave::APave {
           ;# these options need translating \\n to \n
           # catch {set val [subst -nocommands -novariables $val]}
           set val [string map [list \\n \n \\t \t] $val]
+          set opt -text
         }
+        -st {set opt -sticky}
+        -com {set opt -command}
+        -w {set opt -width}
+        -h {set opt -height}
+        -var {set opt -variable}
+        -tvar {set opt -textvariable}
+        -lvar {set opt -listvariable}
+        -ro {set opt -readonly}
       }
       lappend opts $opt \{$val\}
     }
@@ -2119,7 +2102,7 @@ oo::class create ::apave::APave {
     #   options - grid/pack options
     #   attrs - attributes of widget
     #   add - if set, replaces grid/pack with "add" command
-    #   comm - a command executed after the creation of widget ("~" is its name)
+    #   comm - a command executed after the creation of widget ("%w" is its name)
     # First 3 items are mandatory, others are set at need.
     #
     # Called by *paveWindow* method to process a portion of widgets.
@@ -2154,7 +2137,7 @@ oo::class create ::apave::APave {
         continue
       }
       lassign $lst1 name neighbor posofnei rowspan colspan \
-        options1 attrs1 add1 comm1
+        options1 attrs1 comm1
       set prevw $name
       lassign [my NormalizeName name i lwidgets] name wname
       lassign [my NormalizeName neighbor i lwidgets] neighbor
@@ -2212,8 +2195,8 @@ oo::class create ::apave::APave {
       if {$neighbor ne "#"} {
         set options [my GetIntOptions $w $options $row $rowspan $col $colspan]
         set pack [string trim $options]
-        if {$add1 ne ""} {
-          set comm "[winfo parent $wname] add $wname [string range $add1 4 end]"
+        if {[string first "add" $pack]==0} {
+          set comm "[winfo parent $wname] add $wname [string range $pack 4 end]"
           {*}$comm
         } elseif {[string first "pack" $pack]==0} {
           set opts [string trim [string range $pack 5 end]]
@@ -2228,7 +2211,7 @@ oo::class create ::apave::APave {
         }
       }
       if {$comm1 ne ""} {
-        set comm1 [string map [list ~. $wname. "~ " "$wname "] $comm1]
+        set comm1 [string map [list %w. $wname. "%w " "$wname "] $comm1]
         {*}$comm1
       }
       lappend lused [list $name $row $col $rowspan $colspan]
@@ -2272,7 +2255,7 @@ oo::class create ::apave::APave {
   #   options - grid/pack options
   #   attrs - attributes of widget
   #   add - if set, replaces grid/pack with "add" command
-  #   comm - a command executed after the creation of widget ("~" is its name)
+  #   comm - a command executed after the creation of widget ("%w" is its name)
   # First 3 items are mandatory, others are set at need.
   #
   # This method calls *paveWindow* in a cycle, to process a current
