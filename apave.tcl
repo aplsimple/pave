@@ -492,29 +492,44 @@ oo::class create ::apave::APave {
 
     # Expands shortened options.
 
-    set res ""
-    foreach {optname optvalue} $options {
-      switch -- $optname {
-        -st     {set opt -sticky}
-        -com    {set opt -command}
-        -t      {set opt -text}
-        -w      {set opt -width}
-        -h      {set opt -height}
-        -var    {set opt -variable}
-        -tvar   {set opt -textvariable}
-        -lvar   {set opt -listvariable}
-        -ro     {set opt -readonly}
-        -my     {set opt -myown}
-        -cm     {set opt -centerme}
-        default {set opt $optname}
-      }
-      if {$optvalue eq ""} {
-        append res " $opt"
-      } else {
-        append res " $opt {$optvalue}"
-      }
-    }
-    return [string trimleft $res]
+    #? set res ""
+    #? foreach {optname optvalue} $options {
+      #? switch -- $optname {
+        #? -st     {set opt -sticky}
+        #? -com    {set opt -command}
+        #? -t      {set opt -text}
+        #? -w      {set opt -width}
+        #? -h      {set opt -height}
+        #? -var    {set opt -variable}
+        #? -tvar   {set opt -textvariable}
+        #? -lvar   {set opt -listvariable}
+        #? -ro     {set opt -readonly}
+        #? -my     {set opt -myown}
+        #? -cm     {set opt -centerme}
+        #? default {set opt $optname}
+      #? }
+      #? if {$optvalue eq ""} {
+        #? append res " $opt"
+      #? } else {
+        #? append res " $opt {$optvalue}"
+      #? }
+    #? }
+    #? return [string trimleft $res]
+
+    set options [string map {
+      " -st " " -sticky "
+      " -com " " -command "
+      " -t " " -text "
+      " -w " " -width "
+      " -h " " -height "
+      " -var " " -variable "
+      " -tvar " " -textvariable "
+      " -lvar " " -listvariable "
+      " -ro " " -readonly "
+      " -my " " -myown "
+      " -cm " " -centerme "
+    } " $options"]
+    return $options
   }
 
   #########################################################################

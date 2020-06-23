@@ -15,8 +15,8 @@ cd $::testdirname
 lappend auto_path "$::testdirname/.." "$::testdirname"
 set apave_version "apave [package require apave]"
 
-set ::emdir [file normalize [file join $::testdirname ../../e_menu]]
-catch {source [file join $::emdir e_menu.tcl]}
+set ::e_menu_dir [file normalize [file join $::testdirname ../../e_menu]]
+catch {source [file join $::e_menu_dir e_menu.tcl]}
 
 namespace eval t {
 
@@ -795,7 +795,7 @@ where:
       set cs2 [pave csCurrent]
       if {$cs!=$cs2} {toolBut 4 $cs2}
     } else {
-      pdlg ok $icon ERROR " Not found e_menu.tcl in directory:\n $::emdir" -t 1
+      pdlg ok $icon ERROR " Not found e_menu.tcl in directory:\n $::e_menu_dir" -t 1
     }
   }
 
