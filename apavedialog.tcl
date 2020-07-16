@@ -931,9 +931,11 @@ oo::class create ::apave::APaveDialog {
       set $rotext [string trimright [[my TexM] get 1.0 end]]
     }
     destroy $_pdg(win).dia
+    update
     # pause a bit and restore the old focus
     if {$focusback ne "" && [winfo exists $focusback]} {
-      after 50 [list if "\[winfo exist $focusback\]" "focus -force $focusback" "focus ."]
+      set w ".[lindex [split $focusback .] 1]"
+      after 50 [list if "\[winfo exist $focusback\]" "focus -force $focusback" elseif "\[winfo exist $w\]" "focus $w"]
     } else {
       after 50 list focus .
     }

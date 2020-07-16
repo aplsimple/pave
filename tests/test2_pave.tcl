@@ -516,6 +516,7 @@ where:
       if {$t::ans4==11} {[pave ChbRestart] configure -state disabled}
     }
     set ::t::newCS [apave::cs_Non]
+    pave untouchWidgets *buTClr*
     toolBut 0
 
     # Open the window at last

@@ -26,6 +26,7 @@ namespace eval ::apave {
   array set ::apave::_C_ [list]
   set ::apave::_CS_(initall) 1
   set ::apave::_CS_(initWM) 1
+  set ::apave::_CS_(textFont) "Mono"
   set ::apave::_CS_(!FG) #000000
   set ::apave::_CS_(!BG) #c3c3c3
   set ::apave::_CS_(expo,tfg1) "-"
@@ -485,7 +486,7 @@ oo::class create ::apave::ObjectTheming {
 
     if {$::apave::_CS_(initall)} {
       my basicFontSize 10 ;# initialize main font size
-      my basicTextFont "TkTextFont" ;# initialize main font for text
+      my basicTextFont $::apave::_CS_(textFont) ;# initialize main font for text
       my ColorScheme  ;# initialize default colors
       set ::apave::_CS_(initall) 0
     }
@@ -513,7 +514,7 @@ oo::class create ::apave::ObjectTheming {
 
     catch {font delete apaveFontMono}
     catch {font delete apaveFontDef}
-    font create apaveFontMono -family Mono -size $::apave::_CS_(fs)
+    font create apaveFontMono -family $::apave::_CS_(textFont) -size $::apave::_CS_(fs)
     font create apaveFontDef -family $::apave::_CS_(defFont) -size $::apave::_CS_(fs)
     ttk::style configure "." \
       -background        $tbg1 \
@@ -878,6 +879,9 @@ oo::class create ::apave::ObjectTheming {
         my Ttk_style map $ts -foreground [list disabled $tfgD readonly $tfgD selected $tfgS]
         my Ttk_style map $ts -background [list disabled $tbgD readonly $tbgD selected $tbgS]
       }
+    }
+    foreach ts {TRadiobutton TCheckbutton} {
+      ttk::style map $ts -background [list focus $tbg2 !focus $tbg1]
     }
     # non-themed widgets of button and entry types
     foreach ts [my NonThemedWidgets button] {
@@ -1253,9 +1257,9 @@ oo::class create ::apave::ObjectTheming {
     # If 'textfont' is set, this method sets it.
 
     if {$textfont ne ""} {
-      return [set ::apave::_CS_(textfont) $textfont]
+      return [set ::apave::_CS_(textFont) $textfont]
     } else {
-      return $::apave::_CS_(textfont)
+      return $::apave::_CS_(textFont)
     }
   }
 

@@ -707,7 +707,8 @@ oo::class create ::apave::APave {
     # Invokes a button's action after a timeout.
     #   w - button's path
     #   tmo - timeout in sec.
-    #   lbl - optional label, where seconds to wait are displayed
+    #   lbl - label widget, where seconds to wait are displayed
+    #   lbltext - original text of label
 
     if {$tmo>0} {
       catch {set lbl [my $lbl]}
@@ -731,7 +732,8 @@ oo::class create ::apave::APave {
     # Checks if the timeout button is alive & focused; if not, cancels the timeout.
     #   w - button's path
     #   tmo - timeout in sec.
-    #   lbl - optional label, where seconds to wait are displayed
+    #   lbl - label widget, where seconds to wait are displayed
+    #   lbltext - original text of label
 
     if {[winfo exists $lbl]} {
       if {[focus] in [list $w ""]} {
@@ -2357,7 +2359,7 @@ oo::class create ::apave::APave {
     }
     wm minsize $win [set w [winfo width $win]] [set h [winfo height $win]]
     if {$inpgeom == ""} {  ;# final geometrizing with actual sizes
-      if {$ry<40 && $root != "."} { 
+      if {($h/2-$ry-$rh/2)>30 && $root != "."} { 
         # ::tk::PlaceWindow needs correcting in rare cases, namely:
         # when 'root' is of less sizes than 'win' and at screen top
         wm geometry $win [my CenteredXY $rw $rh $rx $ry $w $h]

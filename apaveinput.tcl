@@ -34,7 +34,7 @@
 
 package require Tk
 
-package provide apave 3.0a2
+package provide apave 3.0.1
 
 source [file join [file dirname [info script]] apavedialog.tcl]
 
@@ -127,6 +127,11 @@ oo::class create ::apave::APaveInput {
     if {$iopts ne {}} {
       my initInput  ;# clear away all internal vars
     }
+    if {[string match "*Mono*" "[font families]"]} {
+      set Mfont "Mono"
+    } else {
+      set Mfont TkFixedFont ;#"Courier"
+    }
     set pady "-pady 2"
     if {[set focusopt [::apave::getOption -focus {*}$args]] ne ""} {
       set focusopt "-focus $focusopt"
@@ -149,11 +154,6 @@ oo::class create ::apave::APaveInput {
       switch -- $typ {
         ch { set tvar "-var" }
         sp { set gopts "$gopts -expand 0 -side left"}
-      }
-      if {[string match "*Mono*" "[font families]"]} {
-        set Mfont "Mono"
-      } else {
-        set Mfont TkFixedFont ;#"Courier"
       }
       set framename fraM.fra$name
       if {$typ in {lb te tb}} {  ;# the widgets sized vertically
@@ -248,19 +248,30 @@ oo::class create ::apave::APaveInput {
         }
         la {
           if {$prompt ne ""} { set prompt "-t \"$prompt\" " } ;# prompt as -text
-          lappend inopts [list $ff - - - - "pack $gopts" "$prompt$attrs"]
+          lappend inopts [list $ff - - - - "pack -anchor w $gopts" "$prompt$attrs"]
           continue
         }
-        bu {
-          if {$prompt ne ""} { set prompt "-t \"$prompt\" " } ;# prompt as -text
+        bu - ch {
+          set prompt ""
           if {$toprev eq ""} {
-            lappend inopts [list $ff - - - - "pack -side left -expand 1 -fill both $gopts" "$prompt$attrs"]
+            lappend inopts [list $ff - - - - \
+              "pack -side left -expand 1 -fill both $gopts" "$tvar $vv $attrs"]
           } else {
-            lappend inopts [list $frameprev.$name - - - - "pack -side left $gopts" "$prompt$attrs"]
+            lappend inopts [list $frameprev.$name - - - - \
+              "pack -side left $gopts" "$tvar $vv $attrs"]
+          }
+          if {$vv ne ""} {
+            if {![info exist $vv]} {
+              catch {
+                if {$vsel eq ""} {set vsel 0}
+                set $vv $vsel
+              }
+            }
           }
         }
         default {
-          lappend inopts [list $ff - - - - "pack -side right -expand 1 -fill x $gopts" "$tvar $vv $attrs"]
+          lappend inopts [list $ff - - - - \
+            "pack -side left -expand 1 -fill x $gopts" "$tvar $vv $attrs"]
           if {$vv ne ""} {
             if {![info exist $vv]} {catch {set $vv $vsel}}
           }
@@ -270,7 +281,7 @@ oo::class create ::apave::APaveInput {
         lassign $msgLab lab msg
         set lab [my parentWName [lindex $inopts end 0]].$lab
         if {$msg ne ""} {set msg "-t {$msg}"}
-        lappend inopts [list $lab - - - - "pack -side right -expand 1 -fill x" $msg]
+        lappend inopts [list $lab - - - - "pack -side left -expand 1 -fill x" $msg]
       }
       if {![info exist $vv]} {set $vv ""}
       lappend _savedvv $vv [set $vv]

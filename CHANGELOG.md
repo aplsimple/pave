@@ -1,26 +1,53 @@
 # Last changes:
 
+Version `3.0.1 (17 Jul'20)`
+
+  - ::tk::PlaceWindow being helped again
+
+
+Version `3.0b8 (27 Jun'20)`
+
+  - version bound to e_menu's
+  - `chb` value & appearance amended
+  - `add` command moved to grid/pack item; old `add` item removed
+  - `-toprev` attribute for `but` & `chb` in input dlg
+  - `but` in input dlg
+  - errors of input dialog are caught and messaged
+  - readonly text's `-takefocus` amended
+  - `-myown` attribute
+  - mass commenting of methods & procs
+  - reference docs in Ruff!
+  - `Paste` event removes selection in text
+  - `-timeout` option for buttons & dialogs
+  - `But*` & `Lab*` in dialogs
+  - `::apave::paveObj` instead `themeObj`
+  - CS amended a lot
+  - fixed issue with `-lbxname` option
+  - `spx/spX` included in toolbar
+  - changing default font size
+
+
 Version `2.9b4 (1 Jun'20)`
 
-  - 'tcl' sort of widget (to make Tcl code in widget list)
+  - `tcl` sort of widget (to make Tcl code in widget list)
   - -msgLab option of input dialog
-  - \n and \t  for 'tex'
+  - \n and \t  for `tex`
   - tkwait visibility added
   - ::tk::PlaceWindow supported
   - a bit of new CS
   - renaming CS methods
-  - 'setFocus' finds -tabnext widget by glob match, e.g. OK for a button
-  - 'setDefaultAttrs' to set default attributes
-  - 'pobj paveWindow' is preferred to the old 'pobj window' (kept on for
+  - `setFocus` finds -tabnext widget by glob match, e.g. OK for a button
+  - `setDefaultAttrs` to set default attributes
+  - `pobj paveWindow` is preferred to the old `pobj window` (kept on for
     compatibility)
-  - 'UpdateSelectAttrs' allows to change selection atrributes in run-time;
+  - `UpdateSelectAttrs` allows to change selection atrributes in run-time;
     well fit to set "!fosus color" of -selectfg/bg for some non-ttk widgets
   - sequence of the previous:
     initial selectfg/bg set to "!fosus color" for lbx/tbl/flb/spX/cbx/fco
   - cbx colors amended
   - -ALL option for lbx/tbl/flb: if true, it returns a list of 3 items -
     index, selection, item list (by default, only selection is returned)
-  - 'subst' for -array option, to pass a variable value
+  - `subst` for -array option, to pass a variable value
   - test2_pave.tcl adjusted, for these two changes
   - F2 hotkey added to choosers' entries (fil, dir etc.)
   - "-takefocus 0" as default for choosers' buttons (fil, dir etc.)
@@ -30,12 +57,12 @@ Version `2.9b4 (1 Jun'20)`
 
 Version `2.8 (24 May'20)`
 
-  - 'nbk' widget type for ttk::notebook
-  - 'pack forget' for layouts
+  - `nbk` widget type for ttk::notebook
+  - `pack forget` for layouts
   - blinking by default bg removed
   - popup menus got their coloring with CS
-  - 'themingPopup' method to solve all popup CS issues
-  - 'subst vars' allowed in value fields of 'input' dialog
+  - `themingPopup` method to solve all popup CS issues
+  - `subst vars` allowed in value fields of `input` dialog
   - -activefg/bg for non-ttk buttons
   - statusbar layout corrected (.neighbor allowed, as old neighbor)
   - test2_pave.tcl got icons & new statusbar (the old in comments)
