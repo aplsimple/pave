@@ -569,10 +569,10 @@ oo::class create ::apave::APaveDialog {
     set focusback [focus]
     set focusmatch ""
     # options of dialog
-    lassign "" chmsg geometry optsLabel optsMisc optsFont optsFontM \
-               rotext root head optsHead hsz binds postcom onclose timeout
+    lassign "" chmsg geometry optsLabel optsMisc optsFont optsFontM root ontop \
+               rotext head optsHead hsz binds postcom onclose timeout modal
     set tags ""
-    set wasgeo [set textmode [set ontop 0]]
+    set wasgeo [set textmode 0]
     set cc [set themecolors [set optsGrid ""]]
     set readonly [set hidefind 1]
     set curpos "1.0"
@@ -618,10 +618,11 @@ oo::class create ::apave::APaveDialog {
         -hsz {append hsz " -size $val"}
         -focus {set focusmatch "$val"}
         -theme {append themecolors " {$val}"}
-        -ontop {set ontop 1}
+        -ontop {set ontop "-ontop $val"}
         -post {set postcom $val}
         -focusback {set focusback $val}
         -timeout {set timeout $val}
+        -modal {set modal "-modal $val"}
         default {
           append optsFont " $opt $val"
           if {$opt ne "-family"} {
@@ -899,7 +900,7 @@ oo::class create ::apave::APaveDialog {
     catch "$binds"
     set args [::apave::removeOptions $args -focus]
     my showModal $_pdg(win).dia -themed [string length $themecolors]\
-      -focus $focusnow -geometry $geometry {*}$root -ontop $ontop {*}$args
+      -focus $focusnow -geometry $geometry {*}$root {*}$modal {*}$ontop {*}$args
     oo::objdefine [self] unexport FindInText InitFindInText Pdg
     set pdgeometry [winfo geometry $_pdg(win).dia]
     # the dialog's result is defined by "pave res" + checkbox's value

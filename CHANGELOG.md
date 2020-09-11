@@ -1,5 +1,14 @@
 # Last changes:
 
+Version `3.1 (12 Sep'20)`
+
+  - bartabs package v1.0
+  - 'nbk' attributes: -traverse yes/no, -select tab
+  - 'lab' got "-state disabled" attribute
+  - "-modal false" option of showModal makes the window non-modal
+  - displayText got 'pos' parameter (position of cursor)
+  - BUGFIX: text attribute for choosers could not contain spaces
+
 Version `3.0.1 (17 Jul'20)`
 
   - ::tk::PlaceWindow being helped again

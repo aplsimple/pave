@@ -1,26 +1,27 @@
 #! /usr/bin/env tclsh
-
-###########################################################################
+# _______________________________________________________________________ #
 #
-# Test 2 demonstrates a bit more complex dialog "Preferences".
+# Test 2 demonstrates most features of apave package.
 # Note how the pave is applied to the frames of notebook.
-#
-###########################################################################
+# _______________________________________________________________________ #
 
 set tcltk_version "Tcl/Tk [package require Tk]"
 catch {package require tooltip} ;# may be absent
 
 set ::testdirname [file normalize [file dirname [info script]]]
 cd $::testdirname
-lappend auto_path "$::testdirname/.." "$::testdirname"
-set apave_version "apave [package require apave]"
+set ::test2dirs [list "$::testdirname/.." "$::testdirname" "$::testdirname/../bartabs"]
+lappend auto_path {*}$::test2dirs
+set pkg_versions "apave [package require apave]"
+append pkg_versions ", bartabs [package require bartabs]"
 
 set ::e_menu_dir [file normalize [file join $::testdirname ../../e_menu]]
 catch {source [file join $::e_menu_dir e_menu.tcl]}
 
 namespace eval t {
 
-  variable ftx1 [file join $::testdirname [file tail [info script]]]
+  variable ftx0 [file join $::testdirname [file tail [info script]]]
+  variable ftx1 $ftx0
   # variables used in layouts
   variable v 1 v2 1 c1 0 c2 0 c3 0 en1 "" en2 "" tv 1 tv2 "enter value" sc 0 sc2 0 cb3 "Content of test2_fco.dat" lv1 {}
   variable fil1 "" fis1 "" dir1 "" clr1 "" fon1 "" dat1 ""
@@ -31,7 +32,8 @@ namespace eval t {
   variable pdlg
   variable pave
 
-# This code is taken from Tk's demos/ttkpane.tcl
+# _________________ The code from Tk's demos/ttkpane.tcl ________________ #
+
   proc fillclock {w} {
     # Fill the clocks pane
     set i 0
@@ -73,8 +75,7 @@ namespace eval t {
     }
   }
 
-  #########################################################################
-  # test's main proc
+# ______________________ The test's main procedure ______________________ #
 
   proc test2_pave {} {
 
@@ -83,7 +84,8 @@ namespace eval t {
     set firstin [expr {$::t::newCS==[apave::cs_Non]}]
     apave::APaveInput create pdlg .win
     apave::APaveInput create pave .win $::t::newCS
-    pave configTooltip black yellow -font {-size 11}
+    pave configTooltip black #FBFB95 -font {-size 11}
+    pave untouchWidgets *buTClr*
     if {!$firstin} {pave basicFontSize $::t::fontsz}
     set ::t::filetxt [::apave::readTextFile $::t::ftx1]
     set ::t::tblcols {
@@ -131,7 +133,7 @@ namespace eval t {
 
     # making main window object and dialog object
     pave configure edge "@@"
-    pave makeWindow .win.fra "Preferences: $::apave_version"
+    pave makeWindow .win.fra "Packages: $::pkg_versions"
     pave paveWindow .win.fra {
       {frat - - 1 20 {-st we} }
       {frat.toolTop - - - - {pack -side top} {-array {$::t::toolList}}}
@@ -157,7 +159,7 @@ namespace eval t {
         f3 {-text " Non-themed " -underline 1}
         f4 {-text " Misc. widgets " -underline 1}
         f5 {-text " Color schemes " -underline 1}
-        -traverse
+        -traverse yes -select f2
       }}
       {fra.nbk2 - - - - {pack forget -side top} {
         f1 {-text "First of View" -underline 1}
@@ -228,7 +230,7 @@ namespace eval t {
         -command {eval puts "2nd way ::t::opcvar = [set ::t::opcvar]"} }}
       {labtbl1 labOpc T 1 1 {-st e} {-t "Tablelist widget:\n\n(click on titles\nto sort)"}}
       {frAT labtbl1 L 1 9 {-st ew}}
-      {frAT.TblWid1 - - - - {pack -side left -fill x -expand 1} {-h 5 -lvar ::t::tbllist  -lbxsel buT -columns {$::t::tblcols} -ALL true}}
+      {frAT.TblWid1 - - - - {pack -side left -fill x -expand 1} {-h 5 -lvar ::t::tbllist  -lbxsel buT -columns {$::t::tblcols} -ALL yes}}
       {frAT.sbv frAT.tblWid1 L - - {pack}}
       {labB4 labtbl1 T 3 9 {-st ewns -rw 1} {-t "Some others options can be below"}}
     } .win.fra.fra.nbk.f2 {
@@ -277,7 +279,9 @@ namespace eval t {
       {fra.pan.panR - - - - {add} {-orient vertical}}
       {.lfrT - - - - {add} {-t Progress}}
       {.lfrT.Pro - - - - {pack -fill both -expand 1} {-mode indeterminate} {%w start}}
-      {.lfrB - - - - {add} {-t "Text of $::t::ftx1"}}
+      {.LfrB - - - - {add} {-t "Bar of tabs"}}
+      {.lfrB.BtsBar  - - - - {pack -side top -fill x} {::t::fillBarTabs %w}}
+      {.lfrB.LabEdit  - - - - {pack -side top -fill x}}
       {.lfrB.stat - - - - {pack -side bottom} {-array {
             {Row:       -font {-slant italic -size 10}} 7
             {" Column:" -font {-slant italic -size 10}} 5
@@ -397,7 +401,7 @@ namespace eval t {
       {cbx4 - - - - {pack} {-tvar ::cb2 -inpval MENU-readonly -values {MENU-readonly EVENT-readonly COMMAND-readonly} -state readonly}}
       {seh5 - - - - {pack -pady 9 -fill x}}
       {lab2 - - - - {pack} {-t "File content combobox (fco) contains text file(s) content. Its 'values' attribute is set like this:
-  -values {TEXT1 @@-div1 \" <\" -div2 > -ret true test1.txt@@ TEXT2 @@-pos 0 -len 7 -list {a b c} test2.txt@@ ...}
+  -values {TEXT1 @@-div1 \" <\" -div2 > -ret yes test1.txt@@ TEXT2 @@-pos 0 -len 7 -list {a b c} test2.txt@@ ...}
 where:
   TEXT1, TEXT2, ... TEXTN - optional text snippets outside of @@ ... @@ data sets
   @@ ... @@ - data set for a file, containing the file name and (optionally) its preceding options:
@@ -406,11 +410,11 @@ where:
       -pos, -len - position and length of substring to cut:
           if -pos omitted, -len characters from the beginning; if -len omitted, to the end of line
       -list - a list of items to put directly into the combobox
-      -ret - if set to true, means that the field is returned instead of full string
+      -ret - if set to yes, means that the field is returned instead of full string
   If there is only a single data set and no TEXT, the @@ marks may be omitted. The @@ marks are configured."}}
       {v_3 - - - - {pack} {-h 3}}
       {fco - - - - {pack} {-tvar t::cb3 -w 88 -tooltip "This 'fco' combobox contains: \
-      \n  1) four literal lines\n  2) data from 'test2_fco.dat' file" -values {COMMIT: @@-div1 " \[" -div2 "\] " -ret true test2_fco.dat@@   INFO: @@-pos 22 -list {{Content of test2_fco.dat} {another item} trunk DOC} test2_fco.dat@@}}}
+      \n  1) four literal lines\n  2) data from 'test2_fco.dat' file" -values {COMMIT: @@-div1 " \[" -div2 "\] " -ret yes test2_fco.dat@@   INFO: @@-pos 22 -list {{Content of test2_fco.dat} {another item} trunk DOC} test2_fco.dat@@}}}
       {siz - - - - {pack -side bottom -anchor se}}
     } .win.fra.fra.nbk.f5 {
 
@@ -459,9 +463,10 @@ where:
     # bindings and contents for text widget
     bind $wtex <ButtonRelease> [list t::textPos $wtex]
     bind $wtex <KeyRelease> [list t::textPos $wtex]
+    bind $wtex <<Modified>> ::t::tabModified
     pave displayText $wtex $::t::filetxt
     # at first, Ftx1 widget is editable
-    pave makePopup [pave Ftx1] false true
+    pave makePopup [pave Ftx1] no yes
     # we can use the Lframe method to get its name, similar to Text
     fillclock [pave Lframe]
 
@@ -504,6 +509,9 @@ where:
     # filling the menu
     after idle [list ::t::fillMenu]
 
+    # filling the bar of tabs (another way, instead of btsBar widget)
+    # after idle [list ::t::fillBarTabs [pave BtsBar]]
+
     if {$firstin} {
       set ::t::nextcs [apave::cs_Min]
       set ::t::prevcs [apave::cs_Max]
@@ -516,7 +524,6 @@ where:
       if {$t::ans4==11} {[pave ChbRestart] configure -state disabled}
     }
     set ::t::newCS [apave::cs_Non]
-    pave untouchWidgets *buTClr*
     toolBut 0
 
     # Open the window at last
@@ -562,9 +569,7 @@ where:
     return $res
   }
 
-  #########################################################################
-
-  # procedures for Help, Apply, Cancel, Ok etc.
+# ________________ Handlers for Help, Apply, Cancel etc. ________________ #
 
   # imitating help function
   proc helpProc {} {
@@ -595,7 +600,7 @@ where:
 
   # imitating save & exit function
   proc okProc {} {
-    pdlg ok info "SAVE" "Saving changes...\nCurtain." -weight bold -size 16
+    ::t::pdlg ok info "SAVE" "Saving changes...\nCurtain." -weight bold -size 16
     pave res .win 1
   }
 
@@ -604,7 +609,7 @@ where:
   }
 
   # imitating the toolbar functions
-  proc toolBut {num {cs -2} {starting false}} {
+  proc toolBut {num {cs -2} {starting no}} {
     if {$num in {3 4}} {
       [pave Menu] entryconfigure 2 -font {-slant roman -size 10}
     } elseif {$num == 2} {
@@ -628,7 +633,7 @@ where:
       }
       if {!$starting && $::t::restart} {
         if {$t::ans4<10} {
-          set t::ans4 [lindex [pdlg yesnocancel warn "RESTART" \
+          set t::ans4 [lindex [::t::pdlg yesnocancel warn "RESTART" \
             [restartHint $cs] NO -ch "Don't show again"] 0]
         }
         if {$t::ans4==1 || $t::ans4==11} {
@@ -652,6 +657,7 @@ where:
       set ::t::opcc [pave optionCascadeText [lindex $::t::opcColors $cs+$ic]]
       .win.fra.fra.nbk tab .win.fra.fra.nbk.f5 -text \
       " Color scheme $cs: [pave csGetName $cs]"
+      catch {::t::colorBar}
     }
     tooltip::tooltip [pave BuT_Img4] \
       "Next is $::t::nextcs: [pave csGetName $::t::nextcs]"
@@ -669,7 +675,7 @@ where:
   # ask about exiting
   proc exitProc {resExit} {
     upvar $resExit res
-    if {[pdlg yesno ques "EXIT" "\nClose the test?\n" NO]==1} {
+    if {[::t::pdlg yesno ques "EXIT" "\nClose the test?\n" NO]==1} {
       set res 0
     }
   }
@@ -683,7 +689,7 @@ where:
         pack forget .win.fra.fra.$::t::curTab
       }
       set ::t::curTab $tab
-      pack .win.fra.fra.$::t::curTab -expand true -fill both
+      pack .win.fra.fra.$::t::curTab -expand yes -fill both
       catch {
         .win.fra.fra.$::t::curTab select $arrayTab($::t::curTab)
       }
@@ -713,16 +719,21 @@ where:
     $m add command -label "Cut" -command {::t::msg ques "this is just a demo: no action"}
     $m add command -label "Copy" -command {::t::msg warn "this is just a demo: no action"}
     $m add command -label "Paste" -command {::t::msg err "this is just a demo: no action"}
+    $m add separator
+    $m add command -label "Reload the bar of tabs" -command {::t::RefillBar}
     set m .win.menu.help
-    $m add command -label "About" -command [list ::t::msg info "  It's a demo of <red> $::apave_version </red> package.\n\n  Details on the apave: \
+    $m add command -label "About" -command [list ::t::msg info "  It's a demo of\n  <red> $::pkg_versions </red> packages.\n\n  Details: \
 
-  https://aplsimple.github.io/en/tcl/pave\n\n  License: MIT.
+  https://aplsimple.github.io/en/tcl/pave
+  https://aplsimple.github.io/en/tcl/bartabs
+
+  License: MIT.
   _______________________________________
 
   <red> $::tcltk_version </red>
 
   <red> $::tcl_platform(os) $::tcl_platform(osVersion) </red>
-" -t 1 -w 43 -tags ::t::textTags]
+" -t 1 -w 46 -tags ::t::textTags]
   }
 
   proc tracer {varname args} {
@@ -730,15 +741,37 @@ where:
   }
   
   proc viewfile {} {
-#    set res [pdlg vieweditFile test2_fco.dat "" -h {1 20} -w {1 74} -rotext ::temp]
-    set res [pdlg vieweditFile test2_fco.dat "" -w 74 -h 20 -ro 0 -rotext ::temp]
+    set res [::t::pdlg vieweditFile test2_fco.dat "" -w 74 -h 20 -ro 0 -rotext ::temp]
     puts "\n------------\nResult: $res.\nContent:\n$::temp\n------------\n"
     unset ::temp
   }
   
   proc msg {icon message args} {
-    pdlg ok $icon [string toupper $icon] \n$message\n {*}$args
+    ::t::pdlg ok $icon [string toupper $icon] "\n$message\n" {*}$args
   }
+
+  proc restartit {} {
+    if {[set cs [pave csCurrent]]==[apave::cs_Non]} {set cs [apave::cs_Min]}
+    if {[::t::pdlg yesno warn "RESTART" [restartHint $cs]]} {
+      pave res .win [set ::t::newCS $cs]
+    }
+  }
+
+  proc e_menu {{fname ""}} {
+    if {[info commands ::em::main] ne ""} {
+      if {$fname eq ""} {set fname $::t::ftx1}
+      lassign [split [winfo geometry .win] x+] w h x y
+      set geo "350x1+[expr {$w+$x-350}]+$y"
+      set cs [pave csCurrent]
+      ::em::main -prior 1 -modal 1 -remain 0 "md=~/.tke/plugins/e_menu/menus" m=menu.mnu "f=$fname" "PD=~/PG/e_menu_PD.txt" "s=none" b=chromium h=~/DOC/www.tcl.tk/man/tcl8.6 "tt=xterm -fs 12 -geometry 90x30+400+100" w=32 g=$geo om=0 c=$cs dk=dock
+      set cs2 [pave csCurrent]
+      if {$cs!=$cs2} {toolBut 4 $cs2}
+    } else {
+      ::t::pdlg ok $icon ERROR " Not found e_menu.tcl in directory:\n $::e_menu_dir" -t 1
+    }
+  }
+
+# ________________ Handlers for tk_optionCascade widget _________________ #
 
   proc opcPre {args} {
     lassign $args a
@@ -782,28 +815,237 @@ where:
     if {$cs ne ""} {toolBut 4 $cs}
   }
 
-  proc restartit {} {
-    if {[set cs [pave csCurrent]]==[apave::cs_Non]} {set cs [apave::cs_Min]}
-    if {[pdlg yesno warn "RESTART" [restartHint $cs]]} {
-      pave res .win [set ::t::newCS $cs]
+# ____________________ Procedures for bartabs widget ____________________ #
+
+  # filling the bar of tabs
+  proc fillBarTabs {wframe {swredraw false}} {
+    if {![info exists ::BTS_REDRAW]} {set ::BTS_REDRAW 1}
+    if {$swredraw} {set ::BTS_REDRAW [expr {[incr ::BTS_REDRAW]%2}]}
+    set ::t::noname "<No name>"
+    set ::t::ansSelTab [set ::t::ansSwBta 0]
+    set wbase [pave LfrB]
+    set bar1Opts [list -wbar $wframe -wbase $wbase -lablen 16 \
+      -csel {::t::selTab %t} -cdel {::t::delTab %t} -redraw $::BTS_REDRAW \
+      -menu [list \
+      sep \
+      "com {Mark the tab} {::t::markTab %t} {} ::t::checkMark" \
+      "com {Append $::t::noname} {::t::addTab %t} {} ::t::checkStatic" \
+      "com {View selected} {::t::ViewSelTabs %b} {} {{!\[::bt isTab %t\]} Img20}" \
+      {com {Unselect all} {::bt unselectTab} {} {{![::bt isTab %bt]} Img22}} \
+      sep \
+      {com {Run %l} {::t::e_menu [::t::getTabFile %t]} {} {{![::bt isTab %t]} Img17 {} F5}} \
+      sep \
+      "mnu {Options} {} menusw {0 Img25}" \
+      "com {Switch -static option} {::t::switchBts %b %t -static} menusw ::t::switchAtt" \
+      "com {Switch -scrollsel option} {::t::switchBts %b %t -scrollsel} menusw ::t::switchAtt" \
+      "com {Switch -hidearrows option} {::t::switchBts %b %t -hidearrows} menusw ::t::switchAtt" \
+      "com {Switch -expand option} {::t::switchBts %b %t -expand} menusw ::t::switchAtt" \
+      "com {Switch -bd option} {::t::switchBts %b %t -bd} menusw ::t::switchAtt" \
+      "sep {} {} menusw" \
+      "mnu {Others} {} menusw.oth" \
+      "com {Switch -redraw option} {::t::RefillBar yes} menusw.oth ::t::switchAtt" \
+      "com {Switch -lablen option} {::t::switchBts %b %t -lablen} menusw.oth ::t::switchAtt" \
+      "com {Switch -fgsel option} {::t::switchBts %b %t -fgsel} menusw.oth ::t::switchAtt" \
+      "com {Switch -imagemark option} {::t::switchBts %b %t -imagemark} menusw.oth ::t::switchAtt" \
+      "com {Switch -padx} {::t::switchBts %b %t -padx} menusw.oth ::t::switchAtt" \
+      "com {Switch -pady} {::t::switchBts %b %t -pady} menusw.oth ::t::switchAtt" \
+      ]]
+    set ::t::tclfiles [list]
+    foreach dirname $::test2dirs {
+      foreach f [glob [file join $dirname *.tcl]] {
+        set f [file normalize $f]
+        set fname [file tail $f]
+        if {[lsearch -index 0 $::t::tclfiles $fname]>-1} {
+          set fname [file join {*}[lrange [file split $f] end-1 end]]
+        }
+        lappend ::t::tclfiles [list $fname $f]
+      }
+    }
+    foreach ff [set ::t::tclfiles [lsort -index 0 $::t::tclfiles]] {
+      set tab [lindex $ff 0]
+      if {[string match "bart*" $tab]} {
+        lappend bar1Opts -imagetab [list $tab Img45]
+      } else {
+        lappend bar1Opts -tab $tab
+      }
+    }
+    bartabs::Bars create ::bts                ;# ::bts is Bars object
+    set ::t::BID [::bts create ::bt $bar1Opts]  ;# ::bt is Bar object
+    set ::t::ftx1 $::t::ftx0
+    ::bt [::bt tabID [file tail $::t::ftx1]] show
+    bind [pave Text] <Control-Left> "::bt scrollLeft ; break"
+    bind [pave Text] <Control-Right> "::bt scrollRight ; break"
+    bind .win <F5> "::t::e_menu; break"
+    colorBar
+  }
+
+  proc colorBar {} {
+    set cs [pave csCurrent]
+    if {$cs>-1} {
+      lassign [pave csGet $cs] cfg2 cfg1 cbg2 cbg1 cfhh - - - - fgmark
+    } else {
+      set fgmark #168080
+    }
+    ::bt configure -fgmark $fgmark
+    ::bt draw
+  }
+
+  proc getTabFile {TID} {
+    set label [::bts $TID cget -text]
+    set i [lsearch -index 0 $::t::tclfiles $label]
+    return [lindex $::t::tclfiles $i 1]
+  }
+
+  proc selTab {TID} {
+    set tcurr [::bt cget -tabcurrent]
+    if {$tcurr in [::bt cget -mark] && $::t::ansSelTab<10} {
+      set fname [getTabFile $tcurr]
+      set ::t::ansSelTab [msg warn "The file $fname was marked.\nThere might be some actions taken before quitting it.\n\nHere the mark is removed if \"Don't show again\" is off.\nThe mark is also removed after selecting a tab." -ch "Don't show again" -modal 0]
+      if {$::t::ansSelTab<10} {::bts unmarkTab $tcurr}
+    }
+    set ::t::ftx1 [getTabFile $TID]
+    set ::t::filetxt [::apave::readTextFile $::t::ftx1]
+    pave displayText [pave Text] $::t::filetxt
+    [pave LabEdit] configure -text "$::t::ftx1" -padding {2 8 0 2}
+    ::bts unmarkTab $TID
+    return yes
+  }
+
+  proc delTab {TID} {
+    set fname [getTabFile $TID]
+    ;# just to play with BID (::bt is less wordy):
+    set BID [::bts $TID cget -BID]
+    if {$TID in [::bts $BID cget -mark]} {
+      msg warn "The file $fname was modified.\nThere might be some actions taken before its closing.\n\nThe test is just rejecting the closing.\nPress Ctrl+Z to undo and then close the file."
+      return no
+    }
+    return yes
+  }
+
+  proc tabModified {} {
+    ;# just to play with ::t::BID (::bt is less wordy):
+    if {[info exists ::t::BID]} {
+      set tcurr [::bts $::t::BID cget -tabcurrent]
+      if {[::bts isTab $tcurr]} {
+        if {[[pave Text] edit modified]} {
+          ::bts markTab $tcurr
+        } else {
+          ::bts unmarkTab $tcurr
+        }
+      }
     }
   }
 
-  proc e_menu {} {
-    if {[namespace exists ::em]} {
-      set cs [pave csCurrent]
-      ::em::main -prior 1 -modal 1 -remain 1 "md=~/.tke/plugins/e_menu/menus" m=utils.mnu "f=[info script]" "PD=~/PG/e_menu_PD.txt" "s=none" b=chromium h=~/DOC/www.tcl.tk/man/tcl8.6 "tt=xterm -fs 12 -geometry 90x30+400+100" t=1 w=25 g=+420+170 c=$cs
-      set cs2 [pave csCurrent]
-      if {$cs!=$cs2} {toolBut 4 $cs2}
+  proc addTab {TID} {
+    set newTID [::bt insertTab $::t::noname end Img32]
+    if {$newTID==""} {
+      set newTID [::bt tabID $::t::noname]
+      if {$newTID==""} {
+        msg err "\n Tab not created."
+        return
+      }
+    }
+    lappend ::t::tclfiles [list $::t::noname $::t::noname]
+    ::bts $newTID show
+  }
+
+  proc checkStatic {args} {
+    if {[::bt cget -static]} {return 2}
+    return {0 Img32}
+  }
+
+  proc checkMark {BID TID label} {
+    if {[::bt cget -static]} {return 2}
+    set res [checkStatic]
+    if {$TID in [::bt cget -mark]} {
+      set label [string map {Mark Unmark} $label]
+      set img Img13
     } else {
-      pdlg ok $icon ERROR " Not found e_menu.tcl in directory:\n $::e_menu_dir" -t 1
+      set label [string map {Unmark Mark} $label]
+      set img ""
+    }
+    return [list [expr {![::bt isTab $TID]}] $img $label]
+  }
+
+  proc markTab {TID} {
+    if {$TID in [::bt cget -mark]} {
+      ::bts unmarkTab $TID
+    } else {
+      ::bts markTab $TID
+    }
+  }
+
+  proc switchAtt {BID TID label} {
+    lassign $label -> opt
+    switch -- $opt {
+      -static - -scrollsel - -hidearrows - -expand - -bd - -redraw {
+        if {[::bt cget $opt]} {set img Img30} {set img Img31}
+        set res [list 0 $img]
+      }
+      -lablen - -fgsel - -pady - -padx {
+        set val [::bt cget $opt]
+        set res [list 0 "" "$label ($val)"]
+      }
+      -imagemark {
+        if {[::bt cget -static]} {return 2}
+        if {[::bt cget $opt] eq ""} {set img ""} {set img Img13}
+        set res [list 0 $img]
+      }
+      default {set res 0}
+    }
+    return $res
+  }
+
+  proc switchBts {BID TID optname args} {
+    set val [::bt cget $optname]
+    switch -- $optname {
+      -bd     {if {!$val} {set val 1} {set val 0}}
+      -lablen {if {!$val} {set val 16} {set val 0}}
+      -fgsel  {if {$val eq ""} {set val "."} else {set val ""}}
+      -pady - -padx {if {$val==10} {set val 3} else {set val 10}}
+      -imagemark {if {$val eq ""} {set val "Img13"} else {set val ""}}
+      default {if {[expr {$val eq "" || !$val}]} {set val yes} {set val no}}
+    }
+    ::bt configure $optname $val
+    if {$optname ne "-scrollsel"} {
+      ::bt clear
+      ::bt draw
+    }
+    set bwidth [::bt cget -width]
+    set twidth [::bts $TID cget -width]
+    if {$::t::ansSwBta<10} {
+      set ::t::ansSwBta [msg info "The \"$optname\" option is \"$val\".\n\n$BID's width is $bwidth.\n$TID's width is $twidth." -ch "Don't show again"]
+    }
+  }
+
+  proc ViewSelTabs {BID} {
+    set sellist ""
+    set fewsel [::bt $BID listFlag "s"] 
+    set tcurr [::bt $BID cget -tabcurrent]
+    foreach TID $fewsel {
+      set text [::bts $TID cget -text]
+      append sellist " TID: $TID, label: $text\n"
+    }
+    if {$sellist eq ""} {set sellist " None\n"}
+    set text [::bts $tcurr cget -text]
+    msg info " Selected tabs:\n$sellist \
+      \n Current tab: TID: $tcurr, label: $text\n\n Click on a tab while pressing Ctrl to select few tabs." -text 1
+  }
+
+  proc RefillBar {{swredraw false}} {
+    ::bts destroy
+    fillBarTabs [pave BtsBar] $swredraw
+    if {![info exists ::t::ansNewBar] || $::t::ansNewBar<10} {
+      set ::t::ansNewBar [msg info \
+        "New bar ID: $::t::BID.\nCurrent file: \"[file tail $::t::ftx1]\".\
+        \n\nWhile editing, use Ctrl+Left and Ctrl+Right to scroll files." \
+        -ch "Don't show again"]
     }
   }
 
 } ;# end of ::t namespace
 
-###########################################################################
-# Run the test
+# __________________________ Running the test ___________________________ #
 
 puts "\nThis is just a demo. Take it easy."
 set test2script $::t::ftx1
