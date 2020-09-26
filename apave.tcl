@@ -448,7 +448,7 @@ oo::class create ::apave::APave {
 
   #########################################################################
 
-  method IconA {icon} {
+  method iconA {icon} {
   
     # Gets icon attributes for buttons, menus etc.
     #   icon - name of icon
@@ -772,7 +772,7 @@ oo::class create ::apave::APave {
           ($ic2 ne "" && ( \
           [string match -nocase but$ic2 $w] || \
           [string match -nocase $ic2 $txt]))} {
-        append attrs " [my IconA $ic1]"
+        append attrs " [my iconA $ic1]"
         break
       }
     }
@@ -1728,26 +1728,26 @@ oo::class create ::apave::APave {
     }
     $pop delete 0 end
     if {$isRO} {
-      $pop add command {*}[my IconA copy] -accelerator Ctrl+C -label "Copy" \
+      $pop add command {*}[my iconA copy] -accelerator Ctrl+C -label "Copy" \
             -command "event generate $w <<Copy>>"
     } else {
-      $pop add command {*}[my IconA cut] -accelerator Ctrl+X -label "Cut" \
+      $pop add command {*}[my iconA cut] -accelerator Ctrl+X -label "Cut" \
             -command "event generate $w <<Cut>>"
-      $pop add command {*}[my IconA copy] -accelerator Ctrl+C -label "Copy" \
+      $pop add command {*}[my iconA copy] -accelerator Ctrl+C -label "Copy" \
             -command "event generate $w <<Copy>>"
-      $pop add command {*}[my IconA paste] -accelerator Ctrl+V -label "Paste" \
+      $pop add command {*}[my iconA paste] -accelerator Ctrl+V -label "Paste" \
             -command "event generate $w <<Paste>>"
       if {$istext} {
         $pop add separator
-        $pop add command {*}[my IconA undo] -accelerator Ctrl+Z -label "Undo" \
+        $pop add command {*}[my iconA undo] -accelerator Ctrl+Z -label "Undo" \
               -command "event generate $w <<Undo>>"
-        $pop add command {*}[my IconA redo] -accelerator Ctrl+Shift+Z -label "Redo" \
+        $pop add command {*}[my iconA redo] -accelerator Ctrl+Shift+Z -label "Redo" \
               -command "event generate $w <<Redo>>"
       }
     }
     if {$istext} {
       $pop add separator
-      $pop add command {*}[my IconA none] -accelerator Ctrl+A -label "Select All" \
+      $pop add command {*}[my iconA none] -accelerator Ctrl+A -label "Select All" \
         -command "$w tag add sel 1.0 end"
       bind $w <Control-a> "$w tag add sel 1.0 end; break"
     }

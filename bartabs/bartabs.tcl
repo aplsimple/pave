@@ -7,7 +7,7 @@
 # _______________________________________________________________________ #
 
 package require Tk
-package provide bartabs 1.0
+package provide bartabs 1.0.1
 catch {package require tooltip} ;# optional (though necessary everywhere:)
 
 # __________________ Common data of bartabs:: namespace _________________ #
@@ -16,9 +16,6 @@ namespace eval bartabs {
 
   # IDs for new bars & tabs
   variable NewBarID -1 NewTabID -1 NewTabNo -1
-
-  # registered bars
-  variable BarList [list]
 
   # images made by base64
   image create photo bts_ImgLeft \
@@ -115,9 +112,10 @@ OXfnYjwJWbde73itduYUoTHY6/ep0IOn8bWaKMyRMKdoAmgtffE8uHRcNVFY6P7n27s9ny4x/5YA
 wE4nN4X9rZoHZk4tqIjYIzDzAEky9Lq55yQZImo0PIKcidPJg06/vr2nZtKieh27nQ6t3YPz1Z0o
 yROnlsp+4xkRFgAuSmqo6nf+ATq/yK22zWynAAAAAElFTkSuQmCC}
 
+  variable BarsList [list]
   proc drawAll {} {
     # Draws all bars. Used at updating themes etc.
-    foreach bar $bartabs::BarList {[lindex $bar 1] drawAll}
+    foreach bars $bartabs::BarsList {$bars drawAll}
   }
 }
 
@@ -616,13 +614,15 @@ method Tab_BeCurrent {} {
 
   if {[set TID [my ID]] in {"" "-1"} || [my Disabled $TID]} return
   set BID [my $TID cget -BID]
-  my $TID Tab_Cmd -csel
+  my $TID Tab_Cmd -csel  ;# command before the selection shown
   my Tab_MarkBar $BID $TID
   if {[set wb2 [my $TID cget -wb2]] ne "" && \
   ![string match "bartabs::*" [$wb2 cget -image]] &&
   $TID ni [my $BID listFlag "m"]} {
     $wb2 configure -image bts_ImgNone
   }
+  update
+  my $TID Tab_Cmd -csel2  ;# command after the selection shown
 }
 #_____
 
@@ -1596,8 +1596,6 @@ method remove {} {
     if {[set bc [my $BID cget -BARCOM]] ne ""} {catch {rename $bc ""}}
     foreach tc [my $BID cget -TABCOM] {catch {rename [lindex $tc 1] ""}}
     dict unset btData $BID
-    set i [lsearch -index 0 $bartabs::BarList $BID]
-    set bartabs::BarList [lreplace $bartabs::BarList $i $i]
     return yes
   }
   return no
@@ -1684,11 +1682,14 @@ constructor {args} {
   set btData [dict create]
   if {[llength [self next]]} { next {*}$args }
   oo::objdefine [self] "method tab-1 {args} {return {-1}}"
+  lappend bartabs::BarsList [self]
 }
 
 destructor {
   my removeAll
   unset btData
+  set i [lsearch -exact $bartabs::BarsList [self]]
+  set bartabs::BarsList [lreplace $bartabs::BarsList $i $i]
   if {[llength [self next]]} next
 }
 #_____
@@ -1737,7 +1738,6 @@ method create {barCom {barOpts ""}} {
     proc $barCom {args} "return \[[self] $BID {*}\$args\]"
     my $BID configure -BARCOM $barCom
   }
-  lappend bartabs::BarList [list $BID [self]]
   return $BID
 }
 #_____
@@ -1879,5 +1879,5 @@ method moveTab {TID1 TID2} {
 
 # __________________________ Tests for e_menu ___________________________ #
 
-#RUNF0: test.tcl
+#-RUNF0: test.tcl
 #RUNF1: ../tests/test2_pave.tcl

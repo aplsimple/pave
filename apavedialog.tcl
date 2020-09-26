@@ -561,8 +561,9 @@ oo::class create ::apave::APaveDialog {
     # See also:
     # [aplsimple.github.io](https://aplsimple.github.io/en/tcl/pave/index.html)
 
-    if {[winfo exists $_pdg(win).dia]} {
-      puts "$_pdg(win).dia already exists: select other root window"
+    set qdlg $_pdg(win).dia
+    if {[winfo exists $qdlg]} {
+      puts "$qdlg already exists: select other root window"
       return 0
     }
     # remember the focus (to restore it after closing the dialog)
@@ -573,7 +574,7 @@ oo::class create ::apave::APaveDialog {
                rotext head optsHead hsz binds postcom onclose timeout modal
     set tags ""
     set wasgeo [set textmode 0]
-    set cc [set themecolors [set optsGrid ""]]
+    set cc [set themecolors [set optsGrid [set addpopup ""]]]
     set readonly [set hidefind 1]
     set curpos "1.0"
     set ${_pdg(ns)}PD::ch 0
@@ -623,6 +624,7 @@ oo::class create ::apave::APaveDialog {
         -focusback {set focusback $val}
         -timeout {set timeout $val}
         -modal {set modal "-modal $val"}
+        -popup {set addpopup [string map [list %w $qdlg.fra.texM] "$val"]}
         default {
           append optsFont " $opt $val"
           if {$opt ne "-family"} {
@@ -731,9 +733,9 @@ oo::class create ::apave::APaveDialog {
       rename vallimits ""
       lappend widlist [list fraM $prevh T 10 7 "-st nswe -pady 3 -rw 1"]
       lappend widlist [list TexM - - 1 7 {pack -side left -expand 1 -fill both -in \
-        $_pdg(win).dia.fra.fraM} [list -h $il -w $maxw {*}$optsFontM {*}$optsMisc \
-        -wrap word -textpop 0 -tabnext $_pdg(win).dia.fra.[lindex $buttons 0]]]
-      lappend widlist {sbv texM L 1 1 {pack -in $_pdg(win).dia.fra.fraM}}
+        $qdlg.fra.fraM} [list -h $il -w $maxw {*}$optsFontM {*}$optsMisc \
+        -wrap word -textpop 0 -tabnext $qdlg.fra.[lindex $buttons 0]]]
+      lappend widlist {sbv texM L 1 1 {pack -in $qdlg.fra.fraM}}
       set prevw fraM
     }
     # add the lower (after the message) blank frame
@@ -750,13 +752,13 @@ oo::class create ::apave::APaveDialog {
       if {$readonly || $hidefind || $chmsg ne ""} {
         append binds "
           menu \$pop
-           \$pop add command [my IconA copy] -accelerator Ctrl+C -label \"Copy\" \\
+           \$pop add command [my iconA copy] -accelerator Ctrl+C -label \"Copy\" \\
             -command \"event generate $wt <<Copy>>\""
         if {$hidefind || $chmsg ne ""} {
           append binds "
             \$pop configure -tearoff 0
             \$pop add separator
-            \$pop add command [my IconA none] -accelerator Ctrl+A \\
+            \$pop add command [my iconA none] -accelerator Ctrl+A \\
             -label \"Select All\" -command \"$wt tag add sel 1.0 end\"
              bind $wt <Control-a> \"$wt tag add sel 1.0 end; break\""
         }
@@ -767,7 +769,7 @@ oo::class create ::apave::APaveDialog {
         if {![info exists ${_pdg(ns)}PD::fnd]} {
           set ${_pdg(ns)}PD::fnd ""
         }
-        set noIMG "[my IconA none]"
+        set noIMG "[my iconA none]"
         if {$hidefind} {
           lappend widlist [list h__ h_3 L 1 4 "-cw 1"]
         } else {
@@ -780,20 +782,21 @@ oo::class create ::apave::APaveDialog {
             bind \[[self] Entfind\] <Return> {[self] FindInText}
             bind \[[self] Entfind\] <KP_Enter> {[self] FindInText}
             bind \[[self] Entfind\] <FocusIn> {\[[self] Entfind\] selection range 0 end}
-            bind $_pdg(win).dia <F3> {[self] FindInText 1}
-            bind $_pdg(win).dia <Control-f> \"[self] InitFindInText 1; focus \[[self] Entfind\]; break\"
-            bind $_pdg(win).dia <Control-F> \"[self] InitFindInText 1; focus \[[self] Entfind\]; break\""
+            bind $qdlg <F3> {[self] FindInText 1}
+            bind $qdlg <Control-f> \"[self] InitFindInText 1; focus \[[self] Entfind\]; break\"
+            bind $qdlg <Control-F> \"[self] InitFindInText 1; focus \[[self] Entfind\]; break\""
         }
         if {$readonly} {
           if {!$hidefind} {
             append binds "
              \$pop add separator
-             \$pop add command [my IconA find] -accelerator Ctrl+F -label \\
-             \"Find first\" -command \"[self] InitFindInText; focus \[[self] Entfind\]\"
-             \$pop add command $noIMG -accelerator F3 -label \"Find next\" \\
+             \$pop add command [my iconA find] -accelerator Ctrl+F -label \\
+             \"Find First\" -command \"[self] InitFindInText; focus \[[self] Entfind\]\"
+             \$pop add command $noIMG -accelerator F3 -label \"Find Next\" \\
               -command \"[self] FindInText 1\"
+             $addpopup
              \$pop add separator
-             \$pop add command [my IconA exit] -accelerator Esc -label \"Exit\" \\
+             \$pop add command [my iconA exit] -accelerator Esc -label \"Exit\" \\
               -command \"\[[self] Pdg defb1\] invoke\"
             "
           }
@@ -808,29 +811,30 @@ oo::class create ::apave::APaveDialog {
             bind $wt <Alt-Up>    {[self] linesMove -1}
             bind $wt <Alt-Down>  {[self] linesMove +1}
             menu \$pop
-             \$pop add command [my IconA cut] -accelerator Ctrl+X -label \"Cut\" \\
+             \$pop add command [my iconA cut] -accelerator Ctrl+X -label \"Cut\" \\
               -command \"event generate $wt <<Cut>>\"
-             \$pop add command [my IconA copy] -accelerator Ctrl+C -label \"Copy\" \\
+             \$pop add command [my iconA copy] -accelerator Ctrl+C -label \"Copy\" \\
               -command \"event generate $wt <<Copy>>\"
-             \$pop add command [my IconA paste] -accelerator Ctrl+V -label \"Paste\" \\
+             \$pop add command [my iconA paste] -accelerator Ctrl+V -label \"Paste\" \\
               -command \"event generate $wt <<Paste>>\"
              \$pop add separator
-             \$pop add command [my IconA double] -accelerator Ctrl+D -label \"Double selection\" \\
+             \$pop add command [my iconA double] -accelerator Ctrl+D -label \"Double Selection\" \\
               -command \"[self] doubleText 0\"
-             \$pop add command [my IconA delete] -accelerator Ctrl+Y -label \"Delete line\" \\
+             \$pop add command [my iconA delete] -accelerator Ctrl+Y -label \"Delete Line\" \\
               -command \"[self] deleteLine 0\"
-             \$pop add command [my IconA up] -accelerator Alt+Up -label \"Line(s) up\" \\
+             \$pop add command [my iconA up] -accelerator Alt+Up -label \"Line(s) Up\" \\
               -command \"[self] linesMove -1 0\"
-             \$pop add command [my IconA down] -accelerator Alt+Down -label \"Line(s) down\" \\
+             \$pop add command [my iconA down] -accelerator Alt+Down -label \"Line(s) Down\" \\
               -command \"[self] linesMove +1 0\"
              \$pop add separator
-             \$pop add command [my IconA find] -accelerator Ctrl+F -label \"Find first\" \\
+             \$pop add command [my iconA find] -accelerator Ctrl+F -label \"Find First\" \\
               -command \"[self] InitFindInText; focus \[[self] Entfind\]\"
-             \$pop add command $noIMG -accelerator F3 -label \"Find next\" \\
+             \$pop add command $noIMG -accelerator F3 -label \"Find Next\" \\
               -command \"[self] FindInText 1\"
+             $addpopup
              \$pop add separator
-             \$pop add command [my IconA SaveFile] -accelerator Ctrl+W \\
-             -label \"Save and exit\" -command \"\[[self] Pdg defb1\] invoke\"
+             \$pop add command [my iconA SaveFile] -accelerator Ctrl+W \\
+             -label \"Save and Exit\" -command \"\[[self] Pdg defb1\] invoke\"
             "
         }
         lappend args -onclose [namespace current]::exitEditor
@@ -848,8 +852,8 @@ oo::class create ::apave::APaveDialog {
     # add the buttons
     my AppendButtons widlist $buttons h__ L $defb $timeout
     # make & display the dialog's window
-    set wtop [my makeWindow $_pdg(win).dia.fra $ttl]
-    set widlist [my paveWindow $_pdg(win).dia.fra $widlist]
+    set wtop [my makeWindow $qdlg.fra $ttl]
+    set widlist [my paveWindow $qdlg.fra $widlist]
     if {$precom ne ""} {
       {*}$precom  ;# actions before showModal
     }
@@ -865,12 +869,12 @@ oo::class create ::apave::APaveDialog {
         lappend themecolors $v0 $v1 $v2 $v3 $v3 $v1 $v4 $v4 $v3 $v2 $v3 $v0 $v1
       }
       catch {
-        my themeWindow $_pdg(win).dia {*}$themecolors false
+        my themeWindow $qdlg {*}$themecolors false
       }
     }
     # after creating widgets - show dialog texts if any
-    my SetGetTexts set $_pdg(win).dia.fra $inopts $widlist
-    lassign [my LowercaseWidgetName $_pdg(win).dia.fra.$defb] focusnow
+    my SetGetTexts set $qdlg.fra $inopts $widlist
+    lassign [my LowercaseWidgetName $qdlg.fra.$defb] focusnow
     if {$textmode} {
       my displayTaggedText [my TexM] msg $tags
       if {$defb eq "ButTEXT"} {
@@ -892,19 +896,19 @@ oo::class create ::apave::APaveDialog {
         lassign $w widname
         lassign [my LowercaseWidgetName $widname] wn rn
         if {[string match $focusmatch $rn]} {
-          lassign [my LowercaseWidgetName $_pdg(win).dia.fra.$wn] focusnow
+          lassign [my LowercaseWidgetName $qdlg.fra.$wn] focusnow
           break
         }
       }
     }
     catch "$binds"
     set args [::apave::removeOptions $args -focus]
-    my showModal $_pdg(win).dia -themed [string length $themecolors]\
+    my showModal $qdlg -themed [string length $themecolors]\
       -focus $focusnow -geometry $geometry {*}$root {*}$modal {*}$ontop {*}$args
     oo::objdefine [self] unexport FindInText InitFindInText Pdg
-    set pdgeometry [winfo geometry $_pdg(win).dia]
+    set pdgeometry [winfo geometry $qdlg]
     # the dialog's result is defined by "pave res" + checkbox's value
-    set res [set result [my res $_pdg(win).dia]]
+    set res [set result [my res $qdlg]]
     set chv [set ${_pdg(ns)}PD::ch]
     if { [string is integer $res] } {
       if {$res && $chv} { incr result 10 }
@@ -923,7 +927,7 @@ oo::class create ::apave::APaveDialog {
       set textcont ""
     }
     if {$res && $inopts ne ""} {
-      my SetGetTexts get $_pdg(win).dia.fra $inopts $widlist
+      my SetGetTexts get $qdlg.fra $inopts $widlist
       set inopts " [my GetVarsValues $widlist]"
     } else {
       set inopts ""
@@ -931,7 +935,7 @@ oo::class create ::apave::APaveDialog {
     if {$textmode && $rotext ne ""} {
       set $rotext [string trimright [[my TexM] get 1.0 end]]
     }
-    destroy $_pdg(win).dia
+    destroy $qdlg
     update
     # pause a bit and restore the old focus
     if {$focusback ne "" && [winfo exists $focusback]} {

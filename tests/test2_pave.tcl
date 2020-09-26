@@ -10,10 +10,11 @@ catch {package require tooltip} ;# may be absent
 
 set ::testdirname [file normalize [file dirname [info script]]]
 cd $::testdirname
-set ::test2dirs [list "$::testdirname/.." "$::testdirname" "$::testdirname/../bartabs"]
+set ::test2dirs [list "$::testdirname/.." "$::testdirname" "$::testdirname/../bartabs" "$::testdirname/../hl_tcl"]
 lappend auto_path {*}$::test2dirs
 set pkg_versions "apave [package require apave]"
 append pkg_versions ", bartabs [package require bartabs]"
+append pkg_versions ", hl_tcl [package require hl_tcl]"
 
 set ::e_menu_dir [file normalize [file join $::testdirname ../../e_menu]]
 catch {source [file join $::e_menu_dir e_menu.tcl]}
@@ -88,6 +89,7 @@ namespace eval t {
     pave untouchWidgets *buTClr*
     if {!$firstin} {pave basicFontSize $::t::fontsz}
     set ::t::filetxt [::apave::readTextFile $::t::ftx1]
+    set ::multiline 1
     set ::t::tblcols {
       0 {Name of widget} left \
       0 Type left \
@@ -424,7 +426,7 @@ where:
       {BuTClrB  - - 1 4 {-st nsew -rw 1 -cw 1} {-com {::t::toolBut 4 -1} -text "Color scheme -1\nBasic"}}
       {tcl {
         set prt BuTClrB
-        for {set i 0} {$i<44} {incr i} {
+        for {set i 0} {$i<48} {incr i} {
           set cur "BuTClr$i"
           if {$i%4} {set n $pr; set p L} {set n $prt; set p T; set prt $cur}
           set pr $cur
@@ -495,7 +497,7 @@ where:
     }
 
     # colors for Colors tab
-    for {set i 0} {$i<44} {incr i} {
+    for {set i 0} {$i<48} {incr i} {
       lassign [pave csGet $i] - fg - bg
       [pave BuTClr$i] configure -foreground $fg -background $bg
     }
@@ -525,6 +527,7 @@ where:
     }
     set ::t::newCS [apave::cs_Non]
     toolBut 0
+    highlighting_others
 
     # Open the window at last
     set ::t::curTab ""
@@ -653,7 +656,7 @@ where:
       } else {
         set ::t::nextcs [apave::cs_Min]
       }
-      set ic [expr {$cs>20 ? 3 : 2}]  ;# "|" was added
+      set ic [expr {$cs>22 ? 3 : 2}]  ;# "|" was added
       set ::t::opcc [pave optionCascadeText [lindex $::t::opcColors $cs+$ic]]
       .win.fra.fra.nbk tab .win.fra.fra.nbk.f5 -text \
       " Color scheme $cs: [pave csGetName $cs]"
@@ -670,6 +673,8 @@ where:
       set ::t::restart 0
       [pave ChbRestart] configure -state disabled
     }
+    bartabs::drawAll
+    ::hl_tcl::hl_all -dark [pave csDarkEdit] -font [pave csFontMono]
   }
 
   # ask about exiting
@@ -701,7 +706,7 @@ where:
     lassign [split [$txt index insert] .] r c
     [pave Labstat1] configure -text $r
     [pave Labstat2] configure -text [incr c]
-    [pave Labstat3] configure -text [$txt get \
+    #[pave Labstat3] configure -text [$txt get \
       [$txt index "insert linestart"] [$txt index "insert lineend"]]
   }
   # filling the menu
@@ -726,6 +731,7 @@ where:
 
   https://aplsimple.github.io/en/tcl/pave
   https://aplsimple.github.io/en/tcl/bartabs
+  https://aplsimple.github.io/en/tcl/hl_tcl/hl_tcl.html
 
   License: MIT.
   _______________________________________
@@ -733,7 +739,7 @@ where:
   <red> $::tcltk_version </red>
 
   <red> $::tcl_platform(os) $::tcl_platform(osVersion) </red>
-" -t 1 -w 46 -tags ::t::textTags]
+" -t 1 -w 64 -tags ::t::textTags]
   }
 
   proc tracer {varname args} {
@@ -815,6 +821,19 @@ where:
     if {$cs ne ""} {toolBut 4 $cs}
   }
 
+  proc highlighting_editor {} {
+    set TID [::bt cget -tabcurrent]
+    ::hl_tcl::hl_text [pave Text] [getLock $TID] $::multiline
+  }
+
+  proc highlighting_others {} {
+
+    # try to get "universal" highlighting colors (for dark&light bg):
+    ::hl_tcl::hl_init [pave TextNT] -dark [pave csDarkEdit] \
+      -font [pave csFontMono] -colors {#BC47D9 #AB21CE #0C860C #9a5465 #66a396 brown}
+    ::hl_tcl::hl_text [pave TextNT] yes
+  }
+
 # ____________________ Procedures for bartabs widget ____________________ #
 
   # filling the bar of tabs
@@ -825,10 +844,12 @@ where:
     set ::t::ansSelTab [set ::t::ansSwBta 0]
     set wbase [pave LfrB]
     set bar1Opts [list -wbar $wframe -wbase $wbase -lablen 16 \
-      -csel {::t::selTab %t} -cdel {::t::delTab %t} -redraw $::BTS_REDRAW \
+      -csel {::t::selTab %t} -csel2 {::t::selTab2 %t} \
+      -cdel {::t::delTab %t} -redraw $::BTS_REDRAW \
       -menu [list \
       sep \
       "com {Mark the tab} {::t::markTab %t} {} ::t::checkMark" \
+      "com {Lock %l} {::t::lockUnlock %t} {} ::t::checkLock" \
       "com {Append $::t::noname} {::t::addTab %t} {} ::t::checkStatic" \
       "com {View selected} {::t::ViewSelTabs %b} {} {{!\[::bt isTab %t\]} Img20}" \
       {com {Unselect all} {::bt unselectTab} {} {{![::bt isTab %bt]} Img22}} \
@@ -836,6 +857,7 @@ where:
       {com {Run %l} {::t::e_menu [::t::getTabFile %t]} {} {{![::bt isTab %t]} Img17 {} F5}} \
       sep \
       "mnu {Options} {} menusw {0 Img25}" \
+      "com {Switch ::multiline option} {::t::switchBts %b %t ::multiline} menusw ::t::switchAtt" \
       "com {Switch -static option} {::t::switchBts %b %t -static} menusw ::t::switchAtt" \
       "com {Switch -scrollsel option} {::t::switchBts %b %t -scrollsel} menusw ::t::switchAtt" \
       "com {Switch -hidearrows option} {::t::switchBts %b %t -hidearrows} menusw ::t::switchAtt" \
@@ -884,7 +906,7 @@ where:
     if {$cs>-1} {
       lassign [pave csGet $cs] cfg2 cfg1 cbg2 cbg1 cfhh - - - - fgmark
     } else {
-      set fgmark #168080
+      set fgmark #800080
     }
     ::bt configure -fgmark $fgmark
     ::bt draw
@@ -905,10 +927,15 @@ where:
     }
     set ::t::ftx1 [getTabFile $TID]
     set ::t::filetxt [::apave::readTextFile $::t::ftx1]
-    pave displayText [pave Text] $::t::filetxt
-    [pave LabEdit] configure -text "$::t::ftx1" -padding {2 8 0 2}
     ::bts unmarkTab $TID
+    [pave LabEdit] configure -text "$::t::ftx1" -padding {2 8 0 2}
     return yes
+  }
+
+  proc selTab2 {TID} {
+    ::hl_tcl::hl_init [pave Text] -dark [pave csDarkEdit] -font [pave csFontMono]
+    pave displayText [pave Text] $::t::filetxt
+    highlighting_editor
   }
 
   proc delTab {TID} {
@@ -975,9 +1002,39 @@ where:
     }
   }
 
+  proc getLock {TID} {
+    return [expr {[::bt $TID cget -lock] ne ""}]
+  }
+
+  proc setLock {TID} {
+    ::hl_tcl::hl_readonly [pave Text] [getLock $TID] ;#::t::meStub
+  }
+
+  proc checkLock {BID TID label} {
+    if {[getLock $TID]} {
+      set label [string map {Lock Unlock} $label]
+    } else {
+      set label [string map {Unlock Lock} $label]
+    }
+    return [list 0 {} $label]
+  }
+
+  proc lockUnlock {TID} {
+    if {[::bt $TID cget -lock] ne ""} {
+      ::bt $TID configure -lock ""
+    } else {
+      ::bt $TID configure -lock "1"
+    }
+    setLock $TID
+  }
+
   proc switchAtt {BID TID label} {
     lassign $label -> opt
     switch -- $opt {
+       ::multiline {
+         if {$::multiline} {set img Img30} {set img Img31}
+         set res [list 0 $img]
+      }
       -static - -scrollsel - -hidearrows - -expand - -bd - -redraw {
         if {[::bt cget $opt]} {set img Img30} {set img Img31}
         set res [list 0 $img]
@@ -999,6 +1056,11 @@ where:
   proc switchBts {BID TID optname args} {
     set val [::bt cget $optname]
     switch -- $optname {
+      ::multiline {
+        set ::multiline [expr {!$::multiline}]
+        highlighting_editor
+        return
+      }
       -bd     {if {!$val} {set val 1} {set val 0}}
       -lablen {if {!$val} {set val 16} {set val 0}}
       -fgsel  {if {$val eq ""} {set val "."} else {set val ""}}

@@ -1,5 +1,5 @@
 
-package ifneeded bartabs 1.0 [list source [file join $dir bartabs.tcl]]
+package ifneeded bartabs 1.0.1 [list source [file join $dir bartabs.tcl]]
 
 # short intro (for Ruff! docs generator)
 
@@ -7,127 +7,131 @@ namespace eval bartabs {
 
   set _ruff_preamble {
 
-  The *bartabs* package provides a bar widget containing tabs that are
+The *bartabs* package provides a bar widget containing tabs that are
 
-    - scrollable
-    - markable
-    - moveable
-    - closeable
-    - disabled and enabled
-    - static and changeable
-    - selectable and multi-selectable
-    - configureable
-    - enhanceable with popup menu
+  - scrollable
+  - markable
+  - moveable
+  - closeable
+  - disabled and enabled
+  - static and changeable
+  - selectable and multi-selectable
+  - configureable
+  - enhanceable with popup menu
 
-  The *bartabs* defines three TclOO classes:
-    - *Tab* deals with tabs
-    - *Bar* deals with a bar of tabs
-    - *Bars* deals with bars of tabs
+The *bartabs* defines three TclOO classes:
+  - *Tab* deals with tabs
+  - *Bar* deals with a bar of tabs
+  - *Bars* deals with bars of tabs
 
-  However, only the *Bars* class is used to create bars along with tabs. It can be also used to deal with any bars and tabs, providing all necessary interface.
+However, only the *Bars* class is used to create bars along with tabs. It can be also used to deal with any bars and tabs, providing all necessary interface.
 
-  The *Bar* does not create a real TclOO object, rather it provides *syntax sugar* for a convenient access to the bar methods.
+The *Bar* does not create a real TclOO object, rather it provides *syntax sugar* for a convenient access to the bar methods.
 
-  The *Tab* does not create a real TclOO object as well. It serves actually for structuring *bartabs* code as for tab methods. Thus, its methods are accessible through the *Bars* ("real" TclOO) and *Bar* ("sugar") objects.
+The *Tab* does not create a real TclOO object as well. It serves actually for structuring *bartabs* code as for tab methods. Thus, its methods are accessible through the *Bars* ("real" TclOO) and *Bar* ("sugar") objects.
 
-  A common work flow with *bartabs* looks like this:
+<hr>
 
-  1) Firstly, we create a *Bars* object, e.g.
-  
-   `bartabs::Bars create NS::bars`
+A common work flow with *bartabs* looks like this:
 
-  2) Then we create a *Bar* object, e.g.
-  
-   `NS::bars create NS::bar $barOptions`
+Firstly, we create a *Bars* object, e.g.
 
-  3) If a tab of the bar should be displayed (with its possible contents), we show the bar and select the current tab:
+ `bartabs::Bars create NS::bars`
 
-    `set TID [NS::bar tabID "tab label"]  ;# get the tab's ID by its label`
+Then we create a *Bar* object, e.g.
 
-    `NS::bar $TID show  ;# show the bar and select the tab`
+ `NS::bars create NS::bar $barOptions`
 
-  or just draw the bar without mind-breaking about a tab:
+If a tab of the bar should be displayed (with its possible contents), we show the bar and select the current tab:
 
-    `NS::bar draw  ;# show the bar without selecting a tab`
+  `set TID [NS::bar tabID "tab label"]  ;# get the tab's ID by its label`
 
-  4) The rest actions include:
+  `NS::bar $TID show  ;# show the bar and select the tab`
 
-    - responses to a selection of tab (through `-csel command` option of *Bar* object)
-    - responses to a deletion of tab (through `-cdel command` option of *Bar* object)
-    - responses to a reorganization of bar (through `-cmov command` option of *Bar* object)
-    - inserting and renaming tabs
-    - disabling and enabling tabs
-    - marking tabs with colors or icons
-    - processing the marked tabs
-    - processing multiple tabs selected with Ctrl+click
-    - scrolling tabs to left/right through key bindings
-    - calling other handlers through key bindings and *bartabs* menu
-    - using `cget` and `configure` methods to change the bar/tab appearance
-    - redrawing bars at some events
-    - removing and creating as much bars as required
+or just draw the bar without mind-breaking about a tab:
 
-  <hr>
+  `NS::bar draw  ;# show the bar without selecting a tab`
 
-  The methods of *Tab* class are called from *Bars* or *Bar* object
-   and are passed: *tab ID (TID), method name, arguments*. Syntax:
-  
-  `OBJECT TID method arguments`
+The rest actions include:
 
-  For example: `NS::bars $TID close` or `NS::bar $TID show false`
+  - responses to a selection of tab (through `-csel command` option of *Bar* object)
+  - responses to a deletion of tab (through `-cdel command` option of *Bar* object)
+  - responses to a reorganization of bar (through `-cmov command` option of *Bar* object)
+  - inserting and renaming tabs
+  - disabling and enabling tabs
+  - marking tabs with colors or icons
+  - processing the marked tabs
+  - processing multiple tabs selected with Ctrl+click
+  - scrolling tabs to left/right through key bindings
+  - calling other handlers through key bindings and *bartabs* menu
+  - using `cget` and `configure` methods to change the bar/tab appearance
+  - redrawing bars at some events
+  - removing and creating as much bars as required
 
-  <hr>
+<hr>
 
-  The methods of *Bar* class are called from *Bar* object or (more wordy) from *Bars* object. Syntax:
-  
-  `BAR_OBJECT method arguments`
+The methods of *Tab* class are called from *Bars* or *Bar* object
+ and are passed: *tab ID (TID), method name, arguments*. Syntax:
 
-  `BARS_OBJECT BID method arguments`
+`OBJECT TID method arguments`
 
-  For example: `NS::bar popList $X $Y` or `NS::bars $BID popList $X $Y`
+For example: `NS::bars $TID close` or `NS::bar $TID show false`
 
-  <hr>
+<hr>
 
-  The methods of *Bars* class need no TID nor BID, though not protesting them passed before method name. Syntax:
+The methods of *Bar* class are called from *Bar* object or (more wordy) from *Bars* object. Syntax:
 
-  `BARS_OBJECT method arguments`
+`BAR_OBJECT method arguments`
 
-  For example:
-  
-  `NS::bars drawAll        ;# good boy`
+`BARS_OBJECT BID method arguments`
 
-  `NS::bars tab11 drawAll  ;# bad boy uses the useless tab11 (TID)`
+For example: `NS::bar popList $X $Y` or `NS::bars $BID popList $X $Y`
 
-  `NS::bars bar1 drawAll   ;# bad boy's BID is useless as well`
+<hr>
 
-  <hr>
+The methods of *Bars* class need no TID nor BID, though not protesting them passed before method name. Syntax:
 
-  There are three "virtual" methods:
+`BARS_OBJECT method arguments`
 
-  * `NS::bar create NS::tab $label` creates a tab object *NS::tab* for a tab labeled $label to access the tab methods, e.g. `NS::tab show`
+For example:
 
-  * `NS::tab cget $option` gets an option of tab, e.g. `NS::tab cget -text`
+`NS::bars drawAll        ;# good boy`
 
-  * `NS::tab configure $option $value` sets an option of tab, e.g. `NS::tab configure -text "new label"`  
+`NS::bars tab11 drawAll  ;# bad boy uses the useless tab11 (TID)`
 
-  <hr>
+`NS::bars bar1 drawAll   ;# bad boy's BID is useless as well`
 
-  Few words about *BID* and *TID* mentioned throughout the *bartabs*.
-  
-  These are identifiers of bars and tabs, of form `bar<index>` and `tab<index>` where `<index>` is integer increased from 0 in order of bar/tab creation. The bars and the tabs of all bars have unique IDs.
-  
-  You can use these literals freely, along with BIDs and TIDs gotten from *bartabs* methods. For example, if you know that "some tab" was created third, you can show it straightforward:
+<hr>
 
-    `NS::bar tab2 show ;# show the 3rd tab (TID=tab2)`
+There are three "virtual" methods:
 
-  instead of
+* `NS::bar create NS::tab $label` creates a tab object *NS::tab* for a tab labeled $label to access the tab methods, e.g. `NS::tab show`
 
-    `NS::bar [NS::bar tabID "some tab"] show ;# find and show the tab by its name`
+* `NS::tab cget $option` gets an option of tab, e.g. `NS::tab cget -text`
 
-  <hr>
+* `NS::tab configure $option $value` sets an option of tab, e.g. `NS::tab configure -text "new label"`  
 
-  Further details:
-    - [Documentation](https://aplsimple.github.io/en/tcl/bartabs/index.html)
-    - [Reference](https://aplsimple.github.io/en/tcl/bartabs/bartabs.html)
+<hr>
+
+Few words about *BID* and *TID* mentioned throughout the *bartabs*.
+
+These are identifiers of bars and tabs, of form `bar<index>` and `tab<index>` where `<index>` is integer increased from 0 in order of bar/tab creation. The bars and the tabs of all bars have unique IDs.
+
+You can use these literals freely, along with BIDs and TIDs gotten from *bartabs* methods. For example, if you know that "some tab" was created third, you can show it straightforward:
+
+  `NS::bar tab2 show ;# show the 3rd tab (TID=tab2)`
+
+instead of
+
+  `NS::bar [NS::bar tabID "some tab"] show ;# find and show the tab by its name`
+
+<hr>
+
+More details:
+
+[Documentation](https://aplsimple.github.io/en/tcl/bartabs)
+
+[Reference](https://aplsimple.github.io/en/tcl/bartabs/bartabs.html)
   }
 
 }

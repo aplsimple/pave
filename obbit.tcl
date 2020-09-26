@@ -1,4 +1,4 @@
-###########################################################################
+# _______________________________________________________________________ #
 #
 # This script contains a bunch of oo::classes. A bit of it.
 #
@@ -7,7 +7,7 @@
 #
 # The ObjectTheming class allows to change the ttk widgets' style.
 #
-###########################################################################
+# _______________________________________________________________________ #
 
 package require Tk
 
@@ -33,52 +33,57 @@ namespace eval ::apave {
              # = text1   fg   item bg    bg   itemsHL  actbg   actfg     cc    greyed   hot
              # clrtitf clrinaf clrtitb clrinab clrhelp clractb clractf clrcurs clrgrey clrhotk    fI      bI   -fM-   bM
   set ::apave::_CS_(ALL) {
-{MildDark      #E8E8E8 #E7E7E7 #222A2F #2D435B #FEEFA8 #8CC6D9 #000000  #4EADAD grey    #70C6C6 #000000 #8CC6D9 - #3c546e #000 #001 #002 #003 #004 #005 #006 #007}
-{Brown         #E8E8E8 #E7E7E7 #352927 #453528 #FEEC9A #B7A78C #000000  #E69800 grey    #E69800 #000000 #B7A78C - #524235 #000 #001 #002 #003 #004 #005 #006 #007}
-{Sky           #102433 #0A1D33 #D2EAF2 #AFDFEF #0D3239 #4D6B8A #FFFFFF  #2A8CBD grey    #1261AD #FFFFFF #4D6B8A - #96c6d6 #000 #001 #002 #003 #004 #005 #006 #007}
-{Rosy          #2B122A #000000 #FFFFFF #F6E6E9 #570957 #C5ADC8 #000000  #C84E91 grey    #870287 #000000 #C5ADC8 - #d6c6c9 #000 #001 #002 #003 #004 #005 #006 #007}
-{Magenta       #E8E8E8 #F0E8E8 #2B1137 #4A2A4A #FEEC9A #C09BDD #000000  #E69800 grey    #E69800 #000000 #C09BDD - #573757 #000 #001 #002 #003 #004 #005 #006 #007}
-{Red           white   #CECECB #340202 #440702 yellow  #F19F9F black    #D90505 #440701 orange black   #F19F9F - #440702 #000 #001 #002 #003 #004 #005 #006 #007}
-{Blue          #08085D #030358 #FFFFFF #D2DEFA #562222 #3A3FC1 #FFFFFF  #B66425 grey    #933232 #FFFFFF #3A3FC1 - #b7c3df #000 #001 #002 #003 #004 #005 #006 #007}
-{LightGreen    #122B05 #091900 #FFFFFF #DEF8DE #562222 #A8CCA8 #000000  #B66425 grey    #933232 #000000 #A8CCA8 - #c3ddc3 #000 #001 #002 #003 #004 #005 #006 #007}
-{Green         #E8E8E8 #EFEFEF #0F3F0A #274923 #FEEC9A #A4C2AD #000000  #E69800 grey    #E69800 #000000 #A4C2AD - #3e603a #000 #001 #002 #003 #004 #005 #006 #007}
-{Khaki         #E8E8E8 #FFFFFF #3C423C #4A564C #FEEFA8 #AEC8A6 #000000  #FF8A00 grey    #FF8A00 #000000 #AEC8A6 - #546056 #000 #001 #002 #003 #004 #005 #006 #007}
-{InverseGreen  #122B05 #091900 #FFFFFF #DEF8DE #562222 #567B56 #FFFFFF  #B66425 #DEF8D1 #933232 #FFFFFF #567B56 - #cce6cc #000 #001 #002 #003 #004 #005 #006 #007}
-{Gray          #000000 #0D0D0D #FFFFFF #DADCE0 #362607 #AFAFAF #000000  #B66425 grey    #933232 #000000 #AFAFAF - #caccd0 #000 #001 #002 #003 #004 #005 #006 #007}
-{DarkGrey      #F0E8E8 #E7E7E7 #333333 #494949 #DCDC9B #AFAFAF #000000  #E69800 grey    #E69800 #000000 #AFAFAF - #595959 #000 #001 #002 #003 #004 #005 #006 #007}
-{Dark          #E0D9D9 #C4C4C4 #232323 #303030 #CCCC90 #AFAFAF #000000  #E69800 grey    #E69800 #000000 #AFAFAF - #424242 #000 #001 #002 #003 #004 #005 #006 #007}
-{InverseGrey   #121212 #1A1A1A #FFFFFF #DADCE0 #302206 #525252 #FFFFFF  #B66425 #DADCE1 #933232 #FFFFFF #525252 - #c9cbcf #000 #001 #002 #003 #004 #005 #006 #007}
-{Sandy         #211D1C #27201F #FEFAEB #F7EEC5 #523A0A #82744F #FFFFFF  #B66425 grey    #933232 #FFFFFF #82744F - #e4dbb2 #000 #001 #002 #003 #004 #005 #006 #007}
-{Darcula #a6a6a6 #A1ACB6 #272727 #303030 #B09869 #2F5692 #EDC881 #EDC881 grey #f0a471 #B09869 #1e1e1e - #444444 #000 #001 #002 #003 #004 #005 #006 #007}
-{Sleepy #daefd0 #D0D0D2 #474C4F #2E3436 #CB956D #626D71 #f8f8f8 white grey #B0B000 #B09869 #1e1e1e - #383E40 #000 #001 #002 #003 #004 #005 #006 #007}
-{African black black #ffe2a2 #ffffb4 brown #d3a876 #000000 red grey SaddleBrown #3b1516 #f9b777 - #ffffd0 #000 #001 #002 #003 #004 #005 #006 #007}
-{Florid black darkgreen lightgrey white brown green yellow red grey navy darkgreen lightgreen - #dff4df #000 #001 #002 #003 #004 #005 #006 #007}
+{MildDark      #E8E8E8 #E7E7E7 #222A2F #2D435B #FEEFA8 #566982 black   #4EADAD grey    #76b0c3 #000000 #697c95 - #3c546e #000 #001 #002 #003 #004 #005 #006 #007}
 {Inkpot #d3d3ff #AFC2FF #05050e #1E1E27 #a4a4e5 #4E4E8F #fdfdfd #EDC881 grey orange #fdfdfd #4E4E8F - #292936 #000 #001 #002 #003 #004 #005 #006 #007}
+{Green         #E8E8E8 #EFEFEF #0F3F0A #274923 #FEEC9A #5d7b66 black #E69800 grey #E69800 #000000 #6f8d78 - #3e603a #000 #001 #002 #003 #004 #005 #006 #007}
+{Brown         #E8E8E8 #E7E7E7 #352927 #453528 #FEEC9A #716146 white #E69800 grey #E69800 white #645439 - #524235 #000 #001 #002 #003 #004 #005 #006 #007}
+{Magenta       #E8E8E8 #F0E8E8 #2B1137 #4A2A4A #FEEC9A #805b9d black #E69800 grey #E69800 #000000 #af8acc - #573757 #000 #001 #002 #003 #004 #005 #006 #007}
+{Red           white   #CECECB #340202 #440702 yellow  #903e3e black #D90505 #440701 orange black #ba6868 - #440702 #000 #001 #002 #003 #004 #005 #006 #007}
+{Anti-Light1 #bebebe #bebebe #333333 #242424 #FEEFA8 #141414 #bebebe #ffffff grey    #70C6C6 #bebebe black - #1c1c1c #000 #001 #002 #003 #004 #005 #006 #007}
+{Anti-Light2 #bebebe #bebebe #242424 #333333 #FEEFA8 #636363 black  #ffffff grey    #70C6C6 #000000 #747474 - #2b2b2b #000 #001 #002 #003 #004 #005 #006 #007}
+{Darcula #dedede #A1ACB6 #272727 #303030 #B09869 #2F5692 #EDC881 #EDC881 grey #f0a471 #EDC881 #1a417d - #444444 #000 #001 #002 #003 #004 #005 #006 #007}
+{Sleepy #daefd0 #D0D0D2 #3b4043 #2E3436 #CB956D #626D71 #f8f8f8 white grey #B0B000 white #6c6c6c - #383E40 #000 #001 #002 #003 #004 #005 #006 #007}
+{Dark          #E0D9D9 #C4C4C4 #232323 #303030 #CCCC90 #595959 black #E69800 grey #E69800 #000000 #858585 - #424242 #000 #001 #002 #003 #004 #005 #006 #007}
+{DarkGrey      #F0E8E8 #E7E7E7 #333333 #494949 #DCDC9B #727272 black #E69800 grey #E69800 #000000 #9f9f9f - #595959 #000 #001 #002 #003 #004 #005 #006 #007}
+{Sandy         #211D1C #27201F #FEFAEB #F7EEC5 #523A0A #b2a47f #3b1609  #B66425 grey    #933232 #FFFFFF #82744F - #e4dbb2 #000 #001 #002 #003 #004 #005 #006 #007}
+{African black black #ffe2a2 #ffffb4 brown #d3a876 #000000 red grey SaddleBrown #3b1516 #f9b777 - #ffffd0 #000 #001 #002 #003 #004 #005 #006 #007}
+{Rosy          #2B122A #000000 #FFFFFF #F6E6E9 #570957 #C5ADC8 black #C84E91 grey #870287 #000000 #C5ADC8 - #d6c6c9 #000 #001 #002 #003 #004 #005 #006 #007}
+{InverseGrey   #121212 #1A1A1A #c9cbcf #DADCE0 #302206 #a4a6aa black #B66425 #DADCE1 #933232 #FFFFFF #777777 - #c9cbcf #000 #001 #002 #003 #004 #005 #006 #007}
+{Gray          #000000 #0D0D0D #FFFFFF #DADCE0 #362607 #AFAFAF black #B66425 grey #933232 #000000 #AFAFAF - #caccd0 #000 #001 #002 #003 #004 #005 #006 #007}
+{Anti-Dark1 #2e3436 #2e3436 #F8F8F8 #dadad8 #362607 #AFAFAF black #B66425 grey #933232 #000000 #AFAFAF - #caccd0 #000 #001 #002 #003 #004 #005 #006 #007}
+{Anti-Dark2 #2e3436 #2e3436 #dadad8 #F8F8F8 #362607 #AFAFAF black #B66425 grey #933232 #000000 #AFAFAF - #e1e1df #000 #001 #002 #003 #004 #005 #006 #007}
+{Florid black darkgreen #dbffdb white brown #88cd88 #003300 red grey #933232 black lightgreen - #dff4df #000 #001 #002 #003 #004 #005 #006 #007}
+{LightGreen    #122B05 #091900 #FFFFFF #DEF8DE #562222 #A8CCA8 black #B66425 grey #933232 #000000 #A8CCA8 - #c3ddc3 #000 #001 #002 #003 #004 #005 #006 #007}
+{InverseGreen  #122B05 #091900 #cce6c8 #DEF8DE #562222 #9cc09c black #B66425 #DEF8D1 #933232 #FFFFFF #6c916c - #cce6cc #000 #001 #002 #003 #004 #005 #006 #007}
+{Khakish       #2e3436 #2e3436 #e1ffdd #cadfca #933232 #9dbb99 black #FF8A00 grey #AE5F02 #000000 #9cb694 - #bcdab8 #000 #001 #002 #003 #004 #005 #006 #007}
+{Blue          #08085D #030358 #FFFFFF #D2DEFA #562222 #94abde black #B66425 grey #933232 black #a5bcef - #b7c3df #000 #001 #002 #003 #004 #005 #006 #007}
+{Sky           #102433 #0A1D33 #D2EAF2 #AFDFEF #0D3239 #72b5c9 black #2A8CBD grey #1261AD black #7bbed2 - #96c6d6 #000 #001 #002 #003 #004 #005 #006 #007}
+{TKE-SourceForge #141414 #151616 #ffffff #99d2f5 #723600 #75aed1 black #0058bf grey #c44e28 black #7aa2c5 - #8ac3e6 #000 #001 #002 #003 #004 #005 #006 #007}
+{TKE-Juicy #000000 #000000 #f1f1f1 #dddddd #000000 #bfbfbf black #a4cd52 grey #933232 black #a9a9a9 - #d3d3d3 #000 #001 #002 #003 #004 #005 #006 #007}
+{TKE-FluidVision #000000 #000000 #f4f4f4 #cccccc #000000 #a3a3a3 black #999999 grey #933232 #FFFFFF #777777 - #BABABA #000 #001 #002 #003 #004 #005 #006 #007}
+{TKE-YellowStone #0000ff #00003c #fdf9d0 #d5d2af #00003c #d59d6f black #85836e grey #771d00 #00003c #e6ae80 - #DBD8B5 #000 #001 #002 #003 #004 #005 #006 #007}
+{TKE-TurnOfCentury #333333 #333333 #d6c4b6 #ae9f94 #333333 #d59d6f black #4A3706 grey #771d00 black #e6ae80 - #a5968b #000 #001 #002 #003 #004 #005 #006 #007}
+{TKE-Notebook #000000 #000000 #beb69d #96907c #000000 #d59d6f black #336e30 grey #771d00 #000000 #e6ae80 - #85806E #000 #001 #002 #003 #004 #005 #006 #007}
+{TKE-IdleFingers #ffffff #ffffff #323232 #5a5a5a #ffffff #395472 white #d7e9c3 grey orange #ffffff #2d4866 - #4F4F4F #000 #001 #002 #003 #004 #005 #006 #007}
+{TKE-Minimal #fcffe0 #ffffff #302d26 #5a5a5a #ffffff #395472 white #ff9900 grey orange #ffffff #2e4967 - #4F4F4F #000 #001 #002 #003 #004 #005 #006 #007}
+{TKE-Monokai #f8f8f2 #f8f8f2 #272822 #4e5044 #f8f8f2 #3e3f35 white #999d86 grey orange #f8f8f2 #393a34 - #505147 #000 #001 #002 #003 #004 #005 #006 #007}
+{TKE-LightVision #ffffff #ffffff #3C423C #515753 #ffc2a1 #6f756f black #0089f0 grey orange #ffc2a1 #2c322e - #474D49 #000 #001 #002 #003 #004 #005 #006 #007}
+{TKE-oscuro #f1f1f1 #f1f1f1 #344545 #526d6d #f1f1f1 #162727 white #e87e88 grey orange #f1f1f1 #344545 - #475E5E #000 #001 #002 #003 #004 #005 #006 #007}
+{TKE-StarLight #C0B6A8 #C0B6A8 #223859 #315181 #C0B6A8 #0e2445 #C0B6A8 #4e81ce grey orange #C0B6A8 #122849 - #2D4A75 #000 #001 #002 #003 #004 #005 #006 #007}
+{TKE-MildDark #d2d2d2 #ffffff #151616 #43576e #ffbe00 #283b54 white #00a0f0 grey #ffbb6d #ffbe00 #283e56 - #384b64 #000 #001 #002 #003 #004 #005 #006 #007}
+{TKE-MildDark2 #b4b4b4 #ffffff #0d0e0e #324864 #ffbe00 #192c45 white #00ffff grey #ffbb6d #ffbe00 #1e344c - #2B3E57 #000 #001 #002 #003 #004 #005 #006 #007}
+{TKE-MildDark3 #e2e2e2 #f1f1f1 #000000 #24384f #ffbe00 #0b1e37 white #00ffff grey #ffbb6d #ffbe00 #041a32 - #1F3145 #000 #001 #002 #003 #004 #005 #006 #007}
+{TKE-RubyBlue #ffffff #ffffff #121e31 #213659 #ffffff #395472 white #336e30 grey orange #ffffff #435e7c - #1C2E4D #000 #001 #002 #003 #004 #005 #006 #007}
+{TKE-MadeOfCode #f8f8f8 #f8f8f8 #090a1b #00348c #f8f8f8 #042154 white #4c60ae grey orange #f8f8f8 #00174a - #002C78 #000 #001 #002 #003 #004 #005 #006 #007}
+{TKE-CoolGlow #e0e0e0 #e0e0e0 #06071d #0e1145 #e0e0e0 #253296 white #7600fe grey orange #e0e0e0 #3542a6 - #171C73 #000 #001 #002 #003 #004 #005 #006 #007}
+{TKE-Quiverly #b6c1c1 #b6c1c1 #2b303b #333946 #fbffd7 #395472 white #ff9900 grey orange #FBFCEF #4b6684 - #414650 #000 #001 #002 #003 #004 #005 #006 #007}
+{TKE-Aurora #ececec #ececec #302e40 #4e4b68 #ececec #151325 white #ffffff grey orange #ececec #302e40 - #434259 #000 #001 #002 #003 #004 #005 #006 #007}
+{TKE-Choco #c3be98 #c3be98 #180c0c #402020 #c3be98 #664D4D white #6c6c6c grey orange white #735a5a - #331A1A #000 #001 #002 #003 #004 #005 #006 #007}
+{TKE-AnatomyOfGrey #dfdfdf #ffffff #000000 #282828 #ffffff #565656 black #4e5044 grey orange #ffffff #000000 - #363636 #000 #001 #002 #003 #004 #005 #006 #007}
 {TKE-Default white white black #282828 white blue white #9fa608 grey orange white black - #383838 #000 #001 #002 #003 #004 #005 #006 #007}
-{TKE-AnatomyOfGrey #dfdfdf #ffffff #000000 #282828 #ffffff #b4b4b4 black #4e5044 grey orange #ffffff #000000 - #363636 #000 #001 #002 #003 #004 #005 #006 #007}
-{TKE-Aurora #ececec #ececec #302e40 #4e4b68 #ececec #aeabc8 #0d0a27 #ffffff grey orange #ececec #302e40 - #434259 #000 #001 #002 #003 #004 #005 #006 #007}
-{TKE-CoolGlow #e0e0e0 #e0e0e0 #06071d #0e1145 #e0e0e0 #9d9abe #07081e #7600fe grey orange #e0e0e0 #06071d - #171C73 #000 #001 #002 #003 #004 #005 #006 #007}
-{TKE-FluidVision #000000 #000000 #f4f4f4 #cccccc #000000 #5e5e5e white #999999 grey #933232 #000000 #f4f4f4 - #BABABA #000 #001 #002 #003 #004 #005 #006 #007}
-{TKE-Juicy #000000 #000000 #f1f1f1 #c9c9c9 #000000 #B0B0B0 black #a4cd52 grey #933232 #000000 #f1f1f1 - #BABABA #000 #001 #002 #003 #004 #005 #006 #007}
-{TKE-LightVision #000000 #ffffff #fcfdfb #515753 #ffc2a1 #b1c2ab #000000 #0089f0 grey orange #ffc2a1 #2c322e - #474D49 #000 #001 #002 #003 #004 #005 #006 #007}
-{TKE-MadeOfCode #f8f8f8 #f8f8f8 #090a1b #00348c #f8f8f8 #73a7ff black #4c60ae grey orange #f8f8f8 #090a1b - #002C78 #000 #001 #002 #003 #004 #005 #006 #007}
-{TKE-MildDark #d2d2d2 #ffffff #151616 #43576e #ffbe00 #95b4d2 #000000 #00a0f0 grey #ffbb6d #ffbe00 #283e56 - #384b64 #000 #001 #002 #003 #004 #005 #006 #007}
-{TKE-MildDark2 #b4b4b4 #ffffff #0d0e0e #324864 #ffbe00 #8baac8 #000000 #00ffff grey #ffbb6d #ffbe00 #1e344c - #2B3E57 #000 #001 #002 #003 #004 #005 #006 #007}
-{TKE-MildDark3 #e2e2e2 #f1f1f1 #000000 #24384f #ffbe00 #84a3c1 #000000 #00ffff grey #ffbb6d #ffbe00 #041a32 - #1F3145 #000 #001 #002 #003 #004 #005 #006 #007}
-{TKE-Monokai #f8f8f2 #f8f8f2 #272822 #4e5044 #f8f8f2 #a4a4a4 #13140e #999d86 grey orange #f8f8f2 #272822 - #414238 #000 #001 #002 #003 #004 #005 #006 #007}
-{TKE-Notebook #000000 #000000 #beb69d #96907c #000000 #443e2a white #336e30 grey yellow #000000 #beb69d - #85806E #000 #001 #002 #003 #004 #005 #006 #007}
-{TKE-Quiverly #b6c1c1 #b6c1c1 #2b303b #333946 #fbffd7 #395472 white #ff9900 grey orange #fbffd7 #2b303b - #414650 #000 #001 #002 #003 #004 #005 #006 #007}
-{TKE-RubyBlue #ffffff #ffffff #121e31 #213659 #ffffff #7fbeff #000f39 #336e30 grey orange #ffffff #121e31 - #1C2E4D #000 #001 #002 #003 #004 #005 #006 #007}
-{TKE-SourceForge #141414 #ffffff #ffffff #335b7e #f7cf00 #3175a7 #ffff00 #0089f0 grey yellow #f7cf00 #1d4568 - #2D5170 #000 #001 #002 #003 #004 #005 #006 #007}
-{TKE-StarLight #C0B6A8 #C0B6A8 #223859 #315181 #C0B6A8 #8cacdc #001141 #4e81ce grey orange #C0B6A8 #223859 - #2D4A75 #000 #001 #002 #003 #004 #005 #006 #007}
-{TKE-TurnOfCentury #333333 #333333 #d6c4b6 #ae9f94 #333333 #56473c white #4A3706 grey #804000 #333333 #d6c4b6 - #a5968b #000 #001 #002 #003 #004 #005 #006 #007}
-{TKE-Choco #c3be98 #c3be98 #180c0c #402020 #c3be98 #664D4D white #6c6c6c grey orange #c3be98 #180c0c - #331A1A #000 #001 #002 #003 #004 #005 #006 #007}
-{TKE-IdleFingers #ffffff #ffffff #323232 #5a5a5a #ffffff #afafaf black #d7e9c3 grey orange #ffffff #323232 - #4F4F4F #000 #001 #002 #003 #004 #005 #006 #007}
-{TKE-Minimal #fcffe0 #ffffff #302d26 #5a5a5a #ffffff #c1beae black #ff9900 grey orange #ffffff #302d26 - #4F4F4F #000 #001 #002 #003 #004 #005 #006 #007}
-{TKE-oscuro #f1f1f1 #f1f1f1 #344545 #526d6d #f1f1f1 #9aabab black #e87e88 grey orange #f1f1f1 #344545 - #475E5E #000 #001 #002 #003 #004 #005 #006 #007}
-{TKE-YellowStone #0000ff #00003c #fdf9d0 #d5d2af #00003c #706d4a white #85836e grey #933232 #00003c #fdf9d0 - #DBD8B5 #000 #001 #002 #003 #004 #005 #006 #007}
 }
-#RUNF1: ./tests/test2_pave.tcl 18 11 12
+#-RUNF1: ./tests/test2_pave.tcl
+#RUNF1: ./tests/test2_pave.tcl 14 11 12
 
   set ::apave::_CS_(NONCS) -2
   set ::apave::_CS_(MINCS) -1
@@ -92,7 +97,7 @@ namespace eval ::apave {
   set ::apave::_CS_(untouch) [list]
 }
 
-#########################################################################
+# _______________________________________________________________________ #
 
 proc ::iswindows {} {
 
@@ -420,7 +425,7 @@ oo::class create ::apave::ObjectProperty {
     if {[llength [self next]]} next
   }
 
-  ###########################################################################
+# _______________________________________________________________________ #
 
   method setProperty {name args} {
 
@@ -495,6 +500,17 @@ oo::class create ::apave::ObjectTheming {
 
   ###########################################################################
 
+  method Create_Fonts {} {
+    # Creates fonts used in apave.
+
+    catch {font delete apaveFontMono}
+    catch {font delete apaveFontDef}
+    font create apaveFontMono -family $::apave::_CS_(textFont) -size $::apave::_CS_(fs)
+    font create apaveFontDef -family $::apave::_CS_(defFont) -size $::apave::_CS_(fs)
+  }
+
+  ###########################################################################
+
   method Main_Style {tfg1 tbg1 tfg2 tbg2 tfgS tbgS bclr tc fA bA bD} {
 
     # Sets main colors of application
@@ -512,10 +528,7 @@ oo::class create ::apave::ObjectTheming {
     #
     # The *foreground disabled* is set as `grey`.
 
-    catch {font delete apaveFontMono}
-    catch {font delete apaveFontDef}
-    font create apaveFontMono -family $::apave::_CS_(textFont) -size $::apave::_CS_(fs)
-    font create apaveFontDef -family $::apave::_CS_(defFont) -size $::apave::_CS_(fs)
+    my Create_Fonts
     ttk::style configure "." \
       -background        $tbg1 \
       -foreground        $tfg1 \
@@ -534,34 +547,114 @@ oo::class create ::apave::ObjectTheming {
 
   ###########################################################################
 
-  method Ttk_style {oper ts opt val} {
+  method ColorScheme {{ncolor ""}} {
 
-    # Sets a new style options.
-    #   oper - command of ttk::style ("map" or "configure")
-    #   ts - type of style to be configurated
-    #   opt - option's name
-    #   val - option's value
+    # Gets a full record of color scheme from a list of available ones
+    #   ncolor - index of color scheme
 
-    if {![catch {set oldval [ttk::style $oper $ts $opt]}]} {
-      catch {ttk::style $oper $ts $opt $val}
-      if {$oldval=="" && $oper=="configure"} {
-        switch -- $opt {
-          -foreground - -background {
-            set oldval [ttk::style $oper . $opt]
-          }
-          -fieldbackground {
-            set oldval white
-          }
-          -insertcolor {
-            set oldval black
-          }
-        }
+    if {"$ncolor" eq "" || $ncolor<0} {
+      # basic color scheme: get colors from a current ttk::style colors
+      if {[info exists ::apave::_CS_(def_fg)]} {
+        set fg $::apave::_CS_(def_fg)
+        set bg $::apave::_CS_(def_bg)
+        set fS $::apave::_CS_(def_fS)
+        set bS $::apave::_CS_(def_bS)
+        set bA $::apave::_CS_(def_bA)
+      } else {
+        set ::apave::_CS_(index) $::apave::_CS_(NONCS)
+        lassign [::apave::parseOptions [ttk::style configure .] \
+          -foreground #000000 -background #d9d9d9 -troughcolor #c3c3c3] fg bg tc
+        set fS black
+        set bS #9cb0c6
+        lassign [::apave::parseOptions [ttk::style map . -background] \
+          disabled #d9d9d9 active #ececec] bD bA
+        lassign [::apave::parseOptions [ttk::style map . -foreground] \
+          disabled #a3a3a3] fD
+        lassign [::apave::parseOptions [ttk::style map . -selectbackground] \
+          !focus #9e9a91] bclr
+        set ::apave::_CS_(def_fg) $fg
+        set ::apave::_CS_(def_bg) $bg
+        set ::apave::_CS_(def_fS) $fS
+        set ::apave::_CS_(def_bS) $bS
+        set ::apave::_CS_(def_fD) $fD
+        set ::apave::_CS_(def_bD) $bD
+        set ::apave::_CS_(def_bA) $bA
+        set ::apave::_CS_(def_tc) $tc
+        set ::apave::_CS_(def_bclr) $bclr
       }
+      return [list default \
+           $fg    $fg     $bA    $bg     $fg     $bS     $fS    #1E90FF  grey   #4f6379 $fS $bS - $bg]
+      # clrtitf clrinaf clrtitb clrinab clrhelp clractb clractf clrcurs clrgrey clrhotk fI  bI fM bM
     }
-    return
+    return [lindex $::apave::_CS_(ALL) $ncolor]
   }
 
-  #--------------------------------------------------------------------------
+# _______________________________________________________________________ #
+
+  method basicFontSize {{fs 0}} {
+
+    # Gets/Sets a basic size of font used in apave
+    #    fs - font size
+    #
+    # If 'fs' is omitted or ==0, this method gets it.
+    # If 'fs' >0, this method sets it.
+
+    if {$fs} {
+      return [set ::apave::_CS_(fs) $fs]
+    } else {
+      return $::apave::_CS_(fs)
+    }
+  }
+
+  ###########################################################################
+
+  method basicTextFont {{textfont ""}} {
+
+    # Gets/Sets a basic font used in editing/viewing text widget
+    #    textfont - font
+    #
+    # If 'textfont' is omitted or =="", this method gets it.
+    # If 'textfont' is set, this method sets it.
+
+    if {$textfont ne ""} {
+      return [set ::apave::_CS_(textFont) $textfont]
+    } else {
+      return $::apave::_CS_(textFont)
+    }
+  }
+
+  ###########################################################################
+
+  method csFont {fontname} {
+    # Returns attributes of CS font.
+    if {[catch {set font [font configure $fontname]}]} {
+      my Create_Fonts
+      set font [font configure $fontname]
+    }
+    return $font
+  }
+
+  method csFontMono {} {
+    # Returns attributes of CS monotype font.
+    return [my csFont apaveFontMono]
+  }
+
+  method csFontDef {} {
+    # Returns attributes of CS default font.
+    return [my csFont apaveFontDef]
+  }
+
+  ###########################################################################
+
+  method csDarkEdit {} {
+
+    # Returns a flag "the editor of CS is dark"
+
+    set cs [my csCurrent]
+    return [expr {$cs>-1 && $cs <12 || $cs>30}]
+  }
+
+  ###########################################################################
 
   method csExport {} {
 
@@ -588,61 +681,6 @@ oo::class create ::apave::ObjectTheming {
 
   ###########################################################################
 
-  method ColorScheme {{ncolor ""}} {
-
-    # Gets a full record of color scheme from a list of available ones
-    #   ncolor - index of color scheme
-
-    if {"$ncolor" eq "" || $ncolor<0} {
-      # basic color scheme: get colors from a current ttk::style colors
-      if {[info exists ::apave::_CS_(def_fg)]} {
-        set fg $::apave::_CS_(def_fg)
-        set bg $::apave::_CS_(def_bg)
-        set fS $::apave::_CS_(def_fS)
-        set bS $::apave::_CS_(def_bS)
-        set bA $::apave::_CS_(def_bA)
-      } else {
-        set ::apave::_CS_(index) $::apave::_CS_(NONCS)
-        lassign [::apave::parseOptions [ttk::style configure .] \
-          -foreground #000000 -background #d9d9d9 \
-          -selectforeground #ffffff -selectbackground #4a6984 \
-          -troughcolor #c3c3c3] fg bg fS bS tc
-        lassign [::apave::parseOptions [ttk::style map . -background] \
-          disabled #d9d9d9 active #ececec] bD bA
-        lassign [::apave::parseOptions [ttk::style map . -foreground] \
-          disabled #a3a3a3] fD
-        lassign [::apave::parseOptions [ttk::style map . -selectbackground] \
-          !focus #9e9a91] bclr
-        set ::apave::_CS_(def_fg) $fg
-        set ::apave::_CS_(def_bg) $bg
-        set ::apave::_CS_(def_fS) $fS
-        set ::apave::_CS_(def_bS) $bS
-        set ::apave::_CS_(def_fD) $fD
-        set ::apave::_CS_(def_bD) $bD
-        set ::apave::_CS_(def_bA) $bA
-        set ::apave::_CS_(def_tc) $tc
-        set ::apave::_CS_(def_bclr) $bclr
-      }
-      return [list default \
-           $fg    $fg     $bA    $bg     $fg     $bS     $fS     $bS    grey    $bS     $fS $bS - $bg]
-      # clrtitf clrinaf clrtitb clrinab clrhelp clractb clractf clrcurs clrgrey clrhotk fI  bI fM bM
-    }
-    return [lindex $::apave::_CS_(ALL) $ncolor]
-  }
-
-  ###########################################################################
-
-  method csGet {{ncolor ""}} {
-
-    # Gets a color scheme's colors
-    #   ncolor - index of color scheme
-
-    if {$ncolor eq ""} {set ncolor [my csCurrent]}
-    return [lrange [my ColorScheme $ncolor] 1 end]
-  }
-
-  ###########################################################################
-
   method csGetName {{ncolor 0}} {
 
     # Gets a color scheme's name
@@ -654,6 +692,17 @@ oo::class create ::apave::ObjectTheming {
       return "Basic"
     }
     return [lindex [my ColorScheme $ncolor] 0]
+  }
+
+  ###########################################################################
+
+  method csGet {{ncolor ""}} {
+
+    # Gets a color scheme's colors
+    #   ncolor - index of color scheme
+
+    if {$ncolor eq ""} {set ncolor [my csCurrent]}
+    return [lrange [my ColorScheme $ncolor] 1 end]
   }
 
   ###########################################################################
@@ -715,25 +764,7 @@ oo::class create ::apave::ObjectTheming {
       set ::apave::_CS_(old) $ncolor
       my themeWindow $win $fg $bg $fE $bE $fS $bS $grey $bg $cc $ht $hh $tfgI $tbgI $fM $bM
     }
-    catch {bartabs::drawAll}
     return [list $fg $bg $fE $bE $fS $bS $hh $gr $cc $ht $tfgI $tbgI $fM $bM]
-  }
-
-  ###########################################################################
-
-  method configTooltip {fg bg args} {
-
-    # Configurates colors and other attributes of tooltip.
-    #  fg - foreground
-    #  bg - background
-    #  args - other attributes
-
-    if {[info exists ::tooltip::labelOpts]} {
-	    # Undocumented feature of tooltip.tcl
-	    set ::tooltip::labelOpts [list -highlightthickness 1 \
-        -relief solid -bd 1 -background $bg -fg $fg {*}$args]
-    }
-    return
   }
 
   ###########################################################################
@@ -772,6 +803,35 @@ oo::class create ::apave::ObjectTheming {
     }
     if {$setnew} {set ::apave::_CS_(index) [set ::apave::_CS_(old) $found]}
     return [my csCurrent]
+  }
+
+# _______________________________________________________________________ #
+
+  method Ttk_style {oper ts opt val} {
+
+    # Sets a new style options.
+    #   oper - command of ttk::style ("map" or "configure")
+    #   ts - type of style to be configurated
+    #   opt - option's name
+    #   val - option's value
+
+    if {![catch {set oldval [ttk::style $oper $ts $opt]}]} {
+      catch {ttk::style $oper $ts $opt $val}
+      if {$oldval=="" && $oper=="configure"} {
+        switch -- $opt {
+          -foreground - -background {
+            set oldval [ttk::style $oper . $opt]
+          }
+          -fieldbackground {
+            set oldval white
+          }
+          -insertcolor {
+            set oldval black
+          }
+        }
+      }
+    }
+    return
   }
 
   ###########################################################################
@@ -1198,7 +1258,7 @@ oo::class create ::apave::ObjectTheming {
     return $att
   }
 
-  ###########################################################################
+# _______________________________________________________________________ #
 
   method ThemePopup {mnu args} {
 
@@ -1237,36 +1297,19 @@ oo::class create ::apave::ObjectTheming {
 
   ###########################################################################
 
-  method basicFontSize {{fs 0}} {
+  method configTooltip {fg bg args} {
 
-    # Gets/Sets a basic size of font used in apave
-    #    fs - font size
-    #
-    # If 'fs' is omitted or ==0, this method gets it.
-    # If 'fs' >0, this method sets it.
+    # Configurates colors and other attributes of tooltip.
+    #  fg - foreground
+    #  bg - background
+    #  args - other attributes
 
-    if {$fs} {
-      return [set ::apave::_CS_(fs) $fs]
-    } else {
-      return $::apave::_CS_(fs)
+    if {[info exists ::tooltip::labelOpts]} {
+	    # Undocumented feature of tooltip.tcl
+	    set ::tooltip::labelOpts [list -highlightthickness 1 \
+        -relief solid -bd 1 -background $bg -fg $fg {*}$args]
     }
-  }
-
-  ###########################################################################
-
-  method basicTextFont {{textfont ""}} {
-
-    # Gets/Sets a basic font used in editing/viewing text widget
-    #    textfont - font
-    #
-    # If 'textfont' is omitted or =="", this method gets it.
-    # If 'textfont' is set, this method sets it.
-
-    if {$textfont ne ""} {
-      return [set ::apave::_CS_(textFont) $textfont]
-    } else {
-      return $::apave::_CS_(textFont)
-    }
+    return
   }
 
 }
