@@ -89,7 +89,7 @@ namespace eval t {
     pave untouchWidgets *buTClr*
     if {!$firstin} {pave basicFontSize $::t::fontsz}
     set ::t::filetxt [::apave::readTextFile $::t::ftx1]
-    set ::multiline 1
+    set ::multiline 0
     set ::t::tblcols {
       0 {Name of widget} left \
       0 Type left \

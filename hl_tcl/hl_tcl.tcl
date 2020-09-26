@@ -6,7 +6,7 @@
 # License: MIT.
 # _______________________________________________________________________ #
 
-package provide hl_tcl 0.4
+package provide hl_tcl 0.4.1
 
 # _______________ Common data of ::hl_tcl:: namespace ______________ #
 
@@ -16,7 +16,7 @@ namespace eval ::hl_tcl {
 
   variable data;  array set data [list]
 
-  # to allow multi-line strings without back slash
+  # multi-line strings without back slash ("no" means a-la Gedit)
   set data(MULTI_LINE_STR) yes
 
   # Tcl commands
@@ -339,6 +339,8 @@ proc ::hl_tcl::my::Mempos {txt} {
   set data(CUR_LEN,$txt) [$txt index end]
   lassign [CountQSH $txt $ln] \
     data(CNT_QUOTE,$txt) data(CNT_SLASH,$txt) data(CNT_COMMENT,$txt)
+  $txt tag remove tagBRACKET 1.0 end
+  $txt tag remove tagBRACKETERR 1.0 end
 }
 #------
 proc ::hl_tcl::my::Modified {txt} {
@@ -485,6 +487,142 @@ proc ::hl_tcl::my::LineState {txt tSTR tCMN l1} {
   return $currQtd
 }
 
+# __________ HEROIC EFFORTS to highlight the matching brackets __________ #
+
+proc ::hl_tcl::my::MergePosList {none args} {
+  # Merges lists of numbers that are not-coinciding and sorted.
+  #   none - a number to be not allowed in the lists (e.g. less than minimal)
+  #   args - list of the lists to be merged
+  # Returns a list of pairs: index of list + item of list.
+  # E.g.
+  #   MergePosList -1 {1 5 8} {2 3 9 12} {0 6 10}
+  #   => {2 0} {0 1} {1 2} {1 3} {0 5} {2 6} {0 8} {1 9} {2 10} {1 12}
+
+  set itot [set ilist 0]
+  set lind [set lout [list]]
+  foreach lst $args {
+    incr ilist
+    incr itot [set llen [llength $lst]]
+    lappend lind [list 0 $llen]
+  }
+  for {set i 0} {$i<$itot} {incr i} {
+    set min $none
+    set ind -1
+    for {set k 0} {$k<$ilist} {incr k} {
+      lassign [lindex $lind $k] li llen
+      if {$li < $llen} {
+        set e [lindex [lindex $args $k] $li]
+        if {$min == $none || $min > $e} {
+          set ind $k
+          set min $e
+          set savli [incr li]
+          set savlen $llen
+        }
+      }
+    }
+    if {$ind == -1} {return -code error {Error: probably in the input data}}
+    lset lind $ind [list $savli $savlen]
+    lappend lout [list $ind $min]
+  }
+  return $lout
+}
+#------
+proc ::hl_tcl::my::CountChar2 {str ch {plistName ""}} {
+  # Counts a character in a string.
+  #   str - a string
+  #   ch - a character
+  #   plistName - variable name for a list of positions of *ch*
+  # Returns a number of ANY occurences of character *ch* in string *str*.
+  # See also: my::CountChar
+
+  if {$plistName ne ""} {
+    upvar 1 $plistName plist
+    set plist [list]
+  }
+  set icnt [set begidx 0]
+  while {[set idx [string first $ch $str]] >= 0} {
+    set nidx $idx
+    incr icnt
+    if {$plistName ne ""} {lappend plist [expr {$begidx+$idx}]}
+    incr begidx [incr idx]
+    set str [string range $str $idx end]
+  }
+  return $icnt
+}
+#------
+proc ::hl_tcl::my::MatchedBrackets {inplist curpos schar dchar dir} {
+  # Finds a match of characters (dchar for schar).
+  #   inplist - list of strings where to find a match
+  #   curpos - position of schar in nl.nc form where nl=1.., nc=0..
+  #   schar - source character
+  #   dchar - destination character
+  #   dir - search direction: 1 to the end, -1 to the beginning of list
+
+  lassign [split $curpos .] nl nc
+  if {$dir==1} {set rng1 "$nc end"} else {set rng1 "0 $nc"; set nc 0}
+  set retpos ""
+  set scount [set dcount 0]
+  incr nl -1
+  set inplen [llength $inplist]
+  while {$nl>=0 && $nl<$inplen} {
+    set line [lindex $inplist $nl]
+    set line [string range $line {*}$rng1]
+    set sc [CountChar2 $line $schar slist]
+    set dc [CountChar2 $line $dchar dlist]
+    set plen [llength [set plist [MergePosList -1 $slist $dlist]]]
+    for {set i [expr {$dir>0?0:($plen-1)}]} {$i>=0 && $i<$plen} {incr i $dir} {
+      lassign [lindex $plist $i] src pos
+      if {$src} {incr dcount} {incr scount}
+      if {$scount <= $dcount} {
+        set retpos [incr nl].[incr pos $nc]
+        break
+      }
+    }
+    if {$retpos ne ""} break
+    set nc 0
+    set rng1 "0 end"
+    incr nl $dir
+  }
+  return $retpos
+}
+#------
+proc ::hl_tcl::my::HighlightBrackets {w} {
+  # Highlights matching brackets if any.
+  #   w - text widget's path
+
+  set curpos [$w index insert]
+  set curpos2 [$w index "insert -1 chars"]
+  set ch [$w get $curpos]
+  set lbr "\{(\["
+  set rbr "\})\]"
+  set il [string first $ch $lbr]
+  set ir [string first $ch $rbr]
+  set txt [split [$w get 1.0 end] \n]
+  if {$il>-1} {
+    set brcpos [MatchedBrackets $txt $curpos \
+      [string index $lbr $il] [string index $rbr $il] 1]
+  } elseif {$ir>-1} {
+    set brcpos [MatchedBrackets $txt $curpos \
+      [string index $rbr $ir] [string index $lbr $ir] -1]
+  } elseif {[set il [string first [$w get $curpos2] $lbr]]>-1} {
+    set curpos $curpos2
+    set brcpos [MatchedBrackets $txt $curpos \
+      [string index $lbr $il] [string index $rbr $il] 1]
+  } elseif {[set ir [string first [$w get $curpos2] $rbr]]>-1} {
+    set curpos $curpos2
+    set brcpos [MatchedBrackets $txt $curpos \
+      [string index $rbr $ir] [string index $lbr $ir] -1]
+  } else {
+    return
+  }
+  if {$brcpos ne ""} {
+    $w tag add tagBRACKET $brcpos
+    $w tag add tagBRACKET $curpos
+  } else {
+    $w tag add tagBRACKETERR $curpos
+  }
+}
+
 # _________________________ INTERFACE procedures ________________________ #
 
 proc ::hl_tcl::hl_readonly {txt {ro ""} {com2 ""}} {
@@ -616,10 +754,15 @@ proc ::hl_tcl::hl_text {txt {ro no} {multi ""} {com2 ""}} {
   $txt tag config tagVAR -font "$font0" -foreground $clrVAR
   $txt tag config tagCMN -font "$font2" -foreground $clrCMN
   $txt tag config tagPROC -font "$font1" -foreground $clrPROC
+  $txt tag config tagBRACKET -font "$font1" -foreground $clrPROC
+  $txt tag config tagBRACKETERR -foreground white -background red
   my::HighlightAll $txt
   if {![info exists ::hl_tcl::my::data(BIND_TXT,$txt)]} {
     bind $txt <KeyPress> [list + [namespace current]::my::Mempos $txt]
     bind $txt <ButtonPress-1> [list + [namespace current]::my::Mempos $txt]
+    foreach ev {Enter KeyRelease ButtonRelease} {
+      bind $txt <$ev> [list + ::hl_tcl::my::HighlightBrackets $txt]
+    }
     set ::hl_tcl::my::data(BIND_TXT,$txt) yes
   }
   set ::hl_tcl::my::data(REG_TXT,$txt) "1"
