@@ -1,5 +1,5 @@
 
-package ifneeded hl_tcl 0.4.1 [list source [file join $dir hl_tcl.tcl]]
+package ifneeded hl_tcl 0.4.2 [list source [file join $dir hl_tcl.tcl]]
 
 # short intro (for Ruff! docs generator)
 
@@ -172,6 +172,8 @@ Perhaps, you would want to modify the *tcl_html.tcl*, this way:
 [Reference](https://aplsimple.github.io/en/tcl/hl_tcl/hl_tcl.html)
 
 [Source](https://chiselapp.com/user/aplsimple/repository/hl_tcl/download) (hl_tcl.zip)
+
+Note that [hl_tcl](https://aplsimple.github.io/en/tcl/hl_tcl/hl_tcl.html) is still disposed to update.
   }
 
 }

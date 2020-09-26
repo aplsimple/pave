@@ -6,7 +6,7 @@
 # License: MIT.
 # _______________________________________________________________________ #
 
-package provide hl_tcl 0.4.1
+package provide hl_tcl 0.4.2
 
 # _______________ Common data of ::hl_tcl:: namespace ______________ #
 
@@ -367,6 +367,9 @@ proc ::hl_tcl::my::Modified {txt} {
    || $cntq!=$data(CNT_QUOTE,$txt) \
    || $cnts!=$data(CNT_SLASH,$txt) \
    || $ccmnt!=$data(CNT_COMMENT,$txt)}]
+  if {$bf1 && !$data(MULTI_LINE_STR) && [$txt get "$ln.end -1 char" $ln.end] eq "\\"} {
+    incr ln2 ;# next line be handled too, if this one ended with "\\"
+  }
   set tSTR [$txt tag ranges tagSTR]
   set tCMN [$txt tag ranges tagCMN]
   if {$ln1==1} {

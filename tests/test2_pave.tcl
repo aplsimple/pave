@@ -12,10 +12,10 @@ set ::testdirname [file normalize [file dirname [info script]]]
 cd $::testdirname
 set ::test2dirs [list "$::testdirname/.." "$::testdirname" "$::testdirname/../bartabs" "$::testdirname/../hl_tcl"]
 lappend auto_path {*}$::test2dirs
-set pkg_versions "apave [package require apave]"
-append pkg_versions ", bartabs [package require bartabs]"
-append pkg_versions ", hl_tcl [package require hl_tcl]"
-
+set pkg_versions0 "\n  <red>apave [package require apave]</red>\n\n"
+append pkg_versions0 "  <red>bartabs [package require bartabs]</red>\n\n"
+append pkg_versions0 "  <red>hl_tcl [package require hl_tcl]</red>"
+set pkg_versions [string map {<red> "" </red> "" \n\n , \n ""} $pkg_versions0]
 set ::e_menu_dir [file normalize [file join $::testdirname ../../e_menu]]
 catch {source [file join $::e_menu_dir e_menu.tcl]}
 
@@ -89,7 +89,7 @@ namespace eval t {
     pave untouchWidgets *buTClr*
     if {!$firstin} {pave basicFontSize $::t::fontsz}
     set ::t::filetxt [::apave::readTextFile $::t::ftx1]
-    set ::multiline 0
+    set ::multiline 1
     set ::t::tblcols {
       0 {Name of widget} left \
       0 Type left \
@@ -532,7 +532,7 @@ where:
     # Open the window at last
     set ::t::curTab ""
     chanTab nbk
-    set res [pave showModal .win -geometry +300+20 -decor 1 -onclose t::exitProc]
+    set res [pave showModal .win -geometry +350+50 -decor 1 -onclose t::exitProc]
     if {$::t::newCS==[apave::cs_Non]} { ;# at restart, newCS is set
       # getting result and clearance
       set res [pave res .win]
@@ -727,7 +727,8 @@ where:
     $m add separator
     $m add command -label "Reload the bar of tabs" -command {::t::RefillBar}
     set m .win.menu.help
-    $m add command -label "About" -command [list ::t::msg info "  It's a demo of\n  <red> $::pkg_versions </red> packages.\n\n  Details: \
+    $m add command -label "About" -command [list ::t::msg info "  It's a demo of
+    $::pkg_versions0\n\n  Details: \
 
   https://aplsimple.github.io/en/tcl/pave
   https://aplsimple.github.io/en/tcl/bartabs
@@ -739,7 +740,7 @@ where:
   <red> $::tcltk_version </red>
 
   <red> $::tcl_platform(os) $::tcl_platform(osVersion) </red>
-" -t 1 -w 64 -tags ::t::textTags]
+" -t 1 -tags ::t::textTags]
   }
 
   proc tracer {varname args} {
