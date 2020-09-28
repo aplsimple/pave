@@ -179,7 +179,7 @@ namespace eval ::apave {
     # Sets/gets 'count of open modal windows'.
     #   val - current number of open modal windows
     #   w - root window's path
-    # See also: APave::showModal
+    # See also: showModal
 
     return [IntStatus $w MODALS $val]
   }
@@ -440,7 +440,7 @@ oo::class create ::apave::APave {
     # Gets a style for non-ttk widgets.
     #   typ - the type of widget (in apave terms, i.e. but, buT etc.)
     #   dsbl - a mode to get style of disabled (1) or readonly (2) widgets
-    # See also: APave::GetWidgetType"
+    # See also: GetWidgetType
     #
     # Method to be redefined in descendants/mixins.
     return
@@ -1027,8 +1027,7 @@ oo::class create ::apave::APave {
     #
     # Returns the item trimmed.
     #
-    # See also:
-    #   tk_optionCascade
+    # See also: tk_optionCascade
 
     if {[string match "\{*\}" $it]} {
       set it [string range $it 1 end-1]
@@ -1625,8 +1624,7 @@ oo::class create ::apave::APave {
     # means that the appropriate methods will be created to access
     # their full pathes with a command `my Name`.
     # This method gets a "normal" name of widget accepted by Tk.
-    # See also:
-    #   MakeWidgetName
+    # See also: MakeWidgetName
 
     set root [my ownWName $name]
     return [list [string range $name 0 [string last . $name]][string tolower \

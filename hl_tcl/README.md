@@ -163,8 +163,10 @@ Perhaps, you would want to modify the *tcl_html.tcl*, this way:
 
 ## Links
 
-[Reference](https://aplsimple.github.io/en/tcl/hl_tcl/hl_tcl.html)
+  * [Reference](https://aplsimple.github.io/en/tcl/hl_tcl/hl_tcl.html)
 
-[Source](https://chiselapp.com/user/aplsimple/repository/hl_tcl/download) (hl_tcl.zip)
+  * [Source](https://chiselapp.com/user/aplsimple/repository/hl_tcl/download) (hl_tcl.zip)
+
+  * [Demo](https://github.com/aplsimple/hl_tcl/releases/download/hl_tcl-0.4.2/hl_tcl-0.4.2.mp4) (16 Mb)
 
 Note that [hl_tcl](https://aplsimple.github.io/en/tcl/hl_tcl/hl_tcl.html) is still disposed to update.

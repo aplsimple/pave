@@ -824,6 +824,7 @@ where:
 
   proc highlighting_editor {} {
     set TID [::bt cget -tabcurrent]
+    #puts [time {::hl_tcl::hl_text [pave Text] [getLock $TID] $::multiline} 100]
     ::hl_tcl::hl_text [pave Text] [getLock $TID] $::multiline
   }
 
@@ -934,7 +935,10 @@ where:
   }
 
   proc selTab2 {TID} {
-    ::hl_tcl::hl_init [pave Text] -dark [pave csDarkEdit] -font [pave csFontMono]
+    set monf "Noto Sans Mono"
+    if {$monf in [font families]} {set monf " -family {$monf}"} {set monf ""}
+    ::hl_tcl::hl_init [pave Text] -dark [pave csDarkEdit] -font \
+      "[pave csFontMono]$monf"
     pave displayText [pave Text] $::t::filetxt
     highlighting_editor
   }
@@ -1026,7 +1030,9 @@ where:
     } else {
       ::bt $TID configure -lock "1"
     }
-    setLock $TID
+    if {$TID == [::bts $::t::BID cget -tabcurrent]} {
+      setLock $TID
+    }
   }
 
   proc switchAtt {BID TID label} {

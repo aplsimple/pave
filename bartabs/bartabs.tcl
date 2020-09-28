@@ -703,7 +703,9 @@ method OnButtonMotion {wb1 x y} {
     $wb1 configure -foreground $fgm
     my $BID configure -wb1 $wb1 -MOVX1 $movx1 -MOVY0 $movY0
   }
-  wm geometry $movWin +$movX+$movY0
+  if {abs($x-$movx)>1} {
+    wm geometry $movWin +$movX+$movY0
+  }
   my $BID configure -MOVX [expr {$movX+$x-$movx}] -MOVX0 $x
 }
 #_____
