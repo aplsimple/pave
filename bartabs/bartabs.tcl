@@ -7,7 +7,7 @@
 # _______________________________________________________________________ #
 
 package require Tk
-package provide bartabs 1.0.1
+package provide bartabs 1.0.2
 catch {package require tooltip} ;# optional (though necessary everywhere:)
 
 # __________________ Common data of bartabs:: namespace _________________ #
@@ -360,7 +360,7 @@ method Tab_Bindings {BID} {
       bind $wb <ButtonPress> "[self] $BID OnButtonPress $TID $wb1 {}"
       bind $wb1 <ButtonPress> "[self] $BID OnButtonPress $TID $wb1 %x"
       bind $wb1 <ButtonRelease> "[self] $BID OnButtonRelease $wb1 %x"
-      bind $wb1 <Motion> "[self] $BID OnButtonMotion $wb1 %x %y"
+      bind $wb1 <Motion> "[self] $BID OnButtonMotion $wb $wb1 %x %y"
     }
   }
   bind [lindex $wwid 0] <Button-3> "[self] $BID OnPopup %X %Y $BID"
@@ -635,6 +635,16 @@ method Disabled {TID} {
 
 # ____________________________ Event handlers ___________________________ #
 
+method DestroyMoveWindow {} {
+  # Destroys the moving window zombi.
+
+  set BID [my ID]
+  set movWin [lindex [my $BID cget -MOVWIN] 0]
+  catch {destroy $movWin}
+  my $BID configure -MOVX "" -wb1 ""
+}
+#_____
+
 method OnEnterTab {TID wb1 wb2 fgo bgo} {
 # Handles the mouse pointer entering a tab.
 #   wb1, wb2 - tab's widgets
@@ -675,36 +685,54 @@ method OnButtonPress {TID wb1 x} {
 }
 #_____
 
-method OnButtonMotion {wb1 x y} {
+method OnButtonMotion {wb wb1 x y} {
 # Handles the mouse moving over a tab.
+#   wb - tab's frame
 #   wb1 - tab's label
 #   x, y - positions of the mouse pointer
 
   lassign [my [set BID [my ID]] cget \
-    -static -FGMAIN -FGOVER -BGOVER -MOVWIN -MOVX -MOVX0 -MOVY0] \
-    static fgm fgo bgo movWin movX movx movY0
+    -static -FGMAIN -FGOVER -BGOVER -MOVWIN -MOVX -MOVX0 -MOVX1 -MOVY0] \
+    static fgm fgo bgo movWin movX movx movx1 movY0
   if {$movX eq "" || $static} return
   # dragging the tab
   if {![winfo exists $movWin]} {
     # make the tab's replica to be dragged
     toplevel $movWin
+    if {$::tcl_platform(platform) == "windows"} {
+      wm attributes $movWin -alpha 0.0
+    } else {
+      wm withdraw $movWin
+    }
     if {[tk windowingsystem] eq "aqua"} {
       ::tk::unsupported::MacWindowStyle style $movWin help none
     } else {
       wm overrideredirect $movWin 1
     }
-    bind $movWin <Leave> "destroy $movWin"
     set movx [set movx1 $x]
     set movX [expr {[winfo pointerx .]-$x}]
     set movY0 [expr {[winfo pointery .]-$y}]
-    label $movWin.label -text [$wb1 cget -text] \
-      -foreground $fgo -background $bgo  {*}[my Tab_Font $BID]
-    pack $movWin.label -ipadx 1
+    label $movWin.label -text [$wb1 cget -text] -relief solid \
+      -foreground black -background #FBFB95  {*}[my Tab_Font $BID]
+    pack $movWin.label -expand 1 -fill both -ipadx 1
+    wm minsize $movWin [winfo reqwidth $movWin.label] [winfo reqheight $wb1]
+    set againstLooseFocus "[self] $BID DestroyMoveWindow"
+    bind $movWin <Leave> $againstLooseFocus
+    bind $movWin <ButtonPress> $againstLooseFocus
     $wb1 configure -foreground $fgm
     my $BID configure -wb1 $wb1 -MOVX1 $movx1 -MOVY0 $movY0
   }
-  if {abs($x-$movx)>1} {
+  lassign [my $BID cget -WWID] wframe wlarr
+  lassign [split [winfo geometry $wframe] x+] wflen
+  lassign [split [winfo geometry $wlarr] x+] walen
+  lassign [split [winfo geometry $wb] x+] wbl - wbx
+  if {abs($x-$movx)>1 && ($wflen-$wbx+$movx1+$walen)>$x && ($wbx+$wbl-$movx1+$x)>0} {
     wm geometry $movWin +$movX+$movY0
+    if {$::tcl_platform(platform) == "windows"} {
+      if {[wm attributes $movWin -alpha] < 0.1} {wm attributes $movWin -alpha 1.0}
+    } else {
+      catch {wm deiconify $movWin ; raise $movWin}
+    }
   }
   my $BID configure -MOVX [expr {$movX+$x-$movx}] -MOVX0 $x
 }
@@ -718,8 +746,7 @@ method OnButtonRelease {wb1o x} {
   lassign [my [set BID [my ID]] cget \
     -MOVWIN -MOVX -MOVX1 -MOVY0 -FGMAIN -wb1 -tleft -tright -wbar -static] \
     movWin movX movx1 movY0 fgm wb1 tleft tright wbar static
-  my $BID configure -MOVX "" -wb1 ""
-  if {[winfo exists $movWin]} {destroy $movWin}
+  my $BID DestroyMoveWindow
   if {$movX eq "" || $wb1o ne $wb1 || $static} return
   # dropping the tab - find a tab being dropped at
   $wb1 configure -foreground $fgm
@@ -865,6 +892,7 @@ method OnPopup {X Y {BID "-1"} {TID "-1"} {textcur ""}} {
       lassign [my $TID cget -wb1 -wb2] wb1 wb2
       bind $pop <Unmap> [list [self] $TID OnLeaveTab $wb1 $wb2]
     }
+    my $BID DestroyMoveWindow
     tk_popup $pop $X $Y
   } else {
     my $BID popList $X $Y
@@ -1366,6 +1394,76 @@ method NeedDraw {} {
   }
 }
 
+# _______________________ Auxiliary methods of Bar ______________________ #
+
+method Aux_WidgetWidth {w} {
+# Calculates a widget's width.
+
+  if {![winfo exists $w]} {return 0}
+  set wwidth [winfo width $w]
+  if {$wwidth<2} {set wwidth [winfo reqwidth $w]}
+  return $wwidth
+}
+#_____
+
+method Aux_InitDraw {BID {clearpf yes}} {
+# Auxiliary method used before cycles drawing tabs.
+
+  my $BID InitColors
+  lassign [my $BID cget \
+    -tleft -hidearrows -LLEN -WWID -bd -wbase -wbar -ARRLEN -wproc] \
+    tleft hidearr llen wwid bd wbase wbar arrlen wproc
+  lassign $wwid wframe wlarr
+  if {$arrlen eq ""} {
+    set arrlen [winfo reqwidth $wlarr]
+    my $BID configure -wbase $wbase -ARRLEN $arrlen
+  }
+  set bwidth [my $BID Width]
+  set vislen [expr {$tleft || !$hidearr ? $arrlen : 0}]
+  set tabs [my $BID cget -TABS]
+  if {$clearpf} {foreach tab $tabs {my [lindex $tab 0] configure -pf ""}}
+  return [list $bwidth $vislen $bd $arrlen $llen $tleft $hidearr $tabs $wframe]
+}
+#_____
+
+method Aux_CheckTabVisible {wb wb1 wb2 i tleft trightN vislenN llen hidearr arrlen bd bwidth tabsN TID text} {
+# Auxiliary method used to check if a tab is visible.
+
+  upvar 1 $trightN tright $tabsN tabs $vislenN vislen
+  incr vislen [my $TID cget -width]
+  if {$i>$tleft && ($vislen+(($i+1)<$llen||!$hidearr?$arrlen:0))>$bwidth} {
+    pack forget $wb
+    set pf ""
+  } else {
+    set tright $i
+    set pf "p"
+  }
+  my $TID configure -wb $wb -wb1 $wb1 -wb2 $wb2 -pf $pf
+  return [string length $pf]
+}
+#_____
+
+method Aux_EndDraw {BID tleft tright llen} {
+# Auxiliary method used after cycles drawing tabs.
+
+  my $BID ArrowsState $tleft $tright [expr {$tright < ($llen-1)}]
+  my $BID configure -tleft $tleft -tright $tright
+  my Tab_Bindings $BID
+  my Tab_MarkBar $BID
+}
+#_____
+
+method Aux_IndexInList {ID lst} {
+# Searches ID in list.
+
+  set i 0
+  foreach it $lst {
+    if {[lindex $it 0]==$ID} {return $i}
+    incr i
+  }
+  return -1
+}
+
 # _________________________ Public methods of Bar _______________________ #
 
 method cget {args} {
@@ -1570,6 +1668,7 @@ method popList {X Y} {
 #   Y - y coordinate of mouse pointer
 
   set BID [my ID]
+  my $BID DestroyMoveWindow
   set wbar [my $BID cget -wbar]
   set popi $wbar.popupList
   catch {destroy $popi}
@@ -1602,76 +1701,6 @@ method remove {} {
   }
   return no
 }
-
-# _______________________ Auxiliary methods of Bar ______________________ #
-
-method Aux_WidgetWidth {w} {
-# Calculates a widget's width.
-
-  if {![winfo exists $w]} {return 0}
-  set wwidth [winfo width $w]
-  if {$wwidth<2} {set wwidth [winfo reqwidth $w]}
-  return $wwidth
-}
-#_____
-
-method Aux_InitDraw {BID {clearpf yes}} {
-# Auxiliary method used before cycles drawing tabs.
-
-  my $BID InitColors
-  lassign [my $BID cget \
-    -tleft -hidearrows -LLEN -WWID -bd -wbase -wbar -ARRLEN -wproc] \
-    tleft hidearr llen wwid bd wbase wbar arrlen wproc
-  lassign $wwid wframe wlarr
-  if {$arrlen eq ""} {
-    set arrlen [winfo reqwidth $wlarr]
-    my $BID configure -wbase $wbase -ARRLEN $arrlen
-  }
-  set bwidth [my $BID Width]
-  set vislen [expr {$tleft || !$hidearr ? $arrlen : 0}]
-  set tabs [my $BID cget -TABS]
-  if {$clearpf} {foreach tab $tabs {my [lindex $tab 0] configure -pf ""}}
-  return [list $bwidth $vislen $bd $arrlen $llen $tleft $hidearr $tabs $wframe]
-}
-#_____
-
-method Aux_CheckTabVisible {wb wb1 wb2 i tleft trightN vislenN llen hidearr arrlen bd bwidth tabsN TID text} {
-# Auxiliary method used to check if a tab is visible.
-
-  upvar 1 $trightN tright $tabsN tabs $vislenN vislen
-  incr vislen [my $TID cget -width]
-  if {$i>$tleft && ($vislen+(($i+1)<$llen||!$hidearr?$arrlen:0))>$bwidth} {
-    pack forget $wb
-    set pf ""
-  } else {
-    set tright $i
-    set pf "p"
-  }
-  my $TID configure -wb $wb -wb1 $wb1 -wb2 $wb2 -pf $pf
-  return [string length $pf]
-}
-#_____
-
-method Aux_EndDraw {BID tleft tright llen} {
-# Auxiliary method used after cycles drawing tabs.
-
-  my $BID ArrowsState $tleft $tright [expr {$tright < ($llen-1)}]
-  my $BID configure -tleft $tleft -tright $tright
-  my Tab_Bindings $BID
-  my Tab_MarkBar $BID
-}
-#_____
-
-method Aux_IndexInList {ID lst} {
-# Searches ID in list.
-
-  set i 0
-  foreach it $lst {
-    if {[lindex $it 0]==$ID} {return $i}
-    incr i
-  }
-  return -1
-}
 } ;#  bartabs::Bar
 
 # ___________________________ Methods of Bars ___________________________ #
@@ -1694,7 +1723,8 @@ destructor {
   set bartabs::BarsList [lreplace $bartabs::BarsList $i $i]
   if {[llength [self next]]} next
 }
-#_____
+
+# ________________________ Private methods of Bars ______________________ #
 
 method Bars_Method {mtd args} {
 # Executes a method for all bars.
@@ -1704,6 +1734,43 @@ method Bars_Method {mtd args} {
   foreach BID [lsort -decreasing [dict keys $btData]] {my $BID $mtd {*}$args}
 }
 #_____
+
+method MarkTab {opt args} {
+# Sets option of tab(s).
+#   opt - option
+#   args - list of TID
+
+  foreach TID $args {
+    if {$TID ne ""} {
+      set BID [lindex [my Tab_BID $TID] 0]
+      set marktabs [my $BID cget $opt]
+      if {[lsearch $marktabs $TID]<0} {
+        lappend marktabs $TID
+        my $BID configure $opt $marktabs
+      }
+    }
+  }
+  my Tab_MarkBars
+}
+#_____
+
+method UnmarkTab {opt args} {
+# Unsets option of tab(s).
+#   opt - option
+#   args - list of TID
+
+  if {![llength $args]} {my Bars_Method configure $opt [list]}
+  foreach TID $args {
+    set BID [lindex [my Tab_BID $TID] 0]
+    set marktabs [my $BID cget $opt]
+    if {[set i [lsearch $marktabs $TID]]>=0} {
+      my $BID configure $opt [lreplace $marktabs $i $i]
+    }
+  }
+  my Tab_MarkBars
+}
+
+# ________________________ Public methods of Bars _______________________ #
 
 method create {barCom {barOpts ""}} {
 # Creates a bar.
@@ -1764,42 +1831,6 @@ method removeAll {} {
 # Removes all bars.
 
   my Bars_Method remove
-}
-#_____
-
-method MarkTab {opt args} {
-# Sets option of tab(s).
-#   opt - option
-#   args - list of TID
-
-  foreach TID $args {
-    if {$TID ne ""} {
-      set BID [lindex [my Tab_BID $TID] 0]
-      set marktabs [my $BID cget $opt]
-      if {[lsearch $marktabs $TID]<0} {
-        lappend marktabs $TID
-        my $BID configure $opt $marktabs
-      }
-    }
-  }
-  my Tab_MarkBars
-}
-#_____
-
-method UnmarkTab {opt args} {
-# Unsets option of tab(s).
-#   opt - option
-#   args - list of TID
-
-  if {![llength $args]} {my Bars_Method configure $opt [list]}
-  foreach TID $args {
-    set BID [lindex [my Tab_BID $TID] 0]
-    set marktabs [my $BID cget $opt]
-    if {[set i [lsearch $marktabs $TID]]>=0} {
-      my $BID configure $opt [lreplace $marktabs $i $i]
-    }
-  }
-  my Tab_MarkBars
 }
 #_____
 
@@ -1879,7 +1910,6 @@ method moveTab {TID1 TID2} {
 }
 } ;#  bartabs::Bars
 
-# __________________________ Tests for e_menu ___________________________ #
-
+# ________________________________ EOF __________________________________ #
 #-RUNF0: test.tcl
 #RUNF1: ../tests/test2_pave.tcl

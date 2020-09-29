@@ -12,7 +12,9 @@ set ::testdirname [file normalize [file dirname [info script]]]
 cd $::testdirname
 set ::test2dirs [list "$::testdirname/.." "$::testdirname" "$::testdirname/../bartabs" "$::testdirname/../hl_tcl"]
 lappend auto_path {*}$::test2dirs
-set pkg_versions0 "\n  <red>apave [package require apave]</red>\n\n"
+set apavever [package require apave]
+set pkg_versions0 "\n  <red>apave $apavever</red>\n\n"
+append pkg_versions0 "  <red>e_menu $apavever</red>\n\n"
 append pkg_versions0 "  <red>bartabs [package require bartabs]</red>\n\n"
 append pkg_versions0 "  <red>hl_tcl [package require hl_tcl]</red>"
 set pkg_versions [string map {<red> "" </red> "" \n\n , \n ""} $pkg_versions0]
@@ -731,6 +733,7 @@ where:
     $::pkg_versions0\n\n  Details: \
 
   https://aplsimple.github.io/en/tcl/pave
+  https://aplsimple.github.io/en/tcl/e_menu
   https://aplsimple.github.io/en/tcl/bartabs
   https://aplsimple.github.io/en/tcl/hl_tcl/hl_tcl.html
 

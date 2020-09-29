@@ -6,7 +6,7 @@
 # License: MIT.
 # _______________________________________________________________________ #
 
-package provide hl_tcl 0.5.1
+package provide hl_tcl 0.5.2
 
 # _______________ Common data of ::hl_tcl:: namespace ______________ #
 
@@ -24,7 +24,7 @@ namespace eval ::hl_tcl {
     proc return method self my oo::define oo::class oo::objdefine oo::object \
     coroutine constructor destructor
   ]]
-  set data(CMD_TCL) [list \
+  set data(CMD_TCL) [lsort [list \
     set incr if string expr list lindex lrange llength lappend lreplace lsearch \
     lassign append split info array dict foreach for while break continue \
     switch default linsert lsort lset lmap lrepeat catch variable concat \
@@ -37,7 +37,7 @@ namespace eval ::hl_tcl {
     auto_reset socket bgerror oo::copy unload history re_syntax tailcall \
     tcl::prefix interp parray pid transchan nextto unknown dde pkg::create \
     pkg_mkIndex yieldto zlib platform::shell Tcl auto_import \
-  ]
+  ]]
 
   # Ttk commands
   set data(CMD_TTK) [list \
@@ -54,9 +54,6 @@ namespace eval ::hl_tcl {
     tk_chooseDirectory tk_textPaste ttk_vsapi tk_focusPrev tk_messageBox \
     tk_focusFollowsMouse tk_getSaveFile tk_menuSetFocus tk_dialog tk_chooseColor \
   ]
-
-  # Tcl commands
-  set data(CMD) [lsort $data(CMD_TCL)]
 
   # Tk/ttk commands united
   set data(CMD_TK) [lsort [concat $data(CMD_TTK) $data(CMD_TK2) [list \
@@ -90,7 +87,8 @@ proc ::hl_tcl::my::AuxEnding {kName lineName iName} {
     ([string trimleft [string range $line 0 $k-1]] eq "" || [string index \
     [string trimright [string range $line $i $k-1]] end] eq ";")}]
 }
-#------
+#_____
+
 proc ::hl_tcl::my::NotEscaped {line i} {
   # Checks if a character escaped in a line.
   #   line - line
@@ -106,7 +104,8 @@ proc ::hl_tcl::my::NotEscaped {line i} {
   }
   return [expr {($cntq%2)==0}]
 }
-#------
+#_____
+
 proc ::hl_tcl::my::FirstQtd {lineName iName} {
   # Searches the quote characters in line.
   #   lineName - variable's name for 'line'
@@ -145,7 +144,8 @@ proc ::hl_tcl::my::FirstQtd {lineName iName} {
     incr i
   }
 }
-#------
+#_____
+
 proc ::hl_tcl::my::RemoveTags {txt from to} {
   # Removes tags in text.
   #   txt - text widget's path
@@ -157,7 +157,8 @@ proc ::hl_tcl::my::RemoveTags {txt from to} {
   }
   return
 }
-#------
+#_____
+
 proc ::hl_tcl::my::HighlightCmd {txt line ln pri i} {
   # Highlights Tcl/Tk commands.
   #   txt - text widget's path
@@ -178,7 +179,7 @@ proc ::hl_tcl::my::HighlightCmd {txt line ln pri i} {
     if {$c ne ""} {
       incr i1 $ik
       incr i2
-      if {[lsearch -exact -sorted $data(CMD) $c]>-1} {
+      if {[lsearch -exact -sorted $data(CMD_TCL) $c]>-1} {
         $txt tag add tagCOM "$ln.$pri +$i1 char" "$ln.$pri +$i2 char"
       } elseif {[lsearch -exact -sorted $data(PROC_TCL) $c]>-1} {
         $txt tag add tagPROC "$ln.$pri +$i1 char" "$ln.$pri +$i2 char"
@@ -206,7 +207,8 @@ proc ::hl_tcl::my::HighlightCmd {txt line ln pri i} {
   }
   return
 }
-#------
+#_____
+
 proc ::hl_tcl::my::HighlightStr {txt p1 p2} {
   # Highlights strings.
   #   txt - text widget's path
@@ -230,7 +232,8 @@ proc ::hl_tcl::my::HighlightStr {txt p1 p2} {
   }
   return
 }
-#------
+#_____
+
 proc ::hl_tcl::my::HighlightLine {txt ln prevQtd} {
   # Highlightes a line in text.
   #   txt - text widget's path
@@ -288,7 +291,8 @@ proc ::hl_tcl::my::HighlightLine {txt ln prevQtd} {
   }
   return $currQtd
 }
-#------
+#_____
+
 proc ::hl_tcl::my::HighlightAll {txt} {
   # Highlights all of a text.
   #   txt - text widget's path
@@ -325,7 +329,8 @@ proc ::hl_tcl::my::CountChar {str ch} {
   }
   return $icnt
 }
-#------
+#_____
+
 proc ::hl_tcl::my::CountQSH {txt ln} {
   # Counts quotes, slashes, hashes in a line
   #   txt - text widget's path
@@ -335,7 +340,8 @@ proc ::hl_tcl::my::CountQSH {txt ln} {
   set st [$txt get $ln.0 $ln.end]
   return [list [CountChar2 $st "\""] [CountChar2 $st "\\"] [CountChar2 $st "#"]]
 }
-#------
+#_____
+
 proc ::hl_tcl::my::MemPos {txt} {
   # Remembers the state of current line.
   #   txt - text widget's path
@@ -349,7 +355,8 @@ proc ::hl_tcl::my::MemPos {txt} {
   $txt tag remove tagBRACKET 1.0 end
   $txt tag remove tagBRACKETERR 1.0 end
 }
-#------
+#_____
+
 proc ::hl_tcl::my::Modified {txt} {
   # Handles modifications of text.
   #   txt - text widget's path
@@ -405,7 +412,8 @@ proc ::hl_tcl::my::Modified {txt} {
   }
   return
 }
-#------
+#_____
+
 proc ::hl_tcl::my::InRange {p1 p2 l {c -1}} {
   # Checks if a text position is in a range of text positions.
   #   p1 - 1st position of range
@@ -443,7 +451,8 @@ proc ::hl_tcl::my::InRange {p1 p2 l {c -1}} {
   #set p2 [format "%09d%09d" $l2 $c2]
   #return [expr {$p>=$p1 && $p<=$p2}]
 }
-#------
+#_____
+
 proc ::hl_tcl::my::SearchTag {tagpos l1} {
   # Searches a position in tag ranges.
   #   tagpos - tag position ranges
@@ -458,7 +467,8 @@ proc ::hl_tcl::my::SearchTag {tagpos l1} {
   }
   return -1
 }
-#------
+#_____
+
 proc ::hl_tcl::my::LineState {txt tSTR tCMN l1} {
   # Gets an initial state of line.
   #   txt - text widget's path
@@ -549,7 +559,8 @@ proc ::hl_tcl::my::MergePosList {none args} {
   }
   return $lout
 }
-#------
+#_____
+
 proc ::hl_tcl::my::CountChar2 {str ch {plistName ""}} {
   # Counts a character in a string.
   #   str - a string
@@ -572,7 +583,8 @@ proc ::hl_tcl::my::CountChar2 {str ch {plistName ""}} {
   }
   return $icnt
 }
-#------
+#_____
+
 proc ::hl_tcl::my::MatchedBrackets {inplist curpos schar dchar dir} {
   # Finds a match of characters (dchar for schar).
   #   inplist - list of strings where to find a match
@@ -608,7 +620,8 @@ proc ::hl_tcl::my::MatchedBrackets {inplist curpos schar dchar dir} {
   }
   return $retpos
 }
-#------
+#_____
+
 proc ::hl_tcl::my::HighlightBrackets {w} {
   # Highlights matching brackets if any.
   #   w - text widget's path
@@ -682,7 +695,8 @@ proc ::hl_tcl::hl_readonly {txt {ro -1} {com2 ""}} {
       return \$_res_"
   }
 }
-#------
+#_____
+
 proc ::hl_tcl::hl_font {txt {fontattr ""}} {
   # Sets/gets default font for highlighting.
   #   txt - text widget's path
@@ -699,7 +713,8 @@ proc ::hl_tcl::hl_font {txt {fontattr ""}} {
   dict set font0 -size 12
   return $font0
 }
-#------
+#_____
+
 proc ::hl_tcl::hl_colors {txt args} {
   # Sets/gets default colors for highlighting.
   #   txt - text widget's path
@@ -728,7 +743,8 @@ proc ::hl_tcl::hl_colors {txt args} {
   }
   return [list $clrCOM $clrCOMTK $clrSTR $clrVAR $clrCMN $clrPROC]
 }
-#------
+#_____
+
 proc ::hl_tcl::hl_init {txt args} {
   # Initializes highlighting.
   #   txt - text widget's path
@@ -750,7 +766,8 @@ proc ::hl_tcl::hl_init {txt args} {
   }
   hl_readonly $txt no
 }
-#------
+#_____
+
 proc ::hl_tcl::hl_text {txt {ro no} {multi ""} {com2 ""}} {
   # Highlights Tcl code of a text widget.
   #   txt - text widget's path
@@ -798,7 +815,8 @@ proc ::hl_tcl::hl_text {txt {ro no} {multi ""} {com2 ""}} {
   }
   hl_readonly $txt $ro $com2
 }
-#------
+#_____
+
 proc ::hl_tcl::hl_all {args} {
   # Updates ("rehighlights") all highlighted and existing text widgets.
   #   args - dict of options
