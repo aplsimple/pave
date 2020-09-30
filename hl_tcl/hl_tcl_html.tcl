@@ -41,16 +41,6 @@ proc ::hl_tcl_html::highlight {htmlfile tag1 tag2 {darkedit ""} {multi ""}} {
   set chan [open $htmlfile]
   set text [read $chan]
   close $chan
-  set tCOM1 "<b><font color=#922b23>"
-  set tCOM2 "</font></b>"
-  set tCOMTK1 "<b><font color=#771008>"
-  set tCOMTK2 "</font></b>"
-  set tSTR1 "<font color=#035103>"
-  set tSTR2 "</font>"
-  set tVAR1 "<font color=#4A181B>"
-  set tVAR2 "</font>"
-  set tCMN1 "<font color=#646464>"
-  set tCMN2 "</font>"
   set ic [set ic2 0]
   while {$ic>=0 && $ic2>=0} {
     set ic [string first $tag1 $text $ic]
@@ -64,7 +54,7 @@ proc ::hl_tcl_html::highlight {htmlfile tag1 tag2 {darkedit ""} {multi ""}} {
         $txt replace 1.0 end $code
         ::hl_tcl::hl_text $txt
         set taglist [list]
-        foreach tag {tagCOM tagCOMTK tagSTR tagVAR tagCMN tagPROC} {
+        foreach tag {tagCOM tagCOMTK tagSTR tagVAR tagCMN tagPROC tagOPT} {
           foreach {p1 p2} [$txt tag ranges $tag] {
             lassign [split $p1 .] l1 c1
             lassign [split $p2 .] l2 c2
@@ -78,15 +68,15 @@ proc ::hl_tcl_html::highlight {htmlfile tag1 tag2 {darkedit ""} {multi ""}} {
           lassign $tagdat -> tag typ pos
           switch $tag {
             tagCOM {
-              set t1 "<b><font color=#922b23>"
+              set t1 "<b><font color=#923B23>"
               set t2 "</font></b>"
             }
             tagCOMTK {
-              set t1 "<b><font color=#771008>"
+              set t1 "<b><font color=#7A040E>"
               set t2 "</font></b>"
             }
             tagPROC {
-              set t1 "<b><font color=#800080>"
+              set t1 "<b><font color=#A106A1>"
               set t2 "</font></b>"
             }
             tagSTR {
@@ -98,7 +88,11 @@ proc ::hl_tcl_html::highlight {htmlfile tag1 tag2 {darkedit ""} {multi ""}} {
               set t2 "</font>"
             }
             tagCMN {
-              set t1 "<font color=#646464>"
+              set t1 "<i><font color=#646464>"
+              set t2 "</font></i>"
+            }
+            tagOPT {
+              set t1 "<font color=#463e11>"
               set t2 "</font>"
             }
           }
@@ -127,4 +121,6 @@ proc ::hl_tcl_html::highlight {htmlfile tag1 tag2 {darkedit ""} {multi ""}} {
 }
 after idle exit
 # _________________________________ EOF _________________________________ #
-#RUNF1: ./tcl_html.tcl .bak/hl_tcl.html
+#% file copy -force .bak/hl_tcl2.html .bak/hl_tcl.html
+#% exec tclsh ./tcl_html.tcl .bak/hl_tcl.html
+#% exec opera .bak/hl_tcl.html

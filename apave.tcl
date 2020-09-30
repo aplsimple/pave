@@ -45,7 +45,7 @@
 #
 # See tests/test*.tcl files for the detailed examples of use.
 #
-#RUNF1: ./tests/test2_pave.tcl 18 11 12
+#RUNF1: ./tests/test2_pave.tcl 1 11 12
 ###########################################################################
 
 package require Tk
@@ -179,7 +179,7 @@ namespace eval ::apave {
     # Sets/gets 'count of open modal windows'.
     #   val - current number of open modal windows
     #   w - root window's path
-    # See also: showModal
+    # See also: APave::showModal
 
     return [IntStatus $w MODALS $val]
   }
@@ -902,8 +902,11 @@ oo::class create ::apave::APave {
       "seh" {set widget "ttk::separator"}
       "sev" {set widget "ttk::separator"}
       "siz" {set widget "ttk::sizegrip"}
-      "spx" {set widget "ttk::spinbox"}
-      "spX" {set widget "spinbox"}
+      "spx" - "spX" {
+         if {$nam3 eq "spx"} {set widget "ttk::spinbox"} {set widget "spinbox"}
+         lassign [::apave::parseOptions $attrs -command "" -from "" -to "" ] cmd from to
+         if {$cmd ne ""} {set attrs "-onReturn {|{$cmd} {$from} {$to}|} $attrs"}
+      }
       "tbl" { ;# tablelist
         set widget "tablelist::tablelist"
         set attrs "[my FCfieldAttrs $wnamefull $attrs -lvar]"
@@ -1773,7 +1776,7 @@ oo::class create ::apave::APave {
       switch -- $a {
         -disabledtext - -rotext - -lbxsel - -cbxsel - -notebazook -\
         -entrypop - -entrypopRO - -textpop - -textpopRO - -ListboxSel -
-        -callF2 - -timeout - -bartabs {
+        -callF2 - -timeout - -bartabs - -onReturn {
           # attributes specific to apave, processed below in "Post"
           lappend _pav(prepost) [list $a [string trim $v {\{\}}]]
         }
@@ -1856,6 +1859,21 @@ oo::class create ::apave::APave {
             } elseif {![string match "#*" $fr]} {
               $w add [ttk::frame $w.$fr] {*}[subst $attr]
             }
+          }
+        }
+        -onReturn {   ;# makes a command run at Enter key pressing
+          set v [string trim $v |]
+          lassign $v cmd from to
+          if {[set tvar [$w cget -textvariable]] ne ""} {
+            if {$from ne ""} {
+              set cmd "if {\$$tvar < $from} {set $tvar $from}; $cmd"
+            }
+            if {$to ne ""} {
+              set cmd "if {\$$tvar >$to} {set $tvar $to}; $cmd"
+            }
+          }
+          foreach k {<Return> <KP_Enter>} {
+            if {$v ne ""} {bind $w $k $cmd}
           }
         }
         -callF2 {
@@ -2099,7 +2117,7 @@ oo::class create ::apave::APave {
     if {$widget in {ttk::entry entry spinbox ttk::spinbox}} {
       foreach k {<Return> <KP_Enter>} {
         bind $wname $k \
-        [list event generate $wname <Key> -keysym Tab]
+        [list + event generate $wname <Key> -keysym Tab]
       }
     }
   }

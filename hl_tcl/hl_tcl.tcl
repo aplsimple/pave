@@ -6,7 +6,7 @@
 # License: MIT.
 # _______________________________________________________________________ #
 
-package provide hl_tcl 0.5.2
+package provide hl_tcl 0.5.4
 
 # _______________ Common data of ::hl_tcl:: namespace ______________ #
 
@@ -15,9 +15,6 @@ namespace eval ::hl_tcl {
   namespace eval my {
 
   variable data;  array set data [list]
-
-  # multi-line strings without back slash ("no" means a-la Gedit)
-  set data(MULTI_LINE_STR) yes
 
   # Tcl commands
   set data(PROC_TCL) [lsort [list \
@@ -115,10 +112,7 @@ proc ::hl_tcl::my::FirstQtd {lineName iName} {
   variable data
   upvar 1 $lineName line $iName i
   while {1} {
-    # below is a line that brings Tcl highlighters in the stupor:
-    if {[set i [string first {"} $line $i]]==-1} {return no}
-    # as well as this one:
-    # regsub -all {(([^A-Z@]|\\@)[.?!]("|'|'')?([])])?) } $fieldText {\1  } fieldText
+    if {[set i [string first \" $line $i]]==-1} {return no}
     if {[NotEscaped $line $i]} {
       set i1 [expr {$i-1}]
       set i2 [expr {$i+1}]
@@ -137,7 +131,7 @@ proc ::hl_tcl::my::FirstQtd {lineName iName} {
           if {$c1 in $data(S_SPACE)} {return [expr {$c2 ne "\{"}]}
           incr i1 -1
         }
-        return no ;#[expr {!$data(MULTI_LINE_STR)}]
+        return no
       }
       return yes
     }
@@ -152,7 +146,7 @@ proc ::hl_tcl::my::RemoveTags {txt from to} {
   #   from - starting index
   #   to - ending index
 
-  foreach tag {tagCOM tagCOMTK tagSTR tagVAR tagCMN tagPROC} {
+  foreach tag {tagCOM tagCOMTK tagSTR tagVAR tagCMN tagPROC tagOPT} {
     $txt tag remove $tag $from $to
   }
   return
@@ -172,7 +166,7 @@ proc ::hl_tcl::my::HighlightCmd {txt line ln pri i} {
   set st [string range $line $pri $i-1]
   set lcom [regexp -inline -all -indices {(^|\[|\{|\}|;)+\s*(:|\w)+} $st]
   # commands
-  foreach {lc g1 g2} $lcom {
+  foreach {lc _ _} $lcom {
     lassign $lc i1 i2
     set c [string trim [string range $st $i1 $i2] "\{\}\[;\t "]
     set ik [expr {$i2-$i1+1-[string length $c]}]
@@ -190,19 +184,41 @@ proc ::hl_tcl::my::HighlightCmd {txt line ln pri i} {
   }
   foreach el {else elseif} {
     set lcom [regexp -inline -all -indices "\}\\s+($el)\\s+\{" $st]
-    foreach {g1 lc} $lcom {
+    foreach {_ lc} $lcom {
       lassign $lc i1 i2
       $txt tag add tagCOM "$ln.$pri +$i1 char" "$ln.$pri +[incr i2] char"
     }
   }
-  # variable values
+  # $variables
   set lcom [regexp -inline -all -indices {(^|[^\\])\$+\{?(:|\w|\(|\))+\}?} $st]
-  foreach {lc g1 g2} $lcom {
+  foreach {lc _ _} $lcom {
     lassign $lc i1 i2
     set i [string first \$ [set c [string range $st $i1 $i2]]]
     if {[string last \} $c]>0 && [string first \$\{ $c]==-1} {incr i2 -1}
     if {[incr i1 $i]<[incr i2]} {
       $txt tag add tagVAR "$ln.$pri +$i1 char" "$ln.$pri +$i2 char"
+    }
+  }
+  # -options
+  if {$::hl_tcl::my::data(OPTRE,$txt)} {
+    set lcom [regexp -inline -all -indices {(\s*|^)(-[[:alpha:]]+\w*)(\s*|$)} $st]
+    foreach {_ _ lc _} $lcom {
+      lassign $lc i1 i2
+      $txt tag add tagOPT "$ln.$pri +$i1 char" "$ln.$pri +[incr i2] char"
+    }
+  } else {
+    # "-options without regexp":
+    # performance improved by 10% or so, but it's not very strict mode
+    set i1 -1
+    while {[set i1 [string first "-" $st [incr i1]]]>-1 && 
+    [string is alpha [string index $st $i1+1]]} {
+      if {[set i2 [string first " " $st $i1]]>-1} {
+        $txt tag add tagOPT "$ln.$pri +$i1 char" "$ln.$pri +$i2 char"
+        set i1 $i2
+      } else {
+        $txt tag add tagOPT "$ln.$pri +$i1 char" "$ln.end"
+        break
+      }
     }
   }
   return
@@ -286,7 +302,7 @@ proc ::hl_tcl::my::HighlightLine {txt ln prevQtd} {
   } else {
     HighlightCmd $txt $line $ln $lasti [string length $line]
   }
-  if {!$data(MULTI_LINE_STR) && $currQtd && [string index $line end] ne "\\"} {
+  if {!$data(MULTILINE,$txt) && $currQtd && [string index $line end] ne "\\"} {
     set currQtd 0
   }
   return $currQtd
@@ -299,8 +315,23 @@ proc ::hl_tcl::my::HighlightAll {txt} {
 
   set tlen [lindex [split [$txt index end] .] 0]
   RemoveTags $txt 1.0 end
-  for {set currQtd [set ln 0]} {$ln<=$tlen} {incr ln} {
+  set maxl [expr {min($::hl_tcl::my::data(SEEN,$txt),$tlen)}]
+  for {set currQtd [set ln 0]} {$ln<=$maxl} {incr ln} {
     set currQtd [HighlightLine $txt $ln $currQtd]
+  }
+  if {$ln<=$tlen} {
+    update 
+    # the first lines are seen by a user at start
+    # so, while he/she is looking on, let the rest be handled unseen
+    # (define ::hl_tcl::my::HLTHE1ST anyhow for this being always "idle")
+    if {[info exists ::hl_tcl::my::HLTHE1ST]} {
+      set ::hl_tcl::my::HLTHE1ST idle
+    } else {
+      set ::hl_tcl::my::HLTHE1ST 500
+    }
+    after $::hl_tcl::my::HLTHE1ST \
+     "for {set ln $ln; set currQtd $currQtd} {\$ln<=$tlen} {incr ln} { 
+      set currQtd \[::hl_tcl::my::HighlightLine $txt \$ln \$currQtd\]}"
   }
 }
 
@@ -381,7 +412,7 @@ proc ::hl_tcl::my::Modified {txt} {
    || $cntq!=$data(CNT_QUOTE,$txt) \
    || $cnts!=$data(CNT_SLASH,$txt) \
    || $ccmnt!=$data(CNT_COMMENT,$txt)}]
-  if {$bf1 && !$data(MULTI_LINE_STR)} {
+  if {$bf1 && !$data(MULTILINE,$txt)} {
     set lnt1 $ln
     set lnt2 [expr {$ln+1}]
     while {$ln2<$endl && $lnt1<$endl && $lnt2<=$endl && ( \
@@ -405,7 +436,7 @@ proc ::hl_tcl::my::Modified {txt} {
     }
     RemoveTags $txt $ln1.0 $ln1.end
     set currQtd [HighlightLine $txt $ln1 $currQtd]
-    if {$ln1==$ln2 && ($bf1 || $bf2!=$currQtd) && $data(MULTI_LINE_STR)} {
+    if {$ln1==$ln2 && ($bf1 || $bf2!=$currQtd) && $data(MULTILINE,$txt)} {
       set ln2 $endl  ;# run to the end
     }
     incr ln1
@@ -420,24 +451,6 @@ proc ::hl_tcl::my::InRange {p1 p2 l {c -1}} {
   #   p2 - 2nd position of range
   #   l - line position to check (or 'l.c' if 'c' not set)
   #   c - column position to check
-  # doctest:
-  #% ::hl_tcl::my::InRange 9.0 9.20 9.0
-  #> 1
-  #% ::hl_tcl::my::InRange 9.1 9.20 9.0
-  #> 0
-  #% ::hl_tcl::my::InRange 9.0 9.20 9.19
-  #> 1
-  #% ::hl_tcl::my::InRange 9.0 9.20 9.20
-  #> 0
-  #% ::hl_tcl::my::InRange 9.0 9.20 8.19
-  #> 0
-  #% ::hl_tcl::my::InRange 9.0 9.20 10.0
-  #> 0
-  #% ::hl_tcl::my::InRange 9.10 11.2 10.0
-  #> 1
-  #% ::hl_tcl::my::InRange 9.0 10.0 9 9999
-  #> 1
-  #% puts InRange:[time {::hl_tcl::my::InRange 9.0 9.20 8.20} 10000]
 
   if {$c==-1} {lassign [split $l .] l c}
   lassign [split $p1 .] l1 c1
@@ -451,6 +464,24 @@ proc ::hl_tcl::my::InRange {p1 p2 l {c -1}} {
   #set p2 [format "%09d%09d" $l2 $c2]
   #return [expr {$p>=$p1 && $p<=$p2}]
 }
+# doctest:
+#% ::hl_tcl::my::InRange 9.0 9.20 9.0
+#> 1
+#% ::hl_tcl::my::InRange 9.1 9.20 9.0
+#> 0
+#% ::hl_tcl::my::InRange 9.0 9.20 9.19
+#> 1
+#% ::hl_tcl::my::InRange 9.0 9.20 9.20
+#> 0
+#% ::hl_tcl::my::InRange 9.0 9.20 8.19
+#> 0
+#% ::hl_tcl::my::InRange 9.0 9.20 10.0
+#> 0
+#% ::hl_tcl::my::InRange 9.10 11.2 10.0
+#> 1
+#% ::hl_tcl::my::InRange 9.0 10.0 9 9999
+#> 1
+#% puts InRange:[time {::hl_tcl::my::InRange 9.0 9.20 8.20} 10000]
 #_____
 
 proc ::hl_tcl::my::SearchTag {tagpos l1} {
@@ -522,14 +553,6 @@ proc ::hl_tcl::my::MergePosList {none args} {
   #   none - a number to be not allowed in the lists (e.g. less than minimal)
   #   args - list of the lists to be merged
   # Returns a list of pairs: index of list + item of list.
-  # doctest:
-  #% ::hl_tcl::my::MergePosList -1 {11 12} 13
-  #> {0 11} {0 12} {1 13}
-  #% ::hl_tcl::my::MergePosList -1 {1 8} {2 3}
-  #> {0 1} {1 2} {1 3} {0 8}
-  #% ::hl_tcl::my::MergePosList -1 {1 5 8} {2 3 9 12} {0 6 10}
-  #> {2 0} {0 1} {1 2} {1 3} {0 5} {2 6} {0 8} {1 9} {2 10} {1 12}
-  #% puts MergePosList:[time {::hl_tcl::my::MergePosList -1 {11 12} 13} 10000]
 
   set itot [set ilist 0]
   set lind [set lout [list]]
@@ -559,6 +582,14 @@ proc ::hl_tcl::my::MergePosList {none args} {
   }
   return $lout
 }
+# doctest:
+#% ::hl_tcl::my::MergePosList -1 {11 12} 13
+#> {0 11} {0 12} {1 13}
+#% ::hl_tcl::my::MergePosList -1 {1 8} {2 3}
+#> {0 1} {1 2} {1 3} {0 8}
+#% ::hl_tcl::my::MergePosList -1 {1 5 8} {2 3 9 12} {0 6 10}
+#> {2 0} {0 1} {1 2} {1 3} {0 5} {2 6} {0 8} {1 9} {2 10} {1 12}
+#% puts MergePosList:[time {::hl_tcl::my::MergePosList -1 {11 12} 13} 10000]
 #_____
 
 proc ::hl_tcl::my::CountChar2 {str ch {plistName ""}} {
@@ -672,6 +703,7 @@ proc ::hl_tcl::hl_readonly {txt {ro -1} {com2 ""}} {
     return [expr {[info exists ::hl_tcl::my::data(READONLY,$txt)] && $::hl_tcl::my::data(READONLY,$txt)}]
   }
   set ::hl_tcl::my::data(READONLY,$txt) $ro
+  set ::hl_tcl::my::data(CMD,$txt) $com2
   set newcom "::$txt.internal"
   if {[info commands $newcom] eq ""} {rename $txt $newcom}
   set com "[namespace current]::my::Modified $txt"
@@ -696,104 +728,70 @@ proc ::hl_tcl::hl_readonly {txt {ro -1} {com2 ""}} {
   }
 }
 #_____
-
-proc ::hl_tcl::hl_font {txt {fontattr ""}} {
-  # Sets/gets default font for highlighting.
-  #   txt - text widget's path
-  #   fontattr - attributes of default font
-  # If 'fontattr' omitted, returns the attributes of default font.
-
-  if {$fontattr ne ""} {
-    set ::hl_tcl::my::data(FONT,$txt) $fontattr
-    return
-  } elseif {[info exists ::hl_tcl::my::data(FONT,$txt)]} {
-    return $::hl_tcl::my::data(FONT,$txt)
-  }
-  set font0 [font configure TkFixedFont]
-  dict set font0 -size 12
-  return $font0
-}
-#_____
-
-proc ::hl_tcl::hl_colors {txt args} {
-  # Sets/gets default colors for highlighting.
-  #   txt - text widget's path
-  #   args - list of default colors
-  # If 'args' omitted, returns a list of default colors.
-
-  if {[llength $args]} {
-    set ::hl_tcl::my::data(COLORS,$txt) $args
-    return
-  } elseif {[info exists ::hl_tcl::my::data(COLORS,$txt)]} {
-    return $::hl_tcl::my::data(COLORS,$txt)
-  } elseif {$::hl_tcl::my::data(DARK_EDITOR,$txt)} {
-    set clrCOM orange
-    set clrCOMTK #fe9880
-    set clrSTR lightgreen
-    set clrVAR #f1b479
-    set clrCMN #76a396
-    set clrPROC #d485d4
-  } else {
-    set clrCOM #923B23
-    set clrCOMTK #7A040E
-    set clrSTR #035103
-    set clrVAR #4A181B
-    set clrCMN #646464
-    set clrPROC #A106A1
-  }
-  return [list $clrCOM $clrCOMTK $clrSTR $clrVAR $clrCMN $clrPROC]
-}
-#_____
-
 proc ::hl_tcl::hl_init {txt args} {
   # Initializes highlighting.
   #   txt - text widget's path
   #   args - dict of options
   # The 'args' options include:
   #   -dark - flag "the text widget has dark background"
+  #   -readonly - flag "read-only"
+  #   -optRE - flag "use of RE to highlight options"
+  #   -multiline - flag "allowed multi-line strings"
+  #   -cmd - command to watch editing/viewing
   #   -colors - list of colors: clrCOM, clrCOMTK, clrSTR, clrVAR, clrCMN, clrPROC
   #   -font - attributes of font
+  #   -seen - lines seen at start
   # This procedure has to be called before writing a text in the text widget.
 
   set ::hl_tcl::my::data(REG_TXT,$txt) ""  ;# disables Modified at changing the text
-  set ::hl_tcl::my::data(DARK_EDITOR,$txt) [expr {[dict exists $args -dark] && \
-    [dict get $args -dark]}]
+  foreach {opt val} {-dark 0 -readonly 0 -cmd "" -optRE 1 -multiline 1 -seen 99999999} {
+    if {[dict exists $args $opt]} {set val [dict get $args $opt]}
+    set ::hl_tcl::my::data([string toupper [string range $opt 1 end]],$txt) $val
+  }
   if {[dict exists $args -colors]} {
     set ::hl_tcl::my::data(COLORS,$txt) [dict get $args -colors]
+    set ::hl_tcl::my::data(SETCOLORS,$txt) 1
+  } else {
+    if {![info exists ::hl_tcl::my::data(COLORS,$txt)]}  {
+      if {$::hl_tcl::my::data(DARK,$txt)} {
+        set ::hl_tcl::my::data(COLORS,$txt) [list \
+          orange #A17970 lightgreen #f1b479 #76a396 #d485d4 #b9b96e]
+        # $clrCOM $clrCOMTK $clrSTR $clrVAR $clrCMN $clrPROC $clrOPT
+      } else {
+        set ::hl_tcl::my::data(COLORS,$txt) [list \
+          "#923B23" #7A040E  #035103 #4A181B #646464 #A106A1 #463e11]
+      }
+    }
   }
   if {[dict exists $args -font]} {
     set ::hl_tcl::my::data(FONT,$txt) [dict get $args -font]
+  } else {
+    set ::hl_tcl::my::data(FONT,$txt) [font configure TkFixedFont]
+    dict set ::hl_tcl::my::data(FONT,$txt) -size 12
   }
   hl_readonly $txt no
 }
 #_____
 
-proc ::hl_tcl::hl_text {txt {ro no} {multi ""} {com2 ""}} {
+proc ::hl_tcl::hl_text {txt} {
   # Highlights Tcl code of a text widget.
   #   txt - text widget's path
-  #   ro - flag "the text widget is readonly"
-  #   multi - flag "process multi-line strings" ("yes" by default)
-  #   com2 - command to be called after each text change
 
-  if {$multi ne ""} {set ::hl_tcl::my::data(MULTI_LINE_STR) $multi}
-  if {[info exists ::hl_tcl::my::data(FONT,$txt)]} {
-    set font0 $::hl_tcl::my::data(FONT,$txt)
-  } else {
-    set font0 [font configure TkFixedFont]
-    dict set font0 -size 12
-  }
+  set font0 $::hl_tcl::my::data(FONT,$txt)
   set font1 [set font2 $font0]
   $txt tag config tagSTD -font "$font0"
   $txt tag add tagSTD 1.0 end
   dict set font1 -weight bold
   dict set font2 -slant italic
-  lassign [hl_colors $txt] clrCOM clrCOMTK clrSTR clrVAR clrCMN clrPROC
+  lassign $::hl_tcl::my::data(COLORS,$txt) \
+    clrCOM clrCOMTK clrSTR clrVAR clrCMN clrPROC clrOPT
   $txt tag config tagCOM -font "$font1" -foreground $clrCOM
   $txt tag config tagCOMTK -font "$font1" -foreground $clrCOMTK
   $txt tag config tagSTR -font "$font0" -foreground $clrSTR
   $txt tag config tagVAR -font "$font0" -foreground $clrVAR
   $txt tag config tagCMN -font "$font2" -foreground $clrCMN
   $txt tag config tagPROC -font "$font1" -foreground $clrPROC
+  $txt tag config tagOPT -font "$font0" -foreground $clrOPT
   $txt tag config tagBRACKET -font "$font1" -foreground $clrPROC
   $txt tag config tagBRACKETERR -foreground white -background red
   my::HighlightAll $txt
@@ -806,7 +804,9 @@ proc ::hl_tcl::hl_text {txt {ro no} {multi ""} {com2 ""}} {
     set ::hl_tcl::my::data(BIND_TXT,$txt) yes
   }
   set ::hl_tcl::my::data(REG_TXT,$txt) "1"
-  set txtattrs [list $txt $ro $multi $com2]
+  set ro $::hl_tcl::my::data(READONLY,$txt)
+  set com2 $::hl_tcl::my::data(CMD,$txt)
+  set txtattrs [list $txt $ro $com2]
   if {![info exists ::hl_tcl::my::data(LIST_TXT)] || \
   [set i [lsearch -index 0 -exact $::hl_tcl::my::data(LIST_TXT) $txt]]==-1} {
     lappend ::hl_tcl::my::data(LIST_TXT) $txtattrs
@@ -824,10 +824,17 @@ proc ::hl_tcl::hl_all {args} {
 
   if {[info exists ::hl_tcl::my::data(LIST_TXT)]} {
     foreach wattrs $::hl_tcl::my::data(LIST_TXT) {
-      lassign $wattrs txt ro multi com2
+      lassign $wattrs txt ro com2
       if {[winfo exists $txt]} {
+        if {![info exists ::hl_tcl::my::data(SETCOLORS,$txt)]} {
+          unset ::hl_tcl::my::data(COLORS,$txt) ;# colors defined by DARK
+        }
         hl_init $txt {*}$args
-        hl_text $txt $ro $multi $com2
+        # args (if set) override the settings for $txt
+        # except for these VIPs: readonly and command
+        set ::hl_tcl::my::data(READONLY,$txt) $ro
+        set ::hl_tcl::my::data(CMD,$txt) $com2
+        hl_text $txt
       }
     }
   }

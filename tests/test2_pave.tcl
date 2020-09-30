@@ -20,6 +20,7 @@ append pkg_versions0 "  <red>hl_tcl [package require hl_tcl]</red>"
 set pkg_versions [string map {<red> "" </red> "" \n\n , \n ""} $pkg_versions0]
 set ::e_menu_dir [file normalize [file join $::testdirname ../../e_menu]]
 catch {source [file join $::e_menu_dir e_menu.tcl]}
+catch {source [file join $::testdirname ../../transpops transpops.tcl]}
 
 namespace eval t {
 
@@ -90,6 +91,10 @@ namespace eval t {
     pave configTooltip black #FBFB95 -font {-size 11}
     pave untouchWidgets *buTClr*
     if {!$firstin} {pave basicFontSize $::t::fontsz}
+    set papaTcl [file normalize [file join $::testdirname .. tksqlite.tcl]]
+    if {[file exists $papaTcl]} {
+      set ::t::ftx1 $papaTcl
+    }
     set ::t::filetxt [::apave::readTextFile $::t::ftx1]
     set ::multiline 1
     set ::t::tblcols {
@@ -529,7 +534,8 @@ where:
     }
     set ::t::newCS [apave::cs_Non]
     toolBut 0
-    highlighting_others
+    after 700 {::t::highlighting_others}  ;# it's unseen at changing the theme
+    catch {::transpops::run ../.bak/transpops.txt <Control-q> .win}
 
     # Open the window at last
     set ::t::curTab ""
@@ -827,16 +833,19 @@ where:
 
   proc highlighting_editor {} {
     set TID [::bt cget -tabcurrent]
-    #puts [time {::hl_tcl::hl_text [pave Text] [getLock $TID] $::multiline} 100]
-    ::hl_tcl::hl_text [pave Text] [getLock $TID] $::multiline
+    ::hl_tcl::hl_init [pave Text] -seen 500 -dark [pave csDarkEdit] \
+      -readonly [getLock $TID] -font [pave csFontMono] -multiline $::multiline
+    #puts [time {::hl_tcl::hl_text [pave Text]} 10]
+    ::hl_tcl::hl_text [pave Text]
   }
 
   proc highlighting_others {} {
 
     # try to get "universal" highlighting colors (for dark&light bg):
     ::hl_tcl::hl_init [pave TextNT] -dark [pave csDarkEdit] \
-      -font [pave csFontMono] -colors {#BC47D9 #AB21CE #0C860C #9a5465 #66a396 brown}
-    ::hl_tcl::hl_text [pave TextNT] yes
+      -seen 1500 -readonly 1 -font [pave csFontMono] \
+      -colors {"#BC47D9" #AB21CE #0C860C #9a5465 #66a396 brown #7150cb}
+    ::hl_tcl::hl_text [pave TextNT]
   }
 
 # ____________________ Procedures for bartabs widget ____________________ #
@@ -898,7 +907,7 @@ where:
     }
     bartabs::Bars create ::bts                ;# ::bts is Bars object
     set ::t::BID [::bts create ::bt $bar1Opts]  ;# ::bt is Bar object
-    set ::t::ftx1 $::t::ftx0
+    #set ::t::ftx1 $::t::ftx0
     ::bt [::bt tabID [file tail $::t::ftx1]] show
     bind [pave Text] <Control-Left> "::bt scrollLeft ; break"
     bind [pave Text] <Control-Right> "::bt scrollRight ; break"

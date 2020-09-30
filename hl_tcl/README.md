@@ -12,9 +12,9 @@ The *hl_tcl* has highlighted its own code in [Reference](https://aplsimple.githu
 
 ## Some of blah-blah
 
-The Tcl being incredibly dynamic language sets a lot of problems before any Tcl syntax highlighter. Probably, a Tcl string spanning several lines is the main challenge at that.
+The Tcl being incredibly dynamic language sets a lot of problems before any Tcl syntax highlighter. Probably, the usage of quotes and esp. the strings spanning several lines are the main challenges.
 
-Below is a line that brings most (not *hl_tcl* in [Reference](https://aplsimple.github.io/en/tcl/hl_tcl/hl_tcl.html)) of Tcl highlighters in a stupor:
+Below is a line that brings most (not *hl_tcl*, as seen in [Reference](https://aplsimple.github.io/en/tcl/hl_tcl/hl_tcl.html)) of Tcl highlighters in a stupor:
 
       if {[set i [string first {"} $line $i]]==-1} {return no}
 
@@ -24,7 +24,7 @@ Below is a line that brings most (not *hl_tcl* in [Reference](https://aplsimple.
 
 Good luck for a highlighter when the second line (or similar) follows the first, giving it a matching quote and thus bringing it out of the stupor.
  
-Those stand-alone quotes are widely used in `regexp` and `regsub` Tcl commands, so that when a honest Tcl highlighter (like <a href="https://www.geany.org" title="Geany IDE">Geany</a>) stumbles upon a quote, it tries its best to highlight the rest of code as a string, till the next occurence of unescaped quote.
+Those orphan quotes are often used in `regexp` and `regsub` Tcl commands, so that when a honest Tcl highlighter (like <a href="https://www.geany.org" title="Geany IDE">Geany</a>) stumbles upon an orphan quote, it tries its best to highlight the rest of code as a string, till the next unmatched quote.
 
 Thus, we have
 
@@ -34,7 +34,7 @@ Thus, we have
 
 <img src="https://aplsimple.github.io/en/tcl/hl_tcl/files/hltcl2.png" class="media" alt="">
 
-There are "tricky" highlighters (like <a href="https://wiki.gnome.org/Apps/Gedit" title="Gedit editor">Gedit</a>) that behave more wisely at the stumbling a quote: they permit only a one-line Tcl strings (if not continued with \\), so that the string highlighting would be most likely finished in the same line it started. No problems except for this silly line. And no delays due to the highlighting the rest of code...
+There are "tricky" highlighters (like <a href="https://wiki.gnome.org/Apps/Gedit" title="Gedit editor">Gedit</a>) that behave more wisely at the stumbling an orphan quote: they permit only a one-line Tcl strings (if not continued with \\), so that the string highlighting would be most likely finished in the same line it started. No problems except for this silly line. And no delays due to the highlighting the rest of code...
 
 ... as seen in:
 
@@ -42,7 +42,7 @@ There are "tricky" highlighters (like <a href="https://wiki.gnome.org/Apps/Gedit
 
 ## Some of editors
 
-<a href="https://www.geany.org" title="Geany IDE">Geany</a>. Probably, the best Tcl highlighter and the great programming tool at that. Still, it has few drawbacks:
+<a href="https://www.geany.org" title="Geany IDE">Geany</a>. Probably, the best Tcl highlighter. And the great programming tool at that. Still, it has few drawbacks:
 
    * doesn't highlight the above mentioned Tcl lines properly
    * doesn't highlight `${var}` in contrast with `$var`
@@ -59,15 +59,15 @@ There are "tricky" highlighters (like <a href="https://wiki.gnome.org/Apps/Gedit
 
 <a href="https://kate-editor.org" title="Kate editor">Kate</a>. As nearly good as Geany, still doesn't highlight ttk and TclOO.
 
-<a href="https://github.com/phase1geo/tke/" title="TKE editor">TKE</a>. Written in Tcl/Tk, it might be the best of all to highlight the Tcl/Tk. In spite of its suspended state it still can. Has issues with highlighting strings and the performance.
+<a href="https://github.com/phase1geo/tke/" title="TKE editor">TKE</a>. Written in Tcl/Tk, it might be the best of all to highlight the Tcl/Tk. In spite of its suspended state it still can. Issues with highlighting strings and the performance.
 
 <a href="http://mate-desktop.org" title="Pluma editor">Pluma</a> and <a href="https://wiki.gnome.org/Apps/Gedit" title="Gedit editor">Gedit</a> seem to use the same Tcl highlighting engine that gives rather good results. Still, the mentioned above drawbacks are here too. And no highlighting of tk, ttk, TclOO.
 
-<a href="https://notepad-plus-plus.org/" title="Notepad++ official site">Notepad++</a>. Very fast Tcl highlighter. Still, the mentioned above drawbacks are here all the same. No highlighting of tk, ttk, TclOO. Plus an obsolete version of Tcl, i.e. no highlighting `lset, lassign` etc.
+<a href="https://notepad-plus-plus.org/" title="Notepad++ official site">Notepad++</a>. Very fast Tcl highlighter. And very basic. All the same drawbacks. No highlighting of tk, ttk, TclOO. *Plus* an obsolete version of Tcl, i.e. no highlighting `lset, lassign` etc.
 
 ## What can we do?
 
-To develop a correct (and fast at that) Tcl highlighter, we would have to be familiar with Tcl core. Though, no hopes to achieve this ideal through repeating the core in Tcl/Tk or massively using the regular expressions.
+To develop an ideal (correct and fast) Tcl/Tk highlighter, we would have to dive into Tcl core. Though, no hopes to achieve this ideal through repeating the core in Tcl/Tk or with massively using the regular expressions.
 
 That said, while implementing Tcl/Tk highlighter *in pure Tcl/Tk*, we might hope to achieve a reasonable compromise between the performance and the elimination of blunders.
 
@@ -75,7 +75,8 @@ It seems *hl_tcl* got close to this compromise. Specifically, it provides:
 
   * special highlighting for Tcl and TclOO commands
   * special highlighting for Tk and ttk commands
-  * special highlighting for declarations (`proc, method, oo::class` etc.)  and `return`
+  * special highlighting for declarations `proc, method, oo::class` etc.  and `return`
+  * special highlighting for `#comments`, `$variables`, `"strings"`, `-options`
   * in-line comments being recognized and thus highlighted only after `;#`
   * proper handling of most `regexp` and `regsub` expressions containing a quote
   * highlighting the multi-line strings, with possible switching this mode off (a-la Gedit) to improve the performance
@@ -87,10 +88,9 @@ It seems *hl_tcl* got close to this compromise. Specifically, it provides:
 The *hl_tcl* doesn't provide the following:
 
   * highlighting *numbers*
-  * highlighting *-options*
-  * highlighting *brackets* except for in strings
+  * highlighting *brackets*, except for matched ones and inside the strings
 
-These are in no way critical drawbacks. A bit less florid Tcl code might be even preferable.
+These are in no way critical drawbacks. A little less florid Tcl code might be even preferable for other tastes.
 
 The Tcl can arrange its pitfalls for *hl_tcl* (I know where). Also, tricky practices or tastes can make a fool of *hl_tcl*. Still hopefully these pranks are few and rare to encounter.
 
@@ -99,45 +99,43 @@ The Tcl can arrange its pitfalls for *hl_tcl* (I know where). Also, tricky pract
 The code below:
 
       package require hl_tcl
-      #...
+
       proc ::stub {} {puts "stub: [$::txt index end]"}
-      #...
-      ::hl_tcl::hl_init $::txt
+
+      ::hl_tcl::hl_init $::txt -readonly yes -cmd ::stub
+
       #... inserting a text into the text widget
-      ::hl_tcl::hl_text $::txt $readonly $multi ::stub
+
+      ::hl_tcl::hl_text $::txt
 
 sets an example of *hl_tcl* usage. Here are the details:
 
-  * **`::stub`** is a procedure to watch the text editing; here it simply puts out the text's last index
+  * **`::stub`** is a procedure to watch the text editing; here it simply puts out the text's last index;
 
-  * **`hl_init`** is called *before* filling the text widget with a Tcl code
+  * **`hl_init`** is called *before* filling the text widget with a Tcl code; it sets the highlighting options and disables the highlighting till *hl_text* runs;
 
-  * **`hl_text`** is called to highlight the Tcl code of the text widget and view/edit it
+  * **`hl_text`** runs to highlight the Tcl code of the text widget and to view/edit it.
 
 The **`hl_init`** takes arguments:
 
    * *txt* is the text widget's path
-   * *args* is options of text widget (omittable)
+   * *args* contains options of text widget (omittable)
 
-The *args* may contain pairs *option value* where *option* may be:
+The *args* is a list of *-option "value"* where *-option* may be:
 
-   * *-colors* for a list of colors: *clrCOM, clrCOMTK, clrSTR, clrVAR, clrCMN, clrPROC*
-   * -dark for a flag "dark background of text" (i.e. simplified *-colors*)
-   * *-font* for a font attributes
+   * *-colors* - list of colors: clrCOM, clrCOMTK, clrSTR, clrVAR, clrCMN, clrPROC, clrOPT
+   * *-dark* - flag "dark background of text", i.e. simplified *-colors* (default "no")
+   * *-font* - attributes of text font
+   * *-readonly* - flag "text is read-only" (default "no")
+   * *-multiline* - flag "multi-line strings" (default "yes")
+   * *-cmd* - command to watch editing/viewing (default "")
+   * *-seen* - number of first lines seen at start (default 99999999)
+   * *-optRE* - flag "use a regular expression to highlight options" (default "yes")
 
-The **`hl_text`** takes arguments:
+The rest of *hl_tcl* procedures are:
 
-   * *text widget*'s path
-   * *readonly* flag (may be omitted, by default "no")
-   * *multi-line strings* flag (may be omitted, by default "yes")
-   * *procedure name* to watch the editing (may be omitted, by default "")
-
-Other *hl_tcl* procedures are:
-
+   *  **`hl_all `** updates all highlighted existing text widgets, e.g. at changing a color scheme of application
    *  **`hl_readonly`** gets/sets a read-only mode and/or a command to watch a text widget at viewing/editing it
-   *  **`hl_colors`** gets/sets colors of highlighting
-   *  **`hl_font`** gets/sets font attributes for text widget
-   *  **`hl_all `** updates ("rehighlights") all highlighted existing text widgets
 
 See details in [Reference](https://aplsimple.github.io/en/tcl/hl_tcl/hl_tcl.html).
 
@@ -154,12 +152,13 @@ For example:
 
       tclsh ~/UTILS/hl_tcl/tcl_html.tcl "~/UTILS/mulster/tasks/ruff/src/*"
 
-In this example, the html files are located in `~/UTILS/mulster/tasks/ruff/src/*`.
+In this example, the html files are located in `~/UTILS/mulster/tasks/ruff/src`.
 
 Perhaps, you would want to modify the *tcl_html.tcl*, this way:
 
-  * replace `<code class="tcl">` with html tags *starting* the Tcl code in your html files
-  * replace `</code>` with html tags *finishing* the Tcl code in your html files
+  1. replace `<code class="tcl">` with html tags *starting* the Tcl code in your html files
+
+  2. replace `</code>` with html tags *finishing* the Tcl code in your html files
 
 ## Links
 
