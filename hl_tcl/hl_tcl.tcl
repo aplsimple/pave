@@ -6,7 +6,7 @@
 # License: MIT.
 # _______________________________________________________________________ #
 
-package provide hl_tcl 0.5.4
+package provide hl_tcl 0.5.5
 
 # _______________ Common data of ::hl_tcl:: namespace ______________ #
 

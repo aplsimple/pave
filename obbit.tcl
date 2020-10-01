@@ -383,6 +383,7 @@ proc ::apave::readTextFile {fileName {varName ""} {doErr 0}} {
     if {$doErr} {error "\n readTextFile: can't open \"$fileName\"\n $e"}
     set fvar ""
   } else {
+    chan configure $chan -encoding utf-8
     set fvar [read $chan]
     close $chan
   }
