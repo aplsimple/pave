@@ -55,9 +55,9 @@ There are "tricky" highlighters (like <a href="https://wiki.gnome.org/Apps/Gedit
    * tricky with those above mentioned Tcl lines
    * doesn't highlight ttk commands (Tk only) and TclOO
    * tries to highlight every bit of Tcl, e.g. `set set set` is highlighted as three `set` commands ;)
-   * as a result, much more florid than others
+   * as a result, much more florid than most of others
 
-<a href="https://kate-editor.org" title="Kate editor">Kate</a>. As nearly good as Geany, still doesn't highlight ttk and TclOO.
+<a href="https://kate-editor.org" title="Kate editor">Kate</a>. As nearly good as Geany. As nearly florid as Vim (`set set set`). Doesn't highlight ttk and TclOO.
 
 <a href="https://github.com/phase1geo/tke/" title="TKE editor">TKE</a>. Written in Tcl/Tk, it might be the best of all to highlight the Tcl/Tk. In spite of its suspended state it still can. Issues with highlighting strings and the performance.
 

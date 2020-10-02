@@ -91,10 +91,6 @@ namespace eval t {
     pave configTooltip black #FBFB95 -font {-size 11}
     pave untouchWidgets *buTClr*
     if {!$firstin} {pave basicFontSize $::t::fontsz}
-    set papaTcl [file normalize [file join $::testdirname .. tksqlite.tcl]]
-    if {[file exists $papaTcl]} {
-      set ::t::ftx1 $papaTcl
-    }
     set ::t::filetxt [::apave::readTextFile $::t::ftx1]
     set ::multiline 1
     set ::t::tblcols {
@@ -534,7 +530,7 @@ where:
     }
     set ::t::newCS [apave::cs_Non]
     toolBut 0
-    after 700 {::t::highlighting_others}  ;# it's unseen at changing the theme
+    after 1000 ::t::highlighting_others  ;# it's unseen at changing the theme
     catch {::transpops::run ../.bak/transpops.txt <Control-q> .win}
 
     # Open the window at last
@@ -837,13 +833,14 @@ where:
       -readonly [getLock $TID] -font [pave csFontMono] -multiline $::multiline
     #puts [time {::hl_tcl::hl_text [pave Text]} 10]
     ::hl_tcl::hl_text [pave Text]
+    textPos [pave Text]
   }
 
   proc highlighting_others {} {
 
     # try to get "universal" highlighting colors (for dark&light bg):
     ::hl_tcl::hl_init [pave TextNT] -dark [pave csDarkEdit] \
-      -seen 1500 -readonly 1 -font [pave csFontMono] \
+      -seen 100 -readonly 1 -font [pave csFontMono] \
       -colors {"#BC47D9" #AB21CE #0C860C #9a5465 #66a396 brown #7150cb}
     ::hl_tcl::hl_text [pave TextNT]
   }

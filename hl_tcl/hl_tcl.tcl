@@ -6,7 +6,7 @@
 # License: MIT.
 # _______________________________________________________________________ #
 
-package provide hl_tcl 0.5.5
+package provide hl_tcl 0.6
 
 # _______________ Common data of ::hl_tcl:: namespace ______________ #
 
@@ -19,7 +19,7 @@ namespace eval ::hl_tcl {
   # Tcl commands
   set data(PROC_TCL) [lsort [list \
     proc return method self my oo::define oo::class oo::objdefine oo::object \
-    coroutine constructor destructor
+    coroutine yield yieldto constructor destructor
   ]]
   set data(CMD_TCL) [lsort [list \
     set incr if string expr list lindex lrange llength lappend lreplace lsearch \
@@ -28,12 +28,12 @@ namespace eval ::hl_tcl {
     format scan regexp regsub upvar uplevel namespace try throw read eval \
     after update error global puts file chan open close eof seek flush mixin \
     msgcat gets rename glob fconfigure filename fblocked fcopy cd pwd mathfunc \
-    mathop apply fileevent unset join yield next exec refchan package source \
+    mathop apply fileevent unset join next exec refchan package source \
     exit vwait binary lreverse registry auto_execok subst encoding http load \
     auto_load platform tell auto_mkindex memory trace time clock auto_qualify \
     auto_reset socket bgerror oo::copy unload history re_syntax tailcall \
     tcl::prefix interp parray pid transchan nextto unknown dde pkg::create \
-    pkg_mkIndex yieldto zlib platform::shell Tcl auto_import \
+    pkg_mkIndex zlib platform::shell Tcl auto_import \
   ]]
 
   # Ttk commands
@@ -312,28 +312,63 @@ proc ::hl_tcl::my::HighlightLine {txt ln prevQtd} {
 proc ::hl_tcl::my::HighlightAll {txt} {
   # Highlights all of a text.
   #   txt - text widget's path
+  # Makes a coroutine from this.
+  # See also: CoroHighlightAll
+
+  # let them work one by one:
+  set coroNo [expr {[incr ::hl_tcl::my::data(CORALL)] % 10000000}]
+  coroutine co_HlAll$coroNo ::hl_tcl::my::CoroHighlightAll $txt
+}
+#_____
+
+proc ::hl_tcl::my::CoroHighlightAll {txt} {
+  # Highlights all of a text as a coroutine.
+  #   txt - text widget's path
+  # See also: HighlightAll
 
   set tlen [lindex [split [$txt index end] .] 0]
   RemoveTags $txt 1.0 end
   set maxl [expr {min($::hl_tcl::my::data(SEEN,$txt),$tlen)}]
-  for {set currQtd [set ln 0]} {$ln<=$maxl} {incr ln} {
+  set maxl [expr {min($::hl_tcl::my::data(SEEN,$txt),$tlen)}]
+  for {set currQtd [set ln [set lnseen 0]]} {$ln<=$tlen} {} {
     set currQtd [HighlightLine $txt $ln $currQtd]
-  }
-  if {$ln<=$tlen} {
-    update 
-    # the first lines are seen by a user at start
-    # so, while he/she is looking on, let the rest be handled unseen
-    # (define ::hl_tcl::my::HLTHE1ST anyhow for this being always "idle")
-    if {[info exists ::hl_tcl::my::HLTHE1ST]} {
-      set ::hl_tcl::my::HLTHE1ST idle
-    } else {
-      set ::hl_tcl::my::HLTHE1ST 500
+    incr ln
+    if {[incr lnseen]>$::hl_tcl::my::data(SEEN,$txt)} {
+      set lnseen 0
+      after idle after 1 [info coroutine]
+      yield
     }
-    after $::hl_tcl::my::HLTHE1ST \
-     "for {set ln $ln; set currQtd $currQtd} {\$ln<=$tlen} {incr ln} { 
-      set currQtd \[::hl_tcl::my::HighlightLine $txt \$ln \$currQtd\]}"
   }
+  set ::hl_tcl::my::data(REG_TXT,$txt) "1"
+  return
 }
+
+#proc ::hl_tcl::my::HighlightAll {txt} {
+  ## Highlights all of a text.
+  ##   txt - text widget's path
+
+  #set tlen [lindex [split [$txt index end] .] 0]
+  #RemoveTags $txt 1.0 end
+  #set maxl [expr {min($::hl_tcl::my::data(SEEN,$txt),$tlen)}]
+  #for {set currQtd [set ln 0]} {$ln<=$maxl} {incr ln} {
+    #set currQtd [HighlightLine $txt $ln $currQtd]
+  #}
+  #if {$ln<=$tlen} {
+    #update 
+    ## the first lines are seen by a user at start
+    ## so, while he/she is looking on, let the rest be handled unseen
+    ## (define ::hl_tcl::my::HLTHE1ST anyhow for this being always "idle")
+    #if {[info exists ::hl_tcl::my::HLTHE1ST]} {
+      #set ::hl_tcl::my::HLTHE1ST idle
+    #} else {
+      #set ::hl_tcl::my::HLTHE1ST 400
+    #}
+    #after $::hl_tcl::my::HLTHE1ST \
+     #"for {set ln $ln; set currQtd $currQtd} {\$ln<=$tlen} {incr ln} { 
+      #set currQtd \[::hl_tcl::my::HighlightLine $txt \$ln \$currQtd\]}"
+  #}
+  #set ::hl_tcl::my::data(REG_TXT,$txt) "1"
+#}
 
 # _________________________ DYNAMIC highlighting ________________________ #
 
@@ -391,12 +426,26 @@ proc ::hl_tcl::my::MemPos {txt} {
 proc ::hl_tcl::my::Modified {txt} {
   # Handles modifications of text.
   #   txt - text widget's path
+  # Makes a coroutine from this.
+  # See also: CoroModified
 
   variable data
   if {![info exist data(REG_TXT,$txt)] || $data(REG_TXT,$txt) eq "" || \
   ![info exist data(CUR_LEN,$txt)]} {
     return  ;# skip changes till the highlighting done
   }
+  # let them work one by one
+  set coroNo [expr {[incr ::hl_tcl::my::data(CORMOD)] % 10000000}]
+  coroutine CoModified$coroNo ::hl_tcl::my::CoroModified $txt
+}
+#_____
+
+proc ::hl_tcl::my::CoroModified {txt} {
+  # Handles modifications of text.
+  #   txt - text widget's path
+  # See also: Modified
+
+  variable data
   # current line:
   set ln [expr {int([$txt index insert])}]
   # range of change:
@@ -430,6 +479,7 @@ proc ::hl_tcl::my::Modified {txt} {
   } else {
     set currQtd [LineState $txt $tSTR $tCMN "$ln1.0 -1 chars"]
   }
+  set lnseen 0
   while {$ln1<=$ln2} {
     if {$ln1==$ln2} {
       set bf2 [LineState $txt $tSTR $tCMN "$ln1.end +1 chars"]
@@ -438,6 +488,11 @@ proc ::hl_tcl::my::Modified {txt} {
     set currQtd [HighlightLine $txt $ln1 $currQtd]
     if {$ln1==$ln2 && ($bf1 || $bf2!=$currQtd) && $data(MULTILINE,$txt)} {
       set ln2 $endl  ;# run to the end
+    }
+    if {[incr lnseen]>$::hl_tcl::my::data(SEEN,$txt)} {
+      set lnseen 0
+      after idle after 1 [info coroutine]
+      yield
     }
     incr ln1
   }
@@ -803,7 +858,6 @@ proc ::hl_tcl::hl_text {txt} {
     }
     set ::hl_tcl::my::data(BIND_TXT,$txt) yes
   }
-  set ::hl_tcl::my::data(REG_TXT,$txt) "1"
   set ro $::hl_tcl::my::data(READONLY,$txt)
   set com2 $::hl_tcl::my::data(CMD,$txt)
   set txtattrs [list $txt $ro $com2]
