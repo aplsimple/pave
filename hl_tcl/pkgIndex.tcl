@@ -1,5 +1,5 @@
 
-package ifneeded hl_tcl 0.6 [list source [file join $dir hl_tcl.tcl]]
+package ifneeded hl_tcl 0.6.1 [list source [file join $dir hl_tcl.tcl]]
 
 # short intro (for Ruff! docs generator)
 
@@ -61,9 +61,9 @@ There are "tricky" highlighters (like <a href="https://wiki.gnome.org/Apps/Gedit
    * tricky with those above mentioned Tcl lines
    * doesn't highlight ttk commands (Tk only) and TclOO
    * tries to highlight every bit of Tcl, e.g. `set set set` is highlighted as three `set` commands ;)
-   * as a result, much more florid than others
+   * as a result, much more florid than most of others
 
-<a href="https://kate-editor.org" title="Kate editor">Kate</a>. As nearly good as Geany, still doesn't highlight ttk and TclOO.
+<a href="https://kate-editor.org" title="Kate editor">Kate</a>. As nearly good as Geany. As nearly florid as Vim (`set set set`). Doesn't highlight ttk and TclOO.
 
 <a href="https://github.com/phase1geo/tke/" title="TKE editor">TKE</a>. Written in Tcl/Tk, it might be the best of all to highlight the Tcl/Tk. In spite of its suspended state it still can. Issues with highlighting strings and the performance.
 
@@ -73,7 +73,7 @@ There are "tricky" highlighters (like <a href="https://wiki.gnome.org/Apps/Gedit
 
 ## What can we do?
 
-To develop an ideal (correct and fast) Tcl/Tk highlighter, we would have to dive into Tcl core. Though, no hopes to achieve this ideal through repeating the core in Tcl/Tk or with massively using the regular expressions.
+To develop an ideal (correct and fast) Tcl/Tk highlighter, we would have to dive into Tcl core. Though, no hopes to achieve the ideal through repeating the core in Tcl/Tk or massively using the regular expressions.
 
 That said, while implementing Tcl/Tk highlighter *in pure Tcl/Tk*, we might hope to achieve a reasonable compromise between the performance and the elimination of blunders.
 
@@ -81,7 +81,7 @@ It seems *hl_tcl* got close to this compromise. Specifically, it provides:
 
   * special highlighting for Tcl and TclOO commands
   * special highlighting for Tk and ttk commands
-  * special highlighting for declarations `proc, method, oo::class` etc.  and `return`
+  * special highlighting for declarations `proc, method, oo::class` etc. as well as `return, yield`
   * special highlighting for `#comments`, `$variables`, `"strings"`, `-options`
   * in-line comments being recognized and thus highlighted only after `;#`
   * proper handling of most `regexp` and `regsub` expressions containing a quote
@@ -138,6 +138,8 @@ The *args* is a list of *-option "value"* where *-option* may be:
    * *-seen* - number of first lines seen at start (default 99999999)
    * *-optRE* - flag "use a regular expression to highlight options" (default "yes")
 
+**Note**: `-seen 500` and `-multiline no` can improve the performance a lot. It's recommended to use `-seen 500` (or any other reasonable limit, e.g. `-seen 200`) at any rate, except for static html pages.
+
 The rest of *hl_tcl* procedures are:
 
    *  **`hl_all `** updates all highlighted existing text widgets, e.g. at changing a color scheme of application
@@ -172,7 +174,7 @@ Perhaps, you would want to modify the *tcl_html.tcl*, this way:
 
   * [Source](https://chiselapp.com/user/aplsimple/repository/hl_tcl/download) (hl_tcl.zip)
 
-  * [Demo](https://github.com/aplsimple/hl_tcl/releases/download/hl_tcl-0.4.2/hl_tcl-0.4.2.mp4) (16 Mb)
+  * [Demo of hl_tcl v0.6](https://github.com/aplsimple/hl_tcl/releases/download/hl_tcl-0.6/hl_tcl-0.6.mp4) (33 Mb)
 
 Note that [hl_tcl](https://aplsimple.github.io/en/tcl/hl_tcl/hl_tcl.html) is still disposed to update.
   }

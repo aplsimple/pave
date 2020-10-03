@@ -6,7 +6,7 @@
 # License: MIT.
 # _______________________________________________________________________ #
 
-package provide hl_tcl 0.6
+package provide hl_tcl 0.6.1
 
 # _______________ Common data of ::hl_tcl:: namespace ______________ #
 
@@ -799,7 +799,7 @@ proc ::hl_tcl::hl_init {txt args} {
   # This procedure has to be called before writing a text in the text widget.
 
   set ::hl_tcl::my::data(REG_TXT,$txt) ""  ;# disables Modified at changing the text
-  foreach {opt val} {-dark 0 -readonly 0 -cmd "" -optRE 1 -multiline 1 -seen 99999999} {
+  foreach {opt val} {-dark 0 -readonly 0 -cmd "" -optRE 1 -multiline 1 -seen 500} {
     if {[dict exists $args $opt]} {set val [dict get $args $opt]}
     set ::hl_tcl::my::data([string toupper [string range $opt 1 end]],$txt) $val
   }

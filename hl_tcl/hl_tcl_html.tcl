@@ -53,7 +53,7 @@ proc ::hl_tcl_html::highlight {htmlfile darkedit args} {
         if {$ic>=0} {
           set code [string range $text $ic $ic2-1]
           set code [string map [list "&quot;" \" "&amp;" &] $code]
-          ::hl_tcl::hl_init $txt -dark $darkedit
+          ::hl_tcl::hl_init $txt -dark $darkedit -seen 99999999
           $txt replace 1.0 end $code
           ::hl_tcl::hl_text $txt
           set taglist [list]

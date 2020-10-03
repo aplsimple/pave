@@ -531,7 +531,7 @@ where:
     set ::t::newCS [apave::cs_Non]
     toolBut 0
     after 1000 ::t::highlighting_others  ;# it's unseen at changing the theme
-    catch {::transpops::run ../.bak/transpops.txt <Control-q> .win}
+    catch {::transpops::run [file join $::testdirname ../.bak transpops.txt] <Control-q> .win}
 
     # Open the window at last
     set ::t::curTab ""
@@ -779,7 +779,7 @@ where:
       set cs2 [pave csCurrent]
       if {$cs!=$cs2} {toolBut 4 $cs2}
     } else {
-      ::t::pdlg ok $icon ERROR " Not found e_menu.tcl in directory:\n $::e_menu_dir" -t 1
+      ::t::pdlg ok err ERROR "\n Not found e_menu.tcl in directory:\n $::e_menu_dir\n" -t 1
     }
   }
 
