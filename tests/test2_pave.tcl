@@ -10,7 +10,7 @@ catch {package require tooltip} ;# may be absent
 
 set ::testdirname [file normalize [file dirname [info script]]]
 cd $::testdirname
-set ::test2dirs [list "$::testdirname/.." "$::testdirname" "$::testdirname/../bartabs" "$::testdirname/../hl_tcl"]
+set ::test2dirs [list "$::testdirname/.." "$::testdirname" "$::testdirname/../bartabs" "$::testdirname/../hl_tcl" "$::testdirname/../../screenshooter"]
 lappend auto_path {*}$::test2dirs
 set apavever [package require apave]
 set pkg_versions0 "\n  <red>apave $apavever</red>\n\n"
@@ -21,6 +21,7 @@ set pkg_versions [string map {<red> "" </red> "" \n\n , \n ""} $pkg_versions0]
 set ::e_menu_dir [file normalize [file join $::testdirname ../../e_menu]]
 catch {source [file join $::e_menu_dir e_menu.tcl]}
 catch {source [file join $::testdirname ../../transpops transpops.tcl]}
+catch {package require screenshooter}
 
 namespace eval t {
 
@@ -101,7 +102,7 @@ namespace eval t {
     }
     foreach {k v} $::apave::_Defaults {
       incr itbll
-      lappend ::t::tbllist [list $k [lindex [pave getWidgetType $k {} {}] 0] \
+      lappend ::t::tbllist [list $k [lindex [pave widgetType $k {} {}] 0] \
         $itbll [string range $k [expr {$itbll%3}] end]]
     }
     set ::t::opcItems [list {{Color list} red green blue -- {colored yellow magenta cyan
@@ -117,7 +118,7 @@ namespace eval t {
     # initializing images for toolbar
     set imgl [::apave::iconImage]
     set imgused 0
-    foreach {i icon} {0 retry 1 add 2 delete 3 undo 4 redo 5 run} {
+    foreach {i icon} {0 retry 1 add 2 delete 3 undo 4 redo 5 run 6 double} {
       image create photo Img$i -data [::apave::iconData $icon]
       incr imgused
     }
@@ -158,7 +159,7 @@ namespace eval t {
       {butOK butCancel L 1 1 {-st e} {-t "OK"     -com t::okProc}}
       {#fra2 fral L 8 9 {-st nsew}}
       {fra fral L 8 9 {-st nsew}}
-      {fra.nbk - - - - {pack -side top} {
+      {fra.Nbk - - - - {pack -side top} {
         f1 {-text " 1st tab of General " -underline 2}
         f2 {-text " Ttk demos/ttkpane.tcl " -underline 1}
         f3 {-text " Non-themed " -underline 1}
@@ -250,6 +251,8 @@ namespace eval t {
             sev 7
             h_ 1
             Img5 {{::t::e_menu} -tooltip "Run e_menu"}
+            h_ 1
+            Img6 {{::t::screenshooter} -tooltip "Run screenshooter"}
             sev 7
             h_ 1
             Img3 {{::t::toolBut 3 \[set ::t::prevcs\]}}
@@ -302,7 +305,7 @@ namespace eval t {
       {fra1 - - 1 1 {-st w}}
       {.laB0  - - 1 1 {-st w} {-t "Enabled widgets"}}
       {.laB  fra1.laB0 T 1 1 {-st w -pady 1} {-t "label" -font "-weight bold -size 11"}}
-      {.buTRun fra1.laB T 1 1 {-st w} {-t "button" -com ::t::Pressed} 
+      {.BuTRun fra1.laB T 1 1 {-st w} {-t "button" -com ::t::Pressed} 
         {eval {
           ##################################################################
           # The last element of widget record is Tcl command being the last.
@@ -454,7 +457,8 @@ where:
       {v_ chb3 T 1 5}
       {fraflb v_ T 1 5 {-st ew -pady 10} {}}
       {fraflb.butView - - - - {pack -side right -anchor nw -padx 9} {-t "Edit the file" -com t::viewfile -tooltip "Opens a stand-alone editor of the file\nthe listbox' data are taken from."}}
-      {fraflb.lab - - - - {pack -side left -anchor nw} {-t "Listbox of file content:  \n\nSee also:\nGeneral/Misc. tab"}}
+      {fraflb.lab - - - - {pack -side left -anchor nw} {-t "Listbox of file content:\n\nSee also:\nGeneral/Misc. tab" -link "
+      ::t::chanTab nbk .win.fra.fra.nbk.f3; focus [::t::pave BuTRun]%|%Click to select 'Misc.'\n... and paint the link.%|%0"}}
       {fraflb.flb - - - - {pack -side left -fill x -expand 1} {-lvar ::t::lv1 -lbxsel Cont -ALL 1 -w 50 -h 5 -tooltip "The 'flb' listbox contains:\n 1)  four literal lines\n  2) data from 'test2_fco.dat' file" -values {@@-div1 " \[" -div2 "\] " test2_fco.dat@@   INFO: @@-pos 22 -ret 1 -list {{Content of test2_fco.dat} {another item} trunk DOC} test2_fco.dat@@ Code of test2_pave.tcl: @@-RE {^(\s*)([^#]+)$} ./test2_pave.tcl@@}}}
       {fraflb.sbv fraflb.flb L - - {pack -side left}}
       {fraflb.sbh fraflb.flb T - - {pack -side left}}
@@ -671,8 +675,11 @@ where:
     tooltip::tooltip [pave BuT_Img3] \
       "Previous is $::t::prevcs: [pave csGetName $::t::prevcs]"
     lassign [pave csGet] fg - bg - - bS fS
-    set ::t::textTags [list [list "red" " -font {-weight bold} \
-      -foreground $fS -background $bS"]]
+    set ::t::textTags [list \
+      [list "red" " -font {-weight bold} -foreground $fS -background $bS"] \
+      [list "link1" "::t::browser %t%|%https://%l%|%0"] \
+      [list "link2" "::t::browser %t%|%https://aplsimple.github.io/en/tcl/%l/%l.html%|%0"] \
+      ]
     if {$t::ans4==12} {
       set ::t::restart 0
       [pave ChbRestart] configure -state disabled
@@ -691,7 +698,7 @@ where:
 
   # changing the current tab: we need to save the old tab's selection
   # in order to restore the selection at the tab's return.
-  proc chanTab {tab} {
+  proc chanTab {tab {nt ""}} {
     if {$tab != $::t::curTab} {
       if {$::t::curTab !=""} {
         set arrayTab($::t::curTab) [.win.fra.fra.$::t::curTab select]
@@ -700,7 +707,8 @@ where:
       set ::t::curTab $tab
       pack .win.fra.fra.$::t::curTab -expand yes -fill both
       catch {
-        .win.fra.fra.$::t::curTab select $arrayTab($::t::curTab)
+         if {$nt eq ""} {set nt $arrayTab($::t::curTab)}
+        .win.fra.fra.$::t::curTab select $nt
       }
     }
   }
@@ -734,10 +742,10 @@ where:
     $m add command -label "About" -command [list ::t::msg info "  It's a demo of
     $::pkg_versions0\n\n  Details: \
 
-  https://aplsimple.github.io/en/tcl/pave
-  https://aplsimple.github.io/en/tcl/e_menu
-  https://aplsimple.github.io/en/tcl/bartabs
-  https://aplsimple.github.io/en/tcl/hl_tcl/hl_tcl.html
+   \u2022 <link1>aplsimple.github.io/en/tcl/pave</link1>
+   \u2022 <link1>aplsimple.github.io/en/tcl/e_menu</link1>
+   \u2022 <link1>aplsimple.github.io/en/tcl/bartabs</link1>
+   \u2022 Reference on <link2>hl_tcl</link2>
 
   License: MIT.
   _______________________________________
@@ -766,6 +774,40 @@ where:
     if {[set cs [pave csCurrent]]==[apave::cs_Non]} {set cs [apave::cs_Min]}
     if {[::t::pdlg yesno warn "RESTART" [restartHint $cs]]} {
       pave res .win [set ::t::newCS $cs]
+    }
+  }
+
+  proc browser {url} {
+    # open is the OS X equivalent to xdg-open on Linux, start is used on Windows
+    set commands {xdg-open open start}
+    foreach browser $commands {
+      if {$browser eq "start"} {
+        set command [list {*}[auto_execok start] {}]
+      } else {
+        set command [auto_execok $browser]
+      }
+      if {[string length $command]} {
+        break
+      }
+    }
+    if {[string length $command] == 0} {
+      puts "ERROR: couldn't find browser"
+    }
+    if {[catch {exec {*}$command $url &} error]} {
+      puts "ERROR: couldn't execute '$command':\n$error"
+    }
+  }
+
+  proc screenshooter {} {
+    if {[catch {
+      if {[info exists ::winshot]} {
+        $::winshot display
+      } else {
+        set ::winshot [screenshooter::screenshot .win.sshooter \
+          -background LightYellow -foreground Green]
+      }
+    } e]} {
+      ::t::pdlg ok err ERROR "\n ERROR:\n $e\n\n Install screenshooter in ../screenshooter directory.\n\n See you at https://aplsimple.github.io\n" -t 1
     }
   }
 
@@ -885,13 +927,15 @@ where:
       ]]
     set ::t::tclfiles [list]
     foreach dirname $::test2dirs {
-      foreach f [glob [file join $dirname *.tcl]] {
-        set f [file normalize $f]
-        set fname [file tail $f]
-        if {[lsearch -index 0 $::t::tclfiles $fname]>-1} {
-          set fname [file join {*}[lrange [file split $f] end-1 end]]
+      if {![catch {set files [glob [file join $dirname *.tcl]]}]} {
+        foreach f $files {
+          set f [file normalize $f]
+          set fname [file tail $f]
+          if {[lsearch -index 0 $::t::tclfiles $fname]>-1} {
+            set fname [file join {*}[lrange [file split $f] end-1 end]]
+          }
+          lappend ::t::tclfiles [list $fname $f]
         }
-        lappend ::t::tclfiles [list $fname $f]
       }
     }
     foreach ff [set ::t::tclfiles [lsort -index 0 $::t::tclfiles]] {

@@ -55,9 +55,31 @@ Or hate the question?
 (Choose Cancel in such case)" YES -g +275+275 {*}$args]
   }
 
+  proc ::t::browser {url} {
+    # open is the OS X equivalent to xdg-open on Linux, start is used on Windows
+    set commands {xdg-open open start}
+    foreach browser $commands {
+      if {$browser eq "start"} {
+        set command [list {*}[auto_execok start] {}]
+      } else {
+        set command [auto_execok $browser]
+      }
+      if {[string length $command]} {
+        break
+      }
+    }
+    if {[string length $command] == 0} {
+      puts "ERROR: couldn't find browser"
+    }
+    if {[catch {exec {*}$command $url &} error]} {
+      puts "ERROR: couldn't execute '$command':\n$error"
+    }
+  }
+
   proc test5 {args} {
+    set ::test5Visited [expr {[info exists ::test5Visited] && $::test5Visited}] 
     return [dlg retrycancel err "Dialog RETRYCANCEL" \
-      "Hey that Pushkin!\nHey that son of bitch!
+      "<link>set ::test5Visited 1 ; ::t::browser https://en.wikipedia.org/w/index.php?cirrusUserTesting=classic-explorer-i&search=Pushkin%|%wikipedia about Pushkin%|%$::test5Visited</link>Hey that Pushkin!\nHey that son of bitch!
 ---
 Retry the reading of Pushkin? Cancel if not." RETRY -g +300+300 {*}$args]
   }

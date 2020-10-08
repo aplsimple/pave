@@ -143,6 +143,7 @@ method My {ID} {
   set t [string range $ID 0 2]
   oo::objdefine [self] "method $ID {args} {
   set m \[lindex \$args 0\]
+  if {\$m eq {}} {return {}}
   if {\$m in {create} && {$t} eq {bar} || \$m in {cget configure} && {$t} eq {tab}} {
   set args \[lreplace \$args 0 0 Tab_\$m\]}
   return \[my {*}\$args\]}"
@@ -966,7 +967,7 @@ method Bar_Data {barOptions} {
     -hidearrows no -scrollsel yes -lablen 0 -tiplen 0 -tleft 0 -tright end \
     -disable [list] -select [list] -mark [list] -fgmark #800080  -fgsel "." \
     -relief groove -bd 1 -padx 3 -pady 3 -expand 1 -tabcurrent -1 \
-    -ELLIPSE "\u2026" -MOVWIN ".bt_move" -ARRLEN 0 -USERMNU 0]
+    -ELLIPSE "\u2026" -MOVWIN ".bt_move" -ARRLEN 0 -USERMNU 0 -LLEN 0]
   set tabinfo [set imagetabs [set popup [list]]]
   my Bar_DefaultMenu $BID popup
   foreach {optnam optval} $barOptions {

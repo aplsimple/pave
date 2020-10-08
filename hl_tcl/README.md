@@ -158,9 +158,19 @@ In this example, the html files are located in `~/UTILS/mulster/tasks/ruff/src`.
 
 Perhaps, you would want to modify the *tcl_html.tcl*, this way:
 
-  1. replace `<code class="tcl">` with html tags *starting* the Tcl code in your html files
+   * replace `"no"` with `"yes"` for dark html pages
 
-  2. replace `</code>` with html tags *finishing* the Tcl code in your html files
+   * replace `<code class="tcl">` with html tags *starting* the Tcl code in your html files
+
+   * replace `</code>` with html tags *finishing* the Tcl code in your html files
+
+These are arguments of `::hl_tcl_html::highlight` procedure.
+
+The tag pairs can be multiple if the html pages contain them, e.g.
+
+      ::hl_tcl_html::highlight $fhtml "no" \
+          {<code class="tcl">} {</code>} \
+          {<pre class="code">} {</pre>}
 
 ## Links
 
@@ -168,6 +178,6 @@ Perhaps, you would want to modify the *tcl_html.tcl*, this way:
 
   * [Source](https://chiselapp.com/user/aplsimple/repository/hl_tcl/download) (hl_tcl.zip)
 
-  * [Demo of hl_tcl v0.6](https://github.com/aplsimple/hl_tcl/releases/download/hl_tcl-0.6/hl_tcl-0.6.mp4) (33 Mb)
+  * [Demo of hl_tcl v0.6.1](https://github.com/aplsimple/hl_tcl/releases/download/hl_tcl-0.6.1/hl_tcl-0.6.1.mp4) (25 Mb)
 
 Note that [hl_tcl](https://aplsimple.github.io/en/tcl/hl_tcl/hl_tcl.html) is still disposed to update.

@@ -22,14 +22,14 @@
 #
 # where:
 #   NAME     - name of current widget that can begin with letters
-#              defining the type of widget (see getWidgetType below)
+#              defining the type of widget (see widgetType below)
 #   NEIGHBOR - name of neighboring widget
 #   POSN     - position of neighboring widget: T or L (top or left)
 #   RSPAN    - rowspan of current widget
 #   CSPAN    - columnspan of current widget
 #   OPTGRID  - options of grid command
 #   OPTWIDG  - options of widget's command
-# If NAME begins with others letters than listed in getWidgetType below,
+# If NAME begins with others letters than listed in widgetType below,
 # the NAME widget should be created before calling "pave window" command.
 #
 # For example,
@@ -440,7 +440,7 @@ oo::class create ::apave::APave {
     # Gets a style for non-ttk widgets.
     #   typ - the type of widget (in apave terms, i.e. but, buT etc.)
     #   dsbl - a mode to get style of disabled (1) or readonly (2) widgets
-    # See also: GetWidgetType
+    # See also: widgetType
     #
     # Method to be redefined in descendants/mixins.
     return
@@ -781,7 +781,7 @@ oo::class create ::apave::APave {
 
   #########################################################################
 
-  method getWidgetType {wnamefull options attrs} {
+  method widgetType {wnamefull options attrs} {
 
     # Gets the widget type based on 3 initial letters of its name. Also
     # fills the grid/pack options and attributes of the widget.
@@ -789,7 +789,7 @@ oo::class create ::apave::APave {
     #   options - grid/pack options of the widget
     #   attrs - attribute of the widget
     #
-    # The *getWidgetType* method returns a list of items:
+    # The *widgetType* method returns a list of items:
     #   widget - Tk/Ttk widget name
     #   options - grid/pack options of the widget
     #   attrs - attribute of the widget
@@ -852,6 +852,10 @@ oo::class create ::apave::APave {
         if {[::apave::parseOptions $attrs -state normal] eq "disabled"} {
           set attrs "-foreground grey $attrs"
           set attrs [::apave::removeOptions $attrs -state]
+        }
+        if {[set cmd [::apave::parseOptions $attrs -link ""]] ne "{}"} {
+          set attrs "-linkcom {$cmd} $attrs"
+          set attrs [::apave::removeOptions $attrs -link]
         }
       }
       "laB" {set widget "label"}
@@ -1776,7 +1780,7 @@ oo::class create ::apave::APave {
       switch -- $a {
         -disabledtext - -rotext - -lbxsel - -cbxsel - -notebazook -\
         -entrypop - -entrypopRO - -textpop - -textpopRO - -ListboxSel -
-        -callF2 - -timeout - -bartabs - -onReturn {
+        -callF2 - -timeout - -bartabs - -onReturn - -linkcom {
           # attributes specific to apave, processed below in "Post"
           lappend _pav(prepost) [list $a [string trim $v {\{\}}]]
         }
@@ -1876,6 +1880,10 @@ oo::class create ::apave::APave {
             if {$v ne ""} {bind $w $k $cmd}
           }
         }
+        -linkcom {
+          lassign [my csGet] fg2 fg gb2 bg
+          my MakeLabelLinked $w $v $fg $bg $fg2 $bg
+        }
         -callF2 {
           if {[llength $v]==1} {set w2 $v} {set w2 [string map $v $w]}
           if {[string first $w2 [bind $w "<F2>"]] < 0} {
@@ -1893,6 +1901,50 @@ oo::class create ::apave::APave {
           after 50 [string map [list %w $w] $v]
         }
       }
+    }
+    return
+  }
+
+  #########################################################################
+
+  method VizitedLab {w {on ""} {fg ""} {bg ""}} {
+
+    # Marks a label as vizited/not vizited
+    #   w - label's path
+    #   on - flag "the label vizited"
+
+    set styl [ttk::style configure TLabel]
+    if {$fg eq ""} {lassign [my csGet] - fg - bg}
+    if {$on eq ""} {
+      set on [expr {[info exists ${_pav(ns)}PN::AR(VIZIT,$w)]}]
+    }
+    if {$on} {
+      set fg [lindex [my csGet] 7]
+      set ${_pav(ns)}PN::AR(VIZIT,$w) 1
+    }
+    $w configure -foreground $fg -background $bg
+    if {[set font [$w cget -font]] eq ""} {
+      set font [font configure TkDefaultFont]
+    } else {
+      catch {set font [font configure $font]}
+    }
+    set font [dict set font -underline 1]
+    $w configure -font $font
+  }
+
+  #########################################################################
+
+  method HoverLab {w on {fg ""} {bg ""}} {
+
+    # Actions on entering/leaving a linked label.
+    #   w - label's path
+    #   on - flag "now hovering on the label"
+
+    if {$on} {
+      if {$fg eq ""} {lassign [my csGet] fg - bg}
+      $w configure -foreground $fg -background $bg
+    } else {
+      my VizitedLab $w "" $fg $bg
     }
     return
   }
@@ -2187,7 +2239,7 @@ oo::class create ::apave::APave {
       }
       set options [uplevel 2 subst -nocommand -nobackslashes [list $options1]]
       set attrs [uplevel 2 subst -nocommand -nobackslashes [list $attrs1]]
-      lassign [my getWidgetType $wname $options $attrs] \
+      lassign [my widgetType $wname $options $attrs] \
         widget options attrs nam3 dsbl
       # The type of widget (if defined) means its creation
       # (if not defined, it was created after "makewindow" call
@@ -2503,6 +2555,29 @@ oo::class create ::apave::APave {
 
   #########################################################################
 
+  method MakeLabelLinked {lab v fg bg fg2 bg2} {
+
+    # Makes the linked label from a label.
+    #   lab - label's path
+    #   v - data of the link: command, tip, vizited
+    #   fg - foreground unhovered
+    #   bg - background unhovered
+    #   fg2 - foreground hovered
+    #   bg2 - background hovered
+
+    set txt [$lab cget -text]
+    lassign [split [string map {"%|%" "\uFFFF"} $v] "\uFFFF"] v tt vz
+    set tt [string map [list %l $txt] $tt]
+    set v [string map [list %l $txt %t $tt] $v]
+    if {$tt ne ""} {catch {tooltip::tooltip $lab $tt}}
+    if {$vz ne ""} {my VizitedLab $lab $vz $fg $bg}
+    bind $lab <Enter> "[namespace code [list my HoverLab $lab yes $fg2 $bg2]]"
+    bind $lab <Leave> "[namespace code [list my HoverLab $lab no $fg $bg]]"
+    bind $lab <Button-1> "[namespace code [list my VizitedLab $lab yes $fg2 $bg2]];$v"
+  }
+
+  #########################################################################
+
   method displayTaggedText {w contsName {tags ""}} {
 
     # Sets the text widget's contents using tags (ornamental details).
@@ -2584,12 +2659,29 @@ oo::class create ::apave::APave {
     $w replace 1.0 end $disptext
     foreach tagi $tags {
       lassign $tagi tag opts
-      $w tag config $tag {*}$opts
+      if {![string match "link*" $tag]} {
+        $w tag config $tag {*}$opts
+      }
     }
-    foreach tagli $taglist {
+    lassign [my csGet] fg fg2 bg bg2
+    set lfont [$w cget -font]
+    dict set lfont -underline 1
+    for {set it [llength $taglist]} {[incr it -1]>=0} {} {
+      set tagli [lindex $taglist $it]
       lassign $tagli i p1 p2
       lassign [lindex $tags $i] tag opts
-      $w tag add $tag $p1 $p2
+      if {[string match "link*" $tag] && \
+      [set ist [lsearch -exact -index 0 $tags $tag]]>=0} {
+        set txt [$w get $p1 $p2]
+        set lab $w[incr ::apave::__linklab__]
+        ttk::label $lab -text $txt -font $lfont -foreground $fg -background $bg
+        $w delete $p1 $p2
+        $w window create $p1 -window $lab
+        set v [lindex $tags $ist 1]
+        my MakeLabelLinked $lab $v $fg $bg $fg2 $bg2
+      } else {
+        $w tag add $tag $p1 $p2
+      }
     }
     $w edit reset; $w edit modified no
     if { $state ne "normal" } { $w configure -state $state }

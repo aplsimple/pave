@@ -535,6 +535,23 @@ oo::class create ::apave::APaveDialog {
 
   #########################################################################
 
+  method GetLinkLab {m} {
+
+    # Gets a link for label.
+    #   m - label with possible link (between <link> and </link>)
+    # Returns: list of "pure" message and link for label.
+
+    if {[set i1 [string first "<link>" $m]]<0} {
+      return [list $m]
+    }
+    set i2 [string first "</link>" $m]
+    set link [string range $m $i1+6 $i2-1]
+    set m [string range $m 0 $i1-1][string range $m $i2+7 end]
+    return [list $m [list -link $link]]
+  }
+
+  #########################################################################
+
   method Query {icon ttl msg buttons defb inopts argdia {precom ""} args} {
 
     # Makes a query (or a message) and gets the user's response.
@@ -700,8 +717,9 @@ oo::class create ::apave::APaveDialog {
       }
       incr il
       if {!$textmode} {
+        lassign [my GetLinkLab $m] m link
         lappend widlist [list Lab$il $prevw $prevp 1 7 \
-          "-st w -rw 1 $optsGrid" "-t \"$m \" $optsLabel $optsFont"]
+          "-st w -rw 1 $optsGrid" "-t \"$m \" $optsLabel $optsFont $link"]
       }
       set prevw Lab$il
       set prevp T
@@ -954,3 +972,4 @@ oo::class create ::apave::APaveDialog {
   }
 
 }
+#RUNF1: ./tests/test_pavedialog.tcl

@@ -1177,9 +1177,9 @@ oo::class create ::apave::ObjectTheming {
   method NonTtkStyle {typ {dsbl 0}} {
 
     # Makes styling for non-ttk widgets.
-    #   typ - widget's type (the same as in "APave::GetWidgetType" method)
+    #   typ - widget's type (the same as in "APave::widgetType" method)
     #   dsbl - `1` for disabled; `2` for readonly; otherwise for all widgets
-    # See also: APave::GetWidgetType
+    # See also: APave::widgetType
 
     if {$dsbl} {
       set disopt ""
