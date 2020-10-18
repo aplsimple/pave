@@ -49,7 +49,7 @@ namespace eval ::apave {
 {African black black #ffe2a2 #ffffb4 brown #d3a876 #000000 red grey SaddleBrown #3b1516 #f9b777 - #ffffd0 #000 #001 #002 #003 #004 #005 #006 #007}
 {Rosy          #2B122A #000000 #FFFFFF #F6E6E9 #570957 #C5ADC8 black #C84E91 grey #870287 #000000 #C5ADC8 - #d6c6c9 #000 #001 #002 #003 #004 #005 #006 #007}
 {InverseGrey   #121212 #1A1A1A #c9cbcf #DADCE0 #302206 #a4a6aa black #B66425 #DADCE1 #933232 #FFFFFF #777777 - #c9cbcf #000 #001 #002 #003 #004 #005 #006 #007}
-{Gray          #000000 #0D0D0D #FFFFFF #DADCE0 #362607 #AFAFAF black #B66425 grey #933232 #000000 #AFAFAF - #caccd0 #000 #001 #002 #003 #004 #005 #006 #007}
+{Grey          #000000 #0D0D0D #FFFFFF #DADCE0 #362607 #AFAFAF black #B66425 grey #933232 #000000 #AFAFAF - #caccd0 #000 #001 #002 #003 #004 #005 #006 #007}
 {Anti-Dark1 #2e3436 #2e3436 #F8F8F8 #dadad8 #362607 #AFAFAF black #B66425 grey #933232 #000000 #AFAFAF - #caccd0 #000 #001 #002 #003 #004 #005 #006 #007}
 {Anti-Dark2 #2e3436 #2e3436 #dadad8 #F8F8F8 #362607 #AFAFAF black #B66425 grey #933232 #000000 #AFAFAF - #e1e1df #000 #001 #002 #003 #004 #005 #006 #007}
 {Florid black darkgreen #dbffdb white brown #88cd88 #003300 red grey #933232 black lightgreen - #dff4df #000 #001 #002 #003 #004 #005 #006 #007}
@@ -388,6 +388,32 @@ proc ::apave::readTextFile {fileName {varName ""} {doErr 0}} {
     close $chan
   }
   return $fvar
+}
+
+###########################################################################
+
+proc ::apave::openDoc {url} {
+
+  # Opens a document.
+  #   url - document's file name, www link, e-mail etc.
+
+  set commands {xdg-open open start}
+  foreach opener $commands {
+    if {$opener eq "start"} {
+      set command [list {*}[auto_execok start] {}]
+    } else {
+      set command [auto_execok $opener]
+    }
+    if {[string length $command]} {
+      break
+    }
+  }
+  if {[string length $command] == 0} {
+    puts "ERROR: couldn't find any opener"
+  }
+  if {[catch {exec {*}$command $url &} error]} {
+    puts "ERROR: couldn't execute '$command':\n$error"
+  }
 }
 
 ###########################################################################
@@ -764,6 +790,7 @@ oo::class create ::apave::ObjectTheming {
     if {$::apave::_CS_(old) != $ncolor || $args eq "-doit"} {
       set ::apave::_CS_(old) $ncolor
       my themeWindow $win $fg $bg $fE $bE $fS $bS $grey $bg $cc $ht $hh $tfgI $tbgI $fM $bM
+      my UpdateColors
     }
     return [list $fg $bg $fE $bE $fS $bS $hh $gr $cc $ht $tfgI $tbgI $fM $bM]
   }

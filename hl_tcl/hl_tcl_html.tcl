@@ -50,8 +50,12 @@ proc ::hl_tcl_html::highlight {htmlfile darkedit args} {
       if {$ic>=0} {
         incr ic [string length $tag1]
         set ic2 [string first $tag2 $text $ic]
-        if {$ic>=0} {
+        if {$ic2>=0} {
           set code [string range $text $ic $ic2-1]
+          if {[string first "<font" $code]>-1} {
+            set ic [expr {$ic2+[string length $tag2]}]
+            continue  ;# already processed
+          }
           set code [string map [list "&quot;" \" "&amp;" &] $code]
           ::hl_tcl::hl_init $txt -dark $darkedit -seen 99999999
           $txt replace 1.0 end $code
@@ -113,8 +117,9 @@ proc ::hl_tcl_html::highlight {htmlfile darkedit args} {
           set code [string map [list \" "&quot;"] $code]
           set text1 [string range $text 0 $ic-1]
           set text2 [string range $text $ic2 end]
-          set text "$text1$code$text2"
-          set ic [expr {$ic2+[string length $tag2]}]
+          set text "$text1$code"
+          set ic [string length $text]
+          set text "$text$text2"
         }
       }
     }
@@ -126,6 +131,6 @@ proc ::hl_tcl_html::highlight {htmlfile darkedit args} {
 }
 after idle exit
 # _________________________________ EOF _________________________________ #
-#% file copy -force .bak/hl_tcl2.html .bak/hl_tcl.html
-#% exec tclsh ./tcl_html.tcl .bak/hl_tcl.html
-#% exec opera .bak/hl_tcl.html
+#% file copy -force .bak/index-SRC.html .bak/index.html
+#% exec tclsh ./tcl_html.tcl .bak/index.html
+#% exec opera .bak/index.html

@@ -11,8 +11,10 @@
 # _______________________________________________________________________ #
 
 source [file join [file dirname [info script]] hl_tcl_html.tcl]
-foreach fhtml $::argv {
-  ::hl_tcl_html::highlight $fhtml no \
-    {<code class="tcl">} {</code>} \
-    {<pre class="code">} {</pre>}
+foreach ghtml $::argv {
+  foreach fhtml [glob $ghtml] {
+    ::hl_tcl_html::highlight $fhtml no \
+      {<code class="tcl">} {</code>} \
+      {<pre class="code">} {</pre>}
+  }
 }

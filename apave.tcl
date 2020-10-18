@@ -29,7 +29,7 @@
 #   CSPAN    - columnspan of current widget
 #   OPTGRID  - options of grid command
 #   OPTWIDG  - options of widget's command
-# If NAME begins with others letters than listed in widgetType below,
+# If NAME begins with letters other than listed in widgetType below,
 # the NAME widget should be created before calling "pave window" command.
 #
 # For example,
@@ -119,6 +119,8 @@ namespace eval ::apave {
   variable _AP_VARS; array set _AP_VARS [list]
   set _AP_VARS(.,SHADOW) 0
   set _AP_VARS(.,MODALS) 0
+  variable _AP_VISITED;  array set _AP_VISITED [list]
+  set _AP_VISITED(ALL) [list]
 
   ##########################################################################
 
@@ -193,13 +195,13 @@ namespace eval ::apave {
     # Returns the icon's image or, if *icon* is blank, a list of icons
     # available in *apave*.
 
+    variable _AP_IMG
     variable _AP_ICO
     if {$icon eq ""} {return $_AP_ICO}
     proc imagename {icon} {   # Get a defined icon's image name
       return _AP_IMG(img$icon)
     }
     variable apaveDir
-    variable _AP_IMG
     if {[array size _AP_IMG] == 0} {
       # Make images of icons
       source [file join $apaveDir apaveimg.tcl]
@@ -295,7 +297,7 @@ oo::class create ::apave::APave {
     set _pav(fgtxt) [ttk::style lookup TEntry -foreground]
     set _pav(prepost) [list]
     set _pav(widgetopts) [list]
-    set _pav(edge) "/@"
+    set _pav(edge) "@@"
     if {$_pav(fgtxt)=="black" || $_pav(fgtxt)=="#000000"} {
       set _pav(bgtxt) white
     } else {
@@ -853,7 +855,7 @@ oo::class create ::apave::APave {
           set attrs "-foreground grey $attrs"
           set attrs [::apave::removeOptions $attrs -state]
         }
-        if {[set cmd [::apave::parseOptions $attrs -link ""]] ne "{}"} {
+        if {[set cmd [::apave::getOption -link {*}$attrs]] ne ""} {
           set attrs "-linkcom {$cmd} $attrs"
           set attrs [::apave::removeOptions $attrs -link]
         }
@@ -1778,11 +1780,13 @@ oo::class create ::apave::APave {
     set attrs_ret [set _pav(prepost) {}]
     foreach {a v} $attrs {
       switch -- $a {
-        -disabledtext - -rotext - -lbxsel - -cbxsel - -notebazook -\
-        -entrypop - -entrypopRO - -textpop - -textpopRO - -ListboxSel -
-        -callF2 - -timeout - -bartabs - -onReturn - -linkcom {
+        -disabledtext - -rotext - -lbxsel - -cbxsel - -notebazook - \
+        -entrypop - -entrypopRO - -textpop - -textpopRO - -ListboxSel - \
+        -callF2 - -timeout - -bartabs - -onReturn - -linkcom - -afteridle {
           # attributes specific to apave, processed below in "Post"
-          lappend _pav(prepost) [list $a [string trim $v {\{\}}]]
+          set v2 [string trimleft $v "\{"]
+          set v2 [string range $v2 0 end-[expr {[string length $v]-[string length $v2]}]]
+          lappend _pav(prepost) [list $a $v2]
         }
         -myown {
           lappend _pav(prepost) [list $a [subst $v]]
@@ -1881,8 +1885,8 @@ oo::class create ::apave::APave {
           }
         }
         -linkcom {
-          lassign [my csGet] fg2 fg gb2 bg
-          my MakeLabelLinked $w $v $fg $bg $fg2 $bg
+          lassign [my csGet] fg fg2 bg bg2
+          my makeLabelLinked $w $v $fg $bg $fg2 $bg2 yes yes
         }
         -callF2 {
           if {[llength $v]==1} {set w2 $v} {set w2 [string map $v $w]}
@@ -1900,6 +1904,9 @@ oo::class create ::apave::APave {
         -bartabs {
           after 50 [string map [list %w $w] $v]
         }
+        -afteridle {
+          after idle [string map [list %w $w] $v]
+        }
       }
     }
     return
@@ -1907,20 +1914,138 @@ oo::class create ::apave::APave {
 
   #########################################################################
 
-  method VizitedLab {w {on ""} {fg ""} {bg ""}} {
+  method CleanupUpdateColors {} {
+    # Cleans the unused widgets from _AP_VISITED list
 
-    # Marks a label as vizited/not vizited
+    for {set i [llength $::apave::_AP_VISITED(ALL)]} {[incr i -1]>=0} {} {
+      if {![winfo exists [lindex $::apave::_AP_VISITED(ALL) $i 0]]} {
+        set ::apave::_AP_VISITED(ALL) [lreplace $::apave::_AP_VISITED(ALL) $i $i]
+      }
+    }
+  }
+
+  #########################################################################
+
+  method UpdateColors {} {
+    # Updates colors of widgets at changing CS.
+
+    lassign [my csGet] fg fg2 bg bg2 - - - - - fg3
+    # Visited labels:
+    my CleanupUpdateColors
+    foreach lw $::apave::_AP_VISITED(ALL) {  ;# mark the same links
+      lassign $lw w v inv
+      lassign [my makeLabelLinked $w $v $fg $bg $fg2 $bg2 no $inv] fg0 bg0
+      if {[info exists ::apave::_AP_VISITED(FG,$w)]} {
+        set fg0 $fg3
+        set ::apave::_AP_VISITED(FG,$w) $fg3
+      }
+      $w configure -foreground $fg0 -background $bg0
+    }
+  }
+
+  #########################################################################
+
+  method labelFlashing {w1 w2 first args} {
+
+    # Options of 'flashing' label:
+    #   -file (or -data) {list of image files (or data variables)}
+    #   -label {list of labels' texts}
+    #   -incr {increment for -alpha option}
+    #   -pause {pause in seconds for -alpha 1.0}
+    #   -after {interval for 'after'}
+    #   -squeeze {value for *-big.png}
+
+    if {![winfo exists $w1]} return
+    if {$first} {
+      lassign [::apave::parseOptions $args \
+        -file "" -data "" -label "" -incr 0.01 -pause 3.0 -after 10 -squeeze "" -static 0] \
+        ofile odata olabel oincr opause oafter osqueeze ostatic
+      if {$osqueeze ne ""} {set osqueeze "-subsample $osqueeze"}
+      array set ::t::AR {}
+      lassign {0 -2 0 1} idx incev waitev direv
+    } else {
+      lassign $args ofile odata olabel oincr opause oafter osqueeze ostatic \
+        idx incev waitev direv
+    }
+    set llf [llength $ofile]
+    set lld [llength $odata]
+    if {[set llen [expr {max($llf,$lld)}]]==0} return
+    incr incev $direv
+    set alphaev [expr {$oincr*$incev}]
+    if {$alphaev>=1} {
+      set alpha 1.0
+      if {[incr waitev -1]<0} {
+        set direv -1
+      }
+    } elseif {$alphaev<0} {
+      set alpha 0.0
+      set idx [expr {$idx%$llen+1}]
+      set direv 1
+      set incev 0
+      set waitev [expr {int($opause/$oincr)}]
+    } else {
+      set alpha $alphaev
+    }
+    if {$llf} {
+      set png [list -file [lindex $ofile $idx-1]]
+    } else {
+      set png [list -data [set [lindex $odata $idx-1]]]
+    }
+    set NS [namespace current]
+    if {$ostatic} {
+      image create photo ${NS}::ImgT$w1 {*}$png
+      $w1 configure -image ${NS}::ImgT$w1
+    } else {
+      image create photo ${NS}::ImgT$w1 {*}$png -format "png -alpha $alpha"
+      image create photo ${NS}::Img$w1
+      ${NS}::Img$w1 copy ${NS}::ImgT$w1 {*}$osqueeze
+      $w1 configure -image ${NS}::Img$w1
+    }
+    if {$w2 ne ""} {
+      if {$alphaev<0.33 && !$ostatic} {
+        set fg [$w1 cget -background]
+      } else {
+        if {[info exists ::apave::_AP_VISITED(FG,$w2)]} {
+          set fg $::apave::_AP_VISITED(FG,$w2)
+        } else {
+          set fg [$w1 cget -foreground]
+        }
+      }
+      $w2 configure -text [lindex $olabel $idx-1] -foreground $fg
+    }
+    after $oafter [list [self] labelFlashing $w1 $w2 0 \
+      $ofile $odata $olabel $oincr $opause $oafter $osqueeze $ostatic \
+      $idx $incev $waitev $direv]
+  }
+
+  #########################################################################
+
+  method VisitedLab {w cmd {on ""} {fg ""} {bg ""}} {
+
+    # Marks a label as visited/not visited
     #   w - label's path
-    #   on - flag "the label vizited"
+    #   cmd - command linked
+    #   on - flag "the label visited"
+    #   fg - foreground of label
+    #   bg - background of label
 
     set styl [ttk::style configure TLabel]
     if {$fg eq ""} {lassign [my csGet] - fg - bg}
+    set vst [string map {" " "_"} $cmd]
     if {$on eq ""} {
-      set on [expr {[info exists ${_pav(ns)}PN::AR(VIZIT,$w)]}]
+      set on [expr {[info exists ::apave::_AP_VISITED($vst)]}]
     }
     if {$on} {
-      set fg [lindex [my csGet] 7]
-      set ${_pav(ns)}PN::AR(VIZIT,$w) 1
+      set fg [lindex [my csGet] 9]
+      set ::apave::_AP_VISITED($vst) 1
+      set ::apave::_AP_VISITED(FG,$w) $fg
+      foreach lw $::apave::_AP_VISITED(ALL) {  ;# mark the same links
+        lassign $lw w2 cmd2
+        if {[winfo exists $w2] && $cmd eq $cmd2} {
+          $w2 configure -foreground $fg -background $bg
+          set ::apave::_AP_VISITED(FG,$w2) $fg
+        }
+      }
     }
     $w configure -foreground $fg -background $bg
     if {[set font [$w cget -font]] eq ""} {
@@ -1934,19 +2059,57 @@ oo::class create ::apave::APave {
 
   #########################################################################
 
-  method HoverLab {w on {fg ""} {bg ""}} {
+  method HoverLab {w cmd on {fg ""} {bg ""}} {
 
     # Actions on entering/leaving a linked label.
     #   w - label's path
+    #   cmd - command linked
     #   on - flag "now hovering on the label"
+    #   fg - foreground of label
+    #   bg - background of label
 
     if {$on} {
       if {$fg eq ""} {lassign [my csGet] fg - bg}
-      $w configure -foreground $fg -background $bg
+      $w configure -background $bg
     } else {
-      my VizitedLab $w "" $fg $bg
+      my VisitedLab $w $cmd "" $fg $bg
     }
     return
+  }
+
+  #########################################################################
+
+  method makeLabelLinked {lab v fg bg fg2 bg2 {doadd yes} {inv no} } {
+
+    # Makes the linked label from a label.
+    #   lab - label's path
+    #   v - data of the link: command, tip, visited
+    #   fg - foreground unhovered
+    #   bg - background unhovered
+    #   fg2 - foreground hovered
+    #   bg2 - background hovered
+    #   doadd - flag "register the label in the list of visited"
+    #   inv - flag "invert the meaning of colors"
+
+    set txt [$lab cget -text]
+    lassign [split [string map [list $_pav(edge) "\uFFFF"] $v] "\uFFFF"] v tt vz
+    set tt [string map [list %l $txt] $tt]
+    set v [string map [list %l $txt %t $tt] $v]
+    if {$tt ne ""} {catch {tooltip::tooltip $lab $tt}}
+    if {$inv} {
+      set ft $fg
+      set bt $bg
+      set fg $fg2
+      set bg $bg2
+      set fg2 $ft
+      set bg2 $bt
+    }
+    my VisitedLab $lab $v $vz $fg $bg
+    bind $lab <Enter> "[namespace code [list my HoverLab $lab $v yes $fg2 $bg2]]"
+    bind $lab <Leave> "[namespace code [list my HoverLab $lab $v no $fg $bg]]"
+    bind $lab <Button-1> "[namespace code [list my VisitedLab $lab $v yes $fg2 $bg2]];$v"
+    if {$doadd} {lappend ::apave::_AP_VISITED(ALL) [list $lab $v $inv]}
+    return [list $fg $bg $fg2 $bg2]
   }
 
   #########################################################################
@@ -2350,10 +2513,12 @@ oo::class create ::apave::APave {
   # This method calls *paveWindow* in a cycle, to process a current
   # "win / lwidgets" pair.
 
+    my CleanupUpdateColors
     set res [list]
     set wmain [set wdia ""]
     foreach {w lwidgets} $args {
       lappend res {*}[my Window $w $lwidgets]
+      lappend _pav(lwidgets) $lwidgets ;# possibly useful
       if {[string match *.dia $w]} {
         set wdia $w
       } elseif {[set _ [string first .dia. $w]]>0} {
@@ -2444,13 +2609,9 @@ oo::class create ::apave::APave {
     set ${_pav(ns)}PN::AR($win) "-"
     bind $win <Escape> $opt(-onclose)
     update
-    if {[::iswindows]} {
-      if {[wm attributes $win -alpha] < 0.1} {wm attributes $win -alpha 1.0}
-    } else {
-      catch {wm deiconify $win ; raise $win}
-    }
-    wm minsize $win [set w [winfo width $win]] [set h [winfo height $win]]
     if {$inpgeom == ""} {  ;# final geometrizing with actual sizes
+      set w [winfo width $win]
+      set h [winfo height $win]
       if {($h/2-$ry-$rh/2)>30 && $root != "."} { 
         # ::tk::PlaceWindow needs correcting in rare cases, namely:
         # when 'root' is of less sizes than 'win' and at screen top
@@ -2461,6 +2622,12 @@ oo::class create ::apave::APave {
     } else {
       wm geometry $win $inpgeom
     }
+    if {[::iswindows]} {
+      if {[wm attributes $win -alpha] < 0.1} {wm attributes $win -alpha 1.0}
+    } else {
+      catch {wm deiconify $win ; raise $win}
+    }
+    wm minsize $win [set w [winfo width $win]] [set h [winfo height $win]]
     bind $win <Configure> "[namespace current]::WinResize $win"
     if {$ontop} {
       wm attributes $win -topmost 1
@@ -2537,6 +2704,20 @@ oo::class create ::apave::APave {
 
   #########################################################################
 
+  method textLink {w idx} {
+
+    # Gets a label's path of a link in a text widget.
+    #   w - text's path
+    #   idx - index of the link
+
+    if {[info exists ::apave::__TEXTLINKS__($w)]} {
+      return [lindex $::apave::__TEXTLINKS__($w) $idx]
+    }
+    return ""
+  }
+
+  #########################################################################
+
   method displayText {w conts {pos 1.0}} {
 
     # Sets the text widget's contents.
@@ -2551,29 +2732,6 @@ oo::class create ::apave::APave {
     ::tk::TextSetCursor $w $pos
     if { $state ne "normal" } { $w configure -state $state }
     return
-  }
-
-  #########################################################################
-
-  method MakeLabelLinked {lab v fg bg fg2 bg2} {
-
-    # Makes the linked label from a label.
-    #   lab - label's path
-    #   v - data of the link: command, tip, vizited
-    #   fg - foreground unhovered
-    #   bg - background unhovered
-    #   fg2 - foreground hovered
-    #   bg2 - background hovered
-
-    set txt [$lab cget -text]
-    lassign [split [string map {"%|%" "\uFFFF"} $v] "\uFFFF"] v tt vz
-    set tt [string map [list %l $txt] $tt]
-    set v [string map [list %l $txt %t $tt] $v]
-    if {$tt ne ""} {catch {tooltip::tooltip $lab $tt}}
-    if {$vz ne ""} {my VizitedLab $lab $vz $fg $bg}
-    bind $lab <Enter> "[namespace code [list my HoverLab $lab yes $fg2 $bg2]]"
-    bind $lab <Leave> "[namespace code [list my HoverLab $lab no $fg $bg]]"
-    bind $lab <Button-1> "[namespace code [list my VizitedLab $lab yes $fg2 $bg2]];$v"
   }
 
   #########################################################################
@@ -2665,7 +2823,9 @@ oo::class create ::apave::APave {
     }
     lassign [my csGet] fg fg2 bg bg2
     set lfont [$w cget -font]
+    catch {set lfont [font configure $lfont]}
     dict set lfont -underline 1
+    set ::apave::__TEXTLINKS__($w) [list]
     for {set it [llength $taglist]} {[incr it -1]>=0} {} {
       set tagli [lindex $taglist $it]
       lassign $tagli i p1 p2
@@ -2673,12 +2833,13 @@ oo::class create ::apave::APave {
       if {[string match "link*" $tag] && \
       [set ist [lsearch -exact -index 0 $tags $tag]]>=0} {
         set txt [$w get $p1 $p2]
-        set lab $w[incr ::apave::__linklab__]
+        set lab ${w}l[incr ::apave::__linklab__]
         ttk::label $lab -text $txt -font $lfont -foreground $fg -background $bg
+        set ::apave::__TEXTLINKS__($w) [linsert $::apave::__TEXTLINKS__($w) 0 $lab]
         $w delete $p1 $p2
         $w window create $p1 -window $lab
         set v [lindex $tags $ist 1]
-        my MakeLabelLinked $lab $v $fg $bg $fg2 $bg2
+        my makeLabelLinked $lab $v $fg $bg $fg2 $bg2
       } else {
         $w tag add $tag $p1 $p2
       }

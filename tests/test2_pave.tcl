@@ -80,506 +80,6 @@ namespace eval t {
     }
   }
 
-# ______________________ The test's main procedure ______________________ #
-
-  proc test2_pave {} {
-
-    variable pdlg
-    variable pave
-    set firstin [expr {$::t::newCS==[apave::cs_Non]}]
-    apave::APaveInput create pdlg .win
-    apave::APaveInput create pave .win $::t::newCS
-    pave configTooltip black #FBFB95 -font {-size 11}
-    pave untouchWidgets *buTClr*
-    if {!$firstin} {pave basicFontSize $::t::fontsz}
-    set ::t::filetxt [::apave::readTextFile $::t::ftx1]
-    set ::multiline 1
-    set ::t::tblcols {
-      0 {Name of widget} left \
-      0 Type left \
-      0 Id right \
-      0 Msc right
-    }
-    foreach {k v} $::apave::_Defaults {
-      incr itbll
-      lappend ::t::tbllist [list $k [lindex [pave widgetType $k {} {}] 0] \
-        $itbll [string range $k [expr {$itbll%3}] end]]
-    }
-    set ::t::opcItems [list {{Color list} red green blue -- {colored yellow magenta cyan
-      | #52CB2F #FFA500 #CB2F6A | #FFC0CB #90EE90 #8B6914}} \
-      {hue dark medium light} -- {{multi word example}} ok]
-    set ::t::opcColors [list {{Color schemes}}]
-    for {set i -1; set n [apave::cs_Max]} {$i<=$n} {incr i} {
-      if {(($i+2) % ($n/2+2)) == 0} {lappend ::t::opcColors "|"}
-      lappend ::t::opcColors [list "$i: [pave csGetName $i]"]
-    }
-    variable arrayTab
-    array set arrayTab {}
-    # initializing images for toolbar
-    set imgl [::apave::iconImage]
-    set imgused 0
-    foreach {i icon} {0 retry 1 add 2 delete 3 undo 4 redo 5 run 6 double} {
-      image create photo Img$i -data [::apave::iconData $icon]
-      incr imgused
-    }
-    set ::t::toolList ""
-    for {set i 0} {$i<[llength $imgl]} {incr i} {
-      set icon [lindex $imgl $i]
-      set img "Img[expr {$i+$imgused}]"
-      if {[catch {image create photo $img -data [::apave::iconData $icon]}]} {
-        image create photo $img -data [::apave::iconData none]
-      }
-      append ::t::toolList " $img {{} -tooltip {Icon: $icon}}"
-    }
-    set ::bgst [ttk::style lookup TScrollbar -troughcolor]
-    ttk::style conf TLabelframe -labelmargins {5 10 1 1} -padding 3
-    trace add variable t::sc write "::t::tracer ::t::sc"
-    pave setDefaultAttrs chB {} {-padx 11 -pady 3}  ;# to test setDefaultAttrs
-    set ::t::restart 1
-
-    # making main window object and dialog object
-    pave configure edge "@@"
-    pave makeWindow .win.fra "Packages: $::pkg_versions"
-    pave paveWindow .win.fra {
-      {frat - - 1 20 {-st we} }
-      {frat.toolTop - - - - {pack -side top} {-array {$::t::toolList}}}
-      {fral frat T 8 1 {-st nws -rw 1}}
-      {.butHome - - 1 1 {-st we} {-t "General" -com "t::chanTab nbk"}}
-      {.but2 fral.butHome T 1 1 {-st we} {-t "View" -com "t::chanTab nbk2"}}
-      {.butEdit fral.but2 T 1 1 {-st we} {-t "Editor" -com "t::chanTab nb3"}}
-      {.butFile fral.butEdit T 1 1 {-st we} {-t "Files" -com "t::chanTab nb4"}}
-      {.but5 fral.butFile T 1 1 {-st we} {-t "Tools" -com "t::chanTab nb5"}}
-      {.butConfig fral.but5 T 1 1 {-st we} {-t "Key maps" -com "t::chanTab nb6"}}
-      {.butMisc fral.butConfig T 1 1 {-st we} {-t "Misc" -com "t::chanTab nb7"}}
-      {.fra  fral.butMisc T 1 1 {-st we -rw 10} {-h 30.m}}
-      {buth fral T 1 1 {-st we} {-t "Help" -com t::helpProc}}
-      {frau buth L 1 1 {-st nswe -cw 10} {-w 60.m}}
-      {butApply frau L 1 1 {-st e} {-t "Apply"  -com t::applyProc}}
-      {butCancel butApply L 1 1 {-st e} {-t "Cancel" -com t::cancelProc}}
-      {butOK butCancel L 1 1 {-st e} {-t "OK"     -com t::okProc}}
-      {#fra2 fral L 8 9 {-st nsew}}
-      {fra fral L 8 9 {-st nsew}}
-      {fra.Nbk - - - - {pack -side top} {
-        f1 {-text " 1st tab of General " -underline 2}
-        f2 {-text " Ttk demos/ttkpane.tcl " -underline 1}
-        f3 {-text " Non-themed " -underline 1}
-        f4 {-text " Misc. widgets " -underline 1}
-        f5 {-text " Color schemes " -underline 1}
-        -traverse yes -select f2
-      }}
-      {fra.nbk2 - - - - {pack forget -side top} {
-        f1 {-text "First of View" -underline 1}
-        f2 {-text "Second of View" -underline 10}
-        -tr {just to test "-tr*" to call ttk::notebook::enableTraversal}
-      }}
-    } .win.fra.fra.nbk.f1 {
-
-      ####################################################################
-      # {#
-      #                1ST TAB (ENTRIES AND CHOOSERS)
-      # }
-      ####################################################################
-      #####<~~~~-it's-a-comment-(being-a-record-as-one-continuous-string)
-      # {# <~~~~ it's a comment mark (being first in a {...} record)
-      #
-      # Comments are marked by "#" as the 1st character of layout record.
-      #
-      # A menubar can be defined in any place of window layout because
-      # it is assigned to a whole window.
-      # }
-      ####################################################################
-      {Menu - - - - - {-array {
-            File "&File"
-            edit &Edit
-            help "&{Help (wordy)}"
-      }}}
-      {labB1 - - 1 1   {-st es}  {-t "First option:"}}
-      {ent1 labB1 L 1 9 {-st wes -cw 1} {-tvar t::en1}}
-      {labB2 labB1 T 1 1 {-st es}  {-t "Second option:"}}
-      {ent2 labB2 L 1 9 {-st wes} {-tvar t::en2}}
-      {h_0 labB2 T 1 9}
-      {labBA h_0 T 1 1 {-st ws}  {-t "Default find mode: "}}
-      {radA labBA L 1 1 {-st ws}  {-t "Exact" -var t::v2 -value 1}}
-      {radB radA L 1 1 {-st ws}  {-t "Glob" -var t::v2 -value 2}}
-      {radC radB L 1 1 {-st ws}  {-t "RE" -var t::v2 -value 3}}
-      {v_1 labBA T 1 9 }
-      {labBfil1 v_1 T 1 1 {-st e} {-t "Pick a file:"}}
-      {labBfis1 labBfil1 T 1 1 {-st e} {-t "Pick a file to save as:"}}
-      {labBdir1 labBfis1 T 1 1 {-st e} {-t "Pick a directory:"}}
-      {labBfon1 labBdir1 T 1 1 {-st e} {-t "Pick a font:"}}
-      {labBclr1 labBfon1 T 1 1 {-st e} {-t "Pick a color:"}}
-      {labBdat1 labBclr1 T 1 1 {-st e} {-t "Pick a date:"}}
-      {labBftx1 labBdat1 T 1 1 {-st ne -ipady 8}
-        {-t "Pick a file to view:\n\n\n\nBut the first 'view'\nmay be modified!"}}
-      {fil1 labBfil1 L 1 9 {} {-tvar t::fil1 -title {Pick a file}
-        -filetypes {{{Tcl scripts} .tcl} {{All files} .* }}}}
-      {fis1 labBfis1 L 1 9 {} {-tvar t::fis1 -title {Save as}}}
-      {dir1 labBdir1 L 1 9 {} {-tvar t::dir1 -title {Pick a directory}}}
-      {fon1 labBfon1 L 1 9 {} {-tvar t::fon1 -title {Pick a font}}}
-      {clr1 labBclr1 L 1 9 {} {-tvar t::clr1 -title {Pick a color}}}
-      {dat1 labBdat1 L 1 9 {} {-tvar t::dat1 -title {Pick a date} -dateformat %Y.%m.%d}}
-      {Ftx1 labBftx1 L 1 9 {} {-h 7 -ro 0 -tvar ::t::ftx1 -title {Pick a file to view} -filetypes {{{Tcl scripts} .tcl} {{Text files} {.txt .test}}} -wrap word -tooltip "After choosing a file\nthe text will be read-only." -tabnext "[t::pave Opc1]"}}
-      {labOpc labBftx1 T 2 1 {-st ens} {-t "tk_optionCascade:"}}
-      {frAopc labOpc L 1 9 {-st w -pady 9}}
-      ###############____opc1____good_way
-      {.lab1 - - - - {-st e} {-t " 1st way, good:"}}
-      {.Opc1 frAopc.lab1 L 1 1 {-st w} {::t::opcvar ::t::opcItems {-width -4} \
-        {t::opcPre %a} -command t::opcPost }}
-      ###############____opc2____bad_way
-      {.lab2 frAopc.opc1 L 1 2 {-st e} {-t "       2nd way, bad:"}}
-      {.opc2 frAopc.lab2 L 1 1 {-st w} {::t::opcvar \
-        {{color red green blue -- {colored yellow magenta cyan \
-        | #52CB2F #FFA500 #CB2F6A | #FFC0CB #90EE90 #8B6914}} \
-        {hue dark medium light} -- {{multi word example}} ok} {-width 16} \
-        { if {{%a} in {yellow magenta cyan} || ![string first # {%a}]} \
-        {set _ {-background %a -activeforeground %a}} else {set _ {}} } \
-        -command {eval puts "2nd way ::t::opcvar = [set ::t::opcvar]"} }}
-      {labtbl1 labOpc T 1 1 {-st e} {-t "Tablelist widget:\n\n(click on titles\nto sort)"}}
-      {frAT labtbl1 L 1 9 {-st ew}}
-      {frAT.TblWid1 - - - - {pack -side left -fill x -expand 1} {-h 5 -lvar ::t::tbllist  -lbxsel buT -columns {$::t::tblcols} -ALL yes}}
-      {frAT.sbv frAT.tblWid1 L - - {pack}}
-      {labB4 labtbl1 T 3 9 {-st ewns -rw 1} {-t "Some others options can be below"}}
-    } .win.fra.fra.nbk.f2 {
-
-      ####################################################################
-      # {#               2ND TAB (DEMO OF ttk::panewindow)               }
-      ####################################################################
-      {tool - - - - {pack -side top} {-array {
-            Img1 {{::t::toolBut 1} -tooltip "Start progress" -state disabled}
-            h_ 3
-            Img2 {{::t::toolBut 2} -tooltip "Stop progress"}
-            sev 7
-            h_ 1
-            Img5 {{::t::e_menu} -tooltip "Run e_menu"}
-            h_ 1
-            Img6 {{::t::screenshooter} -tooltip "Run screenshooter"}
-            sev 7
-            h_ 1
-            Img3 {{::t::toolBut 3 \[set ::t::prevcs\]}}
-            h_ 1
-            opcTool {::t::opcc ::t::opcColors {-width 20} {t::opcToolPre %a} -command t::opcToolPost -tooltip "Current color scheme"}
-            h_ 1
-            Img4 {{::t::toolBut 4 \[set ::t::nextcs\]}}
-            h_ 4
-            ChbRestart {-var ::t::restart -t "Restart" -tooltip "To restart test2\nif CS changes"}
-            sev 8
-            h_ 1
-            spX  {-tvar ::t::fontsz -command {::t::toolBut 4 -3} -from 8 -to 16 -w 3 -justify center -tooltip "Font size 8..16" -myown {
-              puts "\nA local/global configuration may be set with -myown attribute, e.g.\
-              \n  %w configure -bg yellow -font {-weight bold}\
-              \n  ::NS::GLOBAL_CONFIG %w"}}
-      }}}
-      {# remove this comment to view another way to make a statusbar:
-       stat - - - - {pack -side bottom} {-array {
-            {Row:       -font {-slant italic -size 10}} 7
-            {" Column:" -font {-slant italic -size 10}} 5
-            {""         -font {-slant italic -size 10}} 30
-      }}}
-      {lab1 - - - - {pack -pady 0} {-t \
-      "It's a bit modified Tk's demos/ttkpane.tcl" -font "-weight bold -size 12"}}
-      {lab2 - - - - {pack} {-t "This demonstration shows off a nested set of themed paned windows. Their sizes can be changed by grabbing the area between each contained pane and dragging the divider." -wraplength 4i -justify left}}
-      {fra - - - - {pack -side bottom -fill both -expand 1 -pady 0}}
-      {fra.pan - - - - {pack -side bottom -fill both -expand 1} {-orient horizontal}}
-      {fra.pan.panL - - - - {add} {-orient vertical}}
-      {.lfrT - - - - {add} {-t Button}}
-      {.lfrT.but - - - - {} {-t "Press Me" -com "t::pdlg ok info {Button Pressed} {That hurt...} -root .win -head {Ouch! Wow!\nMiau!} -weight bold -timeout {5 Lab1}" }}
-      {.Lframe - - - - {add} {-t Clocks}}
-      {fra.pan.panR - - - - {add} {-orient vertical}}
-      {.lfrT - - - - {add} {-t Progress}}
-      {.lfrT.Pro - - - - {pack -fill both -expand 1} {-mode indeterminate} {%w start}}
-      {.LfrB - - - - {add} {-t "Bar of tabs"}}
-      {.lfrB.BtsBar  - - - - {pack -side top -fill x} {::t::fillBarTabs %w}}
-      {.lfrB.LabEdit  - - - - {pack -side top -fill x}}
-      {.lfrB.stat - - - - {pack -side bottom} {-array {
-            {Row:       -font {-slant italic -size 10}} 7
-            {" Column:" -font {-slant italic -size 10}} 5
-            {""         -font {-slant italic -size 10}} 30
-      }}}
-      {.lfrB.Text .lfrB.stat T - - {pack -side left -expand 1 -fill both} {-borderwidth 0 -w 80 -h 10 -wrap word -tabnext .win.fra.fral.butHome}}
-      {.lfrB.sbv .lfrB.text L - - {pack -side top}}
-    } .win.fra.fra.nbk.f3 {
-
-      ####################################################################
-      # {#                3RD TAB: ENABLED NON-TTK WIDGETS               }
-      ####################################################################
-      {fra1 - - 1 1 {-st w}}
-      {.laB0  - - 1 1 {-st w} {-t "Enabled widgets"}}
-      {.laB  fra1.laB0 T 1 1 {-st w -pady 1} {-t "label" -font "-weight bold -size 11"}}
-      {.BuTRun fra1.laB T 1 1 {-st w} {-t "button" -com ::t::Pressed} 
-        {eval {
-          ##################################################################
-          # The last element of widget record is Tcl command being the last.
-          # executed, i.e. after making the current widget.
-          # Here is a definition of procedure that makes a button to blink.
-          ##################################################################
-          proc ::t::Pressed {} {
-            if {[[::t::pave BuTRun] cget -text]!="button"} return
-            set bg [[::t::pave BuTRun] cget -background]
-            [::t::pave BuTRun] config -text "P R E S S E D"
-            for {set i 0} {$i<500} {incr i 100} {
-              after $i {[::t::pave BuTRun] config -background #292a2a}
-              after [expr $i+50] "[::t::pave BuTRun] config -background $bg"
-            }
-            after 800 [list [::t::pave BuTRun] config -text button]
-          }
-        }}}
-      {.chB fra1.buTRun T 1 1 {-st w -pady 5} {-t "  checkbutton"}}
-      {.frAE fra1.chB T 1 1 {-st w}}
-      {.frAE.laB - - 1 1 {-st w} {-t "entry "}}
-      {.frAE.enT fra1.frAE.laB L 1 1 {-st w -pady 5} {-tvar t::tv2}}
-      {.frA fra1.frAE T 1 1 {-st w}}
-      {.frA.laB - - 1 1 {-st w -ipady 5} {-t "label in frame" -font "-weight bold -size 11"}}
-      {.lfR fra1.frA T 1 1 {-st w} {-t "labeled frame" -font "-weight bold -size 11"}}
-      {.lfR.raD1 - - 1 1 {-st w -pady 5} {-t "radiobutton" -var t::v2 -value 1}}
-      {.lfR.raD2 fra1.lfR.raD1 L 1 1 {-st w -padx 7} {-t "radio 2" -var t::v2 -value 2}}
-      {.frAS fra1.lfR T 1 1 {-st w -pady 5}}
-      {.frAS.laB - - - - {pack -side left -anchor w} {-t "spinbox 1 through 9 "}}
-      {.frAS.spX - - - - {pack} {-tvar t::tv -from 1 -to 9 -w 5 -justify center}}
-      {.frAsc fra1.frAS T 1 1 {-st ew -pady 5}}
-      {.frAsc.laBsc - - - - {pack -side left} {-t "scale 0 through 100 "}}
-      {.frAsc.scA - - - - {pack -side right} {-orient horizontal -w 12 -sliderlength 20 -length 238 -var t::sc}}
-      {.frALB fra1.frAsc T 1 1}
-      {.frALB.laB - - - - {pack -side left -anchor nw} {-t "listbox of colors  "}}
-      {.frALB.lbx - - - - {pack -side left -fill x -expand 1} {-lvar t::lvar -h 4 -w 30 -lbxsel dark -ALL yes}}
-      {.frALB.sbV fra1.frALB.lbx L - - {pack}}
-
-      ####################################################################
-      # {#                   DISABLED NON_TTK WIDGETS                    }
-      ####################################################################
-      {labFR # # # # # {-t "labeled frame" -font "-weight bold -size 11" -state disabled -foreground gray}}
-      {lfR1 fra1 L 1 1 {-st we -cw 1} {-t "Disabled counterparts"}}
-      {.laB - - 1 1 {-st w } {-t "label" -font "-weight bold -size 11" -state disabled}}
-      {.BuTRun lfR1.laB T 1 1 {-st w} {-t "button" -state disabled}}
-      {.chB lfR1.buTRun T 1 1 {-st w -pady 5} {-t " checkbutton" -state disabled}}
-      {.frAE lfR1.chB T 1 1 {-st w} {-state disabled}}
-      {.frAE.laB - - 1 1 {-st w} {-t "entry " -state disabled}}
-      {.frAE.enT lfR1.frAE.laB L 1 1 {-st w -pady 5} {-tvar t::tv2 -state disabled}}
-      {.frA lfR1.frAE T 1 1 {-st w} {-state disabled}}
-      {.frA.laB - - 1 1 {-st w -ipady 5} {-t "label in frame" -font "-weight bold -size 11" -state disabled}}
-      {.lfR lfR1.frA T 1 1 {-st w} {-labelwidget .win.fra.fra.nbk.f3.labFR -font "-weight bold -size 11" -state disabled}}
-      {.lfR.raD1 - - 1 1 {-st w -pady 5} {-t "radiobutton" -var t::v2 -value 1 -state disabled}}
-      {.lfR.raD2 lfR1.lfR.raD1 L 1 1 {-st w -padx 7} {-t "radio 2" -var t::v2 -value 2 -state disabled}}
-      {.frAS lfR1.lfR T 1 1 {-st w -pady 5} {-state disabled}}
-      {.frAS.laB - - - - {pack -side left -anchor w} {-t "spinbox 1 through 9 "  -state disabled}}
-      {.frAS.spX - - - - {pack} {-tvar t::tv -from 1 -to 9 -w 5 -justify center -state disabled}}
-      {.frAsc lfR1.frAS T 1 1 {-st ew -cw 1} {-state disabled}}
-      {.frAsc.laBsc - - - - {pack -side left} {-t "scale 0 through 100 " -state disabled}}
-      {.frAsc.scA - - - - {pack} {-orient horizontal -w 12 -sliderlength 20 -length 238 -state disabled -var t::sc}}
-      {.frALB lfR1.frAsc T 1 1 {-st ew -pady 5} {-state disabled}}
-      {.frALB.laB - - - - {pack -side left -anchor nw} {-t "listbox of colors  " -state disabled}}
-      {.frALB.lbx - - - - {pack -side left -fill x -expand 1} {-lvar t::lvar -h 4 -w 30 -state disabled}}
-      {.frALB.sbV lfR1.frALB.lbx L - - {pack -side left}}
-
-      ####################################################################
-      # {#           FRAME FOR TEXT WIDGET OF NON-TTK WIDGET TAB         }
-      ####################################################################
-      {frAT fra1 T 1 2 {-st nsew -rw 1 -pady 7}}
-      {frAT.laB - - - - {pack -side left -anchor nw} {-t "text & scrollbars \
-\n\nas above, i.e.\nnot  ttk::scrollbar\n\ntext is read-only"}}
-      {frAT.TextNT - - - - {pack -side left -expand 1 -fill both} {-h 5 -wrap none -rotext ::t::filetxt -tabnext .win.fra.fral.butHome}}
-      {frAT.sbV frAT.textNT L - - {pack}}
-      {frAT.sbH frAT.textNT T - - {pack}}
-    } .win.fra.fra.nbk.f4 {
-      {can - - - - {pack} {-h 130 -w 360}
-        {eval {
-          ##################################################################
-          # This code is taken from Tk's demos/ctext.tcl
-          proc mkTextConfigPie {w x y a option value color} {
-            set item [$w create arc $x $y [expr {$x+90}] [expr {$y+90}] \
-          	  -start [expr {$a-15}] -extent 30 -fill $color]
-          }
-          set c .win.fra.fra.nbk.f4.can
-          $c create text 180 20 -text {Demo canvas from Tk's demos/ctext.tcl}
-          for {set i0 0} {$i0<12} {incr i0} {
-            set i1 [expr {$i0*30}]
-            set i2 [expr {$i0>9 ? [expr {($i0-10)*30}]: [expr {90+$i1}]}]
-            mkTextConfigPie $c 140 30 $i1 -angle  $i2 Yellow
-          }
-        }}}
-      {seh - - - - {pack -pady 7 -fill x}}
-      {lab - - - - {pack} {-tvar t::sc2}}
-      {sca - - - - {pack} {-length 500 -o horiz -var t::sc -from 0 -to 100}}
-      {seh2 - - - - {pack -pady 7 -fill x}}
-      {spx - - - - {pack} {-tvar t::tv -from 1 -to 9 -w 5 -justify center}}
-      {seh3 - - - - {pack -pady 7 -fill x}}
-      {lab1 - - - - {pack} {-t "Combobox is sort of separate widget."}}
-      {v_1 - - - - {pack} {-h 3}}
-      {cbx1 - - - - {pack} {-tvar ::cb1 -inpval EVENT -values {MENU EVENT COMMAND}}}
-      {v_2 - - - - {pack} {-h 3}}
-      {cbx4 - - - - {pack} {-tvar ::cb2 -inpval MENU-readonly -values {MENU-readonly EVENT-readonly COMMAND-readonly} -state readonly}}
-      {seh5 - - - - {pack -pady 9 -fill x}}
-      {lab2 - - - - {pack} {-t "File content combobox (fco) contains text file(s) content. Its 'values' attribute is set like this:
-  -values {TEXT1 @@-div1 \" <\" -div2 > -ret yes test1.txt@@ TEXT2 @@-pos 0 -len 7 -list {a b c} test2.txt@@ ...}
-where:
-  TEXT1, TEXT2, ... TEXTN - optional text snippets outside of @@ ... @@ data sets
-  @@ ... @@ - data set for a file, containing the file name and (optionally) its preceding options:
-      -div1, -div2 - dividers to filter file lines and to cut substrings from them:
-          if -div1 omitted, from the beginning; if -div2 omitted, to the end of line
-      -pos, -len - position and length of substring to cut:
-          if -pos omitted, -len characters from the beginning; if -len omitted, to the end of line
-      -list - a list of items to put directly into the combobox
-      -ret - if set to yes, means that the field is returned instead of full string
-  If there is only a single data set and no TEXT, the @@ marks may be omitted. The @@ marks are configured."}}
-      {v_3 - - - - {pack} {-h 3}}
-      {fco - - - - {pack} {-tvar t::cb3 -w 88 -tooltip "This 'fco' combobox contains: \
-      \n  1) four literal lines\n  2) data from 'test2_fco.dat' file" -values {COMMIT: @@-div1 " \[" -div2 "\] " -ret yes test2_fco.dat@@   INFO: @@-pos 22 -list {{Content of test2_fco.dat} {another item} trunk DOC} test2_fco.dat@@}}}
-      {siz - - - - {pack -side bottom -anchor se}}
-    } .win.fra.fra.nbk.f5 {
-
-      ####################################################################
-      # {#                TAB-5: COLOR SCHEMES                           }
-      ####################################################################
-      {BuTClrB  - - 1 4 {-st nsew -rw 1 -cw 1} {-com {::t::toolBut 4 -1} -text "Color scheme -1\nBasic"}}
-      {tcl {
-        set prt BuTClrB
-        for {set i 0} {$i<48} {incr i} {
-          set cur "BuTClr$i"
-          if {$i%4} {set n $pr; set p L} {set n $prt; set p T; set prt $cur}
-          set pr $cur
-          set lwid "$cur $n $p 1 1 {-st nsew -rw 1 -cw 1} {-com \
-           {::t::toolBut 4 $i} -t \"Color scheme $i\n[t::pave csGetName $i]\"}"
-          %C $lwid
-        }
-      }}
-    } .win.fra.fra.nbk2.f1 {
-
-      ####################################################################
-      # {#               TABS OF VIEW (JUST TO BE PRESENT)               }
-      ####################################################################
-      {labB  -   - 1 1 {-st w} {-t "Defaults"}}
-      {chb1 labB T 1 2 {-st w} {-t "Match whole word only" -var t::c1}}
-      {chb2 chb1 T 1 2 {-st w} {-t "Match case"  -var t::c2}}
-      {chb3 chb2 T 1 2 {-st w} {-t "Wrap around" -var t::c3}}
-      {sev1 chb1 L 3 1 }
-      {labB3 sev1 L 1 1 {-st w} {-t "Direction:"}}
-      {rad1 labB3 T 1 1 {-st w} {-t "Down" -var t::v -value 1}}
-      {rad2 rad1 L 1 1 {-st w} {-t "Up"   -var t::v -value 2}}
-      {v_ chb3 T 1 5}
-      {fraflb v_ T 1 5 {-st ew -pady 10} {}}
-      {fraflb.butView - - - - {pack -side right -anchor nw -padx 9} {-t "Edit the file" -com t::viewfile -tooltip "Opens a stand-alone editor of the file\nthe listbox' data are taken from."}}
-      {fraflb.lab - - - - {pack -side left -anchor nw} {-t "Listbox of file content:\n\nSee also:\nGeneral/Misc. tab" -link "
-      ::t::chanTab nbk .win.fra.fra.nbk.f3; focus [::t::pave BuTRun]%|%Click to select 'Misc.'\n... and paint the link.%|%0"}}
-      {fraflb.flb - - - - {pack -side left -fill x -expand 1} {-lvar ::t::lv1 -lbxsel Cont -ALL 1 -w 50 -h 5 -tooltip "The 'flb' listbox contains:\n 1)  four literal lines\n  2) data from 'test2_fco.dat' file" -values {@@-div1 " \[" -div2 "\] " test2_fco.dat@@   INFO: @@-pos 22 -ret 1 -list {{Content of test2_fco.dat} {another item} trunk DOC} test2_fco.dat@@ Code of test2_pave.tcl: @@-RE {^(\s*)([^#]+)$} ./test2_pave.tcl@@}}}
-      {fraflb.sbv fraflb.flb L - - {pack -side left}}
-      {fraflb.sbh fraflb.flb T - - {pack -side left}}
-    } .win.fra.fra.nbk2.f2 {
-      {lab - - - - {pack -expand 1 -fill both} {-t "Some text of 2nd View" \
-      -font "-weight bold -size 11"}}
-    }
-
-    # text widget's name is uppercased, so we can use the Text method
-    set wtex [pave Text]
-    # bindings and contents for text widget
-    bind $wtex <ButtonRelease> [list t::textPos $wtex]
-    bind $wtex <KeyRelease> [list t::textPos $wtex]
-    bind $wtex <<Modified>> ::t::tabModified
-    pave displayText $wtex $::t::filetxt
-    # at first, Ftx1 widget is editable
-    pave makePopup [pave Ftx1] no yes
-    # we can use the Lframe method to get its name, similar to Text
-    fillclock [pave Lframe]
-
-    # 3d frame - "Options" (not too much efforts applied ;^)
-    set lst3 {
-      {but1 -    - 1 1 {-st we} {-t "Options1" -com "t::pdlg ok info O1 Opts1..."}}
-      {but2 but1 T 1 1 {-st we} {-t "Options2" -com "t::pdlg ok ques O2 Opts2..."}}
-      {but3 but2 T 1 1 {-st we} {-t "Options3" -com "t::pdlg ok warn O3 Opts3..."}}
-      {but4 but3 T 1 1 {-st we} {-t "Options4" -com "t::pdlg ok err  O4 Opts4..."}}
-      {but5 but1 L 1 1 {-st we} {-t "more..."  -com "t::pdlg ok info M  More..."}}
-    }
-    foreach b {6 7 8 9 a b c d e f g h i} p {5 6 7 8 9 a b c d e f g h} {
-      lappend lst3 [list but$b but$p T 1 1 {-st we} \
-        {-t "more..." -com "t::pdlg ok warn M More...[incr ::iMORE] -text 1 -w 10"}]
-    }
-    ttk::notebook .win.fra.fra.nb3
-    .win.fra.fra.nb3 add [ttk::frame .win.fra.fra.nb3.f1] -text "Editor options"
-
-    pave paveWindow .win.fra.fra.nb3.f1 $lst3
-
-    # 4th and other frames mean even less efforts applied
-    foreach {nn inf} {4 Files 5 Tools 6 "Key mappings" 7 Misc} {
-      ttk::notebook .win.fra.fra.nb$nn
-      pack [ttk::label .win.fra.fra.nb$nn.labB -text "$inf here..." \
-        -foreground blue -font "-weight bold -size 12"] -expand 1
-    }
-
-    # colors for Colors tab
-    for {set i 0} {$i<48} {incr i} {
-      lassign [pave csGet $i] - fg - bg
-      [pave BuTClr$i] configure -foreground $fg -background $bg
-    }
-
-    # icons of top toolbar
-    for {set i 0} {$i<[llength $imgl]} {incr i} {
-      [pave BuT_Img[expr {$i+$imgused}]] configure -command \
-        [list ::t::msg info "This is just a demo.\nIcon $i: [lindex $imgl $i]"]
-    }
-
-    # filling the menu
-    after idle [list ::t::fillMenu]
-
-    # filling the bar of tabs (another way, instead of btsBar widget)
-    # after idle [list ::t::fillBarTabs [pave BtsBar]]
-
-    if {$firstin} {
-      set ::t::nextcs [apave::cs_Min]
-      set ::t::prevcs [apave::cs_Max]
-    } else {
-      set ::t::nextcs [expr {$::t::newCS==[apave::cs_Max] ? \
-        [apave::cs_Min] : $::t::newCS+1}]
-      set ::t::prevcs [expr {$::t::newCS==[apave::cs_Min] ? \
-        [apave::cs_Max] : $::t::newCS-1}]
-      toolBut 4 $::t::newCS yes
-      if {$t::ans4==11} {[pave ChbRestart] configure -state disabled}
-    }
-    set ::t::newCS [apave::cs_Non]
-    toolBut 0
-    after 1000 ::t::highlighting_others  ;# it's unseen at changing the theme
-    catch {::transpops::run [file join $::testdirname ../.bak transpops.txt] <Control-q> .win}
-
-    # Open the window at last
-    set ::t::curTab ""
-    chanTab nbk
-    set res [pave showModal .win -geometry +350+50 -decor 1 -onclose t::exitProc]
-    if {$::t::newCS==[apave::cs_Non]} { ;# at restart, newCS is set
-      # getting result and clearance
-      set res [pave res .win]
-      puts "
-    text file name = \"$::t::ftx1\"
-    text file contents =
--------------------------------
-[pave getTextContent ::t::ftx1]
--------------------------------
-    v   = $t::v
-    v2  = $t::v2
-    c1  = $t::c1
-    c2  = $t::c2
-    c3  = $t::c3
-    cb3 = \"$t::cb3\"
-    en1 = \"$t::en1\"
-    en2 = \"$t::en2\"
-    fil1= \"$t::fil1\"
-    fis1= \"$t::fis1\"
-    dir1= \"$t::dir1\"
-    fon1= \"$t::fon1\"
-    clr1= $t::clr1
-    dat1= $t::dat1
-
-    lvar ALL: $t::lvar
-
-    lv1 ALL: $t::lv1
-
-    tblWid1 curselection: [lindex $::t::tbllist 0]
-    tblWid1 curitem     : [lindex $::t::tbllist 1]
-    tblWid1 items       : [lindex $::t::tbllist 2]
-    "
-    }
-    destroy .win
-    pave destroy
-    pdlg destroy
-    return $res
-  }
-
 # ________________ Handlers for Help, Apply, Cancel etc. ________________ #
 
   # imitating help function
@@ -677,8 +177,9 @@ where:
     lassign [pave csGet] fg - bg - - bS fS
     set ::t::textTags [list \
       [list "red" " -font {-weight bold} -foreground $fS -background $bS"] \
-      [list "link1" "::t::browser %t%|%https://%l%|%0"] \
-      [list "link2" "::t::browser %t%|%https://aplsimple.github.io/en/tcl/%l/%l.html%|%0"] \
+      [list "link1" "::apave::openDoc %t@@https://%l@@"] \
+      [list "link2" "::apave::openDoc %t@@https://aplsimple.github.io/en/tcl/%l/%l.html@@"] \
+      [list "link3" "::apave::openDoc %t@@https://wiki.tcl-lang.org@@"] \
       ]
     if {$t::ans4==12} {
       set ::t::restart 0
@@ -698,8 +199,8 @@ where:
 
   # changing the current tab: we need to save the old tab's selection
   # in order to restore the selection at the tab's return.
-  proc chanTab {tab {nt ""}} {
-    if {$tab != $::t::curTab} {
+  proc chanTab {tab {nt ""} {doit no}} {
+    if {$tab != $::t::curTab || $doit} {
       if {$::t::curTab !=""} {
         set arrayTab($::t::curTab) [.win.fra.fra.$::t::curTab select]
         pack forget .win.fra.fra.$::t::curTab
@@ -737,6 +238,9 @@ where:
     $m add command -label "Copy" -command {::t::msg warn "this is just a demo: no action"}
     $m add command -label "Paste" -command {::t::msg err "this is just a demo: no action"}
     $m add separator
+    $m add command -label "Find..." -command {::t::findInText}
+    $m add command -label "Find Next" -command {::t::findNext}
+    $m add separator
     $m add command -label "Reload the bar of tabs" -command {::t::RefillBar}
     set m .win.menu.help
     $m add command -label "About" -command [list ::t::msg info "  It's a demo of
@@ -748,12 +252,17 @@ where:
    \u2022 Reference on <link2>hl_tcl</link2>
 
   License: MIT.
-  _______________________________________
+  _____________________________________
 
-  <red> $::tcltk_version </red>
+  <red> $::tcltk_version </red> <link3></link3>
 
-  <red> $::tcl_platform(os) $::tcl_platform(osVersion) </red>
-" -t 1 -tags ::t::textTags]
+  <red> $::tcl_platform(os) $::tcl_platform(osVersion) </red>\n
+" -t 1 -w 41 -scroll 0 -tags ::t::textTags -my "after idle {::t::showLogo %w}"]
+  }
+
+  proc showLogo {w} {
+    pave labelFlashing [pave textLink $w 4] "" 1 \
+      -file feather.png -pause 0.5 -incr 0.1 -after 40
   }
 
   proc tracer {varname args} {
@@ -777,25 +286,36 @@ where:
     }
   }
 
-  proc browser {url} {
-    # open is the OS X equivalent to xdg-open on Linux, start is used on Windows
-    set commands {xdg-open open start}
-    foreach browser $commands {
-      if {$browser eq "start"} {
-        set command [list {*}[auto_execok start] {}]
-      } else {
-        set command [auto_execok $browser]
-      }
-      if {[string length $command]} {
-        break
-      }
+  proc goWiki {} {
+    set who [string map {" " "+"} [[pave LabImgInfo] cget -text]]
+    ::apave::openDoc "https://en.wikipedia.org/w/index.php?cirrusUserTesting=classic-explorer-i&search=$who"
+  }
+
+  proc labelImaged {} {
+    pave labelFlashing [pave LabImg] [pave LabImgInfo] 1 \
+      -file {1-small.png 2-small.png 3-small.png 4-small.png} \
+      -label {"Cisticola exilis" "Titmouse" "Wheatear" "Eurasian wren"} \
+      ;# -squeeze 2
+  }
+
+  proc findInText {} {
+    ::t::chanTab nbk .win.fra.fra.nbk.f2 yes
+    pack [pave FraFind]
+    [pave EntFind] selection range 0 end
+    focus [pave EntFind]
+    set closefind "pack forget [pave FraFind]; focus [pave Text]; break"
+    foreach k {<Return> <KP_Enter>} {
+      bind [pave EntFind] $k \
+        "::t::pave findInText 0 [pave Text] ::t::Find; $closefind"
     }
-    if {[string length $command] == 0} {
-      puts "ERROR: couldn't find browser"
+    foreach k {<Escape> <FocusOut>} {
+      bind [pave EntFind] $k $closefind
     }
-    if {[catch {exec {*}$command $url &} error]} {
-      puts "ERROR: couldn't execute '$command':\n$error"
-    }
+    bind [pave Text] <F3> ::t::findNext
+  }
+
+  proc findNext {} {
+    ::t::pave findInText 1 [pave Text] ::t::Find
   }
 
   proc screenshooter {} {
@@ -1163,6 +683,514 @@ where:
         \n\nWhile editing, use Ctrl+Left and Ctrl+Right to scroll files." \
         -ch "Don't show again"]
     }
+  }
+
+# ______________________ The test's main procedure ______________________ #
+
+  proc test2_pave {} {
+
+    variable pdlg
+    variable pave
+    set firstin [expr {$::t::newCS==[apave::cs_Non]}]
+    apave::APaveInput create pdlg .win
+    apave::APaveInput create pave .win $::t::newCS
+    pave configTooltip black #FBFB95 -font {-size 11}
+    pave untouchWidgets *buTClr*
+    if {!$firstin} {pave basicFontSize $::t::fontsz}
+    set ::t::filetxt [::apave::readTextFile $::t::ftx1]
+    set ::t::Find ""
+    set ::multiline 1
+    set ::t::tblcols {
+      0 {Name of widget} left \
+      0 Type left \
+      0 Id right \
+      0 Msc right
+    }
+    foreach {k v} $::apave::_Defaults {
+      incr itbll
+      lappend ::t::tbllist [list $k [lindex [pave widgetType $k {} {}] 0] \
+        $itbll [string range $k [expr {$itbll%3}] end]]
+    }
+    set ::t::opcItems [list {{Color list} red green blue -- {colored yellow magenta cyan
+      | #52CB2F #FFA500 #CB2F6A | #FFC0CB #90EE90 #8B6914}} \
+      {hue dark medium light} -- {{multi word example}} ok]
+    set ::t::opcColors [list {{Color schemes}}]
+    for {set i -1; set n [apave::cs_Max]} {$i<=$n} {incr i} {
+      if {(($i+2) % ($n/2+2)) == 0} {lappend ::t::opcColors "|"}
+      lappend ::t::opcColors [list "$i: [pave csGetName $i]"]
+    }
+    variable arrayTab
+    array set arrayTab {}
+    # initializing images for toolbar
+    set imgl [::apave::iconImage]
+    set imgused 0
+    foreach {i icon} {0 retry 1 add 2 delete 3 undo 4 redo 5 run 6 double} {
+      image create photo Img$i -data [::apave::iconData $icon]
+      incr imgused
+    }
+    set ::t::toolList ""
+    for {set i 0} {$i<[llength $imgl]} {incr i} {
+      set icon [lindex $imgl $i]
+      set img "Img[expr {$i+$imgused}]"
+      if {[catch {image create photo $img -data [::apave::iconData $icon]}]} {
+        image create photo $img -data [::apave::iconData none]
+      }
+      append ::t::toolList " $img {{} -tooltip {Icon: $icon}}"
+    }
+    set ::bgst [ttk::style lookup TScrollbar -troughcolor]
+    ttk::style conf TLabelframe -labelmargins {5 10 1 1} -padding 3
+    trace add variable t::sc write "::t::tracer ::t::sc"
+    pave setDefaultAttrs chB {} {-padx 11 -pady 3}  ;# to test setDefaultAttrs
+    set ::t::restart 1
+
+    # making main window object and dialog object
+    pave makeWindow .win.fra "Packages: $::pkg_versions"
+    pave paveWindow .win.fra {
+      {frat - - 1 20 {-st we} }
+      {frat.toolTop - - - - {pack -side top} {-array {$::t::toolList}}}
+      {fral frat T 8 1 {-st nws -rw 1}}
+      {.butHome - - 1 1 {-st we} {-t "General" -com "t::chanTab nbk"}}
+      {.but2 fral.butHome T 1 1 {-st we} {-t "View" -com "t::chanTab nbk2"}}
+      {.butEdit fral.but2 T 1 1 {-st we} {-t "Editor" -com "t::chanTab nb3"}}
+      {.butFile fral.butEdit T 1 1 {-st we} {-t "Files" -com "t::chanTab nb4"}}
+      {.but5 fral.butFile T 1 1 {-st we} {-t "Tools" -com "t::chanTab nb5"}}
+      {.butConfig fral.but5 T 1 1 {-st we} {-t "Key maps" -com "t::chanTab nb6"}}
+      {.butMisc fral.butConfig T 1 1 {-st we} {-t "Misc" -com "t::chanTab nb7"}}
+      {.fra  fral.butMisc T 1 1 {-st we -rw 10} {-h 30.m}}
+      {buth fral T 1 1 {-st we} {-t "Help" -com t::helpProc}}
+      {frau buth L 1 1 {-st nswe -cw 10} {-w 60.m}}
+      {butApply frau L 1 1 {-st e} {-t "Apply"  -com t::applyProc}}
+      {butCancel butApply L 1 1 {-st e} {-t "Cancel" -com t::cancelProc}}
+      {butOK butCancel L 1 1 {-st e} {-t "OK"     -com t::okProc}}
+      {#fra2 fral L 8 9 {-st nsew}}
+      {fra fral L 8 9 {-st nsew}}
+      {fra.Nbk - - - - {pack -side top} {
+        f1 {-text " 1st tab of General " -underline 2}
+        f2 {-text " Ttk demos/ttkpane.tcl " -underline 1}
+        f3 {-text " Non-themed " -underline 1}
+        f4 {-text " Misc. widgets " -underline 1}
+        f5 {-text " Color schemes " -underline 1}
+        -traverse yes -select f2
+      }}
+      {fra.nbk2 - - - - {pack forget -side top} {
+        f1 {-text "First of View" -underline 1}
+        f2 {-text "Second of View" -underline 10}
+        -tr {just to test "-tr*" to call ttk::notebook::enableTraversal}
+      }}
+    } .win.fra.fra.nbk.f1 {
+
+      ####################################################################
+      # {#
+      #                1ST TAB (ENTRIES AND CHOOSERS)
+      # }
+      ####################################################################
+      #####<~~~~-it's-a-comment-(being-a-record-as-one-continuous-string)
+      # {# <~~~~ it's a comment mark (being first in a {...} record)
+      #
+      # Comments are marked by "#" as the 1st character of layout record.
+      #
+      # A menubar can be defined in any place of window layout because
+      # it is assigned to a whole window.
+      # }
+      ####################################################################
+      {Menu - - - - - {-array {
+            File "&File"
+            edit &Edit
+            help "&{Help (wordy)}"
+      }}}
+      {labB1 - - 1 1   {-st es}  {-t "First option:"}}
+      {ent1 labB1 L 1 9 {-st wes -cw 1} {-tvar t::en1}}
+      {labB2 labB1 T 1 1 {-st es}  {-t "Second option:"}}
+      {ent2 labB2 L 1 9 {-st wes} {-tvar t::en2}}
+      {h_0 labB2 T 1 9}
+      {labBA h_0 T 1 1 {-st ws}  {-t "Default find mode: "}}
+      {radA labBA L 1 1 {-st ws}  {-t "Exact" -var t::v2 -value 1}}
+      {radB radA L 1 1 {-st ws}  {-t "Glob" -var t::v2 -value 2}}
+      {radC radB L 1 1 {-st ws}  {-t "RE" -var t::v2 -value 3}}
+      {v_1 labBA T 1 9 }
+      {labBfil1 v_1 T 1 1 {-st e} {-t "Pick a file:"}}
+      {labBfis1 labBfil1 T 1 1 {-st e} {-t "Pick a file to save as:"}}
+      {labBdir1 labBfis1 T 1 1 {-st e} {-t "Pick a directory:"}}
+      {labBfon1 labBdir1 T 1 1 {-st e} {-t "Pick a font:"}}
+      {labBclr1 labBfon1 T 1 1 {-st e} {-t "Pick a color:"}}
+      {labBdat1 labBclr1 T 1 1 {-st e} {-t "Pick a date:"}}
+      {labBftx1 labBdat1 T 1 1 {-st ne -ipady 8}
+        {-t "Pick a file to view:\n\n\n\nBut the first 'view'\nmay be modified!"}}
+      {fil1 labBfil1 L 1 9 {} {-tvar t::fil1 -title {Pick a file}
+        -filetypes {{{Tcl scripts} .tcl} {{All files} .* }}}}
+      {fis1 labBfis1 L 1 9 {} {-tvar t::fis1 -title {Save as}}}
+      {dir1 labBdir1 L 1 9 {} {-tvar t::dir1 -title {Pick a directory}}}
+      {fon1 labBfon1 L 1 9 {} {-tvar t::fon1 -title {Pick a font}}}
+      {clr1 labBclr1 L 1 9 {} {-tvar t::clr1 -title {Pick a color}}}
+      {dat1 labBdat1 L 1 9 {} {-tvar t::dat1 -title {Pick a date} -dateformat %Y.%m.%d}}
+      {Ftx1 labBftx1 L 1 9 {} {-h 7 -ro 0 -tvar ::t::ftx1 -title {Pick a file to view} -filetypes {{{Tcl scripts} .tcl} {{Text files} {.txt .test}}} -wrap word -tooltip "After choosing a file\nthe text will be read-only." -tabnext "[t::pave Opc1]"}}
+      {labOpc labBftx1 T 2 1 {-st ens} {-t "tk_optionCascade:"}}
+      {frAopc labOpc L 1 9 {-st w -pady 9}}
+      ###############____opc1____good_way
+      {.lab1 - - - - {-st e} {-t " 1st way, good:"}}
+      {.Opc1 frAopc.lab1 L 1 1 {-st w} {::t::opcvar ::t::opcItems {-width -4} \
+        {t::opcPre %a} -command t::opcPost }}
+      ###############____opc2____bad_way
+      {.lab2 frAopc.opc1 L 1 2 {-st e} {-t "       2nd way, bad:"}}
+      {.opc2 frAopc.lab2 L 1 1 {-st w} {::t::opcvar \
+        {{color red green blue -- {colored yellow magenta cyan \
+        | #52CB2F #FFA500 #CB2F6A | #FFC0CB #90EE90 #8B6914}} \
+        {hue dark medium light} -- {{multi word example}} ok} {-width 16} \
+        { if {{%a} in {yellow magenta cyan} || ![string first # {%a}]} \
+        {set _ {-background %a -activeforeground %a}} else {set _ {}} } \
+        -command {eval puts "2nd way ::t::opcvar = [set ::t::opcvar]"} }}
+      {labtbl1 labOpc T 1 1 {-st e} {-t "Tablelist widget:\n\n(click on titles\nto sort)"}}
+      {frAT labtbl1 L 1 9 {-st ew}}
+      {frAT.TblWid1 - - - - {pack -side left -fill x -expand 1} {-h 5 -lvar ::t::tbllist  -lbxsel buT -columns {$::t::tblcols} -ALL yes}}
+      {frAT.sbv frAT.tblWid1 L - - {pack}}
+      {labB4 labtbl1 T 3 9 {-st ewns -rw 1} {-t "Some others options can be below"}}
+    } .win.fra.fra.nbk.f2 {
+
+      ####################################################################
+      # {#               2ND TAB (DEMO OF ttk::panewindow)               }
+      ####################################################################
+      {tool - - - - {pack -side top} {-array {
+            Img1 {{::t::toolBut 1} -tooltip "Start progress" -state disabled}
+            h_ 3
+            Img2 {{::t::toolBut 2} -tooltip "Stop progress"}
+            sev 7
+            h_ 1
+            Img5 {{::t::e_menu} -tooltip "Run e_menu"}
+            h_ 1
+            Img6 {{::t::screenshooter} -tooltip "Run screenshooter"}
+            sev 7
+            h_ 1
+            Img3 {{::t::toolBut 3 \[set ::t::prevcs\]}}
+            h_ 1
+            opcTool {::t::opcc ::t::opcColors {-width 20} {t::opcToolPre %a} -command t::opcToolPost -tooltip "Current color scheme"}
+            h_ 1
+            Img4 {{::t::toolBut 4 \[set ::t::nextcs\]}}
+            h_ 4
+            ChbRestart {-var ::t::restart -t "Restart" -tooltip "To restart test2\nif CS changes"}
+            sev 8
+            h_ 1
+            spX  {-tvar ::t::fontsz -command {::t::toolBut 4 -3} -from 8 -to 16 -w 3 -justify center -tooltip "Font size 8..16" -myown {
+              puts "\nA local/global configuration may be set with -myown attribute, e.g.\
+              \n  %w configure -bg yellow -font {-weight bold}\
+              \n  ::NS::GLOBAL_CONFIG %w"}}
+      }}}
+      {# remove this comment to view another way to make a statusbar:
+       stat - - - - {pack -side bottom} {-array {
+            {Row:       -font {-slant italic -size 10}} 7
+            {" Column:" -font {-slant italic -size 10}} 5
+            {""         -font {-slant italic -size 10}} 30
+      }}}
+      {lab1 - - - - {pack -pady 0} {-t \
+      "It's a bit modified Tk's demos/ttkpane.tcl" -font "-weight bold -size 12"}}
+      {lab2 - - - - {pack} {-t "This demonstration shows off a nested set of themed paned windows. Their sizes can be changed by grabbing the area between each contained pane and dragging the divider." -wraplength 4i -justify left}}
+      {fra - - - - {pack -side bottom -fill both -expand 1 -pady 0}}
+      {fra.pan - - - - {pack -side bottom -fill both -expand 1} {-orient horizontal}}
+      {fra.pan.panL - - - - {add} {-orient vertical}}
+      {.lfrT - - - - {add} {-t Button}}
+      {.lfrT.but - - - - {} {-t "Press Me" -com "t::pdlg ok info {Button Pressed} {That hurt...} -root .win -head {Ouch! Wow!\nMiau!} -weight bold -timeout {5 Lab1}" }}
+      {.Lframe - - - - {add} {-t Clocks}}
+      {fra.pan.panR - - - - {add} {-orient vertical}}
+      {.lfrT - - - - {add} {-t Progress}}
+      {.lfrT.Pro - - - - {pack -fill both -expand 1} {-mode indeterminate -afteridle {%w start}}}
+      {.LfrB - - - - {add} {-t "Bar of tabs"}}
+      {.lfrB.BtsBar  - - - - {pack -side top -fill x} {::t::fillBarTabs %w}}
+      {.lfrB.fraHead  - - - - {pack -side top -fill x}}
+      {.lfrB.fraHead.LabEdit  - - - - {pack -side left -expand 1 -fill x -pady 3}}
+      {.lfrB.fraHead.FraFind  - - - - {pack forget -side left -fill x} {}}
+      {.lfrB.fraHead.fraFind.lab  - - - - {pack -side left} {-t "Find:"}}
+      {.lfrB.fraHead.fraFind.EntFind  - - - - {pack -side left -pady 3 -padx 5} {-tvar ::t::Find -w 20}}
+      {.lfrB.stat - - - - {pack -side bottom} {-array {
+            {Row:       -font {-slant italic -size 10}} 7
+            {" Column:" -font {-slant italic -size 10}} 5
+            {""         -font {-slant italic -size 10}} 30
+      }}}
+      {.lfrB.Text .lfrB.stat T - - {pack -side left -expand 1 -fill both} {-borderwidth 0 -w 80 -h 10 -wrap word -tabnext .win.fra.fral.butHome}}
+      {.lfrB.sbv .lfrB.text L - - {pack -side top}}
+    } .win.fra.fra.nbk.f3 {
+
+      ####################################################################
+      # {#                3RD TAB: ENABLED NON-TTK WIDGETS               }
+      ####################################################################
+      {fra1 - - 1 1 {-st w}}
+      {.laB0  - - 1 1 {-st w} {-t "Enabled widgets"}}
+      {.laB  fra1.laB0 T 1 1 {-st w -pady 1} {-t "label" -font "-weight bold -size 11"}}
+      {.BuTRun fra1.laB T 1 1 {-st w} {-t "button" -com ::t::Pressed} 
+        {eval {
+          ##################################################################
+          # The last element of widget record is Tcl command being the last.
+          # executed, i.e. after making the current widget.
+          # Here is a definition of procedure that makes a button to blink.
+          ##################################################################
+          proc ::t::Pressed {} {
+            if {[[::t::pave BuTRun] cget -text]!="button"} return
+            set bg [[::t::pave BuTRun] cget -background]
+            [::t::pave BuTRun] config -text "P R E S S E D"
+            for {set i 0} {$i<500} {incr i 100} {
+              after $i {[::t::pave BuTRun] config -background #292a2a}
+              after [expr $i+50] "[::t::pave BuTRun] config -background $bg"
+            }
+            after 800 [list [::t::pave BuTRun] config -text button]
+          }
+        }}}
+      {.chB fra1.buTRun T 1 1 {-st w -pady 5} {-t "  checkbutton"}}
+      {.frAE fra1.chB T 1 1 {-st w}}
+      {.frAE.laB - - 1 1 {-st w} {-t "entry "}}
+      {.frAE.enT fra1.frAE.laB L 1 1 {-st w -pady 5} {-tvar t::tv2}}
+      {.frA fra1.frAE T 1 1 {-st w}}
+      {.frA.laB - - 1 1 {-st w -ipady 5} {-t "label in frame" -font "-weight bold -size 11"}}
+      {.lfR fra1.frA T 1 1 {-st w} {-t "labeled frame" -font "-weight bold -size 11"}}
+      {.lfR.raD1 - - 1 1 {-st w -pady 5} {-t "radiobutton" -var t::v2 -value 1}}
+      {.lfR.raD2 fra1.lfR.raD1 L 1 1 {-st w -padx 7} {-t "radio 2" -var t::v2 -value 2}}
+      {.frAS fra1.lfR T 1 1 {-st w -pady 5}}
+      {.frAS.laB - - - - {pack -side left -anchor w} {-t "spinbox 1 through 9 "}}
+      {.frAS.spX - - - - {pack} {-tvar t::tv -from 1 -to 9 -w 5 -justify center}}
+      {.frAsc fra1.frAS T 1 1 {-st ew -pady 5}}
+      {.frAsc.laBsc - - - - {pack -side left} {-t "scale 0 through 100 "}}
+      {.frAsc.scA - - - - {pack -side right} {-orient horizontal -w 12 -sliderlength 20 -length 238 -var t::sc}}
+      {.frALB fra1.frAsc T 1 1}
+      {.frALB.laB - - - - {pack -side left -anchor nw} {-t "listbox of colors  "}}
+      {.frALB.lbx - - - - {pack -side left -fill x -expand 1} {-lvar t::lvar -h 4 -w 30 -lbxsel dark -ALL yes}}
+      {.frALB.sbV fra1.frALB.lbx L - - {pack}}
+
+      ####################################################################
+      # {#                   DISABLED NON_TTK WIDGETS                    }
+      ####################################################################
+      {labFR # # # # # {-t "labeled frame" -font "-weight bold -size 11" -state disabled -foreground gray}}
+      {lfR1 fra1 L 1 1 {-st we -cw 1} {-t "Disabled counterparts"}}
+      {.laB - - 1 1 {-st w } {-t "label" -font "-weight bold -size 11" -state disabled}}
+      {.BuTRun lfR1.laB T 1 1 {-st w} {-t "button" -state disabled}}
+      {.chB lfR1.buTRun T 1 1 {-st w -pady 5} {-t " checkbutton" -state disabled}}
+      {.frAE lfR1.chB T 1 1 {-st w} {-state disabled}}
+      {.frAE.laB - - 1 1 {-st w} {-t "entry " -state disabled}}
+      {.frAE.enT lfR1.frAE.laB L 1 1 {-st w -pady 5} {-tvar t::tv2 -state disabled}}
+      {.frA lfR1.frAE T 1 1 {-st w} {-state disabled}}
+      {.frA.laB - - 1 1 {-st w -ipady 5} {-t "label in frame" -font "-weight bold -size 11" -state disabled}}
+      {.lfR lfR1.frA T 1 1 {-st w} {-labelwidget .win.fra.fra.nbk.f3.labFR -font "-weight bold -size 11" -state disabled}}
+      {.lfR.raD1 - - 1 1 {-st w -pady 5} {-t "radiobutton" -var t::v2 -value 1 -state disabled}}
+      {.lfR.raD2 lfR1.lfR.raD1 L 1 1 {-st w -padx 7} {-t "radio 2" -var t::v2 -value 2 -state disabled}}
+      {.frAS lfR1.lfR T 1 1 {-st w -pady 5} {-state disabled}}
+      {.frAS.laB - - - - {pack -side left -anchor w} {-t "spinbox 1 through 9 "  -state disabled}}
+      {.frAS.spX - - - - {pack} {-tvar t::tv -from 1 -to 9 -w 5 -justify center -state disabled}}
+      {.frAsc lfR1.frAS T 1 1 {-st ew -cw 1} {-state disabled}}
+      {.frAsc.laBsc - - - - {pack -side left} {-t "scale 0 through 100 " -state disabled}}
+      {.frAsc.scA - - - - {pack} {-orient horizontal -w 12 -sliderlength 20 -length 238 -state disabled -var t::sc}}
+      {.frALB lfR1.frAsc T 1 1 {-st ew -pady 5} {-state disabled}}
+      {.frALB.laB - - - - {pack -side left -anchor nw} {-t "listbox of colors  " -state disabled}}
+      {.frALB.lbx - - - - {pack -side left -fill x -expand 1} {-lvar t::lvar -h 4 -w 30 -state disabled}}
+      {.frALB.sbV lfR1.frALB.lbx L - - {pack -side left}}
+
+      ####################################################################
+      # {#           FRAME FOR TEXT WIDGET OF NON-TTK WIDGET TAB         }
+      ####################################################################
+      {frAT fra1 T 1 2 {-st nsew -rw 1 -pady 7}}
+      {frAT.laB - - - - {pack -side left -anchor nw} {-t "text & scrollbars \
+\n\nas above, i.e.\nnot  ttk::scrollbar\n\ntext is read-only"}}
+      {frAT.TextNT - - - - {pack -side left -expand 1 -fill both} {-h 5 -wrap none -rotext ::t::filetxt -tabnext .win.fra.fral.butHome}}
+      {frAT.sbV frAT.textNT L - - {pack}}
+      {frAT.sbH frAT.textNT T - - {pack}}
+    } .win.fra.fra.nbk.f4 {
+      {can - - - - {pack} {-h 130 -w 360}
+        {eval {
+          ##################################################################
+          # This code is taken from Tk's demos/ctext.tcl
+          proc mkTextConfigPie {w x y a option value color} {
+            set item [$w create arc $x $y [expr {$x+90}] [expr {$y+90}] \
+          	  -start [expr {$a-15}] -extent 30 -fill $color]
+          }
+          set c .win.fra.fra.nbk.f4.can
+          $c create text 180 20 -text {Demo canvas from Tk's demos/ctext.tcl}
+          for {set i0 0} {$i0<12} {incr i0} {
+            set i1 [expr {$i0*30}]
+            set i2 [expr {$i0>9 ? [expr {($i0-10)*30}]: [expr {90+$i1}]}]
+            mkTextConfigPie $c 140 30 $i1 -angle  $i2 Yellow
+          }
+        }}}
+      {seh - - - - {pack -pady 7 -fill x}}
+      {lab - - - - {pack} {-tvar t::sc2}}
+      {sca - - - - {pack} {-length 500 -o horiz -var t::sc -from 0 -to 100}}
+      {seh2 - - - - {pack -pady 7 -fill x}}
+      {SpxMisc - - - - {pack} {-tvar t::tv -from 1 -to 9 -w 5 -justify center}}
+      {seh3 - - - - {pack -pady 7 -fill x}}
+      {lab1 - - - - {pack} {-t "Combobox is sort of separate widget."}}
+      {v_1 - - - - {pack} {-h 3}}
+      {cbx1 - - - - {pack} {-tvar ::cb1 -inpval EVENT -values {MENU EVENT COMMAND}}}
+      {v_2 - - - - {pack} {-h 3}}
+      {cbx4 - - - - {pack} {-tvar ::cb2 -inpval MENU-readonly -values {MENU-readonly EVENT-readonly COMMAND-readonly} -state readonly}}
+      {seh5 - - - - {pack -pady 9 -fill x}}
+      {lab2 - - - - {pack} {-t "File content combobox (fco) contains text file(s) content. Its 'values' attribute is set like this:
+  -values {TEXT1 @@-div1 \" <\" -div2 > -ret yes test1.txt@@ TEXT2 @@-pos 0 -len 7 -list {a b c} test2.txt@@ ...}
+where:
+  TEXT1, TEXT2, ... TEXTN - optional text snippets outside of @@ ... @@ data sets
+  @@ ... @@ - data set for a file, containing the file name and (optionally) its preceding options:
+      -div1, -div2 - dividers to filter file lines and to cut substrings from them:
+          if -div1 omitted, from the beginning; if -div2 omitted, to the end of line
+      -pos, -len - position and length of substring to cut:
+          if -pos omitted, -len characters from the beginning; if -len omitted, to the end of line
+      -list - a list of items to put directly into the combobox
+      -ret - if set to yes, means that the field is returned instead of full string
+  If there is only a single data set and no TEXT, the @@ marks may be omitted. The @@ marks are configured."}}
+      {v_3 - - - - {pack} {-h 3}}
+      {fco - - - - {pack} {-tvar t::cb3 -w 88 -tooltip "This 'fco' combobox contains: \
+      \n  1) four literal lines\n  2) data from 'test2_fco.dat' file" -values {COMMIT: @@-div1 " \[" -div2 "\] " -ret yes test2_fco.dat@@   INFO: @@-pos 22 -list {{Content of test2_fco.dat} {another item} trunk DOC} test2_fco.dat@@}}}
+      {siz - - - - {pack -side bottom -anchor se}}
+    } .win.fra.fra.nbk.f5 {
+
+      ####################################################################
+      # {#                TAB-5: COLOR SCHEMES                           }
+      ####################################################################
+      {BuTClrB  - - 1 4 {-st nsew -rw 1 -cw 1} {-com {::t::toolBut 4 -1} -text "Color scheme -1\nBasic"}}
+      {tcl {
+        set prt BuTClrB
+        for {set i 0} {$i<48} {incr i} {
+          set cur "BuTClr$i"
+          if {$i%4} {set n $pr; set p L} {set n $prt; set p T; set prt $cur}
+          set pr $cur
+          set lwid "$cur $n $p 1 1 {-st nsew -rw 1 -cw 1} {-com \
+           {::t::toolBut 4 $i} -t \"Color scheme $i\n[t::pave csGetName $i]\"}"
+          %C $lwid
+        }
+      }}
+    } .win.fra.fra.nbk2.f1 {
+
+      ####################################################################
+      # {#               TABS OF VIEW (JUST TO BE PRESENT)               }
+      ####################################################################
+      {labB  -   - 1 1 {-st w} {-t "Defaults"}}
+      {chb1 labB T 1 2 {-st w} {-t "Match whole word only" -var t::c1}}
+      {chb2 chb1 T 1 2 {-st w} {-t "Match case"  -var t::c2}}
+      {chb3 chb2 T 1 2 {-st w} {-t "Wrap around" -var t::c3}}
+      {sev1 chb1 L 3 1 }
+      {labB3 sev1 L 1 1 {-st w} {-t "Direction:"}}
+      {rad1 labB3 T 1 1 {-st w} {-t "Down" -var t::v -value 1}}
+      {rad2 rad1 L 1 1 {-st w} {-t "Up"   -var t::v -value 2}}
+      {v_ chb3 T 1 5}
+      {fraflb v_ T 1 5 {-st ew -pady 10} {}}
+      {fraflb.butView - - - - {pack -side right -anchor nw -padx 9} {-t "Edit the file" -com t::viewfile -tooltip "Opens a stand-alone editor of the file\nthe listbox' data are taken from."}}
+      {fraflb.lab - - - - {pack -side left -anchor nw} {-t "Listbox of file content:\n\nSee also:\nGeneral/Misc. tab" -link "
+      ::t::chanTab nbk .win.fra.fra.nbk.f4; focus [::t::pave SpxMisc]@@Click to select 'Misc.'\n... and paint the link.@@"}}
+      {fraflb.flb - - - - {pack -side left -fill x -expand 1} {-lvar ::t::lv1 -lbxsel Cont -ALL 1 -w 50 -h 5 -tooltip "The 'flb' listbox contains:\n 1)  four literal lines\n  2) data from 'test2_fco.dat' file" -values {@@-div1 " \[" -div2 "\] " test2_fco.dat@@   INFO: @@-pos 22 -ret 1 -list {{Content of test2_fco.dat} {another item} trunk DOC} test2_fco.dat@@ Code of test2_pave.tcl: @@-RE {^(\s*)([^#]+)$} ./test2_pave.tcl@@}}}
+      {fraflb.sbv fraflb.flb L - - {pack -side left}}
+      {fraflb.sbh fraflb.flb T - - {pack -side left}}
+      {LabImg fraflb T 1 1 {} {-link "::t::goWiki@@Click to go wiki@@"}}
+      {LabImgInfo LabImg T 1 1 {} {-link "
+      ::t::chanTab nbk .win.fra.fra.nbk.f4; focus [::t::pave SpxMisc]@@Click to select 'Misc.'\n... and paint the link\n(to test the multiple visited links).@@" -afteridle ::t::labelImaged}}
+    } .win.fra.fra.nbk2.f2 {
+      {lab - - - - {pack -expand 1 -fill both} {-t "Some text of 2nd View" \
+      -font "-weight bold -size 11"}}
+    }
+
+    # text widget's name is uppercased, so we can use the Text method
+    set wtex [pave Text]
+    # bindings and contents for text widget
+    bind $wtex <ButtonRelease> [list t::textPos $wtex]
+    bind $wtex <KeyRelease> [list t::textPos $wtex]
+    bind $wtex <<Modified>> ::t::tabModified
+    bind $wtex <Control-f> ::t::findInText
+    pave displayText $wtex $::t::filetxt
+    # at first, Ftx1 widget is editable
+    pave makePopup [pave Ftx1] no yes
+    # we can use the Lframe method to get its name, similar to Text
+    fillclock [pave Lframe]
+
+    # 3d frame - "Options" (not too much efforts applied ;^)
+    set lst3 {
+      {but1 -    - 1 1 {-st we} {-t "Options1" -com "t::pdlg ok info O1 Opts1..."}}
+      {but2 but1 T 1 1 {-st we} {-t "Options2" -com "t::pdlg ok ques O2 Opts2..."}}
+      {but3 but2 T 1 1 {-st we} {-t "Options3" -com "t::pdlg ok warn O3 Opts3..."}}
+      {but4 but3 T 1 1 {-st we} {-t "Options4" -com "t::pdlg ok err  O4 Opts4..."}}
+      {but5 but1 L 1 1 {-st we} {-t "more..."  -com "t::pdlg ok info M  More..."}}
+    }
+    foreach b {6 7 8 9 a b c d e f g h i} p {5 6 7 8 9 a b c d e f g h} {
+      lappend lst3 [list but$b but$p T 1 1 {-st we} \
+        {-t "more..." -com "t::pdlg ok warn M More...[incr ::iMORE] -text 1 -w 10"}]
+    }
+    ttk::notebook .win.fra.fra.nb3
+    .win.fra.fra.nb3 add [ttk::frame .win.fra.fra.nb3.f1] -text "Editor options"
+
+    pave paveWindow .win.fra.fra.nb3.f1 $lst3
+
+    # 4th and other frames mean even less efforts applied
+    foreach {nn inf} {4 Files 5 Tools 6 "Key mappings" 7 Misc} {
+      ttk::notebook .win.fra.fra.nb$nn
+      pack [ttk::label .win.fra.fra.nb$nn.labB -text "$inf here..." \
+        -foreground blue -font "-weight bold -size 12"] -expand 1
+    }
+
+    # colors for Colors tab
+    for {set i 0} {$i<48} {incr i} {
+      lassign [pave csGet $i] - fg - bg
+      [pave BuTClr$i] configure -foreground $fg -background $bg
+    }
+
+    # icons of top toolbar
+    for {set i 0} {$i<[llength $imgl]} {incr i} {
+      [pave BuT_Img[expr {$i+$imgused}]] configure -command \
+        [list ::t::msg info "This is just a demo.\nIcon $i: [lindex $imgl $i]"]
+    }
+
+    # filling the menu
+    after idle [list ::t::fillMenu]
+
+    # filling the bar of tabs (another way, instead of btsBar widget)
+    # after idle [list ::t::fillBarTabs [pave BtsBar]]
+
+    if {$firstin} {
+      set ::t::nextcs [apave::cs_Min]
+      set ::t::prevcs [apave::cs_Max]
+    } else {
+      set ::t::nextcs [expr {$::t::newCS==[apave::cs_Max] ? \
+        [apave::cs_Min] : $::t::newCS+1}]
+      set ::t::prevcs [expr {$::t::newCS==[apave::cs_Min] ? \
+        [apave::cs_Max] : $::t::newCS-1}]
+      toolBut 4 $::t::newCS yes
+      if {$t::ans4==11} {[pave ChbRestart] configure -state disabled}
+    }
+    set ::t::newCS [apave::cs_Non]
+    toolBut 0
+    after 1000 ::t::highlighting_others  ;# it's unseen at changing the theme
+    catch {::transpops::run [file join $::testdirname ../.bak transpops.txt] <Control-q> .win}
+
+    # Open the window at last
+    set ::t::curTab ""
+    chanTab nbk
+    set res [pave showModal .win -geometry +350+50 -decor 1 -onclose t::exitProc]
+    if {$::t::newCS==[apave::cs_Non]} { ;# at restart, newCS is set
+      # getting result and clearance
+      set res [pave res .win]
+      puts "
+    text file name = \"$::t::ftx1\"
+    text file contents =
+-------------------------------
+[pave getTextContent ::t::ftx1]
+-------------------------------
+    v   = $t::v
+    v2  = $t::v2
+    c1  = $t::c1
+    c2  = $t::c2
+    c3  = $t::c3
+    cb3 = \"$t::cb3\"
+    en1 = \"$t::en1\"
+    en2 = \"$t::en2\"
+    fil1= \"$t::fil1\"
+    fis1= \"$t::fis1\"
+    dir1= \"$t::dir1\"
+    fon1= \"$t::fon1\"
+    clr1= $t::clr1
+    dat1= $t::dat1
+
+    lvar ALL: $t::lvar
+
+    lv1 ALL: $t::lv1
+
+    tblWid1 curselection: [lindex $::t::tbllist 0]
+    tblWid1 curitem     : [lindex $::t::tbllist 1]
+    tblWid1 items       : [lindex $::t::tbllist 2]
+    "
+    }
+    destroy .win
+    pave destroy
+    pdlg destroy
+    return $res
   }
 
 } ;# end of ::t namespace

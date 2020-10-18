@@ -22,14 +22,14 @@ namespace eval t {
 
   proc test1 {args} {
     return [dlg ok info "Dialog OK" \
-      "Hey that Pushkin!\nHey that son of bitch!" -g +200+200 {*}$args]
+      "Hey that Pushkin!\nHey that son of bitch!" -g +200+200 -scroll 0 {*}$args]
   }
 
   proc test2 {args} {
     return [dlg yesno ques "Dialog YESNO" \
       "Hey that Pushkin!\nHey that son of bitch!
 ---
-Do you agree?" YES -g +225+225 {*}$args]
+Do you agree?" YES -g +225+225 -scroll 0 {*}$args]
   }
 
   proc test3 {args} {
@@ -52,7 +52,7 @@ Do you agree?" YES -g +225+225 {*}$args]
 ---
 Do you agree?
 Or hate the question?
-(Choose Cancel in such case)" YES -g +275+275 {*}$args]
+(Choose Cancel in such case)" YES -g +275+275 -scroll 0 {*}$args]
   }
 
   proc ::t::browser {url} {
@@ -77,9 +77,8 @@ Or hate the question?
   }
 
   proc test5 {args} {
-    set ::test5Visited [expr {[info exists ::test5Visited] && $::test5Visited}] 
     return [dlg retrycancel err "Dialog RETRYCANCEL" \
-      "<link>set ::test5Visited 1 ; ::t::browser https://en.wikipedia.org/w/index.php?cirrusUserTesting=classic-explorer-i&search=Pushkin%|%wikipedia about Pushkin%|%$::test5Visited</link>Hey that Pushkin!\nHey that son of bitch!
+      "<link>::t::browser https://en.wikipedia.org/w/index.php?cirrusUserTesting=classic-explorer-i&search=Pushkin@@wikipedia about Pushkin@@</link>Hey that Pushkin!\nHey that son of bitch!
 ---
 Retry the reading of Pushkin? Cancel if not." RETRY -g +300+300 {*}$args]
   }
@@ -133,8 +132,8 @@ multiline entry field aka
         {{color red green blue -- {{other colors} yellow magenta cyan \
         | #52CB2F #FFA500 #CB2F6A | #FFC0CB #90EE90 #8B6914}} \
         {hue dark medium light} -- {{multi word example}} ok} ] \
-      fco1 [list {Combobox of file content..} {} [list -h 7 -cbxsel $::t8fco1]] {/@-div1 " \[" -div2 "\] " -ret 1 test2_fco.dat/@ \
-        INFO: /@-pos 22 -list {{test2_fco.dat} {other item} trunk DOC} test2_fco.dat/@} \
+      fco1 [list {Combobox of file content..} {} [list -h 7 -cbxsel $::t8fco1]] {@@-div1 " \[" -div2 "\] " -ret 1 test2_fco.dat@@ \
+        INFO: @@-pos 22 -list {{test2_fco.dat} {other item} trunk DOC} test2_fco.dat@@} \
       seh4 {{} {-pady 9}} {} \
       tex1 {{Text field................} {} {-h 4 -w 55 -tabnext butOK}} $::t8tex1 \
     ] -size 14 -weight bold -head "Entries, choosers, switchers, boxes..." {*}$args]

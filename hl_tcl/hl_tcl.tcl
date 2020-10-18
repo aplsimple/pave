@@ -6,7 +6,7 @@
 # License: MIT.
 # _______________________________________________________________________ #
 
-package provide hl_tcl 0.6.1
+package provide hl_tcl 0.7
 
 # _______________ Common data of ::hl_tcl:: namespace ______________ #
 
@@ -18,8 +18,8 @@ namespace eval ::hl_tcl {
 
   # Tcl commands
   set data(PROC_TCL) [lsort [list \
-    proc return method self my oo::define oo::class oo::objdefine oo::object \
-    coroutine yield yieldto constructor destructor
+    proc return method self my coroutine yield yieldto constructor destructor \
+    oo::define oo::class oo::objdefine oo::object
   ]]
   set data(CMD_TCL) [lsort [list \
     set incr if string expr list lindex lrange llength lappend lreplace lsearch \
@@ -27,13 +27,16 @@ namespace eval ::hl_tcl {
     switch default linsert lsort lset lmap lrepeat catch variable concat \
     format scan regexp regsub upvar uplevel namespace try throw read eval \
     after update error global puts file chan open close eof seek flush mixin \
-    msgcat gets rename glob fconfigure filename fblocked fcopy cd pwd mathfunc \
+    msgcat gets rename glob fconfigure fblocked fcopy cd pwd mathfunc \
     mathop apply fileevent unset join next exec refchan package source \
-    exit vwait binary lreverse registry auto_execok subst encoding http load \
-    auto_load platform tell auto_mkindex memory trace time clock auto_qualify \
-    auto_reset socket bgerror oo::copy unload history re_syntax tailcall \
-    tcl::prefix interp parray pid transchan nextto unknown dde pkg::create \
-    pkg_mkIndex zlib platform::shell Tcl auto_import \
+    exit vwait binary lreverse registry auto_execok subst encoding load \
+    auto_load tell auto_mkindex memory trace time clock auto_qualify \
+    auto_reset socket bgerror oo::copy unload history tailcall \
+    interp parray pid transchan nextto unknown dde pkg_mkIndex zlib auto_import \
+    pkg::create tcl::prefix \
+    http::config http::geturl http::formatQuery http::reset http::wait \
+    http::status http::size http::code http::ncode http::meta http::data \
+    http::error http::cleanup http::register http::unregister \
   ]]
 
   # Ttk commands

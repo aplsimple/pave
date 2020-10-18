@@ -260,13 +260,16 @@ oo::class create ::apave::APaveDialog {
 
     set res [set vars [list]]
     foreach wl $lwidgets {
-      set vv [my VarName [my ownWName [lindex $wl 0]]]
+      set ownname [my ownWName [lindex $wl 0]]
+      set vv [my VarName $ownname]
       set attrs [lindex $wl 6]
-      foreach t {-var -tvar} {
-        # for widgets with a common variable (e.g. radiobuttons):
-        if {[set p [string first "$t " $attrs]]>-1} {
-          array set a $attrs
-          set vv $a($t)
+      if {[string match "ra*" $ownname]} {
+        # only for widgets with a common variable (e.g. radiobuttons):
+        foreach t {-var -tvar} {
+          if {[set v [::apave::getOption $t {*}$attrs]] ne ""} {
+            array set a $attrs
+            set vv $v
+          }
         }
       }
       if {[info exist $vv] && [lsearch $vars $vv]==-1} {
@@ -507,13 +510,17 @@ oo::class create ::apave::APaveDialog {
 
   #########################################################################
 
-  method FindInText {{donext 0}} {
+  method findInText {{donext 0} {txt ""} {varFind ""}} {
 
     # Finds a string in text widget.
     #   donext - "1" means 'from a current position'
 
-    set txt [my TexM]
-    set sel [set ${_pdg(ns)}PD::fnd]
+    if {$txt eq ""} {
+      set txt [my TexM]
+      set sel [set ${_pdg(ns)}PD::fnd]
+    } else {
+      set sel [set $varFind]
+    }
     if {$donext} {
       set pos [$txt index "[$txt index insert] + 1 chars"]
       set pos [$txt search -- $sel $pos end]
@@ -592,7 +599,7 @@ oo::class create ::apave::APaveDialog {
     set tags ""
     set wasgeo [set textmode 0]
     set cc [set themecolors [set optsGrid [set addpopup ""]]]
-    set readonly [set hidefind 1]
+    set readonly [set hidefind [set scroll 1]]
     set curpos "1.0"
     set ${_pdg(ns)}PD::ch 0
     foreach {opt val} {*}$argdia {
@@ -628,7 +635,7 @@ oo::class create ::apave::APaveDialog {
         -fgS {append optsMisc " -selectforeground {$val}"}
         -bgS {append optsMisc " -selectbackground {$val}"}
         -cc {append optsMisc " -insertbackground {$val}"}
-        -myown {append optsMisc " -myown {$val}"}
+        -my - -myown {append optsMisc " -myown {$val}"}
         -root {set root " -root $val"}
         -pos {set curpos "$val"}
         -hfg {append optsHead " -foreground {$val}"}
@@ -642,6 +649,7 @@ oo::class create ::apave::APaveDialog {
         -timeout {set timeout $val}
         -modal {set modal "-modal $val"}
         -popup {set addpopup [string map [list %w $qdlg.fra.texM] "$val"]}
+        -scroll {set scroll "$val"}
         default {
           append optsFont " $opt $val"
           if {$opt ne "-family"} {
@@ -753,7 +761,9 @@ oo::class create ::apave::APaveDialog {
       lappend widlist [list TexM - - 1 7 {pack -side left -expand 1 -fill both -in \
         $qdlg.fra.fraM} [list -h $il -w $maxw {*}$optsFontM {*}$optsMisc \
         -wrap word -textpop 0 -tabnext $qdlg.fra.[lindex $buttons 0]]]
-      lappend widlist {sbv texM L 1 1 {pack -in $qdlg.fra.fraM}}
+      if {$scroll} {
+        lappend widlist {sbv texM L 1 1 {pack -in $qdlg.fra.fraM}}
+      }
       set prevw fraM
     }
     # add the lower (after the message) blank frame
@@ -797,10 +807,10 @@ oo::class create ::apave::APaveDialog {
           lappend widlist [list labfnd2 Entfind L 1 1 "-cw 2" "-t {}"]
           lappend widlist [list h__ labfnd2 L 1 1]
           append binds "
-            bind \[[self] Entfind\] <Return> {[self] FindInText}
-            bind \[[self] Entfind\] <KP_Enter> {[self] FindInText}
+            bind \[[self] Entfind\] <Return> {[self] findInText}
+            bind \[[self] Entfind\] <KP_Enter> {[self] findInText}
             bind \[[self] Entfind\] <FocusIn> {\[[self] Entfind\] selection range 0 end}
-            bind $qdlg <F3> {[self] FindInText 1}
+            bind $qdlg <F3> {[self] findInText 1}
             bind $qdlg <Control-f> \"[self] InitFindInText 1; focus \[[self] Entfind\]; break\"
             bind $qdlg <Control-F> \"[self] InitFindInText 1; focus \[[self] Entfind\]; break\""
         }
@@ -811,7 +821,7 @@ oo::class create ::apave::APaveDialog {
              \$pop add command [my iconA find] -accelerator Ctrl+F -label \\
              \"Find First\" -command \"[self] InitFindInText; focus \[[self] Entfind\]\"
              \$pop add command $noIMG -accelerator F3 -label \"Find Next\" \\
-              -command \"[self] FindInText 1\"
+              -command \"[self] findInText 1\"
              $addpopup
              \$pop add separator
              \$pop add command [my iconA exit] -accelerator Esc -label \"Exit\" \\
@@ -848,7 +858,7 @@ oo::class create ::apave::APaveDialog {
              \$pop add command [my iconA find] -accelerator Ctrl+F -label \"Find First\" \\
               -command \"[self] InitFindInText; focus \[[self] Entfind\]\"
              \$pop add command $noIMG -accelerator F3 -label \"Find Next\" \\
-              -command \"[self] FindInText 1\"
+              -command \"[self] findInText 1\"
              $addpopup
              \$pop add separator
              \$pop add command [my iconA SaveFile] -accelerator Ctrl+W \\
@@ -856,7 +866,7 @@ oo::class create ::apave::APaveDialog {
             "
         }
         lappend args -onclose [namespace current]::exitEditor
-        oo::objdefine [self] export FindInText InitFindInText Pdg
+        oo::objdefine [self] export InitFindInText Pdg
       } else {
         lappend widlist [list h__ h_3 L 1 4 "-cw 1"]
       }
@@ -923,7 +933,7 @@ oo::class create ::apave::APaveDialog {
     set args [::apave::removeOptions $args -focus]
     my showModal $qdlg -themed [string length $themecolors]\
       -focus $focusnow -geometry $geometry {*}$root {*}$modal {*}$ontop {*}$args
-    oo::objdefine [self] unexport FindInText InitFindInText Pdg
+    oo::objdefine [self] unexport InitFindInText Pdg
     set pdgeometry [winfo geometry $qdlg]
     # the dialog's result is defined by "pave res" + checkbox's value
     set res [set result [my res $qdlg]]
