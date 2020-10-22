@@ -119,10 +119,13 @@ namespace eval ::apave {
   variable _AP_VARS; array set _AP_VARS [list]
   set _AP_VARS(.,SHADOW) 0
   set _AP_VARS(.,MODALS) 0
+  set _AP_VARS(TIMW) [list]
   variable _AP_VISITED;  array set _AP_VISITED [list]
   set _AP_VISITED(ALL) [list]
+  variable UFF "\uFFFF"
 
-  ##########################################################################
+
+# _______________________ A bit of apave procedures _____________________ #
 
   proc WindowStatus {w name {val ""} {defval ""}} {
 
@@ -251,7 +254,29 @@ namespace eval ::apave {
     return
   }
 
+  proc paveObj {com args} {
+  
+    # Calls a command of APaveInput class.
+    #   com - a command
+    #   args - arguments of the command
+    #
+    # Returns the command's result.
+  
+    set pobj [::apave::APaveInput new]
+    if {[set exported [expr {$com eq "EXPORT"}]]} {
+      set com [lindex $args 0]
+      set args [lrange $args 1 end]
+      oo::objdefine $pobj "export $com"
+    }
+    set res [$pobj $com {*}$args]
+    if {$exported} {
+      oo::objdefine $pobj "unexport $com"
+    }
+    $pobj destroy
+    return $res
 }
+
+}  ;# ::apave
 
 ############################################################################
 
@@ -716,7 +741,10 @@ oo::class create ::apave::APave {
     if {$tmo>0} {
       catch {set lbl [my $lbl]}
       if {[winfo exist $lbl]} {
-        if {$lbltext eq ""} {set lbltext [$lbl cget -text]}
+        if {$lbltext eq ""} {
+          set lbltext [$lbl cget -text]
+          lappend ::apave::_AP_VARS(TIMW) $w
+        }
         $lbl configure -text "$lbltext $tmo sec. "
       }
       incr tmo -1
@@ -740,7 +768,9 @@ oo::class create ::apave::APave {
 
     if {[winfo exists $lbl]} {
       if {[focus] in [list $w ""]} {
-        my timeoutButton $w $tmo $lbl $lbltext
+        if {$w in $::apave::_AP_VARS(TIMW)} {
+          my timeoutButton $w $tmo $lbl $lbltext
+        }
       } else {
         $lbl configure -text $lbltext
       }
@@ -911,7 +941,7 @@ oo::class create ::apave::APave {
       "spx" - "spX" {
          if {$nam3 eq "spx"} {set widget "ttk::spinbox"} {set widget "spinbox"}
          lassign [::apave::parseOptions $attrs -command "" -from "" -to "" ] cmd from to
-         if {$cmd ne ""} {set attrs "-onReturn {|{$cmd} {$from} {$to}|} $attrs"}
+         set attrs "-onReturn {$::apave::UFF{$cmd} {$from} {$to}$::apave::UFF} $attrs"
       }
       "tbl" { ;# tablelist
         set widget "tablelist::tablelist"
@@ -1812,6 +1842,7 @@ oo::class create ::apave::APave {
 
     foreach pp $_pav(prepost) {
       lassign $pp a v
+      set v [string trim $v $::apave::UFF]
       switch -- $a {
         -disabledtext {
           $w configure -state normal
@@ -1870,7 +1901,6 @@ oo::class create ::apave::APave {
           }
         }
         -onReturn {   ;# makes a command run at Enter key pressing
-          set v [string trim $v |]
           lassign $v cmd from to
           if {[set tvar [$w cget -textvariable]] ne ""} {
             if {$from ne ""} {
@@ -1914,12 +1944,23 @@ oo::class create ::apave::APave {
 
   #########################################################################
 
-  method CleanupUpdateColors {} {
-    # Cleans the unused widgets from _AP_VISITED list
+  method CleanUps {{wr ""}} {
+    # Performs various clean-ups before and after showing a window.
+    #   wr - window's path (to clean up at closing)
 
+    # Cleans the unused widgets from _AP_VISITED list
     for {set i [llength $::apave::_AP_VISITED(ALL)]} {[incr i -1]>=0} {} {
       if {![winfo exists [lindex $::apave::_AP_VISITED(ALL) $i 0]]} {
         set ::apave::_AP_VISITED(ALL) [lreplace $::apave::_AP_VISITED(ALL) $i $i]
+      }
+    }
+    if {$wr ne ""} {
+      for {set i [llength $::apave::_AP_VARS(TIMW)]} {[incr i -1]>=0} {} {
+        set w [lindex $::apave::_AP_VARS(TIMW) $i]
+        if {[string first $wr $w]==0} {
+          catch {tooltip::tooltip $w ""}
+          set ::apave::_AP_VARS(TIMW) [lreplace $::apave::_AP_VARS(TIMW) $i $i]
+        }
       }
     }
   }
@@ -1931,7 +1972,7 @@ oo::class create ::apave::APave {
 
     lassign [my csGet] fg fg2 bg bg2 - - - - - fg3
     # Visited labels:
-    my CleanupUpdateColors
+    my CleanUps
     foreach lw $::apave::_AP_VISITED(ALL) {  ;# mark the same links
       lassign $lw w v inv
       lassign [my makeLabelLinked $w $v $fg $bg $fg2 $bg2 no $inv] fg0 bg0
@@ -2054,6 +2095,7 @@ oo::class create ::apave::APave {
       catch {set font [font configure $font]}
     }
     set font [dict set font -underline 1]
+    set font [dict set font -size [my basicFontSize]]
     $w configure -font $font
   }
 
@@ -2092,10 +2134,15 @@ oo::class create ::apave::APave {
     #   inv - flag "invert the meaning of colors"
 
     set txt [$lab cget -text]
-    lassign [split [string map [list $_pav(edge) "\uFFFF"] $v] "\uFFFF"] v tt vz
+    lassign [split [string map [list $_pav(edge) $::apave::UFF] $v] $::apave::UFF] v tt vz
     set tt [string map [list %l $txt] $tt]
     set v [string map [list %l $txt %t $tt] $v]
-    if {$tt ne ""} {catch {tooltip::tooltip $lab $tt}}
+    if {$tt ne ""} {
+      catch {
+        tooltip::tooltip $lab $tt
+        lappend ::apave::_AP_VARS(TIMW) $lab
+      }
+    }
     if {$inv} {
       set ft $fg
       set bt $bg
@@ -2105,9 +2152,9 @@ oo::class create ::apave::APave {
       set bg2 $bt
     }
     my VisitedLab $lab $v $vz $fg $bg
-    bind $lab <Enter> "[namespace code [list my HoverLab $lab $v yes $fg2 $bg2]]"
-    bind $lab <Leave> "[namespace code [list my HoverLab $lab $v no $fg $bg]]"
-    bind $lab <Button-1> "[namespace code [list my VisitedLab $lab $v yes $fg2 $bg2]];$v"
+    bind $lab <Enter> "::apave::paveObj EXPORT HoverLab $lab {$v} yes $fg2 $bg2"
+    bind $lab <Leave> "::apave::paveObj EXPORT HoverLab $lab {$v} no $fg $bg"
+    bind $lab <Button-1> "::apave::paveObj EXPORT VisitedLab $lab {$v} yes $fg2 $bg2;$v"
     if {$doadd} {lappend ::apave::_AP_VISITED(ALL) [list $lab $v $inv]}
     return [list $fg $bg $fg2 $bg2]
   }
@@ -2270,6 +2317,7 @@ oo::class create ::apave::APave {
     set addcomms {}
     if {[set tooltip [::apave::getOption -tooltip {*}$attrs]] ne ""} {
       lappend addcomms [list tooltip::tooltip $wdg $tooltip]
+      lappend ::apave::_AP_VARS(TIMW) $wdg
       set attrs [::apave::removeOptions $attrs -tooltip]
     }
     if {[::apave::getOption -ro {*}$attrs] ne "" || \
@@ -2388,8 +2436,7 @@ oo::class create ::apave::APave {
         incr i
         continue
       }
-      lassign $lst1 name neighbor posofnei rowspan colspan \
-        options1 attrs1 comm1
+      lassign $lst1 name neighbor posofnei rowspan colspan options1 attrs1
       set prevw $name
       lassign [my NormalizeName name i lwidgets] name wname
       lassign [my NormalizeName neighbor i lwidgets] neighbor
@@ -2409,10 +2456,10 @@ oo::class create ::apave::APave {
       # and before "window" call)
       if { !($widget == "" || [winfo exists $widget])} {
         set attrs [my GetAttrs $attrs $nam3 $dsbl]
-        set attrs [string map {\" \\\"} [my ExpandOptions $attrs]]
+        set attrs [my ExpandOptions $attrs]
         # for scrollbars - set up the scrolling commands
         if {$widget in {"ttk::scrollbar" "scrollbar"}} {
-          lassign [my LowercaseWidgetName $neighbor] neighbor
+          set neighbor [lindex [my LowercaseWidgetName $neighbor] 0]
           if {$posofnei=="L"} {
             $w.$neighbor config -yscrollcommand "$wname set"
             set attrs "$attrs -com \\\{$w.$neighbor yview\\\}"
@@ -2462,20 +2509,17 @@ oo::class create ::apave::APave {
              -columnspan $colspan -padx 1 -pady 1 {*}$options
         }
       }
-      if {$comm1 ne ""} {
-        set comm1 [string map [list %w. $wname. "%w " "$wname "] $comm1]
-        {*}$comm1
-      }
       lappend lused [list $name $row $col $rowspan $colspan]
       if {[incr i] < $lwlen} {
         lassign [lindex $lwidgets $i] name neighbor posofnei
         if {$neighbor=="+"} {
           set neighbor $prevw
         }
+        set neighbor [lindex [my LowercaseWidgetName $neighbor] 0]
         set row -1
         foreach cell $lused {
           lassign $cell uname urow ucol urowspan ucolspan
-          if {$uname eq $neighbor} {
+          if {[lindex [my LowercaseWidgetName $uname] 0] eq $neighbor} {
             set col $ucol
             set row $urow
             if {$posofnei == "T" || $posofnei == ""} {
@@ -2513,7 +2557,6 @@ oo::class create ::apave::APave {
   # This method calls *paveWindow* in a cycle, to process a current
   # "win / lwidgets" pair.
 
-    my CleanupUpdateColors
     set res [list]
     set wmain [set wdia ""]
     foreach {w lwidgets} $args {
@@ -2592,6 +2635,7 @@ oo::class create ::apave::APave {
     } else {
       set opt(-onclose) [list $opt(-onclose) ${_pav(ns)}PN::AR($win)]
     }
+    set opt(-onclose) "::apave::paveObj EXPORT CleanUps $win; $opt(-onclose)"
     wm protocol $win WM_DELETE_WINDOW $opt(-onclose)
     # get the window's geometry from its requested sizes
     set inpgeom $opt(-geometry)
@@ -2670,6 +2714,7 @@ oo::class create ::apave::APave {
     if {$result == "get"} {
       return [set ${_pav(ns)}PN::AR($win)]
     }
+    my CleanUps $win
     return [set ${_pav(ns)}PN::AR($win) $result]
   }
 
@@ -2682,6 +2727,7 @@ oo::class create ::apave::APave {
     #   ttl - window's title
     # If $w matches "*.fra" then ttk::frame is created with name $w.
 
+    my CleanUps
     set w [set wtop [string trimright $w .]]
     set withfr [expr {[set pp [string last . $w]]>0 && \
       [string match "*.fra" $w]}]

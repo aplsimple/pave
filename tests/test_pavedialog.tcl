@@ -21,12 +21,12 @@ namespace eval t {
                           [list "red" "-foreground red"]]
 
   proc test1 {args} {
-    return [dlg ok info "Dialog OK" \
+    return [dlg ok info "Dialog OK$::csN" \
       "Hey that Pushkin!\nHey that son of bitch!" -g +200+200 -scroll 0 {*}$args]
   }
 
   proc test2 {args} {
-    return [dlg yesno ques "Dialog YESNO" \
+    return [dlg yesno ques "Dialog YESNO$::csN" \
       "Hey that Pushkin!\nHey that son of bitch!
 ---
 Do you agree?" YES -g +225+225 -scroll 0 {*}$args]
@@ -34,7 +34,7 @@ Do you agree?" YES -g +225+225 -scroll 0 {*}$args]
 
   proc test3 {args} {
     variable textTags
-    set res [dlg okcancel "" "Dialog OKCANCEL" \
+    set res [dlg okcancel "" "Dialog OKCANCEL$::csN" \
       " <dark>Hey that <red><b> Pushkin </b></red>!
  Hey that son of bitch!
  ---
@@ -47,12 +47,12 @@ Do you agree?" YES -g +225+225 -scroll 0 {*}$args]
   }
 
   proc test4 {args} {
-    return [dlg yesnocancel ques "Dialog YESNOCANCEL" \
+    return [dlg yesnocancel ques "Dialog YESNOCANCEL$::csN" \
       "Hey that Pushkin!\nHey that son of bitch!
 ---
 Do you agree?
 Or hate the question?
-(Choose Cancel in such case)" YES -g +275+275 -scroll 0 {*}$args]
+(Choose Cancel in such case)" YES -g +275+275 -scroll 0 {*}$args -timeout {5 ButNO}]
   }
 
   proc ::t::browser {url} {
@@ -77,21 +77,21 @@ Or hate the question?
   }
 
   proc test5 {args} {
-    return [dlg retrycancel err "Dialog RETRYCANCEL" \
+    return [dlg retrycancel err "Dialog RETRYCANCEL$::csN" \
       "<link>::t::browser https://en.wikipedia.org/w/index.php?cirrusUserTesting=classic-explorer-i&search=Pushkin@@wikipedia about Pushkin@@</link>Hey that Pushkin!\nHey that son of bitch!
 ---
-Retry the reading of Pushkin? Cancel if not." RETRY -g +300+300 {*}$args]
+Retry the reading of Pushkin? Cancel if not." RETRY -g +300+300 {*}$args -timeout {37 Lab1}]
   }
 
   proc test6 {args} {
-    return [dlg abortretrycancel err "Dialog ABORTRETRYCANCEL" \
+    return [dlg abortretrycancel err "Dialog ABORTRETRYCANCEL$::csN" \
       "Hey that Pushkin!\nHey that son of bitch!
 ---
 Abort or retry the reading of Pushkin? Cancel if not sure." RETRY -g +325+325 {*}$args]
   }
 
   proc test7 {args} {
-    return [dlg misc info "Dialog MSC" "\nAsk for HELLO\n" \
+    return [dlg misc info "Dialog MSC$::csN" "\nAsk for HELLO\n" \
       {Home 1 {Run me, drink not} run Undo 3 Redo 4 Help 5 Cancel 0 } \
       run -g +350+350 {*}$args]
   }
@@ -112,7 +112,7 @@ multiline entry field aka
     #   $varname for integers and booleans
     #   $::t8tex1 for text
     set rellist {- Father Mother Son Daughter Brother Sister Uncle Aunt Cousin {Big Brother} "Second cousin" "1000th cousin"}
-    set res [dlg input - "Dialog INPUT" [list \
+    set res [dlg input - "Dialog INPUT$::csN" [list \
       seh1 {{} {-pady 9}} {} \
       ent1 {{Enter general info........}} [list $::t8ent1] \
       fil1 {{Choose a file to read.....}} [list $::t8fil1] \
@@ -147,7 +147,7 @@ multiline entry field aka
       set ::login "aplsimple"
       set ::password "12q`\"\{7qweeklmd"
     }
-    set res [dlg input ques "My site" [list \
+    set res [dlg input ques "My site$::csN" [list \
       entLogin {{Login......}} [list $::login] \
       entPassw {{Password...} {} {-show *}} [list $::password] \
     ] -weight bold -head "\n Enter to register here:" {*}$args]
@@ -167,6 +167,7 @@ apave::initWM
 
 # firstly show dialogs without checkboxes
 apave::APaveInput create dlg
+set ::csN ""
 set dn "Don't show this again"
 puts "ok  = [t::test1 -weight bold -size 8 -text 1]"
 puts "yn  = [t::test2 -weight bold -size 10 -text 1 -ch $dn]"
@@ -181,9 +182,11 @@ puts "pavedoc = [t::test9 -g +375+375]"
 # show dialogs with checkboxes, in cycle
 lassign {0 0 0 0 0 0 0 0} r1 r2 r3 r4 r5 r6 r7 r8 r9
 set clrsc 0
-set clrscdark [list 0 1 4 5 8 9 12 13 16 17 20 21 29 30 31 32 35 39 40 41 42]
+set clrscdark [list 0 1 3 6 7 43 45 46 47 31 32 33 34 35 37 38 39]
 while 1 {
-  dlg csSet [lindex $clrscdark $clrsc]
+  set cs [lindex $clrscdark $clrsc]
+  set ::csN " / CS:$cs"
+  dlg csSet $cs
   if {[incr clrsc] == [llength $clrscdark]} {set clrsc 0}
   puts --------------------------------
   set curr [set totr 0]

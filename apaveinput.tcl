@@ -34,7 +34,7 @@
 
 package require Tk
 
-package provide apave 3.2b3
+package provide apave 3.2b5
 
 source [file join [file dirname [info script]] apavedialog.tcl]
 
@@ -199,7 +199,7 @@ oo::class create ::apave::APaveInput {
           set $vv $vlist
           lappend attrs -lvar $vv
           if {$vsel ni {"" "-"}} {
-            lappend attrs -lbxsel $vsel
+            lappend attrs -lbxsel "$::apave::UFF$vsel$::apave::UFF"
           }
           lappend inopts [list $ff - - - - \
             "pack -side left -expand 1 -fill both $gopts" $attrs]
@@ -209,9 +209,9 @@ oo::class create ::apave::APaveInput {
           if {![info exist $vv]} {catch {set $vv ""}}
           lappend attrs -tvar $vv -values $vlist
           if {$vsel ni {"" "-"}} {
-            lappend attrs -cbxsel $vsel
+            lappend attrs -cbxsel "$::apave::UFF$vsel$::apave::UFF"
           }
-          lappend inopts [list $ff - - - - "pack -fill x $gopts" $attrs]
+          lappend inopts [list $ff - - - - "pack -side left -expand 1 -fill x $gopts" $attrs]
         }
         fc {
           if {![info exist $vv]} {catch {set $vv ""}}
@@ -398,21 +398,4 @@ oo::class create ::apave::APaveInput {
     return $res
   }
 
-}
-
-# ------------------------------------------------------------------------
-# A bit of apave procedures
-
-proc ::apave::paveObj {com args} {
-
-  # Calls a command of APaveInput class.
-  #   com - a command
-  #   args - arguments of the command
-  #
-  # Returns the command's result.
-
-  set pobj [::apave::APaveInput new]
-  set res [$pobj $com {*}$args]
-  $pobj destroy
-  return $res
 }

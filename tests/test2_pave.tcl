@@ -93,9 +93,10 @@ namespace eval t {
   # imitating apply function
   proc applyProc {} {
     if {$t::ans1<10} {
-      set t::ans1 [lindex [pdlg ok info "APPLY" "\nApplying changes...\n" \
+      set t::ans1 [lindex [pdlg ok info "APPLY" "\nApplying changes...\nSee results in the terminal.\n" \
         -ch "Don't show again"] 0]
     }
+    putsResult2
   }
 
   # imitating cancel function
@@ -274,7 +275,34 @@ namespace eval t {
     puts "\n------------\nResult: $res.\nContent:\n$::temp\n------------\n"
     unset ::temp
   }
-  
+
+  proc Pressed {} {
+    if {[[::t::pave BuTRun] cget -text]!="button"} return
+    set bg [[::t::pave BuTRun] cget -background]
+    [::t::pave BuTRun] config -text "P R E S S E D"
+    for {set i 0} {$i<500} {incr i 100} {
+      after $i {[::t::pave BuTRun] config -background #292a2a}
+      after [expr $i+50] "[::t::pave BuTRun] config -background $bg"
+    }
+    after 800 [list [::t::pave BuTRun] config -text button]
+  }
+
+  proc TextConfigPie {} {
+    ##################################################################
+    # This code is taken from Tk's demos/ctext.tcl
+    proc mkTextConfigPie {w x y a option value color} {
+      set item [$w create arc $x $y [expr {$x+90}] [expr {$y+90}] \
+        -start [expr {$a-15}] -extent 30 -fill $color]
+    }
+    set c .win.fra.fra.nbk.f4.can
+    $c create text 180 20 -text {Demo canvas from Tk's demos/ctext.tcl}
+    for {set i0 0} {$i0<12} {incr i0} {
+      set i1 [expr {$i0*30}]
+      set i2 [expr {$i0>9 ? [expr {($i0-10)*30}]: [expr {90+$i1}]}]
+      mkTextConfigPie $c 140 30 $i1 -angle  $i2 Yellow
+    }
+  }
+
   proc msg {icon message args} {
     ::t::pdlg ok $icon [string toupper $icon] "\n$message\n" {*}$args
   }
@@ -684,6 +712,47 @@ namespace eval t {
         -ch "Don't show again"]
     }
   }
+  
+proc putsResult1 {} {
+  puts "
+    text file name = \"$::t::ftx1\"
+    text file contents =
+-------------------------------
+[pave getTextContent ::t::ftx1]
+-------------------------------
+  "
+}
+
+proc putsResult2 {} {
+  puts "
+    v   = $t::v
+    v2  = $t::v2
+    c1  = $t::c1
+    c2  = $t::c2
+    c3  = $t::c3
+    cb3 = \"$t::cb3\"
+    en1 = \"$t::en1\"
+    en2 = \"$t::en2\"
+    fil1= \"$t::fil1\"
+    fis1= \"$t::fis1\"
+    dir1= \"$t::dir1\"
+    fon1= \"$t::fon1\"
+    clr1= $t::clr1
+    dat1= $t::dat1
+  "
+}
+
+proc putsResult3 {} {
+  puts "
+    lvar ALL: $t::lvar
+
+    lv1 ALL: $t::lv1
+
+    tblWid1 curselection: [lindex $::t::tbllist 0]
+    tblWid1 curitem     : [lindex $::t::tbllist 1]
+    tblWid1 items       : [lindex $::t::tbllist 2]
+    "
+  }
 
 # ______________________ The test's main procedure ______________________ #
 
@@ -838,7 +907,7 @@ namespace eval t {
         {hue dark medium light} -- {{multi word example}} ok} {-width 16} \
         { if {{%a} in {yellow magenta cyan} || ![string first # {%a}]} \
         {set _ {-background %a -activeforeground %a}} else {set _ {}} } \
-        -command {eval puts "2nd way ::t::opcvar = [set ::t::opcvar]"} }}
+        -command {puts "2nd way ::t::opcvar = [set ::t::opcvar]"} }}
       {labtbl1 labOpc T 1 1 {-st e} {-t "Tablelist widget:\n\n(click on titles\nto sort)"}}
       {frAT labtbl1 L 1 9 {-st ew}}
       {frAT.TblWid1 - - - - {pack -side left -fill x -expand 1} {-h 5 -lvar ::t::tbllist  -lbxsel buT -columns {$::t::tblcols} -ALL yes}}
@@ -914,24 +983,7 @@ namespace eval t {
       {fra1 - - 1 1 {-st w}}
       {.laB0  - - 1 1 {-st w} {-t "Enabled widgets"}}
       {.laB  fra1.laB0 T 1 1 {-st w -pady 1} {-t "label" -font "-weight bold -size 11"}}
-      {.BuTRun fra1.laB T 1 1 {-st w} {-t "button" -com ::t::Pressed} 
-        {eval {
-          ##################################################################
-          # The last element of widget record is Tcl command being the last.
-          # executed, i.e. after making the current widget.
-          # Here is a definition of procedure that makes a button to blink.
-          ##################################################################
-          proc ::t::Pressed {} {
-            if {[[::t::pave BuTRun] cget -text]!="button"} return
-            set bg [[::t::pave BuTRun] cget -background]
-            [::t::pave BuTRun] config -text "P R E S S E D"
-            for {set i 0} {$i<500} {incr i 100} {
-              after $i {[::t::pave BuTRun] config -background #292a2a}
-              after [expr $i+50] "[::t::pave BuTRun] config -background $bg"
-            }
-            after 800 [list [::t::pave BuTRun] config -text button]
-          }
-        }}}
+      {.BuTRun fra1.laB T 1 1 {-st w} {-t "button" -com ::t::Pressed}}
       {.chB fra1.buTRun T 1 1 {-st w -pady 5} {-t "  checkbutton"}}
       {.frAE fra1.chB T 1 1 {-st w}}
       {.frAE.laB - - 1 1 {-st w} {-t "entry "}}
@@ -989,22 +1041,7 @@ namespace eval t {
       {frAT.sbV frAT.textNT L - - {pack}}
       {frAT.sbH frAT.textNT T - - {pack}}
     } .win.fra.fra.nbk.f4 {
-      {can - - - - {pack} {-h 130 -w 360}
-        {eval {
-          ##################################################################
-          # This code is taken from Tk's demos/ctext.tcl
-          proc mkTextConfigPie {w x y a option value color} {
-            set item [$w create arc $x $y [expr {$x+90}] [expr {$y+90}] \
-          	  -start [expr {$a-15}] -extent 30 -fill $color]
-          }
-          set c .win.fra.fra.nbk.f4.can
-          $c create text 180 20 -text {Demo canvas from Tk's demos/ctext.tcl}
-          for {set i0 0} {$i0<12} {incr i0} {
-            set i1 [expr {$i0*30}]
-            set i2 [expr {$i0>9 ? [expr {($i0-10)*30}]: [expr {90+$i1}]}]
-            mkTextConfigPie $c 140 30 $i1 -angle  $i2 Yellow
-          }
-        }}}
+      {can - - - - {pack} {-h 130 -w 360 -afteridle ::t::TextConfigPie}}
       {seh - - - - {pack -pady 7 -fill x}}
       {lab - - - - {pack} {-tvar t::sc2}}
       {sca - - - - {pack} {-length 500 -o horiz -var t::sc -from 0 -to 100}}
@@ -1157,35 +1194,9 @@ where:
     if {$::t::newCS==[apave::cs_Non]} { ;# at restart, newCS is set
       # getting result and clearance
       set res [pave res .win]
-      puts "
-    text file name = \"$::t::ftx1\"
-    text file contents =
--------------------------------
-[pave getTextContent ::t::ftx1]
--------------------------------
-    v   = $t::v
-    v2  = $t::v2
-    c1  = $t::c1
-    c2  = $t::c2
-    c3  = $t::c3
-    cb3 = \"$t::cb3\"
-    en1 = \"$t::en1\"
-    en2 = \"$t::en2\"
-    fil1= \"$t::fil1\"
-    fis1= \"$t::fis1\"
-    dir1= \"$t::dir1\"
-    fon1= \"$t::fon1\"
-    clr1= $t::clr1
-    dat1= $t::dat1
-
-    lvar ALL: $t::lvar
-
-    lv1 ALL: $t::lv1
-
-    tblWid1 curselection: [lindex $::t::tbllist 0]
-    tblWid1 curitem     : [lindex $::t::tbllist 1]
-    tblWid1 items       : [lindex $::t::tbllist 2]
-    "
+      ::t::putsResult1
+      ::t::putsResult2
+      ::t::putsResult3
     }
     destroy .win
     pave destroy

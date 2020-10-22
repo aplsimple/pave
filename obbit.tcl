@@ -1318,7 +1318,8 @@ oo::class create ::apave::ObjectTheming {
     #   mnu - menu's name (path)
 
     if {[my csCurrent] == $::apave::_CS_(NONCS)} return
-    lassign [my csGet] - fg - - - bgS fgS - - - - - - bg
+    lassign [my csGet] - fg - bg2 - bgS fgS - - - - - - bg
+    if {[my csCurrent] > $::apave::_CS_(STDCS)} {set bg $bg2}
     my ThemePopup $mnu -foreground $fg -background $bg \
       -activeforeground $fgS -activebackground $bgS
   }
