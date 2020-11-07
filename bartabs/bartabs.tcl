@@ -7,8 +7,8 @@
 # _______________________________________________________________________ #
 
 package require Tk
-package provide bartabs 1.0.2
-catch {package require tooltip} ;# optional (though necessary everywhere:)
+package provide bartabs 1.0.3
+catch {package require tooltip4}
 
 # __________________ Common data of bartabs:: namespace _________________ #
 
@@ -192,7 +192,7 @@ method Tab_Create {BID TID w text} {
       {*}[my Tab_Font $BID]
   }
   lassign [my Tab_TextEllipsed $BID $text] text ttip
-  catch {tooltip::tooltip $wb1 $ttip; tooltip::tooltip $wb2 $ttip}
+  catch {tooltip4::tooltip $wb1 $ttip; tooltip4::tooltip $wb2 $ttip}
   $wb1 configure -text $text
   if {[my Tab_Iconic $BID]} {
     $wb2 configure -state normal
@@ -587,7 +587,7 @@ method Tab_CloseFew {{TID -1} {left no}} {
 method Tab_Cmd {opt} {
 # Executes a command bound to an action on a tab.
 #   opt - command option (-csel, -cmov, -cdel)
-# The commands can include wildcards: %b for bar ID, %t for tab ID, %l for tab label. 
+# The commands can include wildcards: %b for bar ID, %t for tab ID, %l for tab label.
 # Returns 1, if no command set; otherwise: 1 for Yes, 0 for No, -1 for Cancel.
 
   variable btData
@@ -629,7 +629,7 @@ method Tab_BeCurrent {} {
 
 method Disabled {TID} {
   # Checks if the tab is disabled.
-  
+
   set dsbltabs [my [my $TID cget -BID] cget -disable]
   return [expr {[lsearch $dsbltabs $TID]>-1}]
 }
@@ -1077,7 +1077,7 @@ method InitColors {} {
     } else {
       set fgo $fgmain
     }
-  }]} { 
+  }]} {
     set bgo $fgmain  ;# reversed
     set fgo $bgmain
     if {$bgo in {black #000000}} {set bgo #444444; set fgo #FFFFFF}
@@ -1150,7 +1150,7 @@ method ArrowsState {tleft tright sright} {
       append tip "$text\n"
     }
   }
-  catch {tooltip::tooltip $wlarr [string trim $tip]}
+  catch {::tooltip4::tooltip $wlarr [string trim $tip]}
   if {$sright} {
     if {$hidearr && [catch {pack $wrarr -after $wframe -side right -anchor e}]} {
       pack $wrarr -side right -anchor e
@@ -1177,7 +1177,7 @@ method ArrowsState {tleft tright sright} {
       append tip "$text\n"
     }
   }
-  catch {tooltip::tooltip $wrarr [string trim $tip]}
+  catch {::tooltip4::tooltip $wrarr [string trim $tip]}
 }
 #_____
 
@@ -1549,9 +1549,11 @@ method clear {} {
 }
 #_____
 
-method scrollLeft {} {
-# Scrolls tabs to the left.
+method scrollLeft {wlarr} {
+  # Scrolls tabs to the left.
+  #  wlarr - left arrow button
 
+  catch {::tooltip4::repaint $wlarr}
   if {[my [set BID [my ID]] ScrollCurr -1]} return
   lassign [my $BID cget -tleft -LLEN -scrollsel] tleft llen sccur
   if {![string is integer -strict $tleft]} {set tleft 0}
@@ -1561,13 +1563,16 @@ method scrollLeft {} {
     my $BID configure -tleft $tleft
     my $BID Refill $tleft yes
     if {$sccur} {my $tID Tab_BeCurrent}
+    catch {::tooltip4::repaint $wlarr}
   }
 }
 #_____
 
-method scrollRight {} {
-# Scrolls tabs to the right.
+method scrollRight {wrarr} {
+  # Scrolls tabs to the right.
+  #  wrarr - right arrow button
 
+  catch {::tooltip4::repaint $wrarr}
   if {[my [set BID [my ID]] ScrollCurr 1]} return
   lassign [my $BID cget -tright -LLEN -scrollsel] tright llen sccur
   if {![string is integer -strict $tright]} {set tright [expr {$llen-2}]}
@@ -1577,6 +1582,7 @@ method scrollRight {} {
     my $BID configure -tright $tright
     my $BID Refill $tright no
     if {$sccur} {my $tID Tab_BeCurrent}
+    catch {::tooltip4::repaint $wrarr}
   }
 }
 #_____
@@ -1788,9 +1794,9 @@ method create {barCom {barOpts ""}} {
   my My [set BID [my Bar_Data $barOpts]]
   my $BID Style
   ttk::button $wlarr -style ClButton$BID -image bts_ImgLeft \
-    -command [list [self] $BID scrollLeft] -takefocus 0
+    -command [list [self] $BID scrollLeft $wlarr] -takefocus 0
   ttk::button $wrarr -style ClButton$BID -image bts_ImgRight \
-    -command [list [self] $BID scrollRight] -takefocus 0
+    -command [list [self] $BID scrollRight $wrarr] -takefocus 0
   ttk::frame $wframe -relief flat
   pack $wlarr -side left -padx 0 -pady 0 -anchor e
   pack $wframe -after $wlarr -side left -padx 0 -pady 0 -fill x -expand 1

@@ -361,13 +361,13 @@ oo::class create ::apave::APaveDialog {
 
   #########################################################################
 
-  method pasteText {} {
+  method pasteText {txt} {
 
     # Removes a selection at pasting.
+    #   txt - text's path
     #
     # The absence of this feature is very perpendicular of Tk's paste.
 
-    set txt [my TexM]
     set err [catch {$txt tag ranges sel} sel]
     if {!$err && [llength $sel]==2} {
       lassign $sel pos pos2
@@ -377,17 +377,18 @@ oo::class create ::apave::APaveDialog {
 
   #########################################################################
 
-  method doubleText {{dobreak 1}} {
+  method doubleText {txt {dobreak 1}} {
 
     # Doubles a current line or a selection of text widget.
+    #   txt - text's path
     #   dobreak - if true, means "return -code break"
     #
     # The *dobreak=true* allows to break the Tk processing of keypresses
     # such as Ctrl+D.
     #
-    # The text widget in APaveDialog object is identified as `my TexM`.
+    # If not set, the text widget is identified as `my TexM`.
 
-    set txt [my TexM]
+    if {$txt eq ""} {set txt [my TexM]}
     set err [catch {$txt tag ranges sel} sel]
     if {!$err && [llength $sel]==2} {
       lassign $sel pos pos2
@@ -404,17 +405,18 @@ oo::class create ::apave::APaveDialog {
 
   #########################################################################
 
-  method deleteLine {{dobreak 1}} {
+  method deleteLine {txt {dobreak 1}} {
 
     # Deletes a current line of text widget.
+    #   txt - text's path
     #   dobreak - if true, means "return -code break"
     #
     # The *dobreak=true* allows to break the Tk processing of keypresses
     # such as Ctrl+Y.
     #
-    # The text widget in APaveDialog object is identified as `my TexM`.
+    # If not set, the text widget is identified as `my TexM`.
 
-    set txt [my TexM]
+    if {$txt eq ""} {set txt [my TexM]}
     lassign [my GetLinePosition $txt insert] linestart lineend
     $txt delete $linestart $lineend
     if {$dobreak} {return -code break}
@@ -423,23 +425,24 @@ oo::class create ::apave::APaveDialog {
 
   #########################################################################
 
-  method linesMove {to {dobreak 1}} {
+  method linesMove {txt to {dobreak 1}} {
 
     # Moves a current line or lines of selection up/down.
+    #   txt - text's path
     #   to - direction (-1 means "up", +1 means "down")
     #   dobreak - if true, means "return -code break"
     #
     # The *dobreak=true* allows to break the Tk processing of keypresses
     # such as Ctrl+Y.
     #
-    # The text widget in APaveDialog object is identified as `my TexM`.
+    # If not set, the text widget is identified as `my TexM`.
 
     proc NewRow {ind rn} {
       set i [string first . $ind]
       set row [string range $ind 0 $i-1]
       return [incr row $rn][string range $ind $i end]
     }
-    set txt [my TexM]
+    if {$txt eq ""} {set txt [my TexM]}
     set err [catch {$txt tag ranges sel} sel]
     lassign [$txt index insert] pos  ;# position of caret
     if {[set issel [expr {!$err && [llength $sel]==2}]]} {
@@ -464,9 +467,45 @@ oo::class create ::apave::APaveDialog {
       if {$issel} {
         $txt tag add sel [NewRow $pos1 $to] [NewRow $pos2 $to]
       }
+      if {[lsearch [$txt tag names] tagCOM*]>-1} {
+        set i1 [expr {min($lto,$lfrom,$linestart,$lineend)-1}]
+        set i2 [expr {min($lto,$lfrom,$linestart,$lineend)+1}]
+        ::hl_tcl::my::Modified $txt $i1 $i2
+      }
       if {$dobreak} {return -code break}
     }
     return
+  }
+
+  #########################################################################
+
+  method selectedWordText {txt} {
+
+    # Returns a word under the cursor or a selected text.
+    #   txt - the text's path
+
+    set seltxt ""
+    if {![catch {$txt tag ranges sel} seltxt]} {
+      if {[set forword [expr {$seltxt eq ""}]]} {
+        set pos  [$txt index "insert wordstart"]
+        set pos2 [$txt index "insert wordend"]
+        set seltxt [string trim [$txt get $pos $pos2]]
+        if {![string is wordchar -strict $seltxt]} {
+          # when cursor just at the right of word: take the word at the left
+          set pos  [$txt index "insert -1 char wordstart"]
+          set pos2 [$txt index "insert -1 char wordend"]
+        }
+      } else {
+        lassign $seltxt pos pos2
+      }
+      catch {
+        set seltxt [$txt get $pos $pos2]
+        if {[set sttrim [string trim $seltxt]] ne ""} {
+          if {$forword} {set seltxt $sttrim}
+        }
+      }
+    }
+    return $seltxt
   }
 
   #########################################################################
@@ -480,30 +519,8 @@ oo::class create ::apave::APaveDialog {
     if {$ctrlf} {  ;# Ctrl+F moves cursor 1 char ahead
       ::tk::TextSetCursor $txt [$txt index "insert -1 char"]
     }
-    set seltxt ""
-    set selected [catch {$txt tag ranges sel} seltxt]
-    if {[set ${_pdg(ns)}PD::fnd] eq "" || $seltxt ne ""} {
-      if {!$selected} {
-        if {[set forword [expr {$seltxt eq ""}]]} {
-          set pos  [$txt index "insert wordstart"]
-          set pos2 [$txt index "insert wordend"]
-          set seltxt [string trim [$txt get $pos $pos2]]
-          if {![string is wordchar -strict $seltxt]} {
-            # when cursor just at the right of word: take the word at the left
-            set pos  [$txt index "insert -1 char wordstart"]
-            set pos2 [$txt index "insert -1 char wordend"]
-          }
-        } else {
-          lassign $seltxt pos pos2
-        }
-        catch {
-          set seltxt [$txt get $pos $pos2]
-          if {[set sttrim [string trim $seltxt]] ne ""} {
-            if {$forword} {set seltxt $sttrim}
-            set ${_pdg(ns)}PD::fnd $seltxt
-          }
-        }
-      }
+    if {[set seltxt [my selectedWordText $txt]] ne ""} {
+      set ${_pdg(ns)}PD::fnd $seltxt
     }
     return
   }
@@ -587,7 +604,7 @@ oo::class create ::apave::APaveDialog {
 
     set qdlg $_pdg(win).dia
     if {[winfo exists $qdlg]} {
-      puts "$qdlg already exists: select other root window"
+      puts "$qdlg already exists: select other window"
       return 0
     }
     # remember the focus (to restore it after closing the dialog)
@@ -609,7 +626,7 @@ oo::class create ::apave::APaveDialog {
       }
       switch -- $opt {
         -H - -head {
-          set head [string map {$ \$ \" \'\'} $val]
+          set head [string map {$ \$ \" \'\' \{ ( \} )} $val]
         }
         -ch - -checkbox {set chmsg "$val"}
         -g - -geometry {
@@ -661,7 +678,7 @@ oo::class create ::apave::APaveDialog {
     set optsFont [string trim $optsFont]
     set optsHeadFont $optsFont
     set fs [my basicFontSize]
-    set textfont "-font \"-family {[my basicTextFont]}"
+    set textfont "-font \"[font configure TkFixedFont]"
     if {$optsFont ne ""} {
       if {[string first "-size " $optsFont]<0} {
         append optsFont " -size $fs"
@@ -693,6 +710,7 @@ oo::class create ::apave::APaveDialog {
     if {$head ne ""} {
       # set the dialog's heading (-head option)
       if {$optsHeadFont ne "" || $hsz ne ""} {
+        if {$hsz eq ""} {set hsz "-size [::apave::paveObj basicFontSize]"}
         set optsHeadFont [string trim "$optsHeadFont $hsz"]
         set optsHeadFont "-font \"$optsHeadFont\""
       }
@@ -812,7 +830,8 @@ oo::class create ::apave::APaveDialog {
             bind \[[self] Entfind\] <FocusIn> {\[[self] Entfind\] selection range 0 end}
             bind $qdlg <F3> {[self] findInText 1}
             bind $qdlg <Control-f> \"[self] InitFindInText 1; focus \[[self] Entfind\]; break\"
-            bind $qdlg <Control-F> \"[self] InitFindInText 1; focus \[[self] Entfind\]; break\""
+            bind $qdlg <Control-F> \"[self] InitFindInText 1; focus \[[self] Entfind\]; break\"
+            \[[self] TexM\] tag configure sel -borderwidth 1"
         }
         if {$readonly} {
           if {!$hidefind} {
@@ -831,13 +850,7 @@ oo::class create ::apave::APaveDialog {
         } else {
           # make bindings and popup menu for text widget
           append binds "
-            bind $wt <<Paste>> {+ [self] pasteText}
-            bind $wt <Control-d> {[self] doubleText}
-            bind $wt <Control-D> {[self] doubleText}
-            bind $wt <Control-y> {[self] deleteLine}
-            bind $wt <Control-Y> {[self] deleteLine}
-            bind $wt <Alt-Up>    {[self] linesMove -1}
-            bind $wt <Alt-Down>  {[self] linesMove +1}
+            [my SetTextBinds $wt]
             menu \$pop
              \$pop add command [my iconA cut] -accelerator Ctrl+X -label \"Cut\" \\
               -command \"event generate $wt <<Cut>>\"
@@ -847,13 +860,13 @@ oo::class create ::apave::APaveDialog {
               -command \"event generate $wt <<Paste>>\"
              \$pop add separator
              \$pop add command [my iconA double] -accelerator Ctrl+D -label \"Double Selection\" \\
-              -command \"[self] doubleText 0\"
+              -command \"[self] doubleText {} 0\"
              \$pop add command [my iconA delete] -accelerator Ctrl+Y -label \"Delete Line\" \\
-              -command \"[self] deleteLine 0\"
+              -command \"[self] deleteLine {} 0\"
              \$pop add command [my iconA up] -accelerator Alt+Up -label \"Line(s) Up\" \\
-              -command \"[self] linesMove -1 0\"
+              -command \"[self] linesMove {} -1 0\"
              \$pop add command [my iconA down] -accelerator Alt+Down -label \"Line(s) Down\" \\
-              -command \"[self] linesMove +1 0\"
+              -command \"[self] linesMove {} +1 0\"
              \$pop add separator
              \$pop add command [my iconA find] -accelerator Ctrl+F -label \"Find First\" \\
               -command \"[self] InitFindInText; focus \[[self] Entfind\]\"

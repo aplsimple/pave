@@ -10,7 +10,7 @@ package require Tk
 
 set ::testdirname [file normalize [file dirname [info script]]]
 catch {cd $::testdirname}
-lappend auto_path "$::testdirname/.."
+lappend ::auto_path "$::testdirname/.."
 package require apave
 
 namespace eval t {

@@ -6,7 +6,7 @@
 # License: MIT.
 # _______________________________________________________________________ #
 
-package provide hl_tcl 0.7
+package provide hl_tcl 0.7.2
 
 # _______________ Common data of ::hl_tcl:: namespace ______________ #
 
@@ -346,33 +346,6 @@ proc ::hl_tcl::my::CoroHighlightAll {txt} {
   return
 }
 
-#proc ::hl_tcl::my::HighlightAll {txt} {
-  ## Highlights all of a text.
-  ##   txt - text widget's path
-
-  #set tlen [lindex [split [$txt index end] .] 0]
-  #RemoveTags $txt 1.0 end
-  #set maxl [expr {min($::hl_tcl::my::data(SEEN,$txt),$tlen)}]
-  #for {set currQtd [set ln 0]} {$ln<=$maxl} {incr ln} {
-    #set currQtd [HighlightLine $txt $ln $currQtd]
-  #}
-  #if {$ln<=$tlen} {
-    #update 
-    ## the first lines are seen by a user at start
-    ## so, while he/she is looking on, let the rest be handled unseen
-    ## (define ::hl_tcl::my::HLTHE1ST anyhow for this being always "idle")
-    #if {[info exists ::hl_tcl::my::HLTHE1ST]} {
-      #set ::hl_tcl::my::HLTHE1ST idle
-    #} else {
-      #set ::hl_tcl::my::HLTHE1ST 400
-    #}
-    #after $::hl_tcl::my::HLTHE1ST \
-     #"for {set ln $ln; set currQtd $currQtd} {\$ln<=$tlen} {incr ln} { 
-      #set currQtd \[::hl_tcl::my::HighlightLine $txt \$ln \$currQtd\]}"
-  #}
-  #set ::hl_tcl::my::data(REG_TXT,$txt) "1"
-#}
-
 # _________________________ DYNAMIC highlighting ________________________ #
 
 proc ::hl_tcl::my::CountChar {str ch} {
@@ -423,10 +396,12 @@ proc ::hl_tcl::my::MemPos {txt} {
     data(CNT_QUOTE,$txt) data(CNT_SLASH,$txt) data(CNT_COMMENT,$txt)
   $txt tag remove tagBRACKET 1.0 end
   $txt tag remove tagBRACKETERR 1.0 end
+  $txt tag remove tagCURLINE 1.0 end
+  $txt tag add tagCURLINE [list $ln linestart] [list $ln lineend]+1displayindices
 }
 #_____
 
-proc ::hl_tcl::my::Modified {txt} {
+proc ::hl_tcl::my::Modified {txt {i1 -1} {i2 -1}} {
   # Handles modifications of text.
   #   txt - text widget's path
   # Makes a coroutine from this.
@@ -439,11 +414,11 @@ proc ::hl_tcl::my::Modified {txt} {
   }
   # let them work one by one
   set coroNo [expr {[incr ::hl_tcl::my::data(CORMOD)] % 10000000}]
-  coroutine CoModified$coroNo ::hl_tcl::my::CoroModified $txt
+  coroutine CoModified$coroNo ::hl_tcl::my::CoroModified $txt $i1 $i2
 }
 #_____
 
-proc ::hl_tcl::my::CoroModified {txt} {
+proc ::hl_tcl::my::CoroModified {txt {i1 -1} {i2 -1}} {
   # Handles modifications of text.
   #   txt - text widget's path
   # See also: Modified
@@ -451,10 +426,15 @@ proc ::hl_tcl::my::CoroModified {txt} {
   variable data
   # current line:
   set ln [expr {int([$txt index insert])}]
-  # range of change:
-  set dl [expr {abs(int($data(CUR_LEN,$txt)) - int([$txt index end]))}]
   # ending line:
   set endl [expr {int([$txt index end])}]
+  # range of change:
+  if {$i1!=-1} {
+    set dl [expr {abs($i2-$i1)}]
+    set ln $i1
+  } else {
+    set dl [expr {abs(int($data(CUR_LEN,$txt)) - $endl)}]
+  }
   # begin and end of changes:
   set ln1 [expr {max(($ln-$dl),1)}]
   set ln2 [expr {min(($ln+$dl),$endl)}]
@@ -717,6 +697,8 @@ proc ::hl_tcl::my::HighlightBrackets {w} {
 
   set curpos [$w index insert]
   set curpos2 [$w index "insert -1 chars"]
+  $w tag remove tagCURLINE 1.0 end
+  $w tag add tagCURLINE [list $curpos linestart] [list $curpos lineend]+1displayindices
   set ch [$w get $curpos]
   set lbr "\{(\["
   set rbr "\})\]"
@@ -811,13 +793,17 @@ proc ::hl_tcl::hl_init {txt args} {
     set ::hl_tcl::my::data(SETCOLORS,$txt) 1
   } else {
     if {![info exists ::hl_tcl::my::data(COLORS,$txt)]}  {
+      set clrCURL ""
+      catch {set clrCURL [lindex [::apave::paveObj csGet] 3]}
       if {$::hl_tcl::my::data(DARK,$txt)} {
+        if {$clrCURL eq ""} {set clrCURL #29383c}
         set ::hl_tcl::my::data(COLORS,$txt) [list \
-          orange #A17970 lightgreen #f1b479 #76a396 #d485d4 #b9b96e]
-        # $clrCOM $clrCOMTK $clrSTR $clrVAR $clrCMN $clrPROC $clrOPT
+          orange #A17970 lightgreen #f1b479 #76a396 #d485d4 #b9b96e $clrCURL]
+        # $clrCOM $clrCOMTK $clrSTR $clrVAR $clrCMN $clrPROC $clrOPT $clrCURL
       } else {
+        if {$clrCURL eq ""} {set clrCURL #efe0cd}
         set ::hl_tcl::my::data(COLORS,$txt) [list \
-          "#923B23" #7A040E  #035103 #4A181B #646464 #A106A1 #463e11]
+          "#923B23" #7A040E  #035103 #4A181B #646464 #A106A1 #463e11 $clrCURL]
       }
     }
   }
@@ -827,7 +813,7 @@ proc ::hl_tcl::hl_init {txt args} {
     set ::hl_tcl::my::data(FONT,$txt) [font configure TkFixedFont]
     dict set ::hl_tcl::my::data(FONT,$txt) -size 12
   }
-  hl_readonly $txt no
+  hl_readonly $txt $::hl_tcl::my::data(READONLY,$txt)
 }
 #_____
 
@@ -842,16 +828,18 @@ proc ::hl_tcl::hl_text {txt} {
   dict set font1 -weight bold
   dict set font2 -slant italic
   lassign $::hl_tcl::my::data(COLORS,$txt) \
-    clrCOM clrCOMTK clrSTR clrVAR clrCMN clrPROC clrOPT
-  $txt tag config tagCOM -font "$font1" -foreground $clrCOM
-  $txt tag config tagCOMTK -font "$font1" -foreground $clrCOMTK
-  $txt tag config tagSTR -font "$font0" -foreground $clrSTR
-  $txt tag config tagVAR -font "$font0" -foreground $clrVAR
-  $txt tag config tagCMN -font "$font2" -foreground $clrCMN
-  $txt tag config tagPROC -font "$font1" -foreground $clrPROC
-  $txt tag config tagOPT -font "$font0" -foreground $clrOPT
-  $txt tag config tagBRACKET -font "$font1" -foreground $clrPROC
-  $txt tag config tagBRACKETERR -foreground white -background red
+    clrCOM clrCOMTK clrSTR clrVAR clrCMN clrPROC clrOPT clrCURL
+  $txt tag configure tagCOM -font "$font1" -foreground $clrCOM
+  $txt tag configure tagCOMTK -font "$font1" -foreground $clrCOMTK
+  $txt tag configure tagSTR -font "$font0" -foreground $clrSTR
+  $txt tag configure tagVAR -font "$font0" -foreground $clrVAR
+  $txt tag configure tagCMN -font "$font2" -foreground $clrCMN
+  $txt tag configure tagPROC -font "$font1" -foreground $clrPROC
+  $txt tag configure tagOPT -font "$font0" -foreground $clrOPT
+  $txt tag configure tagBRACKET -font "$font1" -foreground $clrPROC
+  $txt tag configure tagBRACKETERR -foreground white -background red
+  $txt tag configure tagCURLINE -background $clrCURL
+  $txt tag raise sel
   my::HighlightAll $txt
   if {![info exists ::hl_tcl::my::data(BIND_TXT,$txt)]} {
     bind $txt <KeyPress> [list + [namespace current]::my::MemPos $txt]
@@ -897,4 +885,4 @@ proc ::hl_tcl::hl_all {args} {
   }
 }
 # _________________________________ EOF _________________________________ #
-#RUNF1: ~/PG/github/pave/tests/test2_pave.tcl 16 11 12
+#RUNF1: ~/PG/github/pave/tests/test2_pave.tcl 37 9 12

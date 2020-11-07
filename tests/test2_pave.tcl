@@ -6,17 +6,17 @@
 # _______________________________________________________________________ #
 
 set tcltk_version "Tcl/Tk [package require Tk]"
-catch {package require tooltip} ;# may be absent
 
 set ::testdirname [file normalize [file dirname [info script]]]
 cd $::testdirname
 set ::test2dirs [list "$::testdirname/.." "$::testdirname" "$::testdirname/../bartabs" "$::testdirname/../hl_tcl" "$::testdirname/../../screenshooter"]
-lappend auto_path {*}$::test2dirs
+lappend ::auto_path {*}$::test2dirs
 set apavever [package require apave]
 set pkg_versions0 "\n  <red>apave $apavever</red>\n\n"
 append pkg_versions0 "  <red>e_menu $apavever</red>\n\n"
 append pkg_versions0 "  <red>bartabs [package require bartabs]</red>\n\n"
-append pkg_versions0 "  <red>hl_tcl [package require hl_tcl]</red>"
+append pkg_versions0 "  <red>hl_tcl [package require hl_tcl]</red>\n\n"
+append pkg_versions0 "  <red>tooltip4 [package require tooltip4]</red>"
 set pkg_versions [string map {<red> "" </red> "" \n\n , \n ""} $pkg_versions0]
 set ::e_menu_dir [file normalize [file join $::testdirname ../../e_menu]]
 catch {source [file join $::e_menu_dir e_menu.tcl]}
@@ -171,9 +171,9 @@ namespace eval t {
       " Color scheme $cs: [pave csGetName $cs]"
       catch {::t::colorBar}
     }
-    tooltip::tooltip [pave BuT_Img4] \
+    tooltip4::tooltip [pave BuT_Img4] \
       "Next is $::t::nextcs: [pave csGetName $::t::nextcs]"
-    tooltip::tooltip [pave BuT_Img3] \
+    tooltip4::tooltip [pave BuT_Img3] \
       "Previous is $::t::prevcs: [pave csGetName $::t::prevcs]"
     lassign [pave csGet] fg - bg - - bS fS
     set ::t::textTags [list \
@@ -209,8 +209,14 @@ namespace eval t {
       set ::t::curTab $tab
       pack .win.fra.fra.$::t::curTab -expand yes -fill both
       catch {
-         if {$nt eq ""} {set nt $arrayTab($::t::curTab)}
+        if {$nt eq ""} {set nt $arrayTab($::t::curTab)}
         .win.fra.fra.$::t::curTab select $nt
+        lassign [split [winfo geometry .win] x+] w h x y
+        set geo "+([expr {$w+$x}]-W-8)+$y-20"
+        ::tooltip4 too .win "The tab is selected by your request: \
+          \n\"[.win.fra.fra.$::t::curTab tab $nt -text]\"" \
+          -geometry $geo -fg white -bg black -font {-weight bold -size 11} \
+          -pause 1500 -fade 1500 -alpha 0.8 -padx 20 -pady 20
       }
     }
   }
@@ -220,9 +226,8 @@ namespace eval t {
     lassign [split [$txt index insert] .] r c
     [pave Labstat1] configure -text $r
     [pave Labstat2] configure -text [incr c]
-    #[pave Labstat3] configure -text [$txt get \
-      [$txt index "insert linestart"] [$txt index "insert lineend"]]
   }
+
   # filling the menu
   proc fillMenu {} {
     set m .win.menu.file
@@ -251,6 +256,7 @@ namespace eval t {
    \u2022 <link1>aplsimple.github.io/en/tcl/e_menu</link1>
    \u2022 <link1>aplsimple.github.io/en/tcl/bartabs</link1>
    \u2022 Reference on <link2>hl_tcl</link2>
+   \u2022 Reference on <link2>tooltip4</link2>
 
   License: MIT.
   _____________________________________
@@ -262,14 +268,14 @@ namespace eval t {
   }
 
   proc showLogo {w} {
-    pave labelFlashing [pave textLink $w 4] "" 1 \
+    pave labelFlashing [pave textLink $w 5] "" 1 \
       -file feather.png -pause 0.5 -incr 0.1 -after 40
   }
 
   proc tracer {varname args} {
     set ::t::sc2 [expr round($::t::sc)]
   }
-  
+
   proc viewfile {} {
     set res [::t::pdlg vieweditFile test2_fco.dat "" -w 74 -h 20 -ro 0 -rotext ::temp]
     puts "\n------------\nResult: $res.\nContent:\n$::temp\n------------\n"
@@ -280,7 +286,7 @@ namespace eval t {
     if {[[::t::pave BuTRun] cget -text]!="button"} return
     set bg [[::t::pave BuTRun] cget -background]
     [::t::pave BuTRun] config -text "P R E S S E D"
-    for {set i 0} {$i<500} {incr i 100} {
+    for {set i 0} {$i<700} {incr i 100} {
       after $i {[::t::pave BuTRun] config -background #292a2a}
       after [expr $i+50] "[::t::pave BuTRun] config -background $bg"
     }
@@ -365,7 +371,8 @@ namespace eval t {
       lassign [split [winfo geometry .win] x+] w h x y
       set geo "350x1+[expr {$w+$x-350}]+$y"
       set cs [pave csCurrent]
-      ::em::main -prior 1 -modal 1 -remain 0 "md=~/.tke/plugins/e_menu/menus" m=menu.mnu "f=$fname" "PD=~/PG/e_menu_PD.txt" "s=none" b=chromium h=~/DOC/www.tcl.tk/man/tcl8.6 "tt=xterm -fs 12 -geometry 90x30+400+100" w=32 g=$geo om=0 c=$cs dk=dock
+      set seltxt [pave selectedWordText [pave Text]]
+      ::em::main -prior 1 -modal 1 -remain 0 "md=~/.tke/plugins/e_menu/menus" m=menu.mnu "f=$fname" "PD=~/PG/e_menu_PD.txt" "s=$seltxt" b=chromium h=~/DOC/www.tcl.tk/man/tcl8.6 "tt=xterm -fs 12 -geometry 90x30+400+100" w=32 g=$geo om=0 c=$cs dk=dock
       set cs2 [pave csCurrent]
       if {$cs!=$cs2} {toolBut 4 $cs2}
     } else {
@@ -426,13 +433,22 @@ namespace eval t {
     textPos [pave Text]
   }
 
-  proc highlighting_others {} {
+  proc highlighting_others {{ro 1}} {
 
     # try to get "universal" highlighting colors (for dark&light bg):
     ::hl_tcl::hl_init [pave TextNT] -dark [pave csDarkEdit] \
-      -seen 100 -readonly 1 -font [pave csFontMono] \
+      -seen 100 -readonly $ro -font [pave csFontMono] \
       -colors {"#BC47D9" #AB21CE #0C860C #9a5465 #66a396 brown #7150cb}
     ::hl_tcl::hl_text [pave TextNT]
+    ::t::pave makePopup [pave TextNT] $ro yes
+    set lab [[pave LaBNT] cget -text]
+    if {$ro} {
+      [pave LaBNT] configure -text [string map {editable read-only} $lab]
+      set ::t::v2 1
+    } else {
+      [pave LaBNT] configure -text [string map {read-only editable} $lab]
+      set ::t::v2 2
+    }
   }
 
 # ____________________ Procedures for bartabs widget ____________________ #
@@ -690,7 +706,7 @@ namespace eval t {
 
   proc ViewSelTabs {BID} {
     set sellist ""
-    set fewsel [::bt $BID listFlag "s"] 
+    set fewsel [::bt $BID listFlag "s"]
     set tcurr [::bt $BID cget -tabcurrent]
     foreach TID $fewsel {
       set text [::bts $TID cget -text]
@@ -711,8 +727,9 @@ namespace eval t {
         \n\nWhile editing, use Ctrl+Left and Ctrl+Right to scroll files." \
         -ch "Don't show again"]
     }
+    highlighting_others
   }
-  
+
 proc putsResult1 {} {
   puts "
     text file name = \"$::t::ftx1\"
@@ -763,7 +780,7 @@ proc putsResult3 {} {
     set firstin [expr {$::t::newCS==[apave::cs_Non]}]
     apave::APaveInput create pdlg .win
     apave::APaveInput create pave .win $::t::newCS
-    pave configTooltip black #FBFB95 -font {-size 11}
+    pave initTooltip -fg black -bg #FBFB95 -font {-size 11}
     pave untouchWidgets *buTClr*
     if {!$firstin} {pave basicFontSize $::t::fontsz}
     set ::t::filetxt [::apave::readTextFile $::t::ftx1]
@@ -813,7 +830,7 @@ proc putsResult3 {} {
     set ::t::restart 1
 
     # making main window object and dialog object
-    pave makeWindow .win.fra "Packages: $::pkg_versions"
+    pave makeWindow .win.fra "$::pkg_versions"
     pave paveWindow .win.fra {
       {frat - - 1 20 {-st we} }
       {frat.toolTop - - - - {pack -side top} {-array {$::t::toolList}}}
@@ -983,17 +1000,14 @@ proc putsResult3 {} {
       {fra1 - - 1 1 {-st w}}
       {.laB0  - - 1 1 {-st w} {-t "Enabled widgets"}}
       {.laB  fra1.laB0 T 1 1 {-st w -pady 1} {-t "label" -font "-weight bold -size 11"}}
-      {.BuTRun fra1.laB T 1 1 {-st w} {-t "button" -com ::t::Pressed}}
+      {.buTRun fra1.laB T 1 1 {-st w} {-t "button" -com ::t::Pressed}}
       {.chB fra1.buTRun T 1 1 {-st w -pady 5} {-t "  checkbutton"}}
       {.frAE fra1.chB T 1 1 {-st w}}
       {.frAE.laB - - 1 1 {-st w} {-t "entry "}}
       {.frAE.enT fra1.frAE.laB L 1 1 {-st w -pady 5} {-tvar t::tv2}}
       {.frA fra1.frAE T 1 1 {-st w}}
       {.frA.laB - - 1 1 {-st w -ipady 5} {-t "label in frame" -font "-weight bold -size 11"}}
-      {.lfR fra1.frA T 1 1 {-st w} {-t "labeled frame" -font "-weight bold -size 11"}}
-      {.lfR.raD1 - - 1 1 {-st w -pady 5} {-t "radiobutton" -var t::v2 -value 1}}
-      {.lfR.raD2 fra1.lfR.raD1 L 1 1 {-st w -padx 7} {-t "radio 2" -var t::v2 -value 2}}
-      {.frAS fra1.lfR T 1 1 {-st w -pady 5}}
+      {.frAS fra1.frA T 1 1 {-st w -pady 5}}
       {.frAS.laB - - - - {pack -side left -anchor w} {-t "spinbox 1 through 9 "}}
       {.frAS.spX - - - - {pack} {-tvar t::tv -from 1 -to 9 -w 5 -justify center}}
       {.frAsc fra1.frAS T 1 1 {-st ew -pady 5}}
@@ -1003,39 +1017,43 @@ proc putsResult3 {} {
       {.frALB.laB - - - - {pack -side left -anchor nw} {-t "listbox of colors  "}}
       {.frALB.lbx - - - - {pack -side left -fill x -expand 1} {-lvar t::lvar -h 4 -w 30 -lbxsel dark -ALL yes}}
       {.frALB.sbV fra1.frALB.lbx L - - {pack}}
+      {.lfR fra1.frALB T 1 1 {-st w} {-t "labeled frame" -font "-weight bold -size 11"}}
+      {.lfR.raD1 - - 1 1 {-st w -pady 5} {-t "read-only text" -var t::v2 -value 1
+        -com ::t::highlighting_others}}
+      {.lfR.raD2 fra1.lfR.raD1 L 1 1 {-st w -padx 7} {-t "editable text" -var t::v2 -value 2 -com {::t::highlighting_others 0}}}
 
       ####################################################################
       # {#                   DISABLED NON_TTK WIDGETS                    }
       ####################################################################
       {labFR # # # # # {-t "labeled frame" -font "-weight bold -size 11" -state disabled -foreground gray}}
       {lfR1 fra1 L 1 1 {-st we -cw 1} {-t "Disabled counterparts"}}
-      {.laB - - 1 1 {-st w } {-t "label" -font "-weight bold -size 11" -state disabled}}
+      {.laB - - 1 1 {-st w -pady 5} {-t "label" -font "-weight bold -size 11" -state disabled}}
       {.BuTRun lfR1.laB T 1 1 {-st w} {-t "button" -state disabled}}
-      {.chB lfR1.buTRun T 1 1 {-st w -pady 5} {-t " checkbutton" -state disabled}}
+      {.chB lfR1.BuTRun T 1 1 {-st w -pady 5} {-t " checkbutton" -state disabled}}
       {.frAE lfR1.chB T 1 1 {-st w} {-state disabled}}
       {.frAE.laB - - 1 1 {-st w} {-t "entry " -state disabled}}
       {.frAE.enT lfR1.frAE.laB L 1 1 {-st w -pady 5} {-tvar t::tv2 -state disabled}}
       {.frA lfR1.frAE T 1 1 {-st w} {-state disabled}}
       {.frA.laB - - 1 1 {-st w -ipady 5} {-t "label in frame" -font "-weight bold -size 11" -state disabled}}
-      {.lfR lfR1.frA T 1 1 {-st w} {-labelwidget .win.fra.fra.nbk.f3.labFR -font "-weight bold -size 11" -state disabled}}
-      {.lfR.raD1 - - 1 1 {-st w -pady 5} {-t "radiobutton" -var t::v2 -value 1 -state disabled}}
-      {.lfR.raD2 lfR1.lfR.raD1 L 1 1 {-st w -padx 7} {-t "radio 2" -var t::v2 -value 2 -state disabled}}
-      {.frAS lfR1.lfR T 1 1 {-st w -pady 5} {-state disabled}}
+      {.frAS lfR1.frA T 1 1 {-st w -pady 5} {-state disabled}}
       {.frAS.laB - - - - {pack -side left -anchor w} {-t "spinbox 1 through 9 "  -state disabled}}
       {.frAS.spX - - - - {pack} {-tvar t::tv -from 1 -to 9 -w 5 -justify center -state disabled}}
-      {.frAsc lfR1.frAS T 1 1 {-st ew -cw 1} {-state disabled}}
+      {.frAsc lfR1.frAS T 1 1 {-st ew -pady 5} {-state disabled}}
       {.frAsc.laBsc - - - - {pack -side left} {-t "scale 0 through 100 " -state disabled}}
       {.frAsc.scA - - - - {pack} {-orient horizontal -w 12 -sliderlength 20 -length 238 -state disabled -var t::sc}}
       {.frALB lfR1.frAsc T 1 1 {-st ew -pady 5} {-state disabled}}
       {.frALB.laB - - - - {pack -side left -anchor nw} {-t "listbox of colors  " -state disabled}}
       {.frALB.lbx - - - - {pack -side left -fill x -expand 1} {-lvar t::lvar -h 4 -w 30 -state disabled}}
       {.frALB.sbV lfR1.frALB.lbx L - - {pack -side left}}
+      {.lfR lfR1.frALB T 1 1 {-st w} {-labelwidget .win.fra.fra.nbk.f3.labFR -font "-weight bold -size 11" -state disabled}}
+      {.lfR.raD1 - - 1 1 {-st w -pady 5} {-t "read-only text" -var t::v2 -value 1 -state disabled}}
+      {.lfR.raD2 lfR1.lfR.raD1 L 1 1 {-st w -padx 7} {-t "editable text" -var t::v2 -value 2 -state disabled}}
 
       ####################################################################
       # {#           FRAME FOR TEXT WIDGET OF NON-TTK WIDGET TAB         }
       ####################################################################
       {frAT fra1 T 1 2 {-st nsew -rw 1 -pady 7}}
-      {frAT.laB - - - - {pack -side left -anchor nw} {-t "text & scrollbars \
+      {frAT.LaBNT - - - - {pack -side left -anchor nw} {-t "text & scrollbars \
 \n\nas above, i.e.\nnot  ttk::scrollbar\n\ntext is read-only"}}
       {frAT.TextNT - - - - {pack -side left -expand 1 -fill both} {-h 5 -wrap none -rotext ::t::filetxt -tabnext .win.fra.fral.butHome}}
       {frAT.sbV frAT.textNT L - - {pack}}
@@ -1120,7 +1138,7 @@ where:
     set wtex [pave Text]
     # bindings and contents for text widget
     bind $wtex <ButtonRelease> [list t::textPos $wtex]
-    bind $wtex <KeyRelease> [list t::textPos $wtex]
+    bind $wtex <KeyRelease> "+ t::textPos $wtex"
     bind $wtex <<Modified>> ::t::tabModified
     bind $wtex <Control-f> ::t::findInText
     pave displayText $wtex $::t::filetxt

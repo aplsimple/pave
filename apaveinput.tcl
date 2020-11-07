@@ -34,7 +34,7 @@
 
 package require Tk
 
-package provide apave 3.2b5
+package provide apave 3.2
 
 source [file join [file dirname [info script]] apavedialog.tcl]
 
@@ -127,11 +127,6 @@ oo::class create ::apave::APaveInput {
     if {$iopts ne {}} {
       my initInput  ;# clear away all internal vars
     }
-    if {[string match "*Mono*" "[font families]"]} {
-      set Mfont "Mono"
-    } else {
-      set Mfont TkFixedFont ;#"Courier"
-    }
     set pady "-pady 2"
     if {[set focusopt [::apave::getOption -focus {*}$args]] ne ""} {
       set focusopt "-focus $focusopt"
@@ -179,7 +174,7 @@ oo::class create ::apave::APaveInput {
         lappend inopts [list fraM.fra$name.labB$name - - - - \
           "pack -side left -anchor $anc -padx 3" \
           "-t \"$prompt\" -font \
-          \"-family $Mfont -size [::apave::paveObj basicFontSize]\""]
+          \"-family {[my basicTextFont]} -size [my basicFontSize]\""]
       }
       # for most widgets:
       #   1st item of 'valopts' list is the current value

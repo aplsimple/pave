@@ -49,9 +49,6 @@
 ###########################################################################
 
 package require Tk
-package require tablelist
-package require widget::calendar
-catch {package require tooltip} ;# optional (though necessary everywhere:)
 
 namespace eval ::apave {
 
@@ -180,7 +177,7 @@ namespace eval ::apave {
   ##########################################################################
 
   proc modalsOpen {{val ""} {w .}} {
-  
+
     # Sets/gets 'count of open modal windows'.
     #   val - current number of open modal windows
     #   w - root window's path
@@ -192,7 +189,7 @@ namespace eval ::apave {
   ##########################################################################
 
   proc iconImage {{icon ""}} {
-  
+
     # Gets a defined icon's image or list of icons.
     #   icon - icon's name
     # Returns the icon's image or, if *icon* is blank, a list of icons
@@ -255,13 +252,13 @@ namespace eval ::apave {
   }
 
   proc paveObj {com args} {
-  
+
     # Calls a command of APaveInput class.
     #   com - a command
     #   args - arguments of the command
     #
     # Returns the command's result.
-  
+
     set pobj [::apave::APaveInput new]
     if {[set exported [expr {$com eq "EXPORT"}]]} {
       set com [lindex $args 0]
@@ -476,7 +473,7 @@ oo::class create ::apave::APave {
   #########################################################################
 
   method iconA {icon} {
-  
+
     # Gets icon attributes for buttons, menus etc.
     #   icon - name of icon
 
@@ -838,7 +835,7 @@ oo::class create ::apave::APave {
     set attrs "[subst $defattrs] $attrs"
     switch -glob -- $nam3 {
       "bts" {
-        if {[package versions bartabs] eq ""} {package require bartabs}
+        package require bartabs
         set attrs "-bartabs {$attrs}"
         set widget "ttk::frame"
       }
@@ -944,6 +941,7 @@ oo::class create ::apave::APave {
          set attrs "-onReturn {$::apave::UFF{$cmd} {$from} {$to}$::apave::UFF} $attrs"
       }
       "tbl" { ;# tablelist
+        package require tablelist
         set widget "tablelist::tablelist"
         set attrs "[my FCfieldAttrs $wnamefull $attrs -lvar]"
         set attrs "[my ListboxesAttrs $wnamefull $attrs]"
@@ -1221,7 +1219,7 @@ oo::class create ::apave::APave {
     #   tvar - name of variable containing a date
     #   args - options of *widget::calendar*
     #
-    # The *tvar* sets the initial date for the chooser and 
+    # The *tvar* sets the initial date for the chooser and
     # it gets a date selected in the chooser.
     #
     # Returns a selected date.
@@ -1245,6 +1243,7 @@ oo::class create ::apave::APave {
     wm protocol $wcal WM_DELETE_WINDOW [list set ${_pav(ns)}datechoosen ""]
     bind $wcal <Escape> [list set ${_pav(ns)}datechoosen ""]
     set ${_pav(ns)}datechoosen ""
+    package require widget::calendar
     widget::calendar $wcal.c -dateformat $df -enablecmdonkey 0 -command \
       [list set ${_pav(ns)}datechoosen] -textvariable ${_pav(ns)}_pav(clnddate)
     pack $wcal.c -fill both -expand 0
@@ -1729,6 +1728,29 @@ oo::class create ::apave::APave {
 
   #########################################################################
 
+  method SetTextBinds {wt} {
+
+    # Returns bindings for a text widget.
+    #   wt - the text's path
+
+    if {[bind $wt <<Paste>>] eq ""} {
+      set res "
+      bind $wt <<Paste>> {+ [self] pasteText $wt}
+      bind $wt <Return> {+ [self] onKeyTextM $wt %K}"
+    }
+    append res "
+      bind $wt <Control-d> {[self] doubleText $wt}
+      bind $wt <Control-D> {[self] doubleText $wt}
+      bind $wt <Control-y> {[self] deleteLine $wt}
+      bind $wt <Control-Y> {[self] deleteLine $wt}
+      bind $wt <Alt-Up> {[self] linesMove $wt -1}
+      bind $wt <Alt-Down> {[self] linesMove $wt +1}
+      bind $wt <Control-a> \"$wt tag add sel 1.0 end; break\""
+    return $res
+  }
+
+  #########################################################################
+
   method AddPopupAttr {w attrsName atRO isRO args} {
 
     # Adds the attribute to call a popup menu for an editable widget.
@@ -1780,6 +1802,7 @@ oo::class create ::apave::APave {
               -command "event generate $w <<Undo>>"
         $pop add command {*}[my iconA redo] -accelerator Ctrl+Shift+Z -label "Redo" \
               -command "event generate $w <<Redo>>"
+        after idle [my SetTextBinds $w]
       }
     }
     if {$istext} {
@@ -1884,7 +1907,9 @@ oo::class create ::apave::APave {
         }
         -textpop - -textpopRO {
           if {[winfo exists $v]} {
-            my makePopup $v [expr {$a eq "-textpopRO"}] yes
+            set ro [expr {$a eq "-textpopRO"}]
+            my makePopup $v $ro yes
+            $v tag configure sel -borderwidth 1
           }
         }
         -notebazook {
@@ -1925,7 +1950,7 @@ oo::class create ::apave::APave {
           }
         }
         -timeout {
-          lassign $v timo lbl 
+          lassign $v timo lbl
           after idle [list [self] timeoutButton $w $timo $lbl]
         }
         -myown {
@@ -1957,8 +1982,7 @@ oo::class create ::apave::APave {
     if {$wr ne ""} {
       for {set i [llength $::apave::_AP_VARS(TIMW)]} {[incr i -1]>=0} {} {
         set w [lindex $::apave::_AP_VARS(TIMW) $i]
-        if {[string first $wr $w]==0} {
-          catch {tooltip::tooltip $w ""}
+        if {[string first $wr $w]==0 && ![catch {tooltip4::hide $w}]} {
           set ::apave::_AP_VARS(TIMW) [lreplace $::apave::_AP_VARS(TIMW) $i $i]
         }
       }
@@ -2138,10 +2162,9 @@ oo::class create ::apave::APave {
     set tt [string map [list %l $txt] $tt]
     set v [string map [list %l $txt %t $tt] $v]
     if {$tt ne ""} {
-      catch {
-        tooltip::tooltip $lab $tt
-        lappend ::apave::_AP_VARS(TIMW) $lab
-      }
+      my initTooltip
+      ::tooltip4 too $lab $tt
+      lappend ::apave::_AP_VARS(TIMW) $lab
     }
     if {$inv} {
       set ft $fg
@@ -2157,6 +2180,22 @@ oo::class create ::apave::APave {
     bind $lab <Button-1> "::apave::paveObj EXPORT VisitedLab $lab {$v} yes $fg2 $bg2;$v"
     if {$doadd} {lappend ::apave::_AP_VISITED(ALL) [list $lab $v $inv]}
     return [list $fg $bg $fg2 $bg2]
+  }
+
+  #########################################################################
+
+  method onKeyTextM {w K} {
+
+    if {$K eq "Return"} {
+      set idx1 [$w index "insert linestart"]
+      set idx2 [$w index "insert lineend"]
+      set line [$w get $idx1 $idx2]
+      set indent [string repeat " " \
+        [expr {[string length $line]-[string length [string trimleft $line]]}]]
+      if {$indent ne ""} {
+        after idle [list $w insert [$w index "$idx1 +1 line"] $indent]
+      }
+    }
   }
 
   #########################################################################
@@ -2316,7 +2355,8 @@ oo::class create ::apave::APave {
     upvar $attrsName attrs
     set addcomms {}
     if {[set tooltip [::apave::getOption -tooltip {*}$attrs]] ne ""} {
-      lappend addcomms [list tooltip::tooltip $wdg $tooltip]
+      my initTooltip
+      lappend addcomms [list tooltip4::tooltip $wdg $tooltip]
       lappend ::apave::_AP_VARS(TIMW) $wdg
       set attrs [::apave::removeOptions $attrs -tooltip]
     }
@@ -2656,7 +2696,7 @@ oo::class create ::apave::APave {
     if {$inpgeom == ""} {  ;# final geometrizing with actual sizes
       set w [winfo width $win]
       set h [winfo height $win]
-      if {($h/2-$ry-$rh/2)>30 && $root != "."} { 
+      if {($h/2-$ry-$rh/2)>30 && $root != "."} {
         # ::tk::PlaceWindow needs correcting in rare cases, namely:
         # when 'root' is of less sizes than 'win' and at screen top
         wm geometry $win [my CenteredXY $rw $rh $rx $ry $w $h]
