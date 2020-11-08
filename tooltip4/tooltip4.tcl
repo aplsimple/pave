@@ -9,7 +9,7 @@
 # License: MIT.
 # _______________________________________________________________________ #
 
-package provide tooltip4 0.4
+package provide tooltip4 0.5
 
 package require Tk
 
@@ -106,7 +106,7 @@ proc ::tooltip4::tooltip {w text args} {
     set optvals [::tooltip4::my::CGet {*}$args]
     lassign $optvals forced geo
     set optvals [lrange $optvals 2 end]
-    set my::ttdata(optvals,$w) [dict set optvals text $text]
+    set my::ttdata(optvals,$w) [dict set optvals -text $text]
     set my::ttdata(on,$w) [expr {[string length $text]}]
     set my::ttdata(global,$w) no
     if {$text ne ""} {
@@ -158,7 +158,7 @@ proc ::tooltip4::repaint {w} {
   #   w - widget's path
 
   if {[winfo exists $w] && [info exists my::ttdata(optvals,$w)]} {
-    ::tooltip4::my::Show $w [dict get $my::ttdata(optvals,$w) text] yes \
+    ::tooltip4::my::Show $w [dict get $my::ttdata(optvals,$w) -text] yes \
       {} $my::ttdata(optvals,$w)
   }
 }
@@ -174,9 +174,7 @@ proc ::tooltip4::my::CGet {args} {
   variable ttdata
   set saved [array get ttdata]
   set res [::tooltip4::configure {*}$args]
-  foreach {o v} [::tooltip4::cget] {
-    lappend res [string range $o 1 end] $v
-  }
+  lappend res {*}[::tooltip4::cget]
   array set ttdata $saved
   return $res
 }
@@ -243,7 +241,7 @@ proc ::tooltip4::my::Show {w text force geo optvals} {
   if {!$force && $geo eq "" && ([winfo exists $win] || \
   ![info exists ttdata(on,$w)] || !$ttdata(on,$w) || \
   ![string match $w [winfo containing $px $py]] || \
-  !$ttdata(on) || !$data(on))} {
+  !$ttdata(on) || !$data(-on))} {
     return
   }
   ::tooltip4::hide $w
@@ -252,32 +250,32 @@ proc ::tooltip4::my::Show {w text force geo optvals} {
   foreach wold [lrange $ttdata(REGISTERED) 0 end-1] {
     ::tooltip4::hide $wold
   }
-  toplevel $win -bg $data(bg) -class Tooltip$w
+  toplevel $win -bg $data(-bg) -class Tooltip$w
   catch {wm withdraw $win}
   wm overrideredirect $win 1
   wm attributes $win -topmost 1
   pack [label $win.label -text $text -justify left -relief solid \
-    -bd $data(bd) -bg $data(bg) -fg $data(fg) -font $data(font) \
-    -padx $data(padx) -pady $data(pady)] -padx $data(padding) -pady $data(padding)
+    -bd $data(-bd) -bg $data(-bg) -fg $data(-fg) -font $data(-font) \
+    -padx $data(-padx) -pady $data(-pady)] -padx $data(-padding) -pady $data(-padding)
   # defeat rare artifact by passing mouse over a tooltip to destroy it
   bindtags $win "Tooltip$win"
   bind Tooltip$win <Enter>    [list ::tooltip4::hide $w]
   bind Tooltip$win <Button>   [list ::tooltip4::hide $w]
   set aint 20
-  set fint [expr {int($data(fade)/$aint)}]
-  set icount [expr {int($data(per10)/$aint*[string length $text]/10.0)}]
+  set fint [expr {int($data(-fade)/$aint)}]
+  set icount [expr {int($data(-per10)/$aint*[string length $text]/10.0)}]
   if {$icount} {
     if {$geo eq ""} {
-      catch {wm attributes $win -alpha $data(alpha)}
+      catch {wm attributes $win -alpha $data(-alpha)}
     } else {
-      ::tooltip4::my::Fade $win $aint [expr {round(1.0*$data(pause)/$aint)}] \
-        0 Un $data(alpha) $geo 1
+      ::tooltip4::my::Fade $win $aint [expr {round(1.0*$data(-pause)/$aint)}] \
+        0 Un $data(-alpha) $geo 1
     }
-    after $data(pause) [list \
-      ::tooltip4::my::Fade $win $aint $fint $icount {} $data(alpha) $geo 1]
+    after $data(-pause) [list \
+      ::tooltip4::my::Fade $win $aint $fint $icount {} $data(-alpha) $geo 1]
   } else {
     # just showing, no fading
-    after $data(pause) [list ::tooltip4::my::ShowWindow $win $geo]
+    after $data(-pause) [list ::tooltip4::my::ShowWindow $win $geo]
   }
   array unset data
 }
