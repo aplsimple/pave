@@ -1,11 +1,13 @@
-package ifneeded baltip 0.6 [list source [file join $dir baltip.tcl]]
+package ifneeded baltip 0.8 [list source [file join $dir baltip.tcl]]
 
 namespace eval ::baltip {
 
   variable _ruff_preamble {
 It's a Tcl/Tk tip widget inspired by:
 
-[https://wiki.tcl-lang.org/page/balloon+help](https://wiki.tcl-lang.org/page/balloon+help)
+  * [https://wiki.tcl-lang.org/page/Tklib+tooltip](https://wiki.tcl-lang.org/page/Tklib+tooltip)
+
+  * [https://wiki.tcl-lang.org/page/balloon+help](https://wiki.tcl-lang.org/page/balloon+help)
 
 The original code has been modified to make the tip:
 
@@ -16,27 +18,46 @@ The original code has been modified to make the tip:
   * be displayed as a stand-alone balloon message at given coordinates
   * have configure/cget etc. wrapped in Tcl ensemble for convenience
 
+The video introduction to *balltip* is presented by
+ [baltip-0.8.mp4](https://github.com/aplsimple/baltip/releases/download/baltip-0.8/baltip-0.8.mp4) (19 Mb).
+
 Below are several pictures just to glance at the *baltip*.
 
-*Bold welcome*. The tip's font is configured to be "-weight bold -size 11".
+*Under the mouse pointer*. By default, the tips are displayed just under the mouse pointer.
 
- <img src="https://aplsimple.github.io/en/tcl/baltip/files/tt1.png" class="media" alt="">
+ <img src="https://aplsimple.github.io/en/tcl/baltip/files/btip3.png" class="media" alt="">
 
-*More standard*.  The tip's font is configured to be more standard.
+*Under the widget*. This button's tip is configured to be just under the button. As well as the text's tip.
 
- <img src="https://aplsimple.github.io/en/tcl/baltip/files/tt2.png" class="media" alt="">
+ <img src="https://aplsimple.github.io/en/tcl/baltip/files/btip1.png" class="media" alt="">
+
+ <img src="https://aplsimple.github.io/en/tcl/baltip/files/btip2.png" class="media" alt="">
+
+*Tips of text tags*. The text tags can have their own tips.
+
+ <img src="https://aplsimple.github.io/en/tcl/baltip/files/btip4.png" class="media" alt="">
+
+*Tips of menu items*. The menu items can have their own tips. The popup menus may be tear-off at that.
+
+ <img src="https://aplsimple.github.io/en/tcl/baltip/files/btip5.png" class="media" alt="">
+
+ <img src="https://aplsimple.github.io/en/tcl/baltip/files/btip6.png" class="media" alt="">
 
 *Label of danger*. The labels are also tipped. This one is configured to be an alert.
 
- <img src="https://aplsimple.github.io/en/tcl/baltip/files/tt3.png" class="media" alt="">
+ <img src="https://aplsimple.github.io/en/tcl/baltip/files/btip7.png" class="media" alt="">
 
-*Button's tip*. This button has its own tip, being a caller of a balloon at that.
+*Configurable tips*. The tip configuration can be global or local (for a specific tip).
 
- <img src="https://aplsimple.github.io/en/tcl/baltip/files/tt4.png" class="media" alt="">
+The configuring can include: font, colors, paddings, border, exposition time, opacity, bell.
+
+ <img src="https://aplsimple.github.io/en/tcl/baltip/files/btip8.png" class="media" alt="">
+
+ <img src="https://aplsimple.github.io/en/tcl/baltip/files/btip9.png" class="media" alt="">
 
 *Balloon*. The balloon appears at the top right corner. After a while it disappears.
 
- <img src="https://aplsimple.github.io/en/tcl/baltip/files/tt5.png" class="media" alt="">
+ <img src="https://aplsimple.github.io/en/tcl/baltip/files/btip10.png" class="media" alt="">
 
 ## Usage
 
@@ -55,13 +76,11 @@ For example, having a button *.win.but1*, we can set its tip this way:
 
       ::baltip tip .win.but1 "It's a tip.\n2nd line of it.\n3rd."
 
-To get all or specific settings *baltip* settings:
+To get all or specific settings of *baltip*:
 
-      ::baltip::cget
-      ::baltip::cget -option ?-option?
+      ::baltip::cget ?-option?
       # or this way:
-      ::baltip cget
-      ::baltip cget -option ?-option?
+      ::baltip cget ?-option?
 
 To set some options:
 
@@ -71,10 +90,6 @@ To set some options:
 
 **Note**: the options set with `configure` command are *global*, i.e. active for all tips.
 The options set with `tip` command are *local*, i.e. active for the specific tip.
-
-To make all (or specific) tips use the global settings:
-
-      ::baltip::update ?widgetpath?
 
 To disable all tips:
 
@@ -90,15 +105,19 @@ To hide some specific (suspended) tip forcedly:
 
       ::baltip::hide widgetpath
 
-When you click on a widget with tip being displayed, the tip is hidden. It is the default behavior of *baltip*, but sometimes you need to re-display the hidden tip. If the widget is a button, you can include the following command in `-command` of the button:
+To update a tip's text and options:
+
+      ::baltip::update widgetpath text ?options?
+
+When you click on a widget with its tip being displayed, the tip is hidden. It is the default behavior of *baltip*, but sometimes you need to re-display the hidden tip. If the widget is a button, you can include the following command in `-command` of the button:
 
       ::baltip::repaint widgetpath
 
 ## Balloon
 
-The *normal* tip has no `-geometry` option because it's calculated by *baltip*.
+The *normal* tip has no `-geometry` option because it's calculated by *baltip*, to position the tip under its host widget.
 
-So, with `-geometry` option you get a balloon message unrelated to any visible widget (it's made on the toplevel window). The `-geometry` option has +X+Y form where X and Y are coordinates of the balloon.
+By means of `-geometry` option you get a balloon message unrelated to any visible widget: it's parented by the toplevel window. The `-geometry` option has +X+Y form where X and Y are coordinates of the balloon.
 
 For example:
 
@@ -117,8 +136,6 @@ For example:
       set text "The balloon at the right edge of the window"
       ::baltip tip .win $text -geometry $geom -pause 2000 -fade 2000
 
-As seen in the above examples, the *baltip* can be used as Tcl ensemble, so that the commands may be shortened.
-
 ## Options
 
 Below are listed the *baltip* options that are set with `tip` and `configure` and got with `cget`:
@@ -134,26 +151,43 @@ Below are listed the *baltip* options that are set with `tip` and `configure` an
  **-font** - font attributes;
  **-padx** - X padding for text;
  **-pady** - Y padding for text;
- **-padding** - padding for pack.
+ **-padding** - padding for pack;
+ **-under** - if >= 0, sets the tip under the widget, else under the pointer
+ **-bell** - if true, rings at displaying.
 
 The following options are special:
 
+ **-global** - if true, applies the settings to all registered tips.
  **-force** - if true, forces the display by 'tip' command;
  **-index** - index of menu item to tip;
  **-tag** - name of text tag to tip;
  **-geometry** - geometry (+X+Y) of the balloon.
 
+If `-global yes` option is used alone, it applies all global options to all registered tips. If `-global yes` option is used along with other options, only those options are applied to all registered tips.
+
+Of course, all global options will be applied to all tips to be created after `::baltip configuration`. For example:
+
+      ::baltip config -global yes  ;# applies all global options to all registered and to-be-created tips
+      ::baltip config -global yes -per10 2000  ;# applies `-per10` to all registered and to-be-created tips
+
+The `-index` option may have numeric (0, 1, 2...) or symbolic form (active, end, none) to indicate a menu entry, e.g. in `-command` option. For example:
+
+      ::baltip repaint .win.popupMenu -index active
+      ::baltip::tip .menu "File actions" -index 0
+
+As seen in the above examples, the *baltip* can be used as Tcl ensemble, so that the commands may be shortened.
+
+See more examples in *test.tcl* of [baltip.zip](https://chiselapp.com/user/aplsimple/repository/baltip/download).
+
+Also, you can test the *baltip* with *test2_pave.tcl* of the [apave package](https://chiselapp.com/user/aplsimple/repository/pave/download).
+
 ## Links
+
+  * [Demo of baltip v0.8](https://github.com/aplsimple/baltip/releases/download/baltip-0.8/baltip-0.8.mp4)
 
   * [Reference](https://aplsimple.github.io/en/tcl/baltip/baltip.html)
 
   * [Source](https://chiselapp.com/user/aplsimple/repository/baltip/download) (baltip.zip)
-
-You can test the *baltip* with *test2_pave.tcl* of the *apave* package available at:
-
-  * [apave package](https://chiselapp.com/user/aplsimple/repository/pave/download) (pave.zip)
-
-Note that [baltip](https://chiselapp.com/user/aplsimple/repository/baltip/download) is still disposed to updating.
 }
 }
 

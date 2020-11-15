@@ -9,7 +9,7 @@
 # License: MIT.
 # _______________________________________________________________________ #
 
-package provide baltip 0.6
+package provide baltip 0.8
 
 package require Tk
 
@@ -21,7 +21,6 @@ namespace eval ::baltip {
   namespace eval my {
   variable ttdata; array set ttdata [list]
   set ttdata(on) yes
-  set ttdata(wttip) "_baltip_"
   set ttdata(per10) 1600
   set ttdata(fade) 300
   set ttdata(pause) 600
@@ -34,6 +33,7 @@ namespace eval ::baltip {
   set ttdata(alpha) 1.0
   set ttdata(bell) no
   set ttdata(font) [font actual TkDefaultFont]
+  set ttdata(under) -16
   }
 }
 
@@ -42,26 +42,28 @@ namespace eval ::baltip {
 proc ::baltip::configure {args} {
   # Configurates the tip for all widgets.
   #   args - options ("name value" pairs)
-  # The following options are special:
-  #   -force - if true, forces the display by 'tip' command
-  #   -index - index of menu item to tip
-  #   -tag - name of text tag to tip
-  #   -geometry - geometry (+X+Y) of the balloon
   # Returns the list of -force, -geometry, -index, -tag option values.
 
-  set force 0
+  set force no
   set index -1
   set geometry [set tag ""]
+  set global [expr {[dict exists $args -global] && [dict get $args -global]}]
   foreach {n v} $args {
     set n1 [string range $n 1 end]
     switch -glob -- $n {
       -per10 - -fade - -pause - -fg - -bg - -bd - -alpha - -text - \
-      -on - -padx - -pady - -padding - -bell {
+      -on - -padx - -pady - -padding - -bell - -under {
         set my::ttdata($n1) $v
       }
       -font {foreach {k v} $v {dict set my::ttdata(font) $k $v}}
-      -force - -geometry - -index - -tag {set $n1 $v}
+      -force - -geometry - -index - -tag - -global {set $n1 $v}
       default {return -code error "invalid option \"$n\""}
+    }
+    if {$global && ($n ne "-global" || [llength $args]==2)} {
+      foreach k [array names my::ttdata -glob on,*] {
+        set w [lindex [split $k ,] 1]
+        set my::ttdata($n1,$w) $v
+      }
     }
   }
   return [list $force $geometry $index $tag]
@@ -75,7 +77,7 @@ proc ::baltip::cget {args} {
 
   if {![llength $args]} {
     lappend args -on -per10 -fade -pause -fg -bg -bd -padx -pady -padding \
-      -font -alpha -text -index -tag -bell
+      -font -alpha -text -index -tag -bell -under
   }
   set res [list]
   foreach n $args {
@@ -133,20 +135,14 @@ proc ::baltip::tip {w text args} {
 }
 #_____
 
-proc ::baltip::update {{w ""}} {
-  # Updates tips' settings according to the global settings.
-  #   w - widget's path (if omitted, updates all widgets' tips
-  # If the widget's path 'w' is set, shows the tip of this widget.
+proc ::baltip::update {w text args} {
+  # Updates tip's text and settings.
+  #  w - widget's path
+  #  text - tip's text
+  #  args - tip's settings
 
-  if {$w eq ""} {
-    foreach k [array names my::ttdata -glob on,*] {
-      set w [lindex [split $k ,] 1]
-      set my::ttdata(global,$w) yes
-    }
-  } else {
-    set my::ttdata(global,$w) yes
-    repaint $w
-  }
+  set my::ttdata(text,$w) $text
+  foreach {k v} $args {set my::ttdata([string range $k 1 end],$w) $v}
 }
 #_____
 
@@ -155,19 +151,22 @@ proc ::baltip::hide {{w ""}} {
   #   w - widget's path
   # Returns 1, if the window was really hidden.
 
-  return [expr {![catch {destroy $w.$my::ttdata(wttip)}]}]
+  return [expr {![catch {destroy $w.w__BALTIP}]}]
 }
 #_____
 
-proc ::baltip::repaint {w} {
+proc ::baltip::repaint {w args} {
   # Repaints a tip immediately.
   #   w - widget's path
+  #  args - options (incl. -index/-tag)
 
   if {[winfo exists $w] && [info exists my::ttdata(optvals,$w)] && \
   [dict exists $my::ttdata(optvals,$w) -text]} {
+    set optvals $::baltip::my::ttdata(optvals,$w)
+    lappend optvals {*}$args
     after idle [list ::baltip::my::Show $w \
       [dict get $::baltip::my::ttdata(optvals,$w) -text] yes \
-      {} $::baltip::my::ttdata(optvals,$w)]
+      {} $optvals]
   }
 }
 
@@ -188,12 +187,14 @@ proc ::baltip::my::CGet {args} {
 }
 #_____
 
-proc ::baltip::my::ShowWindow {win geo} {
+proc ::baltip::my::ShowWindow {win} {
   # Shows a window of tip.
   #   win - the tip's window
-  #   geo - being +X+Y, sets the tip coordinates
 
   if {![winfo exists $win]} return
+  variable ttdata
+  set geo $ttdata(winGEO,$win)
+  set under $ttdata(winUNDER,$win)
   set w [winfo parent $win]
   set px [winfo pointerx .]
   set py [winfo pointery .]
@@ -211,7 +212,7 @@ proc ::baltip::my::ShowWindow {win geo} {
   }
   if {$geo eq ""} {
     set x [expr {max(1,$px - round($width / 2.0))}]
-    set y [expr {$py + 16 - $ady}]
+    set y [expr {$under>=0 ? ($py + $under) : ($py - $under - $ady)}]
   } else {
     lassign [split $geo +] -> x y
     set x [expr [string map "W $width" $x]]  ;# W to shift horizontally
@@ -235,16 +236,27 @@ proc ::baltip::my::Show {w text force geo optvals} {
   #   force - if true, re-displays the existing tip
   #   geo - being +X+Y, sets the tip coordinates
   #   optvals - settings ("option value" pairs)
+  # See also: Fade, ShowWindow, ::baltip::update
 
   variable ttdata
   if {$w ne "" && ![winfo exists $w]} return
-  set win $w.$ttdata(wttip)
+  set win $w.w__BALTIP
   set px [winfo pointerx .]
   set py [winfo pointery .]
-  if {$ttdata(global,$w)} {
+  if {$geo ne ""} {                    ;# balloons not related to widgets
+    array set data $optvals
+  } elseif {$ttdata(global,$w)} {      ;# flag 'use global settings'
     array set data [::baltip::cget]
   } else {
     array set data $optvals
+    foreach k [array names ttdata -glob *,$w] {
+      set n1 [lindex [split $k ,] 0]   ;# settings set by 'update'
+      if {$n1 eq "text"} {
+        set text $ttdata($k)           ;# tip's text
+      } else {
+        set data(-$n1) $ttdata($k)     ;# tip's options
+      }
+    }
   }
   if {!$force && $geo eq "" && [winfo class $w] ne "Menu" && \
   ([winfo exists $win] || ![info exists ttdata(on,$w)] || !$ttdata(on,$w) || \
@@ -252,7 +264,8 @@ proc ::baltip::my::Show {w text force geo optvals} {
     return
   }
   ::baltip::hide $w
-  if {![string length [string trim $text]] || !$ttdata(on) || !$data(-on)} return
+  set icount [string length [string trim $text]]
+  if {!$icount || (!$ttdata(on) && !$data(-on))} return
   lappend ttdata(REGISTERED) $w
   foreach wold [lrange $ttdata(REGISTERED) 0 end-1] {::baltip::hide $wold}
   toplevel $win -bg $data(-bg) -class Tooltip$w
@@ -269,31 +282,33 @@ proc ::baltip::my::Show {w text force geo optvals} {
   bind Tooltip$win <Any-Button> [list ::baltip::hide $w]
   set aint 20
   set fint [expr {int($data(-fade)/$aint)}]
-  set icount [expr {int($data(-per10)/$aint*[string length $text]/10.0)}]
-  set icount [expr {max(1000/$aint+1,$icount)}] ;# ~1 sec. be minimal
+  set icount [expr {int($data(-per10)/$aint*$icount/10.0)}]
+  set icount [expr {max(1000/$aint+1,$icount)}] ;# 1 sec. be minimal
+  set ttdata(winGEO,$win) $geo
+  set ttdata(winUNDER,$win) $data(-under)
   if {$icount} {
     if {$geo eq ""} {
       catch {wm attributes $win -alpha $data(-alpha)}
     } else {
       ::baltip::my::Fade $win $aint [expr {round(1.0*$data(-pause)/$aint)}] \
-        0 Un $data(-alpha) $geo 1
+        0 Un $data(-alpha) 1
     }
     if {$force} {
-      ::baltip::my::Fade $win $aint $fint $icount {} $data(-alpha) $geo 1
+      ::baltip::my::Fade $win $aint $fint $icount {} $data(-alpha) 1
     } else {
       after $data(-pause) [list \
-        ::baltip::my::Fade $win $aint $fint $icount {} $data(-alpha) $geo 1]
+        ::baltip::my::Fade $win $aint $fint $icount {} $data(-alpha) 1]
     }
   } else {
     # just showing, no fading
-    after $data(-pause) [list ::baltip::my::ShowWindow $win $geo]
+    after $data(-pause) [list ::baltip::my::ShowWindow $win]
   }
   if {$data(-bell)} [list after [expr {$data(-pause)/4}] bell]
   array unset data
 }
 #_____
 
-proc ::baltip::my::Fade {w aint fint icount Un alpha geo show {geo2 ""}} {
+proc ::baltip::my::Fade {w aint fint icount Un alpha show {geos ""}} {
   # Fades/unfades the tip's window.
   #   w - the tip's window
   #   aint - interval for 'after'
@@ -301,37 +316,35 @@ proc ::baltip::my::Fade {w aint fint icount Un alpha geo show {geo2 ""}} {
   #   icount - counter of intervals
   #   Un - if equal to "Un", unfades the tip
   #   alpha - value of -alpha option
-  #   geo - coordinates (+X+Y) of tip
   #   show - flag "show the window"
-  #   geo2 - saved coordinates (+X+Y) of shown tip
+  #   geos - saved coordinates (+X+Y) of shown tip
   # See also: FadeNext, UnFadeNext
 
   update
   if {[winfo exists $w]} {
     after idle [list after $aint \
-      [list ::baltip::my::${Un}FadeNext $w $aint $fint $icount $alpha $geo $show $geo2]]
+      [list ::baltip::my::${Un}FadeNext $w $aint $fint $icount $alpha $show $geos]]
   }
 }
 #_____
 
-proc ::baltip::my::FadeNext {w aint fint icount alpha geo show {geo2 ""}} {
+proc ::baltip::my::FadeNext {w aint fint icount alpha show {geos ""}} {
   # A step to fade the tip's window.
   #   w - the tip's window
   #   aint - interval for 'after'
   #   fint - interval for fading
   #   icount - counter of intervals
   #   alpha - value of -alpha option
-  #   geo - coordinates (+X+Y) of tip
   #   show - flag "show the window"
-  #   geo2 - saved coordinates (+X+Y) of shown tip
+  #   geos - saved coordinates (+X+Y) of shown tip
   # See also: Fade
 
   incr icount -1
-  if {$show} {ShowWindow $w $geo}
+  if {$show} {ShowWindow $w}
   set show 0
   if {![winfo exists $w]} return
   lassign [split [wm geometry $w] +] -> X Y
-  if {$geo2 ne "" && $geo2 ne "+$X+$Y"} return
+  if {$geos ne "" && $geos ne "+$X+$Y"} return
   if {$icount<0} {
     set al [expr {min($alpha,($fint+$icount*1.5)/$fint)}]
     if {$al>0} {
@@ -342,31 +355,30 @@ proc ::baltip::my::FadeNext {w aint fint icount alpha geo show {geo2 ""}} {
       return
     }
   }
-  Fade $w $aint $fint $icount {} $alpha $geo $show +$X+$Y
+  Fade $w $aint $fint $icount {} $alpha $show +$X+$Y
 }
 #_____
 
-proc ::baltip::my::UnFadeNext {w aint fint icount alpha geo show {geo2 ""}} {
+proc ::baltip::my::UnFadeNext {w aint fint icount alpha show {geos ""}} {
   # A step to unfade the balloon's window.
   #   w - the tip's window
   #   aint - interval for 'after'
   #   fint - interval for fading
   #   icount - counter of intervals
   #   alpha - value of -alpha option
-  #   geo - coordinates (+X+Y) of tip
   #   show - not used (here just for compliance with Fade)
-  #   geo2 - not used (here just for compliance with Fade)
+  #   geos - not used (here just for compliance with Fade)
   # See also: Fade
 
   incr icount
   set al [expr {min($alpha,$icount*1.5/$fint)}]
   if {$al<$alpha && [catch {wm attributes $w -alpha $al}]} {set al 1}
   if {$show} {
-    ShowWindow $w $geo
+    ShowWindow $w
     set show 0
   }
   if {[winfo exists $w] && $al<$alpha} {
-    Fade $w $aint $fint $icount Un $alpha $geo 0
+    Fade $w $aint $fint $icount Un $alpha 0
   }
 }
 #_____

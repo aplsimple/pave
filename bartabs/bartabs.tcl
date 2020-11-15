@@ -7,7 +7,7 @@
 # _______________________________________________________________________ #
 
 package require Tk
-package provide bartabs 1.0.3
+package provide bartabs 1.0.4
 catch {package require baltip}
 
 # __________________ Common data of bartabs:: namespace _________________ #
@@ -488,10 +488,10 @@ method Tab_MarkBars {{BID -1} {TID -1}} {
 #_____
 
 method Tab_TextEllipsed {BID text {lneed -1}} {
-# Gets a tab's label  and tooltip
+# Gets a tab's label and tip
 #   text - label
 #   lneed - label length anyway
-# Returns a pair "label tooltip".
+# Returns a pair "label tip".
 
   lassign [my $BID cget -lablen -ELLIPSE] lablen ellipse
   if {$lneed ne -1} {set lablen $lneed}
@@ -1549,12 +1549,17 @@ method clear {} {
 }
 #_____
 
-method scrollLeft {wlarr} {
+method scrollLeft {{dotip no}} {
   # Scrolls tabs to the left.
-  #  wlarr - left arrow button
+  #  dotip - flag 'show tip'
 
-  catch {::baltip::repaint $wlarr}
-  if {[my [set BID [my ID]] ScrollCurr -1]} return
+  set BID [my ID]
+  set w [my $BID cget -wbar]
+  set wlarr $w.larr   ;# left arrow
+  if {[my $BID ScrollCurr -1]} {
+    if {$dotip} {catch {::baltip::repaint $wlarr}}
+    return
+  }
   lassign [my $BID cget -tleft -LLEN -scrollsel] tleft llen sccur
   if {![string is integer -strict $tleft]} {set tleft 0}
   if {$tleft && $tleft<$llen} {
@@ -1563,17 +1568,22 @@ method scrollLeft {wlarr} {
     my $BID configure -tleft $tleft
     my $BID Refill $tleft yes
     if {$sccur} {my $tID Tab_BeCurrent}
-    catch {::baltip::repaint $wlarr}
+    if {$dotip} {catch {::baltip::repaint $wlarr}}
   }
 }
 #_____
 
-method scrollRight {wrarr} {
+method scrollRight {{dotip no}} {
   # Scrolls tabs to the right.
-  #  wrarr - right arrow button
+  #  dotip - flag 'show tip'
 
-  catch {::baltip::repaint $wrarr}
-  if {[my [set BID [my ID]] ScrollCurr 1]} return
+  set BID [my ID]
+  set w [my $BID cget -wbar]
+  set wrarr $w.rarr   ;# left arrow
+  if {[my $BID ScrollCurr 1]} {
+    if {$dotip} {catch {::baltip::repaint $wrarr}}
+    return
+  }
   lassign [my $BID cget -tright -LLEN -scrollsel] tright llen sccur
   if {![string is integer -strict $tright]} {set tright [expr {$llen-2}]}
   if {$tright<($llen-1)} {
@@ -1582,7 +1592,7 @@ method scrollRight {wrarr} {
     my $BID configure -tright $tright
     my $BID Refill $tright no
     if {$sccur} {my $tID Tab_BeCurrent}
-    catch {::baltip::repaint $wrarr}
+    if {$dotip} {catch {::baltip::repaint $wrarr}}
   }
 }
 #_____
@@ -1794,9 +1804,9 @@ method create {barCom {barOpts ""}} {
   my My [set BID [my Bar_Data $barOpts]]
   my $BID Style
   ttk::button $wlarr -style ClButton$BID -image bts_ImgLeft \
-    -command [list [self] $BID scrollLeft $wlarr] -takefocus 0
+    -command [list [self] $BID scrollLeft yes] -takefocus 0
   ttk::button $wrarr -style ClButton$BID -image bts_ImgRight \
-    -command [list [self] $BID scrollRight $wrarr] -takefocus 0
+    -command [list [self] $BID scrollRight yes] -takefocus 0
   ttk::frame $wframe -relief flat
   pack $wlarr -side left -padx 0 -pady 0 -anchor e
   pack $wframe -after $wlarr -side left -padx 0 -pady 0 -fill x -expand 1

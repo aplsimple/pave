@@ -1,40 +1,49 @@
 lappend auto_path .
 package require baltip
+catch {source [file join ../transpops transpops.tcl]}
 
 button .b -text Hello -command {
   ::baltip hide .b
-  ::baltip update
   if {[incr ::ttt]%2} {
     puts "the button's tip disabled"; bell
     ::baltip tip .b ""
-    ::baltip tip .l "      Danger!\n\nDon't trespass!" \
-      -fg white -bg red -font "-weight bold" -padx 20 -pady 15
+    ::baltip update .l "      Danger!\n\nDon't trespass!" \
+      -fg white -bg red -font "-weight bold" -padx 20 -pady 15 -global 0
   } else {
     puts "the button's tip enabled"; bell
     ::baltip config -fg black -bg #FBFB95 -padx 4 -pady 3 \
       -font "-size [expr {max(3,11-$::ttt/2)}] -weight normal"
     ::baltip tip .b "Hi again, world! \
       \nI feel [if $::ttt<2 {set _ great!} {set _ {smaller and smaller...}}]" \
-      -force yes
-    ::baltip tip .l "It's okay. Come on!" \
+      -under 0 -force yes
+    ::baltip update .l "It's okay. Come on!" \
       {*}[::baltip cget -fg -bg -font -padx -pady]
   }
-  if {$::ttt>11} {set ::ttt -2}
+  if {$::ttt>7} {set ::ttt -2}
 }
 
 set geo +999999+30  ;# 999999 to get it the most right
 set alpha 0.8
+lassign [::baltip cget -fg -bg] - ::fg - ::bg
+set ::fg0 $::fg
+set ::bg0 $::bg
+set ::fg1 white
+set ::bg1 black
 button .b2 -text "Balloon at $geo" -command {::baltip tip "" \
   "It's a stand-alone balloon\nto view in black & white \
   \nbold font and $alpha opacity." -alpha $alpha -fg white -bg black \
   -font {-weight bold -size 11} -per10 1400 -pause 1500 -fade 1500 \
-  -geometry $geo -bell yes}
+  -geometry $geo -bell yes -on yes}
 
 label .l -text "Click me (tearoff popup)"
 
 set m [menu .popupMenu]
-$m add command -label "Popup menu item 1" -command bell
-$m add command -label "Popup menu item 2" -command bell
+$m add command -label "Global settings: -fg $::fg1 -bg $::bg1" -command "
+  ::baltip config -fg $::fg1 -bg $::bg1 -global yes;
+  if {\[$m entryconfigure active\] eq {}} {::baltip repaint $m -index active}"
+$m add command -label "Global settings: -fg $::fg0 -bg $::bg0" -command "
+  ::baltip config -fg $::fg0 -bg $::bg0 -global yes;
+  if {\[$m entryconfigure active\] eq {}} {::baltip repaint $m -index 2}"
 bind .l <Button-3> {tk_popup .popupMenu %X %Y}
 
 menu .menu -tearoff 0
@@ -61,20 +70,24 @@ text .t -width 24 -height 4
 
 set ::on 1
 checkbutton .cb -text "Tips on" -variable ::on \
-  -command {::baltip config -on [expr {$::on}]; \
-  puts "all tips [if $::on {set _ enabled} {set _ disabled}]"; \
-  ::baltip update .cb}
+  -command {
+    puts "all tips [if $::on {set _ enabled} {set _ disabled}]"
+    ::baltip config -global yes -on $::on -fg $::fg -bg $::bg
+    ::baltip update .cb "After clicking:\nnew tip & options" \
+      -fg maroon -padding 2 -padx 15 -pady 15 -global 0
+    if {$::on} {::baltip repaint .cb}
+  }
 
 pack .b .l .b2 .t .cb
 . configure -menu .menu
 
 ::baltip::configure -per10 1200 -fade 300 -font {-size 11}
-::baltip::tip .b "Hello, world!\nIt's me o Lord!"
+::baltip::tip .b "Hello, world!\nIt's me o Lord!" -under 0
 ::baltip::tip .l "Calls a popup tearoff menu.\nThis tip is switched by the button\nto an alert/message."
 ::baltip::tip .b2 "Displays a message at top right corner, having\
   \ncoordinates set with \"-geometry $geo\" option."
-::baltip::tip .popupMenu "First" -index 1
-::baltip::tip .popupMenu "2nd" -index 2
+::baltip::tip .popupMenu "Sets new colors of all tips" -index 1
+::baltip::tip .popupMenu "Restores colors of all tips" -index 2
 ::baltip::tip .menu "File actions" -index 0
 ::baltip::tip .menu "Help actions" -index 1
 ::baltip::tip .menu.file "Opens a file\n(stub)" -index 0
@@ -82,10 +95,8 @@ pack .b .l .b2 .t .cb
 ::baltip::tip .menu.file "Saves a file\n(stub)" -index 2
 ::baltip::tip .menu.file "Closes the test" -index 4
 ::baltip::tip .menu.help "About the package" -index 0
-::baltip::tip .t "There are two tags\nwith their own tips."
+::baltip::tip .t "There are two tags\nwith their own tips." -under 0
 ::baltip::tip .t "1st tag's tip!" -tag UnderLine1
 ::baltip::tip .t "2nd tag's tip!" -tag UnderLine2
-::baltip::tip .cb "Switches all tips on/off."
-
-puts "1 : [::baltip::cget]"
-puts "2 : [::baltip::cget -fade -font]"
+::baltip::tip .cb "Switches all tips on/off\nexcept for balloons with \"-on yes\"."
+catch {::transpops::run .bak/transpops.txt <Control-q> .}
