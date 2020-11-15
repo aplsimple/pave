@@ -1982,7 +1982,7 @@ oo::class create ::apave::APave {
     if {$wr ne ""} {
       for {set i [llength $::apave::_AP_VARS(TIMW)]} {[incr i -1]>=0} {} {
         set w [lindex $::apave::_AP_VARS(TIMW) $i]
-        if {[string first $wr $w]==0 && ![catch {tooltip4::hide $w}]} {
+        if {[string first $wr $w]==0 && ![catch {baltip::hide $w}]} {
           set ::apave::_AP_VARS(TIMW) [lreplace $::apave::_AP_VARS(TIMW) $i $i]
         }
       }
@@ -2163,7 +2163,7 @@ oo::class create ::apave::APave {
     set v [string map [list %l $txt %t $tt] $v]
     if {$tt ne ""} {
       my initTooltip
-      ::tooltip4 too $lab $tt
+      ::baltip tip $lab $tt
       lappend ::apave::_AP_VARS(TIMW) $lab
     }
     if {$inv} {
@@ -2356,7 +2356,7 @@ oo::class create ::apave::APave {
     set addcomms {}
     if {[set tooltip [::apave::getOption -tooltip {*}$attrs]] ne ""} {
       my initTooltip
-      lappend addcomms [list tooltip4::tooltip $wdg $tooltip]
+      lappend addcomms [list baltip::tip $wdg $tooltip]
       lappend ::apave::_AP_VARS(TIMW) $wdg
       set attrs [::apave::removeOptions $attrs -tooltip]
     }

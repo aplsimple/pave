@@ -9,7 +9,7 @@
 # License: MIT.
 # _______________________________________________________________________ #
 
-package provide tooltip4 0.5
+package provide tooltip4 0.5.1
 
 package require Tk
 
@@ -203,7 +203,7 @@ proc ::tooltip4::my::ShowWindow {win geo} {
   }
   if {$geo eq ""} {
     set x [expr {max(1,$px - round($width / 2.0))}]
-    set y [expr {$py + 20 - $ady}]
+    set y [expr {$py + 16 - $ady}]
   } else {
     lassign [split $geo +] -> x y
     set x [expr [string map "W $width" $x]]  ;# W to shift horizontally

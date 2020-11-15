@@ -16,7 +16,7 @@ set pkg_versions0 "\n  <red>apave $apavever</red>\n\n"
 append pkg_versions0 "  <red>e_menu $apavever</red>\n\n"
 append pkg_versions0 "  <red>bartabs [package require bartabs]</red>\n\n"
 append pkg_versions0 "  <red>hl_tcl [package require hl_tcl]</red>\n\n"
-append pkg_versions0 "  <red>tooltip4 [package require tooltip4]</red>"
+append pkg_versions0 "  <red>baltip [package require baltip]</red>"
 set pkg_versions [string map {<red> "" </red> "" \n\n , \n ""} $pkg_versions0]
 set ::e_menu_dir [file normalize [file join $::testdirname ../../e_menu]]
 catch {source [file join $::e_menu_dir e_menu.tcl]}
@@ -171,9 +171,9 @@ namespace eval t {
       " Color scheme $cs: [pave csGetName $cs]"
       catch {::t::colorBar}
     }
-    tooltip4::tooltip [pave BuT_Img4] \
+    baltip::tip [pave BuT_Img4] \
       "Next is $::t::nextcs: [pave csGetName $::t::nextcs]"
-    tooltip4::tooltip [pave BuT_Img3] \
+    baltip::tip [pave BuT_Img3] \
       "Previous is $::t::prevcs: [pave csGetName $::t::prevcs]"
     lassign [pave csGet] fg - bg - - bS fS
     set ::t::textTags [list \
@@ -213,7 +213,7 @@ namespace eval t {
         .win.fra.fra.$::t::curTab select $nt
         lassign [split [winfo geometry .win] x+] w h x y
         set geo "+([expr {$w+$x}]-W-8)+$y-20"
-        ::tooltip4 too .win "The tab is selected by your request: \
+        ::baltip tip .win "The tab is selected by your request: \
           \n\"[.win.fra.fra.$::t::curTab tab $nt -text]\"" \
           -geometry $geo -fg white -bg black -font {-weight bold -size 11} \
           -pause 1500 -fade 1500 -alpha 0.8 -padx 20 -pady 20
@@ -256,7 +256,7 @@ namespace eval t {
    \u2022 <link1>aplsimple.github.io/en/tcl/e_menu</link1>
    \u2022 <link1>aplsimple.github.io/en/tcl/bartabs</link1>
    \u2022 Reference on <link2>hl_tcl</link2>
-   \u2022 Reference on <link2>tooltip4</link2>
+   \u2022 Reference on <link2>baltip</link2>
 
   License: MIT.
   _____________________________________

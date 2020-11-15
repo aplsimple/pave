@@ -1,4 +1,4 @@
-package ifneeded tooltip4 0.5 [list source [file join $dir tooltip4.tcl]]
+package ifneeded tooltip4 0.5.1 [list source [file join $dir tooltip4.tcl]]
 
 namespace eval ::tooltip4 {
 

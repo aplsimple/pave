@@ -133,7 +133,7 @@ Links:
 
 [Reference on bartabs](https://aplsimple.github.io/en/tcl/bartabs/bartabs.html)
 
-[Reference on tooltip4](https://aplsimple.github.io/en/tcl/tooltip4/tooltip4.html) (the package used by *bartabs*)
+[Reference on baltip](https://aplsimple.github.io/en/tcl/baltip/baltip.html) (the package used by *bartabs*)
   }
 
 }

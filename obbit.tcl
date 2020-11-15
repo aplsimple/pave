@@ -1336,12 +1336,12 @@ oo::class create ::apave::ObjectTheming {
   method initTooltip {args} {
 
     # Configurates colors and other attributes of tooltip.
-    #  args - options of ::tooltip4::configure
+    #  args - options of ::baltip::configure
 
-    if {[info commands ::tooltip4::configure] eq ""} {
-      package require tooltip4
+    if {[info commands ::baltip::configure] eq ""} {
+      package require baltip
     }
-    ::tooltip4 config {*}$args
+    ::baltip config {*}$args
     return
   }
 

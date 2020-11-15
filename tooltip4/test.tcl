@@ -21,7 +21,7 @@ button .b -text Hello -command {
   }
   if {$::ttt>11} {set ::ttt -2}
   }
-set geo +1500+30
+set geo +999999+30  ;# 999999 to get it the most right
 set alpha 0.8
 button .b2 -text "Balloon at $geo" -command {::tooltip4 too "" \
   "It's a stand-alone balloon\nto view in black & white \

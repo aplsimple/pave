@@ -8,7 +8,7 @@
 
 package require Tk
 package provide bartabs 1.0.3
-catch {package require tooltip4}
+catch {package require baltip}
 
 # __________________ Common data of bartabs:: namespace _________________ #
 
@@ -192,7 +192,7 @@ method Tab_Create {BID TID w text} {
       {*}[my Tab_Font $BID]
   }
   lassign [my Tab_TextEllipsed $BID $text] text ttip
-  catch {tooltip4::tooltip $wb1 $ttip; tooltip4::tooltip $wb2 $ttip}
+  catch {baltip::tip $wb1 $ttip; baltip::tip $wb2 $ttip}
   $wb1 configure -text $text
   if {[my Tab_Iconic $BID]} {
     $wb2 configure -state normal
@@ -1150,7 +1150,7 @@ method ArrowsState {tleft tright sright} {
       append tip "$text\n"
     }
   }
-  catch {::tooltip4::tooltip $wlarr [string trim $tip]}
+  catch {::baltip::tip $wlarr [string trim $tip]}
   if {$sright} {
     if {$hidearr && [catch {pack $wrarr -after $wframe -side right -anchor e}]} {
       pack $wrarr -side right -anchor e
@@ -1177,7 +1177,7 @@ method ArrowsState {tleft tright sright} {
       append tip "$text\n"
     }
   }
-  catch {::tooltip4::tooltip $wrarr [string trim $tip]}
+  catch {::baltip::tip $wrarr [string trim $tip]}
 }
 #_____
 
@@ -1553,7 +1553,7 @@ method scrollLeft {wlarr} {
   # Scrolls tabs to the left.
   #  wlarr - left arrow button
 
-  catch {::tooltip4::repaint $wlarr}
+  catch {::baltip::repaint $wlarr}
   if {[my [set BID [my ID]] ScrollCurr -1]} return
   lassign [my $BID cget -tleft -LLEN -scrollsel] tleft llen sccur
   if {![string is integer -strict $tleft]} {set tleft 0}
@@ -1563,7 +1563,7 @@ method scrollLeft {wlarr} {
     my $BID configure -tleft $tleft
     my $BID Refill $tleft yes
     if {$sccur} {my $tID Tab_BeCurrent}
-    catch {::tooltip4::repaint $wlarr}
+    catch {::baltip::repaint $wlarr}
   }
 }
 #_____
@@ -1572,7 +1572,7 @@ method scrollRight {wrarr} {
   # Scrolls tabs to the right.
   #  wrarr - right arrow button
 
-  catch {::tooltip4::repaint $wrarr}
+  catch {::baltip::repaint $wrarr}
   if {[my [set BID [my ID]] ScrollCurr 1]} return
   lassign [my $BID cget -tright -LLEN -scrollsel] tright llen sccur
   if {![string is integer -strict $tright]} {set tright [expr {$llen-2}]}
@@ -1582,7 +1582,7 @@ method scrollRight {wrarr} {
     my $BID configure -tright $tright
     my $BID Refill $tright no
     if {$sccur} {my $tID Tab_BeCurrent}
-    catch {::tooltip4::repaint $wrarr}
+    catch {::baltip::repaint $wrarr}
   }
 }
 #_____
