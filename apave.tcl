@@ -2356,7 +2356,14 @@ oo::class create ::apave::APave {
     set addcomms {}
     if {[set tooltip [::apave::getOption -tooltip {*}$attrs]] ne ""} {
       my initTooltip
-      lappend addcomms [list baltip::tip $wdg $tooltip]
+      if {[set i [string first " -ATTR " $tooltip]]>0} {
+        set tooltip [string range $tooltip 1 end-1]
+        set tattrs [string range $tooltip $i+6 end]
+        set tooltip "{[string range $tooltip 0 $i-2]}"
+      } else {
+        set tattrs ""
+      }
+      lappend addcomms [list baltip::tip $wdg $tooltip {*}$tattrs]
       lappend ::apave::_AP_VARS(TIMW) $wdg
       set attrs [::apave::removeOptions $attrs -tooltip]
     }

@@ -6,7 +6,7 @@
 # License: MIT.
 # _______________________________________________________________________ #
 
-package provide hl_tcl 0.7.2
+package provide hl_tcl 0.7.3
 
 # _______________ Common data of ::hl_tcl:: namespace ______________ #
 
@@ -390,14 +390,18 @@ proc ::hl_tcl::my::MemPos {txt} {
 
   variable data
   set ln [$txt index insert]
+  set updcurr [expr {![info exists data(CUR_POS,$txt)] || \
+    int($data(CUR_POS,$txt)) != int($ln)}]
   set data(CUR_POS,$txt) $ln
   set data(CUR_LEN,$txt) [$txt index end]
   lassign [CountQSH $txt $ln] \
     data(CNT_QUOTE,$txt) data(CNT_SLASH,$txt) data(CNT_COMMENT,$txt)
-  $txt tag remove tagBRACKET 1.0 end
-  $txt tag remove tagBRACKETERR 1.0 end
-  $txt tag remove tagCURLINE 1.0 end
-  $txt tag add tagCURLINE [list $ln linestart] [list $ln lineend]+1displayindices
+  if {[$txt tag ranges tagBRACKET] ne ""}    {$txt tag remove tagBRACKET 1.0 end}
+  if {[$txt tag ranges tagBRACKETERR] ne ""} {$txt tag remove tagBRACKETERR 1.0 end}
+  if {$updcurr} {
+    $txt tag remove tagCURLINE 1.0 end
+    $txt tag add tagCURLINE [list $ln linestart] [list $ln lineend]+1displayindices
+  }
 }
 #_____
 
@@ -840,6 +844,7 @@ proc ::hl_tcl::hl_text {txt} {
   $txt tag configure tagBRACKETERR -foreground white -background red
   $txt tag configure tagCURLINE -background $clrCURL
   $txt tag raise sel
+  $txt tag raise tagBRACKETERR
   my::HighlightAll $txt
   if {![info exists ::hl_tcl::my::data(BIND_TXT,$txt)]} {
     bind $txt <KeyPress> [list + [namespace current]::my::MemPos $txt]

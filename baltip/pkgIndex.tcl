@@ -1,4 +1,4 @@
-package ifneeded baltip 0.8 [list source [file join $dir baltip.tcl]]
+package ifneeded baltip 0.8.1 [list source [file join $dir baltip.tcl]]
 
 namespace eval ::baltip {
 

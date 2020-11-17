@@ -9,7 +9,7 @@
 # License: MIT.
 # _______________________________________________________________________ #
 
-package provide baltip 0.8
+package provide baltip 0.8.1
 
 package require Tk
 
@@ -291,13 +291,13 @@ proc ::baltip::my::Show {w text force geo optvals} {
       catch {wm attributes $win -alpha $data(-alpha)}
     } else {
       ::baltip::my::Fade $win $aint [expr {round(1.0*$data(-pause)/$aint)}] \
-        0 Un $data(-alpha) 1
+        0 Un $data(-alpha) 1 $geo
     }
     if {$force} {
-      ::baltip::my::Fade $win $aint $fint $icount {} $data(-alpha) 1
+      ::baltip::my::Fade $win $aint $fint $icount {} $data(-alpha) 1 $geo
     } else {
       after $data(-pause) [list \
-        ::baltip::my::Fade $win $aint $fint $icount {} $data(-alpha) 1]
+        ::baltip::my::Fade $win $aint $fint $icount {} $data(-alpha) 1 $geo]
     }
   } else {
     # just showing, no fading
@@ -308,7 +308,7 @@ proc ::baltip::my::Show {w text force geo optvals} {
 }
 #_____
 
-proc ::baltip::my::Fade {w aint fint icount Un alpha show {geos ""}} {
+proc ::baltip::my::Fade {w aint fint icount Un alpha show geo {geos ""}} {
   # Fades/unfades the tip's window.
   #   w - the tip's window
   #   aint - interval for 'after'
@@ -317,18 +317,19 @@ proc ::baltip::my::Fade {w aint fint icount Un alpha show {geos ""}} {
   #   Un - if equal to "Un", unfades the tip
   #   alpha - value of -alpha option
   #   show - flag "show the window"
+  #   geo - coordinates (+X+Y) of balloon
   #   geos - saved coordinates (+X+Y) of shown tip
   # See also: FadeNext, UnFadeNext
 
   update
   if {[winfo exists $w]} {
     after idle [list after $aint \
-      [list ::baltip::my::${Un}FadeNext $w $aint $fint $icount $alpha $show $geos]]
+      [list ::baltip::my::${Un}FadeNext $w $aint $fint $icount $alpha $show $geo $geos]]
   }
 }
 #_____
 
-proc ::baltip::my::FadeNext {w aint fint icount alpha show {geos ""}} {
+proc ::baltip::my::FadeNext {w aint fint icount alpha show geo {geos ""}} {
   # A step to fade the tip's window.
   #   w - the tip's window
   #   aint - interval for 'after'
@@ -336,6 +337,7 @@ proc ::baltip::my::FadeNext {w aint fint icount alpha show {geos ""}} {
   #   icount - counter of intervals
   #   alpha - value of -alpha option
   #   show - flag "show the window"
+  #   geo - coordinates (+X+Y) of balloon
   #   geos - saved coordinates (+X+Y) of shown tip
   # See also: Fade
 
@@ -345,8 +347,8 @@ proc ::baltip::my::FadeNext {w aint fint icount alpha show {geos ""}} {
   if {![winfo exists $w]} return
   lassign [split [wm geometry $w] +] -> X Y
   if {$geos ne "" && $geos ne "+$X+$Y"} return
+  set al [expr {min($alpha,($fint+$icount*1.5)/$fint)}]
   if {$icount<0} {
-    set al [expr {min($alpha,($fint+$icount*1.5)/$fint)}]
     if {$al>0} {
       if {[catch {wm attributes $w -alpha $al}]} {set al 0}
     }
@@ -354,12 +356,14 @@ proc ::baltip::my::FadeNext {w aint fint icount alpha show {geos ""}} {
       catch {destroy $w}
       return
     }
+  } elseif {$al>0 && $geo eq ""} {
+    catch {wm attributes $w -alpha $al}
   }
-  Fade $w $aint $fint $icount {} $alpha $show +$X+$Y
+  Fade $w $aint $fint $icount {} $alpha $show $geo +$X+$Y
 }
 #_____
 
-proc ::baltip::my::UnFadeNext {w aint fint icount alpha show {geos ""}} {
+proc ::baltip::my::UnFadeNext {w aint fint icount alpha show geo {geos ""}} {
   # A step to unfade the balloon's window.
   #   w - the tip's window
   #   aint - interval for 'after'
@@ -367,6 +371,7 @@ proc ::baltip::my::UnFadeNext {w aint fint icount alpha show {geos ""}} {
   #   icount - counter of intervals
   #   alpha - value of -alpha option
   #   show - not used (here just for compliance with Fade)
+  #   geo - not used (here just for compliance with Fade)
   #   geos - not used (here just for compliance with Fade)
   # See also: Fade
 
@@ -378,7 +383,7 @@ proc ::baltip::my::UnFadeNext {w aint fint icount alpha show {geos ""}} {
     set show 0
   }
   if {[winfo exists $w] && $al<$alpha} {
-    Fade $w $aint $fint $icount Un $alpha 0
+    Fade $w $aint $fint $icount Un $alpha 0 $geo
   }
 }
 #_____
