@@ -121,7 +121,7 @@ namespace eval t {
   }
 
   # imitating the toolbar functions
-  proc toolBut {num {cs -2} {starting no}} {
+  proc toolBut {num {cs -2} {starting no} {hl yes}} {
     if {$num in {3 4}} {
       [pave Menu] entryconfigure 2 -font {-slant roman -size 10}
     } elseif {$num == 2} {
@@ -186,8 +186,17 @@ namespace eval t {
       set ::t::restart 0
       [pave ChbRestart] configure -state disabled
     }
-    bartabs::drawAll
-    ::hl_tcl::hl_all -dark [pave csDarkEdit] -font [pave csFontMono]
+    if {$hl} {
+      bartabs::drawAll
+      ::hl_tcl::hl_all -dark [pave csDarkEdit] -font [pave csFontMono]
+    }
+    after idle {
+      if {$::t::restart} {
+        [::t::pave Spx_FS] configure -state disabled
+      } else {
+        [::t::pave Spx_FS] configure -state normal
+      }
+    }
   }
 
   # ask about exiting
@@ -219,6 +228,15 @@ namespace eval t {
           -pause 1500 -fade 1500 -alpha 0.8 -padx 20 -pady 20
       }
     }
+  }
+
+  # check the value to avoid the infinite cycles of redrawing
+  proc fontszCheck {} {
+    lappend ::afters [after 0 {
+      foreach a $::afters {after cancel $a}
+      set ::afters [list]
+      ::t::toolBut 4 -3
+    }]
   }
 
   # displaying the cursor position and the current line's contents
@@ -780,7 +798,7 @@ proc putsResult3 {} {
     set firstin [expr {$::t::newCS==[apave::cs_Non]}]
     apave::APaveInput create pdlg .win
     apave::APaveInput create pave .win $::t::newCS
-    pave initTooltip -fg black -bg #FBFB95 -font {-size 11}
+    pave initLinkFont -slant italic -underline 1
     pave untouchWidgets *buTClr*
     if {!$firstin} {pave basicFontSize $::t::fontsz}
     set ::t::filetxt [::apave::readTextFile $::t::ftx1]
@@ -821,7 +839,7 @@ proc putsResult3 {} {
       if {[catch {image create photo $img -data [::apave::iconData $icon]}]} {
         image create photo $img -data [::apave::iconData none]
       }
-      append ::t::toolList " $img {{} -tooltip {Icon: $icon -ATTR -under 4}}"
+      append ::t::toolList " $img {{} -tooltip {Icon: $icon@@ -under 4}}"
     }
     set ::bgst [ttk::style lookup TScrollbar -troughcolor]
     ttk::style conf TLabelframe -labelmargins {5 10 1 1} -padding 3
@@ -936,26 +954,27 @@ proc putsResult3 {} {
       # {#               2ND TAB (DEMO OF ttk::panewindow)               }
       ####################################################################
       {tool - - - - {pack -side top} {-array {
-            Img1 {{::t::toolBut 1} -tooltip "Start progress -ATTR -under 5" -state disabled}
+            Img1 {{::t::toolBut 1} -tooltip "Start progress@@ -under 5" -state disabled}
             h_ 3
-            Img2 {{::t::toolBut 2} -tooltip "Stop progress -ATTR -under 5"}
+            Img2 {{::t::toolBut 2} -tooltip "Stop progress@@ -under 5"}
             sev 7
             h_ 1
-            Img5 {{::t::e_menu} -tooltip "Run e_menu -ATTR -under 5"}
+            Img5 {{::t::e_menu} -tooltip "Run e_menu@@-under 5"}
             h_ 1
-            Img6 {{::t::screenshooter} -tooltip "Run screenshooter -ATTR -under 5"}
+            Img6 {{::t::screenshooter} -tooltip "Run screenshooter@@ -under 5"}
             sev 7
             h_ 1
             Img3 {{::t::toolBut 3 \[set ::t::prevcs\]}}
             h_ 1
-            opcTool {::t::opcc ::t::opcColors {-width 20} {t::opcToolPre %a} -command t::opcToolPost -tooltip "Current color scheme -ATTR -under 3"}
+            opcTool {::t::opcc ::t::opcColors {-width 20} {t::opcToolPre %a} -command t::opcToolPost -tooltip "Current color scheme@@ -under 3"}
             h_ 1
             Img4 {{::t::toolBut 4 \[set ::t::nextcs\]}}
             h_ 4
-            ChbRestart {-var ::t::restart -t "Restart" -tooltip "To restart test2\nif CS changes -ATTR -under 3"}
+            ChbRestart {-var ::t::restart -t "Restart" -command {::t::toolBut 0} \
+              -tooltip "To restart test2\nif CS changes@@ -under 3"}
             sev 8
             h_ 1
-            spX  {-tvar ::t::fontsz -command {::t::toolBut 4 -3} -from 8 -to 16 -w 3 -justify center -tooltip "Font size 8..16 -ATTR -under 3" -myown {
+            Spx_FS  {-tvar ::t::fontsz -command {::t::fontszCheck} -from 8 -to 16 -w 3 -justify center -tooltip "Font size 8..16\n(enabled if no 'Restart')@@ -under 3" -myown {
               puts "\nA local/global configuration may be set with -myown attribute, e.g.\
               \n  %w configure -bg yellow -font {-weight bold}\
               \n  ::NS::GLOBAL_CONFIG %w"}}

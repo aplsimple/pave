@@ -14,15 +14,15 @@ The original code has been modified to make the tip:
   * have configure/cget etc. wrapped in Tcl ensemble for convenience
 
 The video introduction to *balltip* is presented by
- [baltip-0.8.mp4](https://github.com/aplsimple/baltip/releases/download/baltip-0.8/baltip-0.8.mp4) (19 Mb).
+ [baltip-1.0.mp4](https://github.com/aplsimple/baltip/releases/download/baltip-1.0/baltip-1.0.mp4) (11 Mb).
 
-Below are several pictures just to glance at the *baltip*.
+Below are several pictures just to glance at *baltip*.
 
 *Under the mouse pointer*. By default, the tips are displayed just under the mouse pointer.
 
  <img src="https://aplsimple.github.io/en/tcl/baltip/files/btip3.png" class="media" alt="">
 
-*Under the widget*. This button's tip is configured to be just under the button. As well as the text's tip.
+*Under the widget*. This button's tip is configured to be just under the button. As well as the text's tip. This feature is well fit for widgets positioned in a row (e.g. in toolbar, tabbar etc.).
 
  <img src="https://aplsimple.github.io/en/tcl/baltip/files/btip1.png" class="media" alt="">
 
@@ -32,7 +32,7 @@ Below are several pictures just to glance at the *baltip*.
 
  <img src="https://aplsimple.github.io/en/tcl/baltip/files/btip4.png" class="media" alt="">
 
-*Tips of menu items*. The menu items can have their own tips. The popup menus may be tear-off at that.
+*Tips of menu items*. The menu items can have their own tips. The popup menus may be *tear-off* at that.
 
  <img src="https://aplsimple.github.io/en/tcl/baltip/files/btip5.png" class="media" alt="">
 
@@ -50,13 +50,13 @@ The configuring can include: font, colors, paddings, border, exposition time, op
 
  <img src="https://aplsimple.github.io/en/tcl/baltip/files/btip9.png" class="media" alt="">
 
-*Balloon*. The balloon appears at the top right corner. After a while it disappears.
+*Balloon*. The balloon messages aren't related to any widgets. This one is configurated to appear at the top right corner, disappearing after a while.
 
  <img src="https://aplsimple.github.io/en/tcl/baltip/files/btip10.png" class="media" alt="">
 
 ## Usage
 
-The *baltip* usage is rather straightforward. Firstly we need *package require*:
+The *baltip* usage is rather straightforward. Firstly we need `package require`:
 
       lappend auto_path "dir_of_baltip"
       package require baltip
@@ -147,12 +147,12 @@ Below are listed the *baltip* options that are set with `tip` and `configure` an
  **-padx** - X padding for text;
  **-pady** - Y padding for text;
  **-padding** - padding for pack;
- **-under** - if >= 0, sets the tip under the widget, else under the pointer
+ **-under** - if >= 0, sets the tip under the widget, else under the pointer;
  **-bell** - if true, rings at displaying.
 
 The following options are special:
 
- **-global** - if true, applies the settings to all registered tips.
+ **-global** - if true, applies the settings to all registered tips;
  **-force** - if true, forces the display by 'tip' command;
  **-index** - index of menu item to tip;
  **-tag** - name of text tag to tip;
@@ -170,15 +170,15 @@ The `-index` option may have numeric (0, 1, 2...) or symbolic form (active, end,
       ::baltip repaint .win.popupMenu -index active
       ::baltip::tip .menu "File actions" -index 0
 
-As seen in the above examples, the *baltip* can be used as Tcl ensemble, so that the commands may be shortened.
+As seen in the above examples, *baltip* can be used as Tcl ensemble, so that the commands may be shortened.
 
 See more examples in *test.tcl* of [baltip.zip](https://chiselapp.com/user/aplsimple/repository/baltip/download).
 
-Also, you can test the *baltip* with *test2_pave.tcl* of the [apave package](https://chiselapp.com/user/aplsimple/repository/pave/download).
+Also, you can test *baltip* with *test2_pave.tcl* of [apave package](https://chiselapp.com/user/aplsimple/repository/pave/download).
 
 ## Links
 
-  * [Demo of baltip v0.8](https://github.com/aplsimple/baltip/releases/download/baltip-0.8/baltip-0.8.mp4)
+  * [Demo of baltip v1.0](https://github.com/aplsimple/baltip/releases/download/baltip-1.0/baltip-1.0.mp4)
 
   * [Reference](https://aplsimple.github.io/en/tcl/baltip/baltip.html)
 

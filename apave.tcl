@@ -117,6 +117,7 @@ namespace eval ::apave {
   set _AP_VARS(.,SHADOW) 0
   set _AP_VARS(.,MODALS) 0
   set _AP_VARS(TIMW) [list]
+  set _AP_VARS(LINKFONT) [list -underline 1]
   variable _AP_VISITED;  array set _AP_VISITED [list]
   set _AP_VISITED(ALL) [list]
   variable UFF "\uFFFF"
@@ -329,8 +330,7 @@ oo::class create ::apave::APave {
     namespace eval ${_pav(ns)}PN {}
     array set ${_pav(ns)}PN::AR {}
     # set/reset a color scheme if it is/was requested
-    #if {$cs<-1} {set cs [my csCurrent]}
-    if {$cs>=-1} {my csSet $cs}
+    if {$cs>=-1} {my csSet $cs} {my initTooltip}
 
     # object's procedures
 
@@ -2008,6 +2008,24 @@ oo::class create ::apave::APave {
     }
   }
 
+  ###########################################################################
+
+  method initLinkFont {args} {
+
+    # Gets/sets font attributes of links (labels & text tags with -link).
+    #  args - font attributes ("-underline 1" by default)
+    # Returns the current value of these attributes.
+
+    if {[set ll [llength $args]]} {
+      if {$ll%2} {   ;# clear the attributes, if called with ""
+        set ::apave::_AP_VARS(LINKFONT) [list]
+      } else {
+        set ::apave::_AP_VARS(LINKFONT) $args
+      }
+    }
+    return $::apave::_AP_VARS(LINKFONT)
+  }
+
   #########################################################################
 
   method labelFlashing {w1 w2 first args} {
@@ -2118,7 +2136,7 @@ oo::class create ::apave::APave {
     } else {
       catch {set font [font configure $font]}
     }
-    set font [dict set font -underline 1]
+    foreach {o v} [my initLinkFont] {dict set font $o $v}
     set font [dict set font -size [my basicFontSize]]
     $w configure -font $font
   }
@@ -2162,7 +2180,6 @@ oo::class create ::apave::APave {
     set tt [string map [list %l $txt] $tt]
     set v [string map [list %l $txt %t $tt] $v]
     if {$tt ne ""} {
-      my initTooltip
       ::baltip tip $lab $tt
       lappend ::apave::_AP_VARS(TIMW) $lab
     }
@@ -2355,11 +2372,10 @@ oo::class create ::apave::APave {
     upvar $attrsName attrs
     set addcomms {}
     if {[set tooltip [::apave::getOption -tooltip {*}$attrs]] ne ""} {
-      my initTooltip
-      if {[set i [string first " -ATTR " $tooltip]]>0} {
+      if {[set i [string first $_pav(edge) $tooltip]]>=0} {
         set tooltip [string range $tooltip 1 end-1]
-        set tattrs [string range $tooltip $i+6 end]
-        set tooltip "{[string range $tooltip 0 $i-2]}"
+        set tattrs [string range $tooltip [incr i -1]+[string length $_pav(edge)] end]
+        set tooltip "{[string range $tooltip 0 $i-1]}"
       } else {
         set tattrs ""
       }
@@ -2390,9 +2406,10 @@ oo::class create ::apave::APave {
     # Sets some hotkeys for some widgets (e.g. Enter to work as Tab)
     #   wname - the widget's name
     #   widget - the widget's type
+    # This may be disabled by including "STD" in the widget's name.
 
+    if {[string first "STD" $wname]>0} return
     if {($widget in {ttk::entry entry})} {
-      # STD in $w or $name prevents it:
       bind $wname <Up> [list \
         if {$::tcl_platform(platform) == "windows"} [list \
           event generate $wname <Shift-Tab> \
@@ -2529,10 +2546,7 @@ oo::class create ::apave::APave {
         my Post $wname $attrs
         foreach acm $addcomms { eval {*}$acm }
         # for buttons and entries - set up the hotkeys (Up/Down etc.)
-        # though, this may be disabled by putting STD in widget's name
-        if {[string first "STD" $wname]==-1} {
-          my DefineWidgetKeys $wname $widget
-        }
+        my DefineWidgetKeys $wname $widget
       }
       if {$neighbor eq "-" || $row < 0} {
         set row [set col 0]
@@ -2917,7 +2931,7 @@ oo::class create ::apave::APave {
     lassign [my csGet] fg fg2 bg bg2
     set lfont [$w cget -font]
     catch {set lfont [font configure $lfont]}
-    dict set lfont -underline 1
+    foreach {o v} [my initLinkFont] {dict set lfont $o $v}
     set ::apave::__TEXTLINKS__($w) [list]
     for {set it [llength $taglist]} {[incr it -1]>=0} {} {
       set tagli [lindex $taglist $it]

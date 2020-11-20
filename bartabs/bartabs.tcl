@@ -7,7 +7,7 @@
 # _______________________________________________________________________ #
 
 package require Tk
-package provide bartabs 1.0.4
+package provide bartabs 1.0.5
 catch {package require baltip}
 
 # __________________ Common data of bartabs:: namespace _________________ #
@@ -622,7 +622,7 @@ method Tab_BeCurrent {} {
   $TID ni [my $BID listFlag "m"]} {
     $wb2 configure -image bts_ImgNone
   }
-  update
+#?  update
   my $TID Tab_Cmd -csel2  ;# command after the selection shown
 }
 #_____

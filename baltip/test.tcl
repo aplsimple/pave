@@ -1,8 +1,15 @@
+#! /usr/bin/env tclsh
+#
+# It's a test for baltip package.
+# _______________________________________________________________________ #
+
+cd [file dirname [info script]]
 lappend auto_path .
 package require baltip
-catch {source [file join ../transpops transpops.tcl]}
 
-button .b -text Hello -command {
+# _______________________________________________________________________ #
+
+proc ::butComm {} {
   ::baltip hide .b
   if {[incr ::ttt]%2} {
     puts "the button's tip disabled"; bell
@@ -11,7 +18,7 @@ button .b -text Hello -command {
       -fg white -bg red -font "-weight bold" -padx 20 -pady 15 -global 0
   } else {
     puts "the button's tip enabled"; bell
-    ::baltip config -fg black -bg #FBFB95 -padx 4 -pady 3 \
+    ::baltip config -global yes -fg black -bg #FBFB95 -padx 4 -pady 3 \
       -font "-size [expr {max(3,11-$::ttt/2)}] -weight normal"
     ::baltip tip .b "Hi again, world! \
       \nI feel [if $::ttt<2 {set _ great!} {set _ {smaller and smaller...}}]" \
@@ -21,6 +28,18 @@ button .b -text Hello -command {
   }
   if {$::ttt>7} {set ::ttt -2}
 }
+
+proc ::chbComm {}  {
+    puts "all tips [if $::on {set _ enabled} {set _ disabled}]"
+    ::baltip config -global yes -on $::on -fg $::fg -bg $::bg
+    ::baltip update .cb "After clicking:\nnew tip & options" \
+      -fg maroon -padding 2 -padx 15 -pady 15 -global 0
+    if {$::on} {::baltip repaint .cb}
+}
+
+# _______________________________________________________________________ #
+
+button .b -text Hello -command ::butComm
 
 set geo +999999+30  ;# 999999 to get it the most right
 set alpha 0.8
@@ -69,14 +88,7 @@ text .t -width 24 -height 4
 .t tag add UnderLine2 2.10 2.15
 
 set ::on 1
-checkbutton .cb -text "Tips on" -variable ::on \
-  -command {
-    puts "all tips [if $::on {set _ enabled} {set _ disabled}]"
-    ::baltip config -global yes -on $::on -fg $::fg -bg $::bg
-    ::baltip update .cb "After clicking:\nnew tip & options" \
-      -fg maroon -padding 2 -padx 15 -pady 15 -global 0
-    if {$::on} {::baltip repaint .cb}
-  }
+checkbutton .cb -text "Tips on" -variable ::on -command ::chbComm
 
 pack .b .l .b2 .t .cb
 . configure -menu .menu
@@ -99,4 +111,8 @@ pack .b .l .b2 .t .cb
 ::baltip::tip .t "1st tag's tip!" -tag UnderLine1
 ::baltip::tip .t "2nd tag's tip!" -tag UnderLine2
 ::baltip::tip .cb "Switches all tips on/off\nexcept for balloons with \"-on yes\"."
-catch {::transpops::run .bak/transpops.txt <Control-q> .}
+
+# _______________________________________________________________________ #
+
+catch {source [file join ../transpops transpops.tcl]}
+catch {::transpops::run .bak/transpops.txt {<Control-q> <Alt-q>} .}

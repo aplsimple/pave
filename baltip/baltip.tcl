@@ -9,7 +9,7 @@
 # License: MIT.
 # _______________________________________________________________________ #
 
-package provide baltip 0.8.1
+package provide baltip 1.0
 
 package require Tk
 
@@ -52,10 +52,9 @@ proc ::baltip::configure {args} {
     set n1 [string range $n 1 end]
     switch -glob -- $n {
       -per10 - -fade - -pause - -fg - -bg - -bd - -alpha - -text - \
-      -on - -padx - -pady - -padding - -bell - -under {
+      -on - -padx - -pady - -padding - -bell - -under - -font {
         set my::ttdata($n1) $v
       }
-      -font {foreach {k v} $v {dict set my::ttdata(font) $k $v}}
       -force - -geometry - -index - -tag - -global {set $n1 $v}
       default {return -code error "invalid option \"$n\""}
     }
@@ -176,7 +175,8 @@ proc ::baltip::my::CGet {args} {
   # Gets options' values, using local (args) and global (ttdata) settings.
   #   args - local settings ("name value" pairs)
   # Returns the full list of settings ("name value" pairs, "name" without "-") \
-   in which -force and -geometry option values go first.
+   in which special options go first.
+  # See also: cget, configure
 
   variable ttdata
   set saved [array get ttdata]
@@ -268,6 +268,10 @@ proc ::baltip::my::Show {w text force geo optvals} {
   if {!$icount || (!$ttdata(on) && !$data(-on))} return
   lappend ttdata(REGISTERED) $w
   foreach wold [lrange $ttdata(REGISTERED) 0 end-1] {::baltip::hide $wold}
+  if {$data(-fg) eq "" || $data(-bg) eq ""} {
+    set data(-fg) black
+    set data(-bg) #FBFB95
+  }
   toplevel $win -bg $data(-bg) -class Tooltip$w
   catch {wm withdraw $win}
   wm overrideredirect $win 1
@@ -399,12 +403,12 @@ proc ::baltip::my::MenuTip {w wt optvals} {
   set index [$wt index active]
   set mit "$w/$index"
   if {$index eq "none"} return
-	if {[info exists ttdata($w,$index)] && ([::baltip::hide $w] || \
+  if {[info exists ttdata($w,$index)] && ([::baltip::hide $w] || \
   ![info exists ttdata(LASTMITEM)] || $ttdata(LASTMITEM) ne $mit)} {
     set text $ttdata($w,$index)
     ::baltip::my::Show $w $text no {} $optvals
   }
-	set ttdata(LASTMITEM) $mit
+  set ttdata(LASTMITEM) $mit
 }
 #_____
 
