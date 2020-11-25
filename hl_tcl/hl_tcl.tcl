@@ -6,7 +6,7 @@
 # License: MIT.
 # _______________________________________________________________________ #
 
-package provide hl_tcl 0.7.3
+package provide hl_tcl 0.7.4
 
 # _______________ Common data of ::hl_tcl:: namespace ______________ #
 
@@ -70,6 +70,13 @@ namespace eval ::hl_tcl {
   # allowed edges of string (as one or both)
   set data(S_SPACE) [list "" " " "\t" ";"]
   set data(S_BOTH) [concat $data(S_SPACE) [list "\"" "="]]
+
+  set data(RE1) {(^|\[|\{|\}|;)+\s*(:|\w)+}
+  set data(RE2else) "\}\\s+(else)\\s+\{"
+  set data(RE2elseif) "\}\\s+(elseif)\\s+\{"
+  set data(RE3) {(^|[^\\])\$+\{?(:|\w|\(|\))+\}?}
+  set data(RE4) {(\s*|^)(-[[:alpha:]]+\w*)(\s*|$)}
+  set data(RE5) {(^|[^\\])(\[|\]|\$|\{|\})+}
   }
 }
 
@@ -167,7 +174,7 @@ proc ::hl_tcl::my::HighlightCmd {txt line ln pri i} {
   variable data
   $txt tag add tagSTD "$ln.$pri" "$ln.$i -1 chars"
   set st [string range $line $pri $i-1]
-  set lcom [regexp -inline -all -indices {(^|\[|\{|\}|;)+\s*(:|\w)+} $st]
+  set lcom [regexp -inline -all -indices $data(RE1) $st]
   # commands
   foreach {lc _ _} $lcom {
     lassign $lc i1 i2
@@ -186,14 +193,14 @@ proc ::hl_tcl::my::HighlightCmd {txt line ln pri i} {
     }
   }
   foreach el {else elseif} {
-    set lcom [regexp -inline -all -indices "\}\\s+($el)\\s+\{" $st]
+    set lcom [regexp -inline -all -indices $data(RE2$el) $st]
     foreach {_ lc} $lcom {
       lassign $lc i1 i2
       $txt tag add tagCOM "$ln.$pri +$i1 char" "$ln.$pri +[incr i2] char"
     }
   }
   # $variables
-  set lcom [regexp -inline -all -indices {(^|[^\\])\$+\{?(:|\w|\(|\))+\}?} $st]
+  set lcom [regexp -inline -all -indices $data(RE3) $st]
   foreach {lc _ _} $lcom {
     lassign $lc i1 i2
     set i [string first \$ [set c [string range $st $i1 $i2]]]
@@ -204,7 +211,7 @@ proc ::hl_tcl::my::HighlightCmd {txt line ln pri i} {
   }
   # -options
   if {$::hl_tcl::my::data(OPTRE,$txt)} {
-    set lcom [regexp -inline -all -indices {(\s*|^)(-[[:alpha:]]+\w*)(\s*|$)} $st]
+    set lcom [regexp -inline -all -indices $data(RE4) $st]
     foreach {_ _ lc _} $lcom {
       lassign $lc i1 i2
       $txt tag add tagOPT "$ln.$pri +$i1 char" "$ln.$pri +[incr i2] char"
@@ -234,11 +241,12 @@ proc ::hl_tcl::my::HighlightStr {txt p1 p2} {
   #   p1 - starting index of the string in 'txt'
   #   p2 - ending index of the string in 'txt'
 
+  variable data
   set p1 [$txt index $p1]
   set p2 [$txt index $p2]
   $txt tag add tagSTR $p1 $p2
   set st [$txt get $p1 $p2]
-  set lcom [regexp -inline -all -indices {(^|[^\\])(\[|\]|\$|\{|\})+} $st]
+  set lcom [regexp -inline -all -indices $data(RE5) $st]
   foreach {lc g1 g2} $lcom {
     lassign $lc i1 i2
     incr i2
@@ -384,24 +392,31 @@ proc ::hl_tcl::my::CountQSH {txt ln} {
 }
 #_____
 
+proc ::hl_tcl::my::ShowCurrentLine {txt} {
+  # Shows the current line.
+  #   txt - text widget's path
+
+  set ln [$txt index insert]
+  if {![info exists data(CURPOS,$txt)] || int($data(CURPOS,$txt))!=int($ln)} {
+    $txt tag remove tagCURLINE 1.0 end
+    $txt tag add tagCURLINE [list $ln linestart] [list $ln lineend]+1displayindices
+  }
+  return $ln
+}
+#_____
+
 proc ::hl_tcl::my::MemPos {txt} {
   # Remembers the state of current line.
   #   txt - text widget's path
 
   variable data
-  set ln [$txt index insert]
-  set updcurr [expr {![info exists data(CUR_POS,$txt)] || \
-    int($data(CUR_POS,$txt)) != int($ln)}]
-  set data(CUR_POS,$txt) $ln
+  set ln [ShowCurrentLine $txt]
+  set data(CURPOS,$txt) $ln
   set data(CUR_LEN,$txt) [$txt index end]
   lassign [CountQSH $txt $ln] \
     data(CNT_QUOTE,$txt) data(CNT_SLASH,$txt) data(CNT_COMMENT,$txt)
   if {[$txt tag ranges tagBRACKET] ne ""}    {$txt tag remove tagBRACKET 1.0 end}
   if {[$txt tag ranges tagBRACKETERR] ne ""} {$txt tag remove tagBRACKETERR 1.0 end}
-  if {$updcurr} {
-    $txt tag remove tagCURLINE 1.0 end
-    $txt tag add tagCURLINE [list $ln linestart] [list $ln lineend]+1displayindices
-  }
 }
 #_____
 
@@ -444,7 +459,7 @@ proc ::hl_tcl::my::CoroModified {txt {i1 -1} {i2 -1}} {
   set ln2 [expr {min(($ln+$dl),$endl)}]
   lassign [CountQSH $txt $ln] cntq cnts ccmnt
   # flag "highlight to the end":
-  set bf1 [expr {abs($ln-int($data(CUR_POS,$txt)))>1 || $dl>1 \
+  set bf1 [expr {abs($ln-int($data(CURPOS,$txt)))>1 || $dl>1 \
    || $cntq!=$data(CNT_QUOTE,$txt) \
    || $cnts!=$data(CNT_SLASH,$txt) \
    || $ccmnt!=$data(CNT_COMMENT,$txt)}]
@@ -699,10 +714,8 @@ proc ::hl_tcl::my::HighlightBrackets {w} {
   # Highlights matching brackets if any.
   #   w - text widget's path
 
-  set curpos [$w index insert]
+  set curpos [ShowCurrentLine $w]
   set curpos2 [$w index "insert -1 chars"]
-  $w tag remove tagCURLINE 1.0 end
-  $w tag add tagCURLINE [list $curpos linestart] [list $curpos lineend]+1displayindices
   set ch [$w get $curpos]
   set lbr "\{(\["
   set rbr "\})\]"
@@ -847,8 +860,8 @@ proc ::hl_tcl::hl_text {txt} {
   $txt tag raise tagBRACKETERR
   my::HighlightAll $txt
   if {![info exists ::hl_tcl::my::data(BIND_TXT,$txt)]} {
-    bind $txt <KeyPress> [list + [namespace current]::my::MemPos $txt]
-    bind $txt <ButtonPress-1> [list + [namespace current]::my::MemPos $txt]
+    bind $txt <KeyPress> [list + ::hl_tcl::my::MemPos $txt]
+    bind $txt <ButtonPress-1> [list + ::hl_tcl::my::MemPos $txt]
     foreach ev {Enter KeyRelease ButtonRelease} {
       bind $txt <$ev> [list + ::hl_tcl::my::HighlightBrackets $txt]
     }

@@ -1736,7 +1736,7 @@ oo::class create ::apave::APave {
     if {[bind $wt <<Paste>>] eq ""} {
       set res "
       bind $wt <<Paste>> {+ [self] pasteText $wt}
-      bind $wt <Return> {+ [self] onKeyTextM $wt %K}"
+      bind $wt <KeyPress> {+ [self] onKeyTextM $wt %K}"
     }
     append res "
       bind $wt <Control-d> {[self] doubleText $wt}
