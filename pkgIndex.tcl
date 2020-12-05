@@ -1,5 +1,5 @@
 
-package ifneeded apave 3.2.4.1 [list source [file join $dir apaveinput.tcl]]
+package ifneeded apave 3.2.5 [list source [file join $dir apaveinput.tcl]]
 
 # A short intro (for Ruff! docs generator:)
 
@@ -50,6 +50,7 @@ namespace eval apave {
    - e_menu
    - bartabs
    - link
+   - baltip
 
   At last, a stand-alone dialog allows not only to ask "OK/Cancel" or "Yes/No" returning 1/0 but also to set environment variables to use in shell scripts.
   

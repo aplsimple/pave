@@ -222,9 +222,16 @@ namespace eval t {
         .win.fra.fra.$::t::curTab select $nt
         lassign [split [winfo geometry .win] x+] w h x y
         set geo "+([expr {$w+$x}]-W-8)+$y-20"
+        if {[::apave::paveObj csDarkEdit]} {
+          set fg black
+          set bg yellow
+        } else {
+          set fg white
+          set bg black
+        }
         ::baltip tip .win "The tab is selected by your request: \
           \n\"[.win.fra.fra.$::t::curTab tab $nt -text]\"" \
-          -geometry $geo -fg white -bg black -font {-weight bold -size 11} \
+          -geometry $geo -fg $fg -bg $bg -font {-weight bold -size 11} \
           -pause 1500 -fade 1500 -alpha 0.8 -padx 20 -pady 20
       }
     }
