@@ -1,5 +1,13 @@
 # Last changes:
 
+Version `3.2.5 (5 Dec'20)`
+
+  - hl_tcl package
+  - baltip package
+  - borderwidth for text sel
+  - indent & font of text widget
+  - linked labels (also in text), also with images
+
 Version `3.1 (12 Sep'20)`
 
   - bartabs package v1.0
