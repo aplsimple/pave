@@ -13,7 +13,7 @@ The original code has been modified to make the tip:
   * be displayed as a stand-alone balloon message at given coordinates
   * have configure/cget etc. wrapped in Tcl ensemble for convenience
 
-The video introduction to *balltip* is presented by
+The video introduction to *baltip* is presented by
  [baltip-1.0.mp4](https://github.com/aplsimple/baltip/releases/download/baltip-1.0/baltip-1.0.mp4) (11 Mb).
 
 Below are several pictures just to glance at *baltip*.

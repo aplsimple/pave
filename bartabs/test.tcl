@@ -6,7 +6,7 @@
 
 package require Tk
 
-lappend auto_path [file dirname [info script]]
+lappend auto_path [file dirname [info script]] ../baltip
 package require bartabs
 
 #----------------------------------
@@ -118,7 +118,7 @@ proc ::FillBarTabs {} {
   set ::w5 $::w4.f5
   toplevel $::frm
   wm minsize $::frm 200 350
-  wm geometry $::frm +80+80
+  wm geometry $::frm +500+200
   wm protocol $::frm WM_DELETE_WINDOW {::bts destroy; exit}
   ttk::label $::l0 -text "Absolutely static:"
   ttk::label $::l1 -text [string repeat "0123456789" 6]
@@ -147,13 +147,14 @@ proc ::FillBarTabs {} {
   set barOpts1 [list -tleft 1 -tright 5 -wbar $::w1 -fgsel "" \
     -wbase $::frm -wproc "winfo width $::l1" \
     -hidearrows yes -relief sunken  -static 1 -tiplen -1 \
+    -csel {::TestComm sel %b %t {%l}} \
     -menu [list sep "com {Append $::noname} {::TestAdd %b} {} ::TestDsbl" sep \
     "com {Switch -static option} {::TestSwitch %b %t -static}" \
     "com {Switch -scrollsel option} {::TestSwitch %b %t -scrollsel}" \
     "com {Switch -hidearrows option} {::TestSwitch %b %t -hidearrows}"] ]
 
   set barOpts2 [list -wbar $::w2 -wbase $::l2 \
-    -lablen 11 -expand 0 -imagemark markimg -tiplen 15 \
+    -lablen 11 -expand 0 -imagemark markimg -tiplen 15 -dotip yes \
     -tleft 3 -fgsel black -bgsel #999999 \
     -cmov {::TestComm mov %b %t {%l}} \
     -csel {::TestComm sel %b %t {%l}} \
@@ -200,6 +201,12 @@ try {ttk::style theme use clam}
 
 ::FillBarTabs
 
+catch {
+  source [file join ../transpops/transpops.tcl]
+  #set ::transpops::my::perchars 1.0 ;# for popups to be 12 times longer
+  ::transpops::run .bak/transpops.txt {<Control-q> <Alt-q>} .frame
+}
+
 if {1} {
   ####### some mimicring actions with bars & tabs:
   toplevel .mimi
@@ -211,7 +218,7 @@ if {1} {
   update
   after 3000
   after 1000 {::bts tab4 show ; ::bts tab15 show}
-  after 2000 {::bts markTab tab11 tab15 tab17 tab18}
+  after 2000 {::bts markTab tab11 tab12 tab13 tab14 tab15 tab17 tab18}
   after 2500 {::bar0 disableTab tab19 tab3}  ;# any bar can use disable/mark
   after 3000 {::bts unmarkTab tab11 tab17 tab18}
   after 3500 {::bts enableTab tab3}

@@ -1,12 +1,24 @@
 # Last changes:
 
-Version `3.2.5 (5 Dec'20)`
+
+Version `3.2.7 (17 Jan'21)`
+
+  - "gut" (gutter) widget
+  - default "-highlightbackground" for non-ttk
+  - eventOnText: for menu items at highlighting
+  - CS modified
+  - bartabs, hl_tcl updated
+
+
+Version `3.2.5 (26 Dec'20)`
 
   - hl_tcl package
   - baltip package
   - borderwidth for text sel
   - indent & font of text widget
   - linked labels (also in text), also with images
+  - icon sets: "small", "middle" ("large" to do)
+
 
 Version `3.1 (12 Sep'20)`
 
@@ -16,6 +28,7 @@ Version `3.1 (12 Sep'20)`
   - "-modal false" option of showModal makes the window non-modal
   - displayText got 'pos' parameter (position of cursor)
   - BUGFIX: text attribute for choosers could not contain spaces
+
 
 Version `3.0.1 (17 Jul'20)`
 

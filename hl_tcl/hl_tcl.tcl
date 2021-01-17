@@ -6,7 +6,7 @@
 # License: MIT.
 # _______________________________________________________________________ #
 
-package provide hl_tcl 0.7.4
+package provide hl_tcl 0.7.5
 
 # _______________ Common data of ::hl_tcl:: namespace ______________ #
 
@@ -785,6 +785,7 @@ proc ::hl_tcl::hl_readonly {txt {ro -1} {com2 ""}} {
   }
 }
 #_____
+
 proc ::hl_tcl::hl_init {txt args} {
   # Initializes highlighting.
   #   txt - text widget's path
@@ -815,12 +816,12 @@ proc ::hl_tcl::hl_init {txt args} {
       if {$::hl_tcl::my::data(DARK,$txt)} {
         if {$clrCURL eq ""} {set clrCURL #29383c}
         set ::hl_tcl::my::data(COLORS,$txt) [list \
-          orange #A17970 lightgreen #f1b479 #76a396 #d485d4 #b9b96e $clrCURL]
+          orange #ff7e00 lightgreen #f1b479 #76a396 #d485d4 #b9b96e $clrCURL]
         # $clrCOM $clrCOMTK $clrSTR $clrVAR $clrCMN $clrPROC $clrOPT $clrCURL
       } else {
         if {$clrCURL eq ""} {set clrCURL #efe0cd}
         set ::hl_tcl::my::data(COLORS,$txt) [list \
-          "#923B23" #7A040E  #035103 #4A181B #646464 #A106A1 #463e11 $clrCURL]
+          "#923B23" #7d1c00 #035103 #4A181B #646464 #A106A1 #463e11 $clrCURL]
       }
     }
   }

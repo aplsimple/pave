@@ -7,7 +7,7 @@
 # _______________________________________________________________________ #
 
 package require Tk
-package provide bartabs 1.0.5
+package provide bartabs 1.2.2
 catch {package require baltip}
 
 # __________________ Common data of bartabs:: namespace _________________ #
@@ -16,6 +16,7 @@ namespace eval bartabs {
 
   # IDs for new bars & tabs
   variable NewBarID -1 NewTabID -1 NewTabNo -1
+  variable NewAfterID;  array set NewAfterID [list]
 
   # images made by base64
   image create photo bts_ImgLeft \
@@ -143,7 +144,7 @@ method My {ID} {
   set t [string range $ID 0 2]
   oo::objdefine [self] "method $ID {args} {
   set m \[lindex \$args 0\]
-  if {\$m eq {}} {return {}}
+  if {\$m in {{} -1}} {return {}}
   if {\$m in {create} && {$t} eq {bar} || \$m in {cget configure} && {$t} eq {tab}} {
   set args \[lreplace \$args 0 0 Tab_\$m\]}
   return \[my {*}\$args\]}"
@@ -903,7 +904,7 @@ method OnPopup {X Y {BID "-1"} {TID "-1"} {textcur ""}} {
 
 # _________________________ Public methods of Tab _______________________ #
 
-method show {{anyway no}} {
+method show {{anyway yes}} {
 # Shows a tab in a bar and sets it current.
 #   anyway - if "yes", refill the bar anyway (for choosing from menu)
 
@@ -938,7 +939,7 @@ method close {{redraw yes}} {
   set tabs [lreplace $tabs $icurr $icurr]
   my $BID configure -TABS $tabs
   if {$redraw} {
-    if {$icurr>=$tleft && $icurr<$tright} {
+    if {$icurr>=$tleft && $icurr<[llength $tabs]} {
       my $BID draw
       my [lindex $tabs $icurr 0] Tab_BeCurrent
     } else {
@@ -966,7 +967,7 @@ method Bar_Data {barOptions} {
   set barOpts [dict create -wbar ""  -wbase "" -wproc "" -static no \
     -hidearrows no -scrollsel yes -lablen 0 -tiplen 0 -tleft 0 -tright end \
     -disable [list] -select [list] -mark [list] -fgmark #800080  -fgsel "." \
-    -relief groove -bd 1 -padx 3 -pady 3 -expand 1 -tabcurrent -1 \
+    -relief groove -bd 1 -padx 3 -pady 3 -expand 1 -tabcurrent -1 -dotip no \
     -ELLIPSE "\u2026" -MOVWIN ".bt_move" -ARRLEN 0 -USERMNU 0 -LLEN 0]
   set tabinfo [set imagetabs [set popup [list]]]
   my Bar_DefaultMenu $BID popup
@@ -1391,9 +1392,29 @@ method NeedDraw {} {
     my $BID configure -BWIDTH $bw
   }
   if {$bwo ne "" && $need} {
-    after idle [list [self] $BID draw]
+    catch {after cancel $::bartabs::NewAfterID($BID)}
+    set ::bartabs::NewAfterID($BID) [after 10 [list [self] $BID draw]]
   }
 }
+
+# _________________ Exported 'internal' methods of Bar __________________ #
+
+method _runBound_ {w ev args} {
+# Runs a method bound to an event occuring at a widget.
+#   w - widget
+#   ev - event
+#   args - the bound method & its arguments
+
+  if {[catch {my {*}$args}]} { ;# failed binding => remove it
+    foreach b [split [bind $w $ev] \n] {
+      if {[string first $args $b]==-1} {
+        if {[incr is1]==1} {bind $w $ev $b} {bind $w $ev +$b}
+      }
+    }
+  }
+}
+
+export _runBound_
 
 # _______________________ Auxiliary methods of Bar ______________________ #
 
@@ -1549,12 +1570,11 @@ method clear {} {
 }
 #_____
 
-method scrollLeft {{dotip no}} {
+method scrollLeft {} {
   # Scrolls tabs to the left.
-  #  dotip - flag 'show tip'
 
   set BID [my ID]
-  set w [my $BID cget -wbar]
+  lassign [my $BID cget -wbar -dotip] w dotip
   set wlarr $w.larr   ;# left arrow
   if {[my $BID ScrollCurr -1]} {
     if {$dotip} {catch {::baltip::repaint $wlarr}}
@@ -1573,12 +1593,11 @@ method scrollLeft {{dotip no}} {
 }
 #_____
 
-method scrollRight {{dotip no}} {
+method scrollRight {} {
   # Scrolls tabs to the right.
-  #  dotip - flag 'show tip'
 
   set BID [my ID]
-  set w [my $BID cget -wbar]
+  lassign [my $BID cget -wbar -dotip] w dotip
   set wrarr $w.rarr   ;# left arrow
   if {[my $BID ScrollCurr 1]} {
     if {$dotip} {catch {::baltip::repaint $wrarr}}
@@ -1789,10 +1808,11 @@ method UnmarkTab {opt args} {
 
 # ________________________ Public methods of Bars _______________________ #
 
-method create {barCom {barOpts ""}} {
+method create {barCom {barOpts ""} {tab1 ""}} {
 # Creates a bar.
 #   barCom - bar command's name or barOpts
 #   barOpts - list of bar's options
+#   tab1 - tab to show after creating the bar
 # Returns BID.
 
   if {[set noComm [expr {$barOpts eq ""}]]} {set barOpts $barCom}
@@ -1804,9 +1824,9 @@ method create {barCom {barOpts ""}} {
   my My [set BID [my Bar_Data $barOpts]]
   my $BID Style
   ttk::button $wlarr -style ClButton$BID -image bts_ImgLeft \
-    -command [list [self] $BID scrollLeft yes] -takefocus 0
+    -command [list [self] $BID scrollLeft] -takefocus 0
   ttk::button $wrarr -style ClButton$BID -image bts_ImgRight \
-    -command [list [self] $BID scrollRight yes] -takefocus 0
+    -command [list [self] $BID scrollRight] -takefocus 0
   ttk::frame $wframe -relief flat
   pack $wlarr -side left -padx 0 -pady 0 -anchor e
   pack $wframe -after $wlarr -side left -padx 0 -pady 0 -fill x -expand 1
@@ -1816,13 +1836,19 @@ method create {barCom {barOpts ""}} {
   }
   set wbase [my $BID cget -wbase]
   if {$wbase ne ""} {
-    my $BID configure -BINDWBASE [list $wbase [bind $wbase <Configure>]]
-    bind $wbase <Configure> [list + [self] $BID NeedDraw]
+    after 1 [list \
+    my $BID configure -BINDWBASE [list $wbase [bind $wbase <Configure>]] ; \
+    bind $wbase <Configure> [list + [self] _runBound_ $wbase <Configure> $BID NeedDraw]]
   }
-  after idle [list [self] $BID NeedDraw ; [self] $BID draw]
   if {!$noComm} {
     proc $barCom {args} "return \[[self] $BID {*}\$args\]"
     my $BID configure -BARCOM $barCom
+  }
+  if {$tab1 eq ""} {
+    after 100 [list [self] $BID NeedDraw ; [self] $BID draw]
+  } else {
+    set tab1 [my $BID tabID $tab1]
+    if {$tab1 ne ""} {after 200 "[self] $BID clear; [self] $BID $tab1 show"}
   }
   return $BID
 }
@@ -1928,5 +1954,5 @@ method moveTab {TID1 TID2} {
 } ;#  bartabs::Bars
 
 # ________________________________ EOF __________________________________ #
-#-RUNF0: test.tcl
+#RUNF0: test.tcl
 #RUNF1: ../tests/test2_pave.tcl

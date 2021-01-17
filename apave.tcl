@@ -45,7 +45,7 @@
 #
 # See tests/test*.tcl files for the detailed examples of use.
 #
-#RUNF1: ./tests/test2_pave.tcl 1 11 12
+#RUNF1: ./tests/test2_pave.tcl 1 11 12 'small icons'
 ###########################################################################
 
 package require Tk
@@ -75,6 +75,7 @@ namespace eval ::apave {
     "fra" {{} {}} \
     "ftx" {{} {}} \
     "frA" {{} {}} \
+    "gut" {{} {-width 0 -highlightthickness 1}} \
     "lab" {{-sticky w} {}} \
     "laB" {{-sticky w} {}} \
     "lfr" {{} {}} \
@@ -108,10 +109,13 @@ namespace eval ::apave {
     "h_" {{-sticky ew -csz 3 -padx 3} {}} \
     "v_" {{-sticky ns -rsz 3 -pady 3} {}}]
   variable apaveDir [file dirname [info script]]
-  variable _AP_ICO { none folder OpenFile SaveFile font color date help home \
-    undo redo run tools file find search replace view edit config misc \
-    cut copy paste plus minus add change delete double up down info \
-    err warn ques no retry ok yes cancel exit }
+  variable _AP_ICO { none folder OpenFile SaveFile saveall print font \
+    color date help home undo redo run tools file find replace other view \
+    categories actions config pin cut copy paste plus minus add delete \
+    change double more up down previous next upload download tag tagoff \
+    misc diagram box trash tree terminal lock light restricted attach \
+    share mail www map umbrella gulls sound heart clock people info err \
+    warn ques retry yes no ok cancel exit }
   variable _AP_IMG;  array set _AP_IMG [list]
   variable _AP_VARS; array set _AP_VARS [list]
   set _AP_VARS(.,SHADOW) 0
@@ -189,10 +193,12 @@ namespace eval ::apave {
 
   ##########################################################################
 
-  proc iconImage {{icon ""}} {
+  proc iconImage {{icon ""} {iconset "small"}} {
 
-    # Gets a defined icon's image or list of icons.
+    # Gets a defined icon's image or list of icons. \
+    If *icon* equals to "-init", initializes apave's icon set.
     #   icon - icon's name
+    #   iconset - one of small/middle/large
     # Returns the icon's image or, if *icon* is blank, a list of icons
     # available in *apave*.
 
@@ -206,28 +212,47 @@ namespace eval ::apave {
     if {[array size _AP_IMG] == 0} {
       # Make images of icons
       source [file join $apaveDir apaveimg.tcl]
+      if {$iconset ne "small"} {
+        foreach ic $_AP_ICO {  ;# small icons best fit for menus
+          set _AP_IMG($ic-small) [set _AP_IMG($ic)]
+        }
+        if {$iconset eq "middle"} {
+          source [file join $apaveDir apaveimg2.tcl]
+        } else {
+          source [file join $apaveDir apaveimg2.tcl] ;# TODO
+        }
+      }
       foreach ic $_AP_ICO {
         if {[catch {image create photo [imagename $ic] -data [set _AP_IMG($ic)]}]} {
           # some png issues on old Tk
           image create photo [imagename $ic] -data [set _AP_IMG(none)]
+        } elseif {$iconset ne "small"} {
+          image create photo [imagename $ic-small] -data [set _AP_IMG($ic-small)]
         }
       }
     }
-    if {$icon eq "-init"} return ;# just to get to icons
-    if {$icon ni $_AP_ICO} { set icon [lindex $_AP_ICO 0] }
+    if {$icon eq "-init"} {return $_AP_ICO} ;# just to get to icons
+    if {$icon ni $_AP_ICO} {set icon [lindex $_AP_ICO 0]}
+    if {$iconset eq "small" && "_AP_IMG(img$icon-small)" in [image names]} {
+      set icon $icon-small
+    }
     return [imagename $icon]
   }
 
   ##########################################################################
 
-  proc iconData {{icon "info"}} {
+  proc iconData {{icon "info"} {iconset ""}} {
 
     # Gets an icon's data.
     #   icon - icon's name
+    #   iconset - one of small/middle/large
     # Returns data of the icon.
 
     variable _AP_IMG
     iconImage -init
+    if {$iconset ne "" && "_AP_IMG(img$icon-$iconset)" in [image names]} {
+      return [set _AP_IMG($icon-$iconset)]
+    }
     return [set _AP_IMG($icon)]
   }
 
@@ -245,12 +270,26 @@ namespace eval ::apave {
     set appIcon ""
     if {$winicon ne ""} {
       if {[catch {set appIcon [image create photo -data $winicon]}]} {
-        catch { set appIcon [image create photo -file $winicon] }
+        catch {set appIcon [image create photo -file $winicon]}
       }
     }
-    if {$appIcon ne ""} { wm iconphoto $win $appIcon }
-    return
+    if {$appIcon ne ""} {wm iconphoto $win $appIcon}
   }
+
+  ##########################################################################
+
+  proc eventOnText {w ev} {
+
+    # Generates an event on a text, saving its current index in hl_tcl.
+    #   w - text widget's path
+    #   ev - event
+    # The hl_tcl needs to call MemPos before any action changing the text.
+
+     catch {::hl_tcl::my::MemPos $w}
+     event generate $w $ev
+  }
+
+  ##########################################################################
 
   proc paveObj {com args} {
 
@@ -447,7 +486,6 @@ oo::class create ::apave::APave {
     # Applies a color scheme to a popup menu.
     #   mnu - name of popup menu
     # The method is to be redefined in descendants/mixins.
-    #
     return
   }
 
@@ -465,19 +503,20 @@ oo::class create ::apave::APave {
     #   typ - the type of widget (in apave terms, i.e. but, buT etc.)
     #   dsbl - a mode to get style of disabled (1) or readonly (2) widgets
     # See also: widgetType
-    #
     # Method to be redefined in descendants/mixins.
     return
   }
 
   #########################################################################
 
-  method iconA {icon} {
+  method iconA {icon {iconset "small"}} {
 
     # Gets icon attributes for buttons, menus etc.
     #   icon - name of icon
+    #   iconset - one of small/middle/large
+    # The *iconset* is "small" for menus (recommended and default).
 
-    return "-image [::apave::iconImage $icon] -compound left"
+    return "-image [::apave::iconImage $icon $iconset] -compound left"
   }
 
   #########################################################################
@@ -486,7 +525,6 @@ oo::class create ::apave::APave {
 
     # Configures the apave object (all of *_pav* array may be changed).
     #   args - list of pairs name/value of options
-    #
     # Example:
     #     pobj configure edge "@@"
 
@@ -502,7 +540,6 @@ oo::class create ::apave::APave {
     #   typ - widget type
     #   opt - new default grid options
     #   atr - new default attributes
-    #
     # Returns a list of updated options and attributes of the widget type.
 
     lassign [dict get $::apave::_Defaults $typ] defopts defattrs
@@ -797,11 +834,9 @@ oo::class create ::apave::APave {
       lassign $icon ic1 ic2
       # text of button is of highest priority at defining its icon
       if {[string match -nocase $ic1 $txt] || \
-          [string match -nocase but$ic1 $w] || \
-          ($ic2 ne "" && ( \
-          [string match -nocase but$ic2 $w] || \
-          [string match -nocase $ic2 $txt]))} {
-        append attrs " [my iconA $ic1]"
+      [string match -nocase but$ic1 $w] || ($ic2 ne "" && ( \
+      [string match -nocase but$ic2 $w] || [string match -nocase $ic2 $txt]))} {
+        append attrs " [my iconA $ic1 ""]"
         break
       }
     }
@@ -876,6 +911,7 @@ oo::class create ::apave::APave {
         set widget "frame"
         if {$disabled} {set attrs [::apave::removeOptions $attrs -state]}
       }
+      "gut" {set widget "canvas"}
       "lab" {
         set widget "ttk::label"
         if {[::apave::parseOptions $attrs -state normal] eq "disabled"} {
@@ -951,12 +987,17 @@ oo::class create ::apave::APave {
           my AddPopupAttr $wnamefull attrs -textpop \
             [expr {[::apave::getOption -rotext {*}$attrs] ne ""}] -- disabled
         }
-        lassign [::apave::parseOptions $attrs -ro "" -readonly "" -rotext ""] r1 r2 r3
+        lassign [::apave::parseOptions $attrs -ro "" -readonly "" -rotext "" \
+          -gutter "" -gutterwidth 5 -guttershift 6] r1 r2 r3 g1 g2 g3
         set b1 [expr [string is boolean -strict $r1]]
         set b2 [expr [string is boolean -strict $r2]]
         if {($b1 && $r1) || ($b2 && $r2) || \
         ($r3 ne "" && !($b1 && !$r1) && !($b2 && !$r2))} {
           set attrs "-takefocus 0 $attrs"
+        }
+        set attrs [::apave::removeOptions $attrs -gutter -gutterwidth -guttershift]
+        if {$g1 ne ""} {
+          set attrs "$attrs -gutter {-canvas $g1 -width $g2 -shift $g3}"
         }
       }
       "tre" {set widget "ttk::treeview"}
@@ -1317,6 +1358,50 @@ oo::class create ::apave::APave {
     return $res
   }
 
+  method fillGutter {txt canvas width shift args} {
+    # Fills a gutter of text with the text's line numbers.
+    #  txt - path to the text widget
+    #  canvas - canvas of the gutter
+    #  width - width of the gutter, in chars
+    #  shift - addition to the width (to shift from the left side)
+    #  args - additional arguments for tracing
+    # The code is borrowed from open source tedit project.
+
+    set oper [lindex $args 0 1]
+    if {[llength $args] == 0 || [lindex $args 0 4] eq "-elide" || \
+    $oper in {configure delete insert see yview}} {
+      set i [$txt index @0,0]
+      set gcont [list]
+      while true {
+        set dline [$txt dlineinfo $i]
+        if {[llength $dline] == 0} break
+        set height [lindex $dline 3]
+        set y [expr {[lindex $dline 1]}]
+        set linenum [format "%${width}d" [lindex [split $i "."] 0]]
+        set i [$txt index "$i +1 lines linestart"]
+        lappend gcont [list $y $linenum]
+      }
+      # update the gutter at changing its contents/config
+      lassign [my csGet] - - - bg - - - - fg
+      set cwidth [expr {$shift + \
+        [font measure apaveFontMono -displayof $txt [string repeat 0 $width]]}]
+      set newbg [expr {$bg ne [$canvas cget -background]}]
+      set newwidth [expr {$cwidth ne [$canvas cget -width]}]
+      set savedcont [namespace current]::gc$txt
+      if {$newbg || $newwidth || ![info exists $savedcont] || \
+      $gcont != [set $savedcont]} {
+        if {$newbg} {$canvas config -background $bg}
+        if {$newwidth} {$canvas config -width $cwidth}
+        $canvas delete all
+        foreach g $gcont {
+          lassign $g y linenum
+          $canvas create text 2 $y -anchor nw -text $linenum -font apaveFontMono -fill $fg
+        }
+        set $savedcont $gcont
+      }
+    }
+  }
+
   #########################################################################
 
   method Transname {typ name} {
@@ -1505,7 +1590,7 @@ oo::class create ::apave::APave {
       if {[string first $ic $chooser] >= 0} {set icon $ic; break}
     }
     set com "[self] chooser $chooser \{$vv\} $addopt $wpar $addattrs2"
-    set butf [list [my Transname buT $name] - - - - "pack -side right -anchor n -in $w.$name -padx 1" "-com \{$com\} -compound none -image [::apave::iconImage $icon] -font \{-weight bold -size 5\} -fg $_pav(fgbut) -bg $_pav(bgbut) $takefocus"]
+    set butf [list [my Transname buT $name] - - - - "pack -side right -anchor n -in $w.$name -padx 1" "-com \{$com\} -compound none -image [::apave::iconImage $icon small] -font \{-weight bold -size 5\} -fg $_pav(fgbut) -bg $_pav(bgbut) $takefocus"]
     if {$view ne ""} {
       set scrolh [list [my Transname sbh $name] $txtnam T - - "pack -in $w.$name" ""]
       set scrolv [list [my Transname sbv $name] $txtnam L - - "pack -in $w.$name" ""]
@@ -1597,8 +1682,9 @@ oo::class create ::apave::APave {
         set wid2 [list $ntmp.[my Transname sev $name$j] - - - - "pack -fill y -expand 1 -padx $v2"]
       } elseif {$typ=="statusBar"} {  ;# statusbar
         my NormalizeName name i lwidgets
-        set wid1 [list .[my ownWName [my Transname Lab ${name}_[incr j]]] - - - - "pack -side left -in $w.$name" "-t [lindex $v1 0]"]
-        set wid2 [list .[my ownWName [my Transname Lab $name$j]] - - - - "pack -side left $expand -in $w.$name" "-relief sunken -w $v2 [lrange $v1 1 end]"]
+        set dattr "[lrange $v1 1 end]"
+        set wid1 [list .[my ownWName [my Transname Lab ${name}_[incr j]]] - - - - "pack -side left -in $w.$name" "-t {[lindex $v1 0]} $dattr"]
+        set wid2 [list .[my ownWName [my Transname Lab $name$j]] - - - - "pack -side left $expand -in $w.$name" "-relief sunken -w $v2 $dattr"]
       } elseif {$typ=="toolBar"} {  ;# toolbar
         switch -nocase -glob -- $v1 {
           opc* { ;# tk_optionCascade
@@ -1790,19 +1876,26 @@ oo::class create ::apave::APave {
       $pop add command {*}[my iconA copy] -accelerator Ctrl+C -label "Copy" \
             -command "event generate $w <<Copy>>"
     } else {
-      $pop add command {*}[my iconA cut] -accelerator Ctrl+X -label "Cut" \
-            -command "event generate $w <<Cut>>"
-      $pop add command {*}[my iconA copy] -accelerator Ctrl+C -label "Copy" \
-            -command "event generate $w <<Copy>>"
-      $pop add command {*}[my iconA paste] -accelerator Ctrl+V -label "Paste" \
-            -command "event generate $w <<Paste>>"
       if {$istext} {
+        $pop add command {*}[my iconA cut] -accelerator Ctrl+X -label "Cut" \
+              -command "::apave::eventOnText $w <<Cut>>"
+        $pop add command {*}[my iconA copy] -accelerator Ctrl+C -label "Copy" \
+              -command "::apave::eventOnText $w <<Copy>>"
+        $pop add command {*}[my iconA paste] -accelerator Ctrl+V -label "Paste" \
+              -command "::apave::eventOnText $w <<Paste>>"
         $pop add separator
         $pop add command {*}[my iconA undo] -accelerator Ctrl+Z -label "Undo" \
-              -command "event generate $w <<Undo>>"
+              -command "::apave::eventOnText $w <<Undo>>"
         $pop add command {*}[my iconA redo] -accelerator Ctrl+Shift+Z -label "Redo" \
-              -command "event generate $w <<Redo>>"
+              -command "::apave::eventOnText $w <<Redo>>"
         after idle [my SetTextBinds $w]
+      } else {
+        $pop add command {*}[my iconA cut] -accelerator Ctrl+X -label "Cut" \
+              -command "event generate $w <<Cut>>"
+        $pop add command {*}[my iconA copy] -accelerator Ctrl+C -label "Copy" \
+              -command "event generate $w <<Copy>>"
+        $pop add command {*}[my iconA paste] -accelerator Ctrl+V -label "Paste" \
+              -command "event generate $w <<Paste>>"
       }
     }
     if {$istext} {
@@ -1835,7 +1928,8 @@ oo::class create ::apave::APave {
       switch -- $a {
         -disabledtext - -rotext - -lbxsel - -cbxsel - -notebazook - \
         -entrypop - -entrypopRO - -textpop - -textpopRO - -ListboxSel - \
-        -callF2 - -timeout - -bartabs - -onReturn - -linkcom - -afteridle {
+        -callF2 - -timeout - -bartabs - -onReturn - -linkcom - \
+        -afteridle - -gutter {
           # attributes specific to apave, processed below in "Post"
           set v2 [string trimleft $v "\{"]
           set v2 [string range $v2 0 end-[expr {[string length $v]-[string length $v2]}]]
@@ -1925,6 +2019,15 @@ oo::class create ::apave::APave {
             }
           }
         }
+        -gutter {
+          lassign [::apave::parseOptions $v -canvas Gut -width 5 -shift 6] canvas width shift
+          if {![winfo exists $canvas]} {set canvas [my $canvas]}
+          set bind [list [self] fillGutter $w $canvas $width $shift]
+          bind $w <Configure> $bind
+          if {[trace info execution $w] eq ""} {
+            trace add execution $w leave $bind
+          }
+        }
         -onReturn {   ;# makes a command run at Enter key pressing
           lassign $v cmd from to
           if {[set tvar [$w cget -textvariable]] ne ""} {
@@ -1957,7 +2060,7 @@ oo::class create ::apave::APave {
           eval {*}[string map [list %w $w] $v]
         }
         -bartabs {
-          after 50 [string map [list %w $w] $v]
+          after 10 [string map [list %w $w] $v]
         }
         -afteridle {
           after idle [string map [list %w $w] $v]
@@ -2836,8 +2939,11 @@ oo::class create ::apave::APave {
     }
     $w replace 1.0 end $conts
     $w edit reset; $w edit modified no
-    ::tk::TextSetCursor $w $pos
-    if { $state ne "normal" } { $w configure -state $state }
+    if {$state eq "normal"} {
+      ::tk::TextSetCursor $w $pos
+    } else {
+      $w configure -state $state
+    }
     return
   }
 

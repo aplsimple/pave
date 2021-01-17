@@ -10,8 +10,9 @@ package require Tk
 
 set ::testdirname [file normalize [file dirname [info script]]]
 catch {cd $::testdirname}
-lappend ::auto_path "$::testdirname/.."
+lappend ::auto_path "$::testdirname/.." "$::testdirname/../../transpops"
 package require apave
+package require transpops
 
 namespace eval t {
 
@@ -22,14 +23,14 @@ namespace eval t {
 
   proc test1 {args} {
     return [dlg ok info "Dialog OK$::csN" \
-      "Hey that Pushkin!\nHey that son of bitch!" -g +200+200 -scroll 0 {*}$args]
+      "Hey that Pushkin!\nHey that son of bitch!" -g +400+200 -scroll 0 {*}$args]
   }
 
   proc test2 {args} {
     return [dlg yesno ques "Dialog YESNO$::csN" \
       "Hey that Pushkin!\nHey that son of bitch!
 ---
-Do you agree?" YES -g +225+225 -scroll 0 {*}$args]
+Do you agree?" YES -g +425+225 -scroll 0 {*}$args]
   }
 
   proc test3 {args} {
@@ -39,7 +40,15 @@ Do you agree?" YES -g +225+225 -scroll 0 {*}$args]
  Hey that son of bitch!
  ---
  Do you agree? <i>Cancel</i> if not.</dark>
- " TEXT -g +250+250 -text 1 -tags textTags -width 30 -height 6 -bg white \
+
+
+The text is restricted with 6 rows at start.
+...
+So, it has some hidden parts viewed through the scrolling or the resizing.
+...
+...
+...
+ " TEXT -g +450+250 -text 1 -tags textTags -width 30 -height 6 -bg white \
  -head "When presented at first\nit's a \"changeable text message\"." \
  -hsz "12 -slant italic -weight normal" {*}$args]
     set textTags [lreplace $textTags 0 0 [list "dark" "-foreground yellow"]]
@@ -52,7 +61,7 @@ Do you agree?" YES -g +225+225 -scroll 0 {*}$args]
 ---
 Do you agree?
 Or hate the question?
-(Choose Cancel in such case)" YES -g +275+275 -scroll 0 {*}$args -timeout {5 ButNO}]
+(Choose Cancel in such case)" YES -g +475+275 -scroll 0 {*}$args -timeout {10 ButNO}]
   }
 
   proc ::t::browser {url} {
@@ -80,14 +89,14 @@ Or hate the question?
     return [dlg retrycancel err "Dialog RETRYCANCEL$::csN" \
       "<link>::t::browser https://en.wikipedia.org/w/index.php?cirrusUserTesting=classic-explorer-i&search=Pushkin@@wikipedia about Pushkin@@</link>Hey that Pushkin!\nHey that son of bitch!
 ---
-Retry the reading of Pushkin? Cancel if not." RETRY -g +300+300 {*}$args -timeout {37 Lab1}]
+Retry the reading of Pushkin? Cancel if not." RETRY -g +500+300 {*}$args -timeout {37 Lab1}]
   }
 
   proc test6 {args} {
     return [dlg abortretrycancel err "Dialog ABORTRETRYCANCEL$::csN" \
       "Hey that Pushkin!\nHey that son of bitch!
 ---
-Abort or retry the reading of Pushkin? Cancel if not sure." RETRY -g +325+325 {*}$args]
+Abort or retry the reading of Pushkin? Cancel if not sure." RETRY -g +525+325 {*}$args]
   }
 
   proc test7 {args} {
@@ -167,6 +176,8 @@ apave::initWM
 
 # firstly show dialogs without checkboxes
 apave::APaveInput create dlg
+
+catch {::transpops::run [file join $::testdirname ../.bak/transpops_dialog.txt] {<Control-q> <Alt-q>} .dia}
 set ::csN ""
 set dn "Don't show this again"
 puts "ok  = [t::test1 -weight bold -size 8 -text 1]"
@@ -176,8 +187,8 @@ puts "ync = [t::test4 -weight bold -size 14 -text 1 -width 30 -height 6 -fg gree
 puts "rc  = [t::test5 -weight bold -size 16]"
 puts "arc = [t::test6 -weight bold -size 18]"
 puts "msc = [t::test7 -size 20]"
-puts "inp = [t::test8 -g +375+375 -focus en*dir*]"
-puts "pavedoc = [t::test9 -g +375+375]"
+puts "inp = [t::test8 -g +575+175 -focus en*dir*]"
+puts "pavedoc = [t::test9 -g +575+375]"
 
 # show dialogs with checkboxes, in cycle
 lassign {0 0 0 0 0 0 0 0} r1 r2 r3 r4 r5 r6 r7 r8 r9
@@ -204,7 +215,7 @@ while 1 {
   if {$curr == $totr} break
   # ask for continuation anyway
   if {[lindex [dlg yesno warn "UFF..." "\n Break the dance? \n" NO \
-      -g +350+350 -weight bold -size 22 -c "ghost white"] 0] == 1} {
+      -weight bold -size 22 -c "ghost white"] 0] == 1} {
     break
   }
 }

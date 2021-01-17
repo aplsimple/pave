@@ -19,21 +19,21 @@ namespace eval ::baltip {
   namespace ensemble create
 
   namespace eval my {
-  variable ttdata; array set ttdata [list]
-  set ttdata(on) yes
-  set ttdata(per10) 1600
-  set ttdata(fade) 300
-  set ttdata(pause) 600
-  set ttdata(fg) black
-  set ttdata(bg) #FBFB95
-  set ttdata(bd) 1
-  set ttdata(padx) 4
-  set ttdata(pady) 3
-  set ttdata(padding) 0
-  set ttdata(alpha) 1.0
-  set ttdata(bell) no
-  set ttdata(font) [font actual TkDefaultFont]
-  set ttdata(under) -16
+    variable ttdata; array set ttdata [list]
+    set ttdata(on) yes
+    set ttdata(per10) 1600
+    set ttdata(fade) 300
+    set ttdata(pause) 600
+    set ttdata(fg) black
+    set ttdata(bg) #FBFB95
+    set ttdata(bd) 1
+    set ttdata(padx) 4
+    set ttdata(pady) 3
+    set ttdata(padding) 0
+    set ttdata(alpha) 1.0
+    set ttdata(bell) no
+    set ttdata(font) [font actual TkDefaultFont]
+    set ttdata(under) -16
   }
 }
 
@@ -44,6 +44,7 @@ proc ::baltip::configure {args} {
   #   args - options ("name value" pairs)
   # Returns the list of -force, -geometry, -index, -tag option values.
 
+  variable my::ttdata
   set force no
   set index -1
   set geometry [set tag ""]
@@ -74,6 +75,7 @@ proc ::baltip::cget {args} {
   #   args - option names (if empty, returns all options)
   # Returns a list of "name value" pairs.
 
+  variable my::ttdata
   if {![llength $args]} {
     lappend args -on -per10 -fade -pause -fg -bg -bd -padx -pady -padding \
       -font -alpha -text -index -tag -bell -under
@@ -95,6 +97,8 @@ proc ::baltip::tip {w text args} {
   #   text - the tip text
   #   args - options ("name value" pairs)
 
+  variable my::ttdata
+  array unset my::ttdata winGEO*
   if {[winfo exists $w] || $w eq ""} {
     set arrsaved [array get my::ttdata]
     set optvals [::baltip::my::CGet {*}$args]
@@ -120,7 +124,7 @@ proc ::baltip::tip {w text args} {
           set my::ttdata(LASTMITEM) ""
           bind $w <<MenuSelect>> [list + ::baltip::my::MenuTip $w %W $optvals]
         } elseif {$ttag ne ""} {
-          set ::baltip::my::ttdata($w,$ttag) "$text"
+          set my::ttdata($w,$ttag) "$text"
           $w tag bind $ttag <Enter> [list + ::baltip::my::TagTip $w $ttag $optvals]
           foreach event {Leave KeyPress Button} {
             $w tag bind $ttag <$event> [list + ::baltip::my::TagTip $w]
@@ -140,6 +144,7 @@ proc ::baltip::update {w text args} {
   #  text - tip's text
   #  args - tip's settings
 
+  variable my::ttdata
   set my::ttdata(text,$w) $text
   foreach {k v} $args {set my::ttdata([string range $k 1 end],$w) $v}
 }
@@ -159,13 +164,13 @@ proc ::baltip::repaint {w args} {
   #   w - widget's path
   #  args - options (incl. -index/-tag)
 
+  variable my::ttdata
   if {[winfo exists $w] && [info exists my::ttdata(optvals,$w)] && \
   [dict exists $my::ttdata(optvals,$w) -text]} {
-    set optvals $::baltip::my::ttdata(optvals,$w)
+    set optvals $my::ttdata(optvals,$w)
     lappend optvals {*}$args
     after idle [list ::baltip::my::Show $w \
-      [dict get $::baltip::my::ttdata(optvals,$w) -text] yes \
-      {} $optvals]
+      [dict get $my::ttdata(optvals,$w) -text] yes {} $optvals]
   }
 }
 
@@ -191,8 +196,8 @@ proc ::baltip::my::ShowWindow {win} {
   # Shows a window of tip.
   #   win - the tip's window
 
-  if {![winfo exists $win]} return
   variable ttdata
+  if {![winfo exists $win] || ![info exists ttdata(winGEO,$win)]} return
   set geo $ttdata(winGEO,$win)
   set under $ttdata(winUNDER,$win)
   set w [winfo parent $win]
@@ -296,11 +301,11 @@ proc ::baltip::my::Show {w text force geo optvals} {
     if {$geo eq ""} {
       catch {wm attributes $win -alpha $data(-alpha)}
     } else {
-      ::baltip::my::Fade $win $aint [expr {round(1.0*$data(-pause)/$aint)}] \
+      Fade $win $aint [expr {round(1.0*$data(-pause)/$aint)}] \
         0 Un $data(-alpha) 1 $geo
     }
     if {$force} {
-      ::baltip::my::Fade $win $aint $fint $icount {} $data(-alpha) 1 $geo
+      Fade $win $aint $fint $icount {} $data(-alpha) 1 $geo
     } else {
       after $data(-pause) [list \
         ::baltip::my::Fade $win $aint $fint $icount {} $data(-alpha) 1 $geo]
