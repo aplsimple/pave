@@ -122,9 +122,11 @@ namespace eval ::apave {
   set _AP_VARS(.,MODALS) 0
   set _AP_VARS(TIMW) [list]
   set _AP_VARS(LINKFONT) [list -underline 1]
+  set _AP_VARS(HILI) 0
   variable _AP_VISITED;  array set _AP_VISITED [list]
   set _AP_VISITED(ALL) [list]
   variable UFF "\uFFFF"
+  variable _OBJ_ ""
 
 
 # _______________________ A bit of apave procedures _____________________ #
@@ -291,7 +293,7 @@ namespace eval ::apave {
 
   ##########################################################################
 
-  proc paveObj {com args} {
+  proc obj {com args} {
 
     # Calls a command of APaveInput class.
     #   com - a command
@@ -299,17 +301,17 @@ namespace eval ::apave {
     #
     # Returns the command's result.
 
-    set pobj [::apave::APaveInput new]
+    variable _OBJ_
+    if {$_OBJ_ eq ""} {set _OBJ_ [::apave::APaveInput new]}
     if {[set exported [expr {$com eq "EXPORT"}]]} {
       set com [lindex $args 0]
       set args [lrange $args 1 end]
-      oo::objdefine $pobj "export $com"
+      oo::objdefine $_OBJ_ "export $com"
     }
-    set res [$pobj $com {*}$args]
+    set res [$_OBJ_ $com {*}$args]
     if {$exported} {
-      oo::objdefine $pobj "unexport $com"
+      oo::objdefine $_OBJ_ "unexport $com"
     }
-    $pobj destroy
     return $res
 }
 
@@ -1358,7 +1360,7 @@ oo::class create ::apave::APave {
     return $res
   }
 
-  method fillGutter {txt canvas width shift args} {
+  method fillGutter {txt {canvas ""} {width ""} {shift ""} args} {
     # Fills a gutter of text with the text's line numbers.
     #  txt - path to the text widget
     #  canvas - canvas of the gutter
@@ -1367,8 +1369,12 @@ oo::class create ::apave::APave {
     #  args - additional arguments for tracing
     # The code is borrowed from open source tedit project.
 
+    if {$canvas eq ""} {
+      event generate $txt <Configure> ;# repaints the gutter
+      return
+    }
     set oper [lindex $args 0 1]
-    if {[llength $args] == 0 || [lindex $args 0 4] eq "-elide" || \
+    if {![llength $args] || [lindex $args 0 4] eq "-elide" || \
     $oper in {configure delete insert see yview}} {
       set i [$txt index @0,0]
       set gcont [list]
@@ -1388,7 +1394,7 @@ oo::class create ::apave::APave {
       set newbg [expr {$bg ne [$canvas cget -background]}]
       set newwidth [expr {$cwidth ne [$canvas cget -width]}]
       set savedcont [namespace current]::gc$txt
-      if {$newbg || $newwidth || ![info exists $savedcont] || \
+      if {![llength $args] || $newbg || $newwidth || ![info exists $savedcont] || \
       $gcont != [set $savedcont]} {
         if {$newbg} {$canvas config -background $bg}
         if {$newwidth} {$canvas config -width $cwidth}
@@ -1814,7 +1820,7 @@ oo::class create ::apave::APave {
 
   #########################################################################
 
-  method SetTextBinds {wt} {
+  method setTextBinds {wt} {
 
     # Returns bindings for a text widget.
     #   wt - the text's path
@@ -1859,22 +1865,25 @@ oo::class create ::apave::APave {
 
   #########################################################################
 
-  method makePopup {w {isRO no} {istext no} {tearoff no}} {
+  method makePopup {w {isRO no} {istext no} {tearoff no} {addpop ""}} {
 
     # Makes a popup menu for an editable widget.
     #   w - widget's name
     #   isRO - flag for "is it readonly"
     #   istext - flag for "is it a text"
     #   tearoff - flag for "-tearoff" option
+    #   addpop - additional commands for popup menu
 
     set pop $w.popupMenu
-    catch {
-      menu $pop -tearoff $tearoff
-    }
+    catch {menu $pop -tearoff $tearoff}
     $pop delete 0 end
     if {$isRO} {
       $pop add command {*}[my iconA copy] -accelerator Ctrl+C -label "Copy" \
             -command "event generate $w <<Copy>>"
+      if {$istext} {
+        eval [my popupHighlightCommands $pop $w]
+        after idle [list [self] set_highlight_matches $w]
+      }
     } else {
       if {$istext} {
         $pop add command {*}[my iconA cut] -accelerator Ctrl+X -label "Cut" \
@@ -1888,7 +1897,14 @@ oo::class create ::apave::APave {
               -command "::apave::eventOnText $w <<Undo>>"
         $pop add command {*}[my iconA redo] -accelerator Ctrl+Shift+Z -label "Redo" \
               -command "::apave::eventOnText $w <<Redo>>"
-        after idle [my SetTextBinds $w]
+        eval [my popupBlockCommands $pop $w]
+        eval [my popupHighlightCommands $pop $w]
+        if {$addpop ne ""} {
+          lassign $addpop com par1 par2
+          eval [my $com $pop $w {*}$par1 {*}$par2]
+        }
+        after idle [list [self] set_highlight_matches $w]
+        after idle [my setTextBinds $w]
       } else {
         $pop add command {*}[my iconA cut] -accelerator Ctrl+X -label "Cut" \
               -command "event generate $w <<Cut>>"
@@ -2003,8 +2019,11 @@ oo::class create ::apave::APave {
           if {[winfo exists $v]} {
             set ro [expr {$a eq "-textpopRO"}]
             my makePopup $v $ro yes
-            $v tag configure sel -borderwidth 1
+            set w $v
+          } elseif {[string length $v]>5} {
+            my makePopup $w no yes no $v
           }
+          $w tag configure sel -borderwidth 1
         }
         -notebazook {
           foreach {fr attr} $v {
@@ -2174,8 +2193,10 @@ oo::class create ::apave::APave {
     }
     if {$llf} {
       set png [list -file [lindex $ofile $idx-1]]
+    } elseif {[info exists [set datavar [lindex $odata $idx-1]]]} {
+      set png [list -data [set $datavar]]
     } else {
-      set png [list -data [set [lindex $odata $idx-1]]]
+      set png [list -data $odata]
     }
     set NS [namespace current]
     if {$ostatic} {
@@ -2295,9 +2316,9 @@ oo::class create ::apave::APave {
       set bg2 $bt
     }
     my VisitedLab $lab $v $vz $fg $bg
-    bind $lab <Enter> "::apave::paveObj EXPORT HoverLab $lab {$v} yes $fg2 $bg2"
-    bind $lab <Leave> "::apave::paveObj EXPORT HoverLab $lab {$v} no $fg $bg"
-    bind $lab <Button-1> "::apave::paveObj EXPORT VisitedLab $lab {$v} yes $fg2 $bg2;$v"
+    bind $lab <Enter> "::apave::obj EXPORT HoverLab $lab {$v} yes $fg2 $bg2"
+    bind $lab <Leave> "::apave::obj EXPORT HoverLab $lab {$v} no $fg $bg"
+    bind $lab <Button-1> "::apave::obj EXPORT VisitedLab $lab {$v} yes $fg2 $bg2;$v"
     if {$doadd} {lappend ::apave::_AP_VISITED(ALL) [list $lab $v $inv]}
     return [list $fg $bg $fg2 $bg2]
   }
@@ -2799,7 +2820,7 @@ oo::class create ::apave::APave {
     } else {
       set opt(-onclose) [list $opt(-onclose) ${_pav(ns)}PN::AR($win)]
     }
-    set opt(-onclose) "::apave::paveObj EXPORT CleanUps $win; $opt(-onclose)"
+    set opt(-onclose) "::apave::obj EXPORT CleanUps $win; $opt(-onclose)"
     wm protocol $win WM_DELETE_WINDOW $opt(-onclose)
     # get the window's geometry from its requested sizes
     set inpgeom $opt(-geometry)

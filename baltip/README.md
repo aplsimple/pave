@@ -9,8 +9,9 @@ The original code has been modified to make the tip:
   * be faded/destroyed after an interval defined by a caller
   * be enabled/disabled for all or specific widgets
   * be displayed at the screen's edges
-  * be displayed with given opacity
+  * be displayed under the host widget
   * be displayed as a stand-alone balloon message at given coordinates
+  * be displayed with given opacity, font, paddings, colors
   * have configure/cget etc. wrapped in Tcl ensemble for convenience
 
 The video introduction to *baltip* is presented by

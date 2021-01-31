@@ -1,6 +1,20 @@
 # Last changes:
 
 
+Version `3.2.8 (31 Jan'21)`
+
+  - modifying style of scale, scrollbar, combobox
+  - modifying menu's font size
+  - CS made milder
+  - revising popup menus of text widget
+  - color of matching bracket is magenta
+  - modifying & moving highlight matches procs from ::em to ::apave
+  - labelFlashing's -data allows var contents along with var name
+  - fillGutter can be run to update a gutter, e.g. at switching CS
+  - squeezing icons
+  - updating hl_tcl, bartabs packages
+
+
 Version `3.2.7 (17 Jan'21)`
 
   - "gut" (gutter) widget
@@ -50,7 +64,7 @@ Version `3.0b8 (27 Jun'20)`
   - `Paste` event removes selection in text
   - `-timeout` option for buttons & dialogs
   - `But*` & `Lab*` in dialogs
-  - `::apave::paveObj` instead `themeObj`
+  - `::apave::obj` instead `themeObj`
   - CS amended a lot
   - fixed issue with `-lbxname` option
   - `spx/spX` included in toolbar

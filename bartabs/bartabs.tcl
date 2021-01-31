@@ -7,7 +7,7 @@
 # _______________________________________________________________________ #
 
 package require Tk
-package provide bartabs 1.2.2
+package provide bartabs 1.2.3
 catch {package require baltip}
 
 # __________________ Common data of bartabs:: namespace _________________ #
@@ -1043,7 +1043,7 @@ method Bar_MenuList {BID TID popi {ilist ""} {pop ""}} {
 #   pop - menu to be themed in apave package
 
   if {$pop eq ""} {set pop $popi}
-  catch {::apave::paveObj themePopup $pop}
+  catch {::apave::obj themePopup $pop}
   lassign [my $BID cget -tabcurrent -select -FGOVER -BGOVER] \
     tabcurr fewsel fgo bgo
   for {set i 0} {$i<[llength $ilist]} {incr i} {
@@ -1845,10 +1845,10 @@ method create {barCom {barOpts ""} {tab1 ""}} {
     my $BID configure -BARCOM $barCom
   }
   if {$tab1 eq ""} {
-    after 100 [list [self] $BID NeedDraw ; [self] $BID draw]
+    after 50 [list [self] $BID NeedDraw ; [self] $BID draw]
   } else {
     set tab1 [my $BID tabID $tab1]
-    if {$tab1 ne ""} {after 200 "[self] $BID clear; [self] $BID $tab1 show"}
+    if {$tab1 ne ""} {after 100 "[self] $BID clear; [self] $BID $tab1 show"}
   }
   return $BID
 }

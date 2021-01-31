@@ -34,64 +34,64 @@ namespace eval ::apave {
 # Colors for <MildDark CS> : 1) meanings 2) code names
 
 # <CS>    itemfg  mainfg  itembg  mainbg  itemsHL  actbg   actfg  cursor  greyed   hot \
-  emfg  embg   -  menubg  winfg   winbg   #002...reserved...
+  emfg  embg   -  menubg  winfg   winbg   itembg2 #003...reserved...
 
 # <CS>    clrtitf clrinaf clrtitb clrinab clrhelp clractb clractf clrcurs clrgrey clrhotk \
-  fI     bI   -fM-   bM    fW      bW     #002...reserved...
+  fI     bI   -fM-   bM    fW      bW     itembg2 #003...reserved...
 
   set ::apave::_CS_(ALL) {
-{MildDark #E8E8E8 #E7E7E7 #222A2F #2D435B #ffcf6d #567e9c black   #00ffff grey #ffbb6d \
-black #6d95b3  -  #3c546e black #b0b04c #002 #003 #004 #005 #006 #007}
-{Inkpot #d3d3ff #AFC2FF #05050e #1E1E27 #ffd486 #7272b3 black #ff9900 grey #e1ac5e black #8585c6 - #292936 black #a2a23e #002 #003 #004 #005 #006 #007}
-{Green         #E8E8E8 #EFEFEF #0F3F0A #274923 #FEEC9A #678570 black #E69800 grey #ffd486 black #88a691 - #3e603a black #bebe5a #002 #003 #004 #005 #006 #007}
-{Brown         #E8E8E8 #E7E7E7 #352927 #453528 #FEEC9A #9c8c71 black #E69800 grey #ffd486 black #ab9b80 - #524235 black #bebe5a #002 #003 #004 #005 #006 #007}
-{Magenta       #E8E8E8 #F0E8E8 #2B1137 #4A2A4A #FEEC9A #9b7b9b black #E69800 grey #ffd486 black #ad8dad - #573757 black #cdcd69 #002 #003 #004 #005 #006 #007}
-{Red           white   #CECECB #340202 #440702 #ffffb3 #c16f6f black yellow #8b8b8b #ffbb6d black #ba6868 - #440702 black #bebe5a #002 #003 #004 #005 #006 #007}
-{Anti-Light1 #bebebe #bebebe #333333 #242424 #FEEFA8 #818181 black #ff9900 grey #ffd486 #000000 #636363 - #1c1c1c black #bebe5a #002 #003 #004 #005 #006 #007}
-{Anti-Light2 #bebebe #bebebe #242424 #333333 #FEEFA8 #818181 black #ff9900 grey #ffd486 #000000 #636363 - #2b2b2b black #b0b04c #002 #003 #004 #005 #006 #007}
-{Darcula #ececec #c7c7c7 #272727 #303030 #efd7a8 #2F5692 #e1e1e1 #ff9900 grey #f0a471 #EDC881 #1a417d - #444444 black #a2a23e #002 #003 #004 #005 #006 #007}
-{Sleepy #daefd0 #D0D0D2 #3b4043 #2E3436 #efd7a8 #818181 black #ff9900 grey #ffd486 black #828d91 - #383E40 black #b0b04c #002 #003 #004 #005 #006 #007}
-{Dark          #E0D9D9 #C4C4C4 #232323 #303030 #ededb1 #818181 black #E69800 grey #ffd486 black #a2a2a2 - #424242 black #cdcd69 #002 #003 #004 #005 #006 #007}
-{DarkGrey      #F0E8E8 #E7E7E7 #333333 #494949 #DCDC9B #818181 black #E69800 grey #ffd486 black #adadad - #595959 black #cdcd69 #002 #003 #004 #005 #006 #007}
-{Sandy         #211D1C #27201F #FEFAEB #F7EEC5 #9c5b5b #ccbe99 #260100 #802e00 grey #933232 black #b9ab86 - #e4dbb2 #000000 #ffff3a #002 #003 #004 #005 #006 #007}
-{African black black #ffe2a2 #ffffb4 brown #d3a876 #000000 red grey SaddleBrown #3b1516 #f9b777 - #ffffd0 #000000 #ffff00 #002 #003 #004 #005 #006 #007}
-{Rosy          #2B122A #000000 #FFFFFF #F6E6E9 #570957 #C5ADC8 black #802e00 grey #870287 #000000 #C5ADC8 - #d6c6c9 #000000 #FBFB95 #002 #003 #004 #005 #006 #007}
-{InverseGrey   #121212 #1A1A1A #c9cbcf #DADCE0 #5c1616 #a5a5a5 black #802e00 grey #933232 black #AFAFAF - #c9cbcf #000000 #FBFB95 #002 #003 #004 #005 #006 #007}
-{Grey          #000000 #0D0D0D #FFFFFF #DADCE0 #5c1616 #AFAFAF black #802e00 grey #933232 #000000 #AFAFAF - #caccd0 #000000 #FBFB95 #002 #003 #004 #005 #006 #007}
-{Anti-Dark1 #2e3436 #2e3436 #F8F8F8 #dadad8 #5c1616 #AFAFAF black #802e00 grey #933232 #000000 #AFAFAF - #caccd0 #000000 #FBFB95 #002 #003 #004 #005 #006 #007}
-{Anti-Dark2 #2e3436 #2e3436 #dadad8 #F8F8F8 #5c1616 #AFAFAF black #802e00 grey #933232 #000000 #AFAFAF - #e1e1df #000000 #FBFB95 #002 #003 #004 #005 #006 #007}
-{Florid black darkgreen #dbffdb white brown #93e493 #0F2D0F #802e00 grey #802e00 black #8adb8a - #dff4df #000000 #FBFB96 #002 #003 #004 #005 #006 #007}
-{LightGreen    #122B05 #091900 #edffed #DEF8DE #562222 #A8CCA8 black #802e00 grey #933232 #000000 #A8CCA8 - #c3ddc3 #000000 #FBFB96 #002 #003 #004 #005 #006 #007}
-{InverseGreen  #122B05 #091900 #cce6c8 #DEF8DE #562222 #9cc09c black #802e00 grey #933232 black #98bc98 - #cce6cc #000000 #FBFB96 #002 #003 #004 #005 #006 #007}
-{Khakish       #2e3436 #2e3436 #e1ffdd #cadfca #562222 #9dbb99 black #802e00 grey #933232 #000000 #9cb694 - #bcdab8 #000000 #FBFB96 #002 #003 #004 #005 #006 #007}
-{Blue          #08085D #030358 #FFFFFF #D2DEFA #562222 #9fb6e9 black #802e00 grey #933232 black #a5bcef - #b7c3df #000000 #FBFB96 #002 #003 #004 #005 #006 #007}
-{Sky           #102433 #0A1D33 #D2EAF2 #bdf6ff #562222 #82bbc4 black #0052b9 grey #933232 black #7bbed2 - #a8e1ea #000000 #FBFB95 #002 #003 #004 #005 #006 #007}
-{TKE-SourceForge #141414 #151616 #ffffff #a9e2f8 #562222 #7fb8ce black #0052b9 grey #933232 white #4982a5 - #9dd6f9 #000000 #FBFB96 #002 #003 #004 #005 #006 #007}
-{TKE-Juicy #000000 #000000 #f1f1f1 #dddddd #41312b #bfbfbf black #802e00 grey #933232 black #a9a9a9 - #d3d3d3 #000000 #FBFB96 #002 #003 #004 #005 #006 #007}
-{TKE-FluidVision #000000 #000000 #f4f4f4 #d3d3d3 #41312b #a5a5a5 black #802e00 grey #843500 white #6b6b6b - #c9c9c9 #000000 #FBFB95 #002 #003 #004 #005 #006 #007}
-{TKE-YellowStone #00002f #00003c #fdf9d0 #d5d2af #41312b #d59d6f black #4A3706 grey #771d00 #00003c #e6ae80 - #DBD8B5 #000000 #fbfb74 #002 #003 #004 #005 #006 #007}
-{TKE-Notebook #000000 #000000 #beb69d #96907c #41312b #d59d6f black #821c04 #c5c3be #771d00 #000000 #e6ae80 - #85806E #000000 #eded89 #002 #003 #004 #005 #006 #007}
-{TKE-TurnOfCentury #ffffff #ffffff #47382d #5a4b40 #ffc799 #b77f51 black #ffff68 #a2a2a2 #ffd486 black #e6ae80 - #55463b #000000 #eded89 #002 #003 #004 #005 #006 #007}
-{TKE-IdleFingers #ffffff #ffffff #323232 #5a5a5a #ffc799 #395472 white #ff9900 grey orange #ffffff #2d4866 - #4F4F4F black #cdcd69 #002 #003 #004 #005 #006 #007}
-{TKE-Minimal #fcffe0 #ffffff #302d26 #5a5a5a #ededb1 #395472 white #ff9900 grey orange #ffffff #2e4967 - #4F4F4F black #cdcd69 #002 #003 #004 #005 #006 #007}
-{TKE-Monokai #f8f8f2 #f8f8f2 #272822 #4e5044 #ffc2a1 #818181 black #ff959f grey #ffd486 black #777777 - #505147 black #cdcd69 #002 #003 #004 #005 #006 #007}
-{TKE-LightVision #ffffff #ffffff #3C423C #515753 #ffc2a1 #818181 black #ff959f grey #ffd486 black #777777 - #474D49 black #cdcd69 #002 #003 #004 #005 #006 #007}
-{TKE-oscuro #f1f1f1 #f1f1f1 #344545 #526d6d #ffc2a1 #829d9d black #ff959f #9f9f9f #ffd486 black #94afaf - #475E5E black #cdcd69 #002 #003 #004 #005 #006 #007}
-{TKE-StarLight #dedede #dedede #223859 #315181 #ffc2a1 #7292c2 black #00ffff grey #ffd486 black #7d9dcd - #2D4A75 black #bebe5a #002 #003 #004 #005 #006 #007}
-{TKE-MildDark #d2d2d2 #ffffff #151616 #2D435B #ffcf6d #557d9b black #00ffff grey #ffbb6d black #6c94b2 - #24384f black #bebe5a #002 #003 #004 #005 #006 #007}
-{TKE-MildDark2 #b4b4b4 #ffffff #0d0e0e #24384f #ffcf6d #557d9b black #00ffff grey #ffbb6d black #6890ae - #1B3048 black #bebe5a #002 #003 #004 #005 #006 #007}
-{TKE-MildDark3 #e2e2e2 #f1f1f1 #000000 #1B3048 #ffcf6d #557d9b black #00ffff grey #ffbb6d black #668eac - #12273f black #b0b04c #002 #003 #004 #005 #006 #007}
-{TKE-RubyBlue #ffffff #ffffff #121e31 #213659 #ffcf6d #637e9c black #00ffff grey #ffbb6d black #66819f - #1C2E4D black #b0b04c #002 #003 #004 #005 #006 #007}
-{TKE-MadeOfCode #f8f8f8 #f8f8f8 #090a1b #00348c #ffcf6d #5589e1 black #00ffff grey #ffbb6d black #578be3 - #002C78 black #b0b04c #002 #003 #004 #005 #006 #007}
-{TKE-CoolGlow #e0e0e0 #e0e0e0 #06071d #0e1145 #ffcf6d #616ed2 black #00ffff grey #ffbb6d black #727fe3 - #171C73 black #b0b04c #002 #003 #004 #005 #006 #007}
-{TKE-Quiverly #cdd8d8 #cdd8d8 #2b303b #333946 #ffcf6d #7c828f black #ff9900 grey #ffbb6d black #9197a4 - #414650 black #b0b04c #002 #003 #004 #005 #006 #007}
-{TKE-Aurora #ececec #ececec #302e40 #4e4b68 #ffe785 #8b88a5 black #ff9900 grey #ffd486 black #8d8aa7 - #434259 black #bebe5a #002 #003 #004 #005 #006 #007}
-{TKE-Choco #d6d1ab #d6d1ab #180c0c #402020 #ffe785 #664D4D white #ff9900 grey orange white #735a5a - #331A1A black #b0b04c #002 #003 #004 #005 #006 #007}
-{TKE-AnatomyOfGrey #dfdfdf #dddddd #000000 #282828 #ffe785 #818181 black #ff9900 grey #ffd486 black #828282 - #363636 black #b0b04c #002 #003 #004 #005 #006 #007}
-{TKE-Default white white black #282828 #ffe785 blue white #ff9900 grey orange white #0000d3 - #383838 black #b0b04c #002 #003 #004 #005 #006 #007}
+{MildDark #E8E8E8 #E7E7E7 #222A2F #2D435B #FEEFA8 #567e9c black   #00ffff grey #ffbb6d \
+black #6d95b3  -   #3c546e black #b0b04c #2b3338 #003 #004 #005 #006 #007}
+{Inkpot #d3d3ff #AFC2FF #16161f #1E1E27 #FEEFA8 #7272b3 black #ff9900 grey #ffbb6d black #8585c6 - #292936 black #a2a23e #24242d #003 #004 #005 #006 #007}
+{Green  #E8E8E8 #EFEFEF #1e3b1b #274923 #FEEC9A #678570 black #E69800 grey #ffd486 black #88a691 - #3e603a black #bebe5a #2c4929 #003 #004 #005 #006 #007}
+{Brown  #E8E8E8 #E7E7E7 #352927 #453528 #FEEC9A #9c8c71 black #E69800 grey #ffd486 black #ab9b80 - #524235 black #bebe5a #3f3331 #003 #004 #005 #006 #007}
+{Magenta #E8E8E8 #F0E8E8 #381e44 #4A2A4A #FEEC9A #9b7b9b black #E69800 grey #ffd486 black #ad8dad - #573757 black #cdcd69 #42284e #003 #004 #005 #006 #007}
+{Red white #CECECB #340202 #440702 #ffffb3 #c16f6f black yellow #8b8b8b #ffbb6d black #ba6868 - #440702 black #bebe5a #4a1818 #003 #004 #005 #006 #007}
+{Anti-Light1 #bebebe #bebebe #333333 #242424 #FEEFA8 #818181 black #ff9900 grey #ffd486 #000000 #636363 - #1c1c1c black #bebe5a #3f3f3f #003 #004 #005 #006 #007}
+{Anti-Light2 #bebebe #bebebe #242424 #333333 #FEEFA8 #818181 black #ff9900 grey #ffd486 #000000 #636363 - #2b2b2b black #b0b04c #2d2d2d #003 #004 #005 #006 #007}
+{Darcula #ececec #c7c7c7 #272727 #303030 #FEEFA8 #2F5692 #e1e1e1 #ff9900 grey #f0a471 #EDC881 #1a417d - #444444 black #a2a23e #343434 #003 #004 #005 #006 #007}
+{Sleepy #daefd0 #D0D0D2 #3b4043 #2E3436 #FEEFA8 #818181 black #ff9900 grey #ffd486 black #828d91 - #383E40 black #b0b04c #4a4f52 #003 #004 #005 #006 #007}
+{Dark          #E0D9D9 #C4C4C4 #232323 #303030 #FEEFA8 #818181 black #E69800 grey #ffd486 black #a2a2a2 - #424242 black #cdcd69 #2d2d2d #003 #004 #005 #006 #007}
+{DarkGrey      #F0E8E8 #E7E7E7 #333333 #494949 #FEEFA8 #818181 black #E69800 grey #ffd486 black #adadad - #595959 black #cdcd69 #3e3e3e #003 #004 #005 #006 #007}
+{Sandy         #211D1C #27201F #FEFAEB #F7EEC5 #591c0e #ccbe99 #260100 #802e00 grey #9c5b5b black #b9ab86 - #e4dbb2 #000000 #ffff45 #e3dfd0 #003 #004 #005 #006 #007}
+{African black black #ffeaaa #ffffb4 #591c0e #d3a876 #000000 red grey SaddleBrown #3b1516 #f9b777 - #ffffd0 #000000 #ffff45 #eed999 #003 #004 #005 #006 #007}
+{Rosy          #2B122A #000000 #FFFFFF #F6E6E9 #570957 #C5ADC8 black #802e00 grey #870287 #000000 #C5ADC8 - #d6c6c9 #000000 #FBFB95 #e9dcdf #003 #004 #005 #006 #007}
+{InverseGrey   #121212 #1A1A1A #c9cbcf #DADCE0 #5c1616 #a5a5a5 black #802e00 grey #933232 black #AFAFAF - #c9cbcf #000000 #FBFB95 #bebebe #003 #004 #005 #006 #007}
+{Grey          #000000 #0D0D0D #FFFFFF #DADCE0 #5c1616 #AFAFAF black #802e00 grey #933232 #000000 #AFAFAF - #caccd0 #000000 #FBFB95 #e0e0d8 #003 #004 #005 #006 #007}
+{Anti-Dark1 #2e3436 #2e3436 #F8F8F8 #dadad8 #5c1616 #AFAFAF black #802e00 grey #933232 #000000 #AFAFAF - #caccd0 #000000 #FBFB95 #e0e0d8 #003 #004 #005 #006 #007}
+{Anti-Dark2 #2e3436 #2e3436 #e9e9e7 #F8F8F8 #5c1616 #AFAFAF black #802e00 grey #933232 #000000 #AFAFAF - #e1e1df #000000 #FBFB95 #d5d5d3 #003 #004 #005 #006 #007}
+{Florid black #004000 #e4fce4 white #5c1616 #93e493 #0F2D0F #802e00 grey #802e00 black #8adb8a - #d7efd7 #000000 #FBFB96 #d5e0d5 #003 #004 #005 #006 #007}
+{LightGreen    #122B05 #091900 #edffed #DEF8DE #562222 #A8CCA8 black #802e00 grey #933232 #000000 #A8CCA8 - #c3ddc3 #000000 #FBFB96 #d5e0d5 #003 #004 #005 #006 #007}
+{InverseGreen  #122B05 #091900 #cce6c8 #DEF8DE #562222 #9cc09c black #802e00 grey #933232 black #98bc98 - #cce6cc #000000 #FBFB96 #bed8ba #003 #004 #005 #006 #007}
+{Khakish       #2e3436 #2e3436 #e1ffdd #cadfca #562222 #9dbb99 black #802e00 grey #933232 #000000 #9cb694 - #bcdab8 #000000 #FBFB96 #d2e1d2 #003 #004 #005 #006 #007}
+{Blue          #08085D #030358 #FFFFFF #D2DEFA #562222 #9fb6e9 black #802e00 grey #933232 black #a5bcef - #b7c3df #000000 #FBFB96 #dde1ef #003 #004 #005 #006 #007}
+{Sky           #102433 #0A1D33 #d0fdff #bdf6ff #562222 #82bbc4 black #0052b9 grey #933232 black #7bbed2 - #a8e1ea #000000 #FBFB95 #bae3e9 #003 #004 #005 #006 #007}
+{TKE-SourceForge #141414 #151616 #ffffff #a9e2f8 #562222 #82bbd1 black #0052b9 grey #933232 white #4982a5 - #9dd6f9 #000000 #FBFB96 #dde1ef #003 #004 #005 #006 #007}
+{TKE-Juicy #000000 #000000 #f1f1f1 #dddddd #6c220c #bfbfbf black #802e00 grey #933232 black #a9a9a9 - #d3d3d3 #000000 #FBFB96 #dadada #003 #004 #005 #006 #007}
+{TKE-FluidVision #000000 #000000 #f4f4f4 #d3d3d3 #500a0a #a5a5a5 black #802e00 grey #843500 white #6b6b6b - #c9c9c9 #000000 #FBFB95 #dcdcdc #003 #004 #005 #006 #007}
+{TKE-YellowStone #00002f #00003c #fdf9d0 #d5d2af #500a0a #d59d6f black #4A3706 grey #771d00 #00003c #e6ae80 - #DBD8B5 #000000 #fbfb74 #dcdcc3 #003 #004 #005 #006 #007}
+{TKE-Notebook #000000 #000000 #beb69d #96907c #460000 #d59d6f black #821c04 #d6d4cf #771d00 #000000 #e6ae80 - #aaa593 #000000 #eded89 #b2aa91 #003 #004 #005 #006 #007}
+{TKE-TurnOfCentury #ffffff #ffffff #47382d #5a4b40 #FEEFA8 #b77f51 black #ffff68 #a2a2a2 #ffd486 black #e6ae80 - #55463b #000000 #eded89 #503f34 #003 #004 #005 #006 #007}
+{TKE-IdleFingers #ffffff #ffffff #323232 #5a5a5a #FEEFA8 #395472 white #ff9900 grey orange #ffffff #2d4866 - #4F4F4F black #cdcd69 #3b3b3b #003 #004 #005 #006 #007}
+{TKE-Minimal #fcffe0 #ffffff #302d26 #5a5a5a #FEEFA8 #395472 white #ff9900 grey orange #ffffff #2e4967 - #4F4F4F black #cdcd69 #3a3730 #003 #004 #005 #006 #007}
+{TKE-Monokai #f8f8f2 #f8f8f2 #272822 #4e5044 #FEEFA8 #818181 black #ff959f grey #ffd486 black #777777 - #505147 black #cdcd69 #31322c #003 #004 #005 #006 #007}
+{TKE-LightVision #ffffff #ffffff #3C423C #515753 #FEEFA8 #818181 black #ff959f grey #ffd486 black #777777 - #474D49 black #cdcd69 #494f49 #003 #004 #005 #006 #007}
+{TKE-oscuro #f1f1f1 #f1f1f1 #344545 #526d6d #FEEFA8 #829d9d black #ff959f #afafaf #ffd486 black #94afaf - #475E5E black #cdcd69 #415252 #003 #004 #005 #006 #007}
+{TKE-StarLight #dedede #dedede #223859 #315181 #FEEFA8 #7292c2 black #00ffff grey #ffd486 black #7d9dcd - #2D4A75 black #bebe5a #2c405d #003 #004 #005 #006 #007}
+{TKE-MildDark #d2d2d2 #ffffff #151616 #2D435B #FEEFA8 #557d9b black #00ffff grey #ffbb6d black #6c94b2 - #24384f black #bebe5a #1f2020 #003 #004 #005 #006 #007}
+{TKE-MildDark2 #b4b4b4 #ffffff #0d0e0e #24384f #FEEFA8 #557d9b black #00ffff grey #ffbb6d black #6890ae - #1B3048 black #bebe5a #161717 #003 #004 #005 #006 #007}
+{TKE-MildDark3 #e2e2e2 #f1f1f1 black #1B3048 #FEEFA8 #557d9b black #00ffff grey #ffbb6d black #668eac - #12273f black #b0b04c #111111 #003 #004 #005 #006 #007}
+{TKE-RubyBlue #ffffff #ffffff #121e31 #213659 #FEEFA8 #637e9c black #00ffff grey #ffbb6d black #66819f - #1C2E4D black #b0b04c #1b273a #003 #004 #005 #006 #007}
+{TKE-MadeOfCode #f8f8f8 #f8f8f8 #090a1b #00348c #FEEFA8 #5589e1 black #00ffff grey #ffbb6d black #578be3 - #002C78 black #b0b04c #121324 #003 #004 #005 #006 #007}
+{TKE-CoolGlow #e0e0e0 #e0e0e0 #06071d #0e1145 #FEEFA8 #616ed2 black #00ffff grey #ffbb6d black #727fe3 - #171C73 black #b0b04c #0f1026 #003 #004 #005 #006 #007}
+{TKE-Quiverly #cdd8d8 #cdd8d8 #2b303b #333946 #FEEFA8 #7c828f black #ff9900 grey #ffbb6d black #9197a4 - #414650 black #b0b04c #393e49 #003 #004 #005 #006 #007}
+{TKE-Aurora #ececec #ececec #302e40 #4e4b68 #FEEFA8 #8b88a5 black #ff9900 grey #ffd486 black #8d8aa7 - #434259 black #bebe5a #393749 #003 #004 #005 #006 #007}
+{TKE-Choco #d6d1ab #d6d1ab #180c0c #402020 #FEEFA8 #664D4D white #ff9900 grey orange white #735a5a - #331A1A black #b0b04c #201414 #003 #004 #005 #006 #007}
+{TKE-AnatomyOfGrey #dfdfdf #dddddd #131313 #282828 #FEEFA8 #818181 black #ff9900 grey #ffd486 black #828282 - #363636 black #b0b04c #1b1b1b #003 #004 #005 #006 #007}
+{TKE-Default #dbdbdb #dbdbdb black #282828 #FEEFA8 #0a0acc white #ff9900 grey orange white #0000d3 - #383838 black #b0b04c #0d0e0e #003 #004 #005 #006 #007}
 }
 #-RUNF1: ./tests/test2_pave.tcl
-#RUNF1: ./tests/test2_pave.tcl 46 10 12 small
+#RUNF1: ./tests/test2_pave.tcl 19 10 12 small
 
   set ::apave::_CS_(NONCS) -2
   set ::apave::_CS_(MINCS) -1
@@ -609,9 +609,11 @@ oo::class create ::apave::ObjectTheming {
       # basic color scheme: get colors from a current ttk::style colors
       set fW black
       set bW #FBFB95
+      set bg2 #d8d8d8
       if {[info exists ::apave::_CS_(def_fg)]} {
+        if {$ncolor == $::apave::_CS_(NONCS)} {set bg2 #e5e5e5}
         set fg $::apave::_CS_(def_fg)
-        set fg2 #43576d
+        set fg2 #2b3f55
         set bg $::apave::_CS_(def_bg)
         set fS $::apave::_CS_(def_fS)
         set bS $::apave::_CS_(def_bS)
@@ -639,7 +641,7 @@ oo::class create ::apave::ObjectTheming {
         set ::apave::_CS_(def_bclr) $bclr
       }
       return [list default \
-           $fg    $fg     $bA    $bg     $fg2    $bS     $fS    #802e00  grey   #4f6379 $fS $bS - $bg $fW $bW]
+           $fg    $fg     $bA    $bg     $fg2    $bS     $fS    #802e00  grey   #4f6379 $fS $bS - $bg $fW $bW $bg2]
       # clrtitf clrinaf clrtitb clrinab clrhelp clractb clractf clrcurs clrgrey clrhotk fI  bI fM bM fW bW
     }
     return [lindex $::apave::_CS_(ALL) $ncolor]
@@ -997,21 +999,21 @@ oo::class create ::apave::ObjectTheming {
         # combobox is sort of individual
         my Ttk_style configure $ts -foreground $tfg1
         my Ttk_style configure $ts -background $tbg1
-        my Ttk_style map $ts -foreground [list readonly $tfg1]
-        my Ttk_style map $ts -background [list {readonly focus} $tbg1]
+        my Ttk_style map $ts -foreground [list {readonly focus} $tfg1 active $tfg1]
+        my Ttk_style map $ts -background [list {readonly focus} $tbg1 active $tbg1]
         my Ttk_style map $ts -fieldbackground [list readonly $tbg1]
         my Ttk_style map $ts -background [list active $tbg2]
-        option add *TCombobox*Listbox.font apaveFontDef userDefault
-        foreach {i nam clr} \
-        {0 back tbg1 1 fore tfg1 2 selectBack tbgS 3 selectFore tfgS} {
-          option add *TCombobox*Listbox.${nam}ground [set $clr] userDefault
-        }
       } else {
         my Ttk_style configure $ts -foreground $tfg2
         my Ttk_style configure $ts -background $tbg2
         my Ttk_style map $ts -foreground [list disabled $tfgD readonly $tfgD selected $tfgS]
         my Ttk_style map $ts -background [list disabled $tbgD readonly $tbgD selected $tbgS]
       }
+    }
+    option add *Listbox.font apaveFontDef userDefault
+    option add *Menu.font apaveFontDef userDefault
+    foreach {i nam clr} {0 back tbg1 1 fore tfg1 2 selectBack tbgS 3 selectFore tfgS} {
+      option add *Listbox.${nam}ground [set $clr] userDefault
     }
     foreach ts {TRadiobutton TCheckbutton} {
       ttk::style map $ts -background [list focus $tbg2 !focus $tbg1]
@@ -1031,8 +1033,11 @@ oo::class create ::apave::ObjectTheming {
           set ::apave::_C_($ts,7) "-selectcolor $tbg1"
           set ::apave::_C_($ts,8) "-highlightbackground $tbg1"
         }
-        frame - scrollbar - tframe - tnotebook {
-          set ::apave::_C_($ts,0) 1
+        frame - scrollbar - scale - tframe - tnotebook {
+          set ::apave::_C_($ts,0) 9
+          set ::apave::_C_($ts,7) "-troughcolor $tbg1"
+          set ::apave::_C_($ts,8) "-activebackground $bclr"
+          set ::apave::_C_($ts,9) "-elementborderwidth 2"
         }
         menu {
           set ::apave::_C_($ts,0) 7

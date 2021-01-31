@@ -6,7 +6,7 @@
 # License: MIT.
 # _______________________________________________________________________ #
 
-package provide hl_tcl 0.7.5
+package provide hl_tcl 0.7.8
 
 # _______________ Common data of ::hl_tcl:: namespace ______________ #
 
@@ -812,7 +812,7 @@ proc ::hl_tcl::hl_init {txt args} {
   } else {
     if {![info exists ::hl_tcl::my::data(COLORS,$txt)]}  {
       set clrCURL ""
-      catch {set clrCURL [lindex [::apave::paveObj csGet] 3]}
+      catch {set clrCURL [lindex [::apave::obj csGet] 16]}
       if {$::hl_tcl::my::data(DARK,$txt)} {
         if {$clrCURL eq ""} {set clrCURL #29383c}
         set ::hl_tcl::my::data(COLORS,$txt) [list \
@@ -854,11 +854,12 @@ proc ::hl_tcl::hl_text {txt} {
   $txt tag configure tagCMN -font "$font2" -foreground $clrCMN
   $txt tag configure tagPROC -font "$font1" -foreground $clrPROC
   $txt tag configure tagOPT -font "$font0" -foreground $clrOPT
-  $txt tag configure tagBRACKET -font "$font1" -foreground $clrPROC
+  $txt tag configure tagBRACKET -font "$font1" -foreground magenta
   $txt tag configure tagBRACKETERR -foreground white -background red
   $txt tag configure tagCURLINE -background $clrCURL
   $txt tag raise sel
   $txt tag raise tagBRACKETERR
+  catch {$txt tag raise hilited;  $txt tag raise hilited2} ;# for apave package
   my::HighlightAll $txt
   if {![info exists ::hl_tcl::my::data(BIND_TXT,$txt)]} {
     bind $txt <KeyPress> [list + ::hl_tcl::my::MemPos $txt]

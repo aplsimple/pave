@@ -86,11 +86,23 @@ namespace eval t {
 # ________________ Handlers for Help, Apply, Cancel etc. ________________ #
 
   # imitating help function
-  proc helpProc {} {
-    if {$t::ans0<10} {
-      set t::ans0 [lindex [pdlg ok info "HELP" "\nViewing help...\n" \
-        -ch "Don't show again"] 0]
-    }
+  proc helpAbout {} {
+    ::t::msg info "  It's a demo of
+    $::pkg_versions0\n\n  Details: \
+
+   \u2022 <link1>aplsimple.github.io/en/tcl/pave</link1>
+   \u2022 <link1>aplsimple.github.io/en/tcl/e_menu</link1>
+   \u2022 <link1>aplsimple.github.io/en/tcl/bartabs</link1>
+   \u2022 Reference on <link2>hl_tcl</link2>
+   \u2022 Reference on <link2>baltip</link2>
+
+  License: MIT.
+  _____________________________________
+
+  <red> $::tcltk_version </red> <link3></link3>
+
+  <red> $::tcl_platform(os) $::tcl_platform(osVersion) </red>\n
+" -modal no -t 1 -w 41 -scroll 0 -tags ::t::textTags -my "after idle {::t::textImaged %w}"
   }
 
   # imitating apply function
@@ -126,7 +138,7 @@ namespace eval t {
   # imitating the toolbar functions
   proc toolBut {num {cs -2} {starting no} {hl yes}} {
     if {$num in {3 4}} {
-      [pave Menu] entryconfigure 2 -font {-slant roman -size 10}
+      #[pave Menu] entryconfigure 2 -font {-slant roman -size 10}
     } elseif {$num == 2} {
       [pave Pro] stop
       [pave BuT_IMG_2] configure -state disabled
@@ -181,6 +193,7 @@ namespace eval t {
       .win.fra.fra.nbk tab .win.fra.fra.nbk.f5 -text \
       " Color scheme $cs: [pave csGetName $cs]"
       catch {::t::colorBar; ::bt draw}
+      pave fillGutter [pave Text]
     }
     baltip::tip [pave BuT_IMG_4] \
       "Next is $::t::nextcs: [pave csGetName $::t::nextcs]" -under 5
@@ -234,7 +247,7 @@ namespace eval t {
         if {$dotip} {
           lassign [split [winfo geometry .win] x+] w h x y
           set geo "+([expr {$w+$x}]-W-8)+$y-20"
-          if {[::apave::paveObj csDarkEdit]} {
+          if {[::apave::obj csDarkEdit]} {
             set fg black
             set bg yellow
           } else {
@@ -274,7 +287,8 @@ namespace eval t {
     $m add command -label "Save" -command {::t::msg info "This is just a demo:\nno action has been defined for the \"Save\" entry."}
     $m add command -label "Save As..." -command {::t::msg info "This is just a demo:\nno action has been defined for the \"Save As...\" entry."}
     $m add separator
-    $m add command -label "Restart" -command {::t::restartit}
+    if {$::noRestart} {set state disabled} {set state normal}
+    $m add command -label "Restart" -command {::t::restartit} -state $state
     $m add separator
     $m add command -label "Quit" -command {::t::pave res .win 0}
     set m .win.menu.edit
@@ -287,27 +301,17 @@ namespace eval t {
     $m add separator
     $m add command -label "Reload the bar of tabs" -command {::t::RefillBar}
     set m .win.menu.help
-    $m add command -label "About" -command [list ::t::msg info "  It's a demo of
-    $::pkg_versions0\n\n  Details: \
-
-   \u2022 <link1>aplsimple.github.io/en/tcl/pave</link1>
-   \u2022 <link1>aplsimple.github.io/en/tcl/e_menu</link1>
-   \u2022 <link1>aplsimple.github.io/en/tcl/bartabs</link1>
-   \u2022 Reference on <link2>hl_tcl</link2>
-   \u2022 Reference on <link2>baltip</link2>
-
-  License: MIT.
-  _____________________________________
-
-  <red> $::tcltk_version </red> <link3></link3>
-
-  <red> $::tcl_platform(os) $::tcl_platform(osVersion) </red>\n
-" -modal no -t 1 -w 41 -scroll 0 -tags ::t::textTags -my "after idle {::t::textImaged %w}"]
+    $m add command -label "About" -command ::t::helpAbout
   }
 
   proc textImaged {w} {
     pave labelFlashing [pave textLink $w 5] "" 1 \
       -file [file join $::testdirname feather.png] -pause 0.5 -incr 0.1 -after 40
+  }
+
+  proc textIco {w ico} {
+    pave labelFlashing [pave textLink $w 0] "" 1 \
+      -data [::apave::iconData $ico] -static 1
   }
 
   proc tracer {varname args} {
@@ -371,20 +375,24 @@ namespace eval t {
   }
 
   proc findTclFirst {{dochan no}} {
+    set ent [pave EntFind]
+    set tex [pave Text]
     chanTab nbk .win.fra.fra.nbk.f2 $dochan
+    set err [catch {$tex tag ranges sel} sel]
+    if {!$err && [llength $sel]==2} {
+      $ent delete 0 end
+      $ent insert 0 [$tex get {*}$sel]
+    }
     pack [pave FraFind]
-    [pave EntFind] selection range 0 end
-    focus [pave EntFind]
+    $ent selection range 0 end
+    focus $ent
     set closefind "pack forget [::t::pave FraFind]; \
-      focus [::t::pave Text]; ::t::textPos [::t::pave Text]; break"
+      focus $tex; ::t::textPos $tex; break"
     foreach k {<Return> <KP_Enter>} {
-      bind [pave EntFind] $k \
-        "::t::pave findInText 0 [::t::pave Text] ::t::Find; $closefind"
+      bind $ent $k "::t::pave findInText 0 $tex ::t::Find; $closefind"
     }
-    foreach k {<Escape> <FocusOut>} {
-      bind [pave EntFind] $k $closefind
-    }
-    bind [pave Text] <F3> ::t::findTclNext
+    foreach k {<Escape> <FocusOut>} {bind $ent $k $closefind}
+    bind $tex <F3> ::t::findTclNext
   }
 
   proc findTclNext {{dochan no}} {
@@ -841,7 +849,7 @@ namespace eval t {
       {.butConfig fral.but5 T 1 1 {-st we} {-t "Keys" -com "t::chanTab nb6" -style TButtonWest}}
       {.butMisc fral.butConfig T 1 1 {-st we} {-t "Misc" -com "t::chanTab nb7" -style TButtonWest}}
       {.fra  fral.butMisc T 1 1 {-st we -rw 10} {-h 30.m}}
-      {buth fral T 1 1 {-st we} {-t "Help" -com t::helpProc}}
+      {buth fral T 1 1 {-st we} {-t "Help" -com t::helpAbout}}
       {frau buth L 1 1 {-st nswe -cw 10} {-w 60.m}}
       {butApply frau L 1 1 {-st e} {-t "Apply"  -com t::applyProc}}
       {butCancel butApply L 1 1 {-st e} {-t "Cancel" -com t::cancelProc}}
@@ -1004,7 +1012,7 @@ namespace eval t {
       {# 2 use cases: full path & 'apavish' path }
       {.lfrB.GutText .lfrB.stat T - - {pack -side left -expand 0 -fill both} {}}
       {#.lfrB.Text .lfrB.canLines T - - {pack -side left -expand 1 -fill both} {-borderwidth 0 -w 80 -h 10 -wrap word -tabnext .win.fra.fral.butHome -gutter .win.fra.fra.nbk.f2.fra.pan.panR.lfrB.gutText -gutterwidth 5 -guttershift 4}}
-      {.lfrB.Text .lfrB.canLines T - - {pack -side left -expand 1 -fill both} {-borderwidth 0 -w 80 -h 10 -wrap word -tabnext .win.fra.fral.butHome -gutter GutText -gutterwidth 5 -guttershift 4}}
+      {.lfrB.Text .lfrB.canLines T - - {pack -side left -expand 1 -fill both} {-borderwidth 0 -w 80 -h 10 -wrap word -tabnext .win.fra.fral.butHome -gutter GutText -gutterwidth 5 -guttershift 4 -textpop {popupFindCommands ::t::findTclFirst ::t::findTclNext}}}
       {.lfrB.sbv .lfrB.text L - - {pack -side top}}
     }
   }
@@ -1291,8 +1299,9 @@ where:
 
     # icons of top toolbar etc.
     for {set i 0} {$i<[llength $imgl]} {incr i} {
+      set ico [lindex $imgl $i]
       [pave BuT_ICN$i] configure -command \
-        [list ::t::msg info "This is just a demo.\nIcon$i: [lindex $imgl $i]."]
+        [list ::t::msg info " This is just a demo.\n\n Icon$i was clicked:\n <link3></link3> $ico" -tags ::t::textTags -my "after idle {::t::textIco %w $ico}" -text 1 -scroll 0]
     }
     [pave Labstat3] configure -text "System encoding: [encoding system]"
 
@@ -1313,12 +1322,12 @@ where:
     set ::t::newCS [apave::cs_Non]
     toolBut 0
     after 1000 ::t::highlighting_others  ;# it's unseen at changing the theme
-    catch {::transpops::run [file join $::pavedirname .bak/$::t::transpopsFile] {<Control-q> <Alt-q>} .win}
+    catch {::transpops::run [file join $::pavedirname .bak/$::t::transpopsFile] {<Control-t> <Alt-t>} .win}
 
     # Open the window at last
     set ::t::curTab ""
     chanTab nbk
-    set res [pave showModal .win -geometry +350+50 -decor 1 -onclose t::exitProc]
+    set res [pave showModal .win -geometry +350+30 -decor 1 -onclose t::exitProc]
     if {$::t::newCS==[apave::cs_Non]} { ;# at restart, newCS is set
       # getting result and clearance
       set res [pave res .win]
@@ -1346,6 +1355,9 @@ if {$::argc==4} {
   set ::t::newCS [apave::cs_Non]
   set ::t::opcIcon "small"
 }
+# check for CloudTk by Jeff Smith (on wiki.tcl-lang.org)
+set ::noRestart [expr {[string match "/home/tclhttp*" $::t::ftx1]}]
+if {$::noRestart} {set ::t::ans4 12}
 set ::t::opcIcon [lindex $::t::opcIcon 0]
 ::apave::iconImage -init $::t::opcIcon
 append ::t::opcIcon " icons  "

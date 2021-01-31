@@ -510,12 +510,13 @@ oo::class create ::apave::APaveDialog {
 
   #########################################################################
 
-  method InitFindInText { {ctrlf 0} } {
+  method InitFindInText { {ctrlf 0} {txt {}} } {
 
     # Initializes the search in the text.
     #   ctrlf - "1" means that the method is called by Ctrl+F
+    #   txt - path to the text widget
 
-    set txt [my TexM]
+    if {$txt eq ""} {set txt [my TexM]}
     if {$ctrlf} {  ;# Ctrl+F moves cursor 1 char ahead
       ::tk::TextSetCursor $txt [$txt index "insert -1 char"]
     }
@@ -531,9 +532,13 @@ oo::class create ::apave::APaveDialog {
 
     # Finds a string in text widget.
     #   donext - "1" means 'from a current position'
+    #   txt - path to the text widget
+    #   varFind - variable
 
     if {$txt eq ""} {
       set txt [my TexM]
+      set sel [set ${_pdg(ns)}PD::fnd]
+    } elseif {$varFind eq ""} {
       set sel [set ${_pdg(ns)}PD::fnd]
     } else {
       set sel [set $varFind]
@@ -572,6 +577,186 @@ oo::class create ::apave::APaveDialog {
     set link [string range $m $i1+6 $i2-1]
     set m [string range $m 0 $i1-1][string range $m $i2+7 end]
     return [list $m [list -link $link]]
+  }
+
+  #########################################################################
+
+  method popupFindCommands {pop {txt {}} {com1 ""} {com2 ""}} {
+
+    # Returns find commands for a popup menu on a text.
+    #   pop - path to the menu
+    #   txt - path to the text
+    #   com1 - user's command "find first"
+    #   com2 - user's command "find next"
+
+    if {$com1 eq ""} {set com1 "[self] InitFindInText 0 $txt; focus \[[self] Entfind\]"}
+    if {$com2 eq ""} {set com2 "[self] findInText 1 $txt"}
+    return "\$pop add separator
+      \$pop add command [my iconA find] -accelerator Ctrl+F -label \"Find First\" \\
+        -command {$com1}
+      \$pop add command [my iconA none] -accelerator F3 -label \"Find Next\" \\
+        -command {$com2}"
+  }
+
+  #########################################################################
+
+  method popupBlockCommands {pop {txt {}}} {
+
+    # Returns block commands for a popup menu on a text.
+    #   pop - path to the menu
+    #   txt - path to the text
+
+    return "\$pop add separator
+      \$pop add command [my iconA add] -accelerator Ctrl+D -label \"Double Selection\" \\
+        -command \"[self] doubleText {$txt} 0\"
+      \$pop add command [my iconA delete] -accelerator Ctrl+Y -label \"Delete Line\" \\
+        -command \"[self] deleteLine {$txt} 0\"
+      \$pop add command [my iconA up] -accelerator Alt+Up -label \"Line(s) Up\" \\
+        -command \"[self] linesMove {$txt} -1 0\"
+      \$pop add command [my iconA down] -accelerator Alt+Down -label \"Line(s) Down\" \\
+       -command \"[self] linesMove {$txt} +1 0\""
+  }
+
+  #########################################################################
+
+  method popupHighlightCommands {{pop ""} {txt ""}} {
+
+    # Returns highlighting commands for a popup menu on a text.
+    #   pop - path to the menu
+    #   txt - path to the text
+
+    set res "\$pop add separator
+      \$pop add command [my iconA upload] -accelerator Alt+Q \\
+      -label \"Highlight First\" -command \"::apave::obj seek_highlight %w 2\"
+      \$pop add command [my iconA download] -accelerator Alt+W \\
+      -label \"Highlight Last\" -command \"::apave::obj seek_highlight %w 3\"
+      \$pop add command [my iconA previous] -accelerator Alt+Left \\
+      -label \"Highlight Previous\" -command \"::apave::obj seek_highlight %w 0\"
+      \$pop add command [my iconA next] -accelerator Alt+Right \\
+      -label \"Highlight Next\" -command \"::apave::obj seek_highlight %w 1\"
+      \$pop add command [my iconA none] -accelerator Dbl.Click \\
+      -label \"Highlight All\" -command \"::apave::obj highlight_matches %w\""
+    if {$txt ne ""} {set res [string map [list %w $txt] $res]}
+    return $res
+  }
+
+  #########################################################################
+
+  method set_highlight_matches {w} {
+    # Creates bindings to highlight matches in a text.
+    #   w - path to the text
+
+    $w tag configure hilited -foreground #1f0000 -background #ffa073
+    $w tag configure hilited2 -foreground #1f0000 -background #ff6b85
+    bind $w <Double-ButtonPress-1> [list [self] highlight_matches $w]
+    bind $w <KeyRelease> [list + [self] unhighlight_matches $w]
+    bind $w <Alt-Left> "[self] seek_highlight $w 0 ; break"
+    bind $w <Alt-Right> "[self] seek_highlight $w 1 ; break"
+    foreach {kq kw} {q w Q W} {
+      bind $w <Alt-$kq> [list [self] seek_highlight $w 2]
+      bind $w <Alt-$kw> [list [self] seek_highlight $w 3]
+    }
+  }
+
+  #########################################################################
+
+  method get_highlighted {txt} {
+    # Gets a selected word after double-clicking on a text.
+    #   w - path to the text
+
+    set err [catch {$txt tag ranges sel} sel]
+    lassign $sel pos pos2
+    if {!$err && [llength $sel]==2} {
+      set sel [$txt get $pos $pos2]  ;# single selection
+    } else {
+      if {$err || [string trim $sel]==""} {
+        set pos  [$txt index "insert wordstart"]
+        set pos2 [$txt index "insert wordend"]
+        set sel [string trim [$txt get $pos $pos2]]
+        if {![string is wordchar -strict $sel]} {
+          # when cursor just at the right of word: take the word at the left
+          # e.g. if "_" stands for cursor then "word_" means selecting "word"
+          set pos  [$txt index "insert -1 char wordstart"]
+          set pos2 [$txt index "insert -1 char wordend"]
+          set sel [$txt get $pos $pos2]
+        }
+      }
+    }
+    if {[string length $sel] == 0} {set pos ""}
+    return [list $sel $pos $pos2]
+  }
+
+  #########################################################################
+
+  method highlight_matches {txt} {
+    # Highlights matches of selected word in a text.
+    #   w - path to the text
+
+    lassign [my get_highlighted $txt] sel pos
+    if {$pos eq ""} return
+    set lenList {}
+    set posList [$txt search -all -count lenList -- "$sel" 1.0 end]
+    foreach pos2 $posList len $lenList {
+      if {$len eq ""} {set len [string length $sel]}
+      set pos3 [$txt index "$pos2 + $len chars"]
+      if {$pos2 == $pos} {
+        lappend matches2 $pos2 $pos3
+      } else {
+        lappend matches1 $pos2 $pos3
+      }
+    }
+    catch {
+      $txt tag remove hilited 1.0 end
+      $txt tag remove hilited2 1.0 end
+      $txt tag add hilited {*}$matches1
+      $txt tag add hilited2 {*}$matches2
+    }
+    set ::apave::_AP_VARS(HILI) yes
+  }
+
+  #########################################################################
+
+  method unhighlight_matches {txt} {
+    # Unhighlights matches of selected word in a text.
+    #   w - path to the text
+
+    if {$::apave::_AP_VARS(HILI)} {
+      $txt tag remove hilited 1.0 end
+      $txt tag remove hilited2 1.0 end
+      set ::apave::_AP_VARS(HILI) no
+    }
+  }
+
+  #########################################################################
+
+  method seek_highlight {txt mode} {
+    # Seeks the selected word forward/backward/to first/to last in a text.
+    #   w - path to the text
+    #   mode - 0 (search backward), 1 (forward), 2 (first), 3 (last)
+
+    my unhighlight_matches $txt
+    lassign [my get_highlighted $txt] sel pos pos2
+    if {!$pos} return
+    switch $mode {
+      0 { # backward
+        set nc [expr {[string length $sel] - 1}]
+        set pos [$txt index "$pos - $nc chars"]
+        set pos [$txt search -backwards -- $sel $pos 1.0]
+      }
+      1 { # forward
+        set pos [$txt search -- $sel $pos2 end]
+      }
+      2 { # to first
+        set pos [$txt search -- $sel 1.0 end]
+      }
+      3 { # to last
+        set pos [$txt search -backwards -- $sel end 1.0]
+      }
+    }
+    if {[string length "$pos"]} {
+      ::tk::TextSetCursor $txt $pos
+      $txt tag add sel $pos [$txt index "$pos + [string length $sel] chars"]
+    }
   }
 
   #########################################################################
@@ -710,7 +895,7 @@ oo::class create ::apave::APaveDialog {
     if {$head ne ""} {
       # set the dialog's heading (-head option)
       if {$optsHeadFont ne "" || $hsz ne ""} {
-        if {$hsz eq ""} {set hsz "-size [::apave::paveObj basicFontSize]"}
+        if {$hsz eq ""} {set hsz "-size [::apave::obj basicFontSize]"}
         set optsHeadFont [string trim "$optsHeadFont $hsz"]
         set optsHeadFont "-font \"$optsHeadFont\""
       }
@@ -810,6 +995,7 @@ oo::class create ::apave::APaveDialog {
         }
       }
     }
+    set appendHL no
     if {$chmsg eq ""} {
       if {$textmode} {
         if {![info exists ${_pdg(ns)}PD::fnd]} {
@@ -846,11 +1032,14 @@ oo::class create ::apave::APaveDialog {
              \$pop add command [my iconA exit] -accelerator Esc -label \"Exit\" \\
               -command \"\[[self] Pdg defb1\] invoke\"
             "
+          } else {
+            set appendHL yes
           }
         } else {
           # make bindings and popup menu for text widget
+          after idle "[self] set_highlight_matches \[[self] TexM\]"
           append binds "
-            [my SetTextBinds $wt]
+            [my setTextBinds $wt]
             menu \$pop
              \$pop add command [my iconA cut] -accelerator Ctrl+X -label \"Cut\" \\
               -command \"event generate $wt <<Cut>>\"
@@ -858,20 +1047,9 @@ oo::class create ::apave::APaveDialog {
               -command \"event generate $wt <<Copy>>\"
              \$pop add command [my iconA paste] -accelerator Ctrl+V -label \"Paste\" \\
               -command \"event generate $wt <<Paste>>\"
-             \$pop add separator
-             \$pop add command [my iconA double] -accelerator Ctrl+D -label \"Double Selection\" \\
-              -command \"[self] doubleText {} 0\"
-             \$pop add command [my iconA delete] -accelerator Ctrl+Y -label \"Delete Line\" \\
-              -command \"[self] deleteLine {} 0\"
-             \$pop add command [my iconA up] -accelerator Alt+Up -label \"Line(s) Up\" \\
-              -command \"[self] linesMove {} -1 0\"
-             \$pop add command [my iconA down] -accelerator Alt+Down -label \"Line(s) Down\" \\
-              -command \"[self] linesMove {} +1 0\"
-             \$pop add separator
-             \$pop add command [my iconA find] -accelerator Ctrl+F -label \"Find First\" \\
-              -command \"[self] InitFindInText; focus \[[self] Entfind\]\"
-             \$pop add command $noIMG -accelerator F3 -label \"Find Next\" \\
-              -command \"[self] findInText 1\"
+             [[self] popupBlockCommands \$pop $wt]
+             [[self] popupHighlightCommands \$pop $wt]
+             [[self] popupFindCommands \$pop $wt]
              $addpopup
              \$pop add separator
              \$pop add command [my iconA SaveFile] -accelerator Ctrl+W \\
@@ -889,6 +1067,12 @@ oo::class create ::apave::APaveDialog {
       lappend widlist [list h_ chb L 1 1]
       lappend widlist [list sev h_ L 1 1 "-st nse -cw 1"]
       lappend widlist [list h__ sev L 1 1]
+      set appendHL $textmode
+    }
+    if {$appendHL} {
+      after idle "[self] set_highlight_matches $wt"
+      append binds "
+      [[self] popupHighlightCommands \$pop $wt]"
     }
     # add the buttons
     my AppendButtons widlist $buttons h__ L $defb $timeout

@@ -34,7 +34,7 @@
 
 package require Tk
 
-package provide apave 3.2.7
+package provide apave 3.2.8
 
 source [file join [file dirname [info script]] apavedialog.tcl]
 
@@ -300,7 +300,7 @@ oo::class create ::apave::APaveInput {
     set res [my Query $icon $ttl {} "butOK $titleOK 1 $butCancel" butOK \
     $inopts [my PrepArgs $args] "" {*}$centerme]} e]} {
       catch {destroy $_pdg(win).dia}  ;# Query's window
-      ::apave::paveObj ok err "ERROR" "\n$e\n" \
+      ::apave::obj ok err "ERROR" "\n$e\n" \
         -t 1 -head "\nAPaveInput returned an error: \n" -hfg red -weight bold
       return 0
     }

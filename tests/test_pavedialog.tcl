@@ -12,7 +12,7 @@ set ::testdirname [file normalize [file dirname [info script]]]
 catch {cd $::testdirname}
 lappend ::auto_path "$::testdirname/.." "$::testdirname/../../transpops"
 package require apave
-package require transpops
+catch {package require transpops}
 
 namespace eval t {
 
@@ -134,13 +134,13 @@ multiline entry field aka
       chb1 {{Check the demo checkbox...}} $::t8chb1 \
       rad1 {{Check the radio button....}} [list "$::t8rad1" Giant Big Small "None of these"] \
       seh3 {{} {-pady 9}} {} \
-      spx1 {{Spinbox from 0 to 99......} {} {-from 0 -to 99}} $::t8spx1 \
+      spx1 {{Spinbox from 0 to 99......} {} {-w 4 -justify center -from 0 -to 99}} $::t8spx1 \
       lbx1 [list {Listbox of relations......} {} [list -h 4 -lbxsel $::t8lbx1]] $rellist \
-      cbx1 [list {Combobox of relations.....} {} [list -h 7 -cbxsel $::t8cbx1]] $rellist \
-      opc1 {{Option cascade............}} [list $::t8opc1 \
+      cbx1 [list {Combobox of relations.....} {-fill none -anchor w} [list -w 20 -h 7 -cbxsel $::t8cbx1]] $rellist \
+      opc1 {{Option cascade............} {-fill none -anchor w}} [list $::t8opc1 \
         {{color red green blue -- {{other colors} yellow magenta cyan \
         | #52CB2F #FFA500 #CB2F6A | #FFC0CB #90EE90 #8B6914}} \
-        {hue dark medium light} -- {{multi word example}} ok} ] \
+        {hue dark medium light} -- {{multi word example}} ok} {-w 20}] \
       fco1 [list {Combobox of file content..} {} [list -h 7 -cbxsel $::t8fco1]] {@@-div1 " \[" -div2 "\] " -ret 1 test2_fco.dat@@ \
         INFO: @@-pos 22 -list {{test2_fco.dat} {other item} trunk DOC} test2_fco.dat@@} \
       seh4 {{} {-pady 9}} {} \
@@ -177,7 +177,7 @@ apave::initWM
 # firstly show dialogs without checkboxes
 apave::APaveInput create dlg
 
-catch {::transpops::run [file join $::testdirname ../.bak/transpops_dialog.txt] {<Control-q> <Alt-q>} .dia}
+catch {::transpops::run [file join $::testdirname ../.bak/transpops_dialog.txt] {<Control-t> <Alt-t>} .dia}
 set ::csN ""
 set dn "Don't show this again"
 puts "ok  = [t::test1 -weight bold -size 8 -text 1]"
