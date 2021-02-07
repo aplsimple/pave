@@ -669,7 +669,7 @@ oo::class create ::apave::APaveDialog {
     if {!$err && [llength $sel]==2} {
       set sel [$txt get $pos $pos2]  ;# single selection
     } else {
-      if {$err || [string trim $sel]==""} {
+      if {$err || [string trim $sel] eq ""} {
         set pos  [$txt index "insert wordstart"]
         set pos2 [$txt index "insert wordend"]
         set sel [string trim [$txt get $pos $pos2]]

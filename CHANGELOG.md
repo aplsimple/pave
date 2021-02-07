@@ -1,6 +1,11 @@
 # Last changes:
 
 
+Version `3.3a1 (3 Feb'21)`
+
+  - theming file/dir/color choosers in Unix
+
+
 Version `3.2.8 (31 Jan'21)`
 
   - modifying style of scale, scrollbar, combobox

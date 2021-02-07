@@ -45,7 +45,7 @@
 #
 # See tests/test*.tcl files for the detailed examples of use.
 #
-#RUNF1: ./tests/test2_pave.tcl 1 11 12 'small icons'
+#RUNF1: ./tests/test2_pave.tcl 1 13 12 'small icons'
 ###########################################################################
 
 package require Tk
@@ -109,13 +109,13 @@ namespace eval ::apave {
     "h_" {{-sticky ew -csz 3 -padx 3} {}} \
     "v_" {{-sticky ns -rsz 3 -pady 3} {}}]
   variable apaveDir [file dirname [info script]]
-  variable _AP_ICO { none folder OpenFile SaveFile saveall print font \
-    color date help home undo redo run tools file find replace other view \
+  variable _AP_ICO { none folder OpenFile SaveFile saveall print font color \
+    date help home misc terminal run tools file find replace other view \
     categories actions config pin cut copy paste plus minus add delete \
-    change double more up down previous next upload download tag tagoff \
-    misc diagram box trash tree terminal lock light restricted attach \
-    share mail www map umbrella gulls sound heart clock people info err \
-    warn ques retry yes no ok cancel exit }
+    change diagram box trash double more undo redo up down previous next \
+    previous2 next2 upload download tag tagoff tree lock light restricted \
+    attach share mail www map umbrella gulls sound heart clock people info \
+    err warn ques retry yes no ok cancel exit }
   variable _AP_IMG;  array set _AP_IMG [list]
   variable _AP_VARS; array set _AP_VARS [list]
   set _AP_VARS(.,SHADOW) 0
@@ -353,7 +353,7 @@ oo::class create ::apave::APave {
     set _pav(lwidgets) [list]
     set _pav(moveall) 0
     set _pav(tonemoves) 1
-    set _pav(initialcolor) black
+    set _pav(initialcolor) ""
     set _pav(clnddate) ""
     set _pav(modalwin) "."
     set _pav(fgbut) [ttk::style lookup TButton -foreground]
@@ -362,7 +362,7 @@ oo::class create ::apave::APave {
     set _pav(prepost) [list]
     set _pav(widgetopts) [list]
     set _pav(edge) "@@"
-    if {$_pav(fgtxt)=="black" || $_pav(fgtxt)=="#000000"} {
+    if {$_pav(fgtxt) in {"black" "#000000"}} {
       set _pav(bgtxt) white
     } else {
       set _pav(bgtxt) [ttk::style lookup TEntry -background]
@@ -1210,6 +1210,9 @@ oo::class create ::apave::APave {
     #
     # Returns a selected color.
 
+    if {$_pav(initialcolor) eq ""} {
+      source [file join $::apave::apaveDir pickers color clrpick.tcl]
+    }
     if {[set _ [string trim [set $tvar]]] ne ""} {
       set _pav(initialcolor) $_
     } else {
@@ -1260,44 +1263,21 @@ oo::class create ::apave::APave {
 
     # Date chooser (calendar widget).
     #   tvar - name of variable containing a date
-    #   args - options of *widget::calendar*
+    #   args - options of *::apave::klnd::calendar*
     #
     # The *tvar* sets the initial date for the chooser and
     # it gets a date selected in the chooser.
     #
     # Returns a selected date.
 
-    set df %d.%m.%Y
-    array set a $args
-    set ttl "Date"
-    if [info exists a(-title)] {set ttl "$a(-title)"}
-    catch {
-      set df $a(-dateformat)
-      set _pav(clnddate) [set $tvar]
+    if {$_pav(clnddate) eq ""} {
+      source [file join $::apave::apaveDir pickers klnd klnd.tcl]
+      set _pav(clnddate) 1
     }
-    if {$_pav(clnddate)==""} {
-      set _pav(clnddate) [clock format [clock seconds] -format $df]
-    }
-    set wcal [set wmain [set ${_pav(ns)}PN::wn]].dateWidChooser
-    catch {destroy $wcal}
-    wm title [toplevel $wcal] $ttl
-    lassign [split [winfo geometry $_pav(modalwin)] x+] rw rh rx ry
-    wm geometry $wcal [my CenteredXY $rw $rh $rx $ry 220 150]
-    wm protocol $wcal WM_DELETE_WINDOW [list set ${_pav(ns)}datechoosen ""]
-    bind $wcal <Escape> [list set ${_pav(ns)}datechoosen ""]
-    set ${_pav(ns)}datechoosen ""
-    package require widget::calendar
-    widget::calendar $wcal.c -dateformat $df -enablecmdonkey 0 -command \
-      [list set ${_pav(ns)}datechoosen] -textvariable ${_pav(ns)}_pav(clnddate)
-    pack $wcal.c -fill both -expand 0
-    after idle [list focus $wcal]
-    vwait ${_pav(ns)}datechoosen
-    update idle
-    destroy $wcal
-    if {[set ${_pav(ns)}datechoosen]==""} {
-      set _pav(clnddate) [set $tvar]
-    }
-    return $_pav(clnddate)
+    if {[catch {set val [set $tvar]}]} {set val ""}
+    set res [::apave::klnd::calendar {*}$args -value $val]
+    if {$res ne ""} {catch {set $tvar $res}}
+    return $res
   }
 
   #########################################################################
@@ -1326,16 +1306,21 @@ oo::class create ::apave::APave {
     if {$nchooser eq "ftx_OpenFile"} {
       set nchooser "tk_getOpenFile"
     }
-    if {$nchooser=="fontChooser" || $nchooser=="colorChooser" \
-    ||  $nchooser=="dateChooser" } {
-      set nchooser "my $nchooser $tvar"
-    } elseif {$nchooser=="tk_getOpenFile" || $nchooser=="tk_getSaveFile"} {
+    set choosname $nchooser
+    if {$choosname in {"fontChooser" "colorChooser" "dateChooser"}} {
+      set nchooser "my $choosname $tvar"
+    } elseif {$choosname in {"tk_getOpenFile" "tk_getSaveFile"}} {
       if {[set fn [set $tvar]]==""} {set dn [pwd]} {set dn [file dirname $fn]}
       set args "-initialfile \"$fn\" -initialdir \"$dn\" [my ParentOpt] $args"
       incr isfilename
-    } elseif {$nchooser=="tk_chooseDirectory"} {
+    } elseif {$nchooser eq "tk_chooseDirectory"} {
       set args "-initialdir \"[set $tvar]\" [my ParentOpt] $args"
       incr isfilename
+    }
+    if {$::tcl_platform(platform) eq "unix" && $choosname ne "dateChooser" && \
+    [set cs [my csCurrent]] != -2} {
+      my untouchWidgets *.foc.*                   ;# don't touch tkcc's boxes
+      after idle [list [self] csSet $cs . -doit]  ;# theme the chooser
     }
     set res [{*}$nchooser {*}$args]
     if {"$res" ne "" && "$tvar" ne ""} {
@@ -1551,7 +1536,7 @@ oo::class create ::apave::APave {
     set tvar [set vv [set addopt ""]]
     set attmp [list]
     foreach {nam val} $attrs1 {
-      if {$nam=="-title" || $nam=="-dateformat"} {
+      if {$nam in {-title -parent -dateformat -weekday}} {
         append addopt " $nam \{$val\}"
       } else {
         lappend attmp $nam $val
@@ -1681,25 +1666,28 @@ oo::class create ::apave::APave {
       if {$v1=="h_"} {  ;# horisontal space
         set ntmp [my Transname fra ${name}[incr j2]]
         set wid1 [list $ntmp - - - - "pack -side left -in $w.$name -fill y"]
-        set wid2 [list $ntmp.[my Transname h_ $name$j] - - - - "pack -fill y -expand 1 -padx $v2"]
+        set wid2 [list $ntmp.[my ownWName [my Transname h_ $name$j]] - - - - "pack -fill y -expand 1 -padx $v2"]
       } elseif {$v1=="sev"} {   ;# vertical separator
         set ntmp [my Transname fra ${name}[incr j2]]
         set wid1 [list $ntmp - - - - "pack -side left -in $w.$name -fill y"]
-        set wid2 [list $ntmp.[my Transname sev $name$j] - - - - "pack -fill y -expand 1 -padx $v2"]
+        set wid2 [list $ntmp.[my ownWName [my Transname sev $name$j]] - - - - "pack -fill y -expand 1 -padx $v2"]
       } elseif {$typ=="statusBar"} {  ;# statusbar
         my NormalizeName name i lwidgets
         set dattr "[lrange $v1 1 end]"
         set wid1 [list .[my ownWName [my Transname Lab ${name}_[incr j]]] - - - - "pack -side left -in $w.$name" "-t {[lindex $v1 0]} $dattr"]
         set wid2 [list .[my ownWName [my Transname Lab $name$j]] - - - - "pack -side left $expand -in $w.$name" "-relief sunken -w $v2 $dattr"]
       } elseif {$typ=="toolBar"} {  ;# toolbar
+        set packreq ""
         switch -nocase -glob -- $v1 {
+          lab* - laB* { ;# label
+            lassign $v2 txt packreq att
+            set v2 "-text {$txt} $att"
+          }
           opc* { ;# tk_optionCascade
             lset v2 2 "[lindex $v2 2] -takefocus 0"
-            set wid1 [list $name.$v1 - - - - "pack -side left" "$v2"]
           }
           spx* - chb* { ;# spinbox etc.
             set v2 "$v2 -takefocus 0"
-            set wid1 [list $name.$v1 - - - - "pack -side left" "$v2"]
           }
           default {
             if {[string is lower [string index $v1 0]]} { ;# button with -image
@@ -1711,10 +1699,12 @@ oo::class create ::apave::APave {
             set v1 [my Transname $but _$v1]
           }
         }
-        set wid1 [list $name.$v1 - - - - "pack -side left" $v2]
+        set wid1 [list $name.$v1 - - - - "pack -side left $packreq" $v2]
         if {[incr wasseh]==1} {
+          ;# horiz.separator for multiline toolbar
           set wid2 [list [my Transname seh $name$j] - - - - "pack -side top -fill x"]
         } else {
+          ;# 1st line of toolbar
           set lwidgets [linsert $lwidgets [incr itmp] $wid1]
           continue
         }
@@ -2787,6 +2777,8 @@ oo::class create ::apave::APave {
           in order to close the window indeed
     #  -geometry GEOMETRY - a geometry of window
     #  -decor DECOR - decorative buttons of window (if DECOR=1)
+    #  -resizable {byX byY} - list of 0/1 meaning "may be resized by X/Y"
+    #  -variable - variable's name for tkwait
 
     set shal [::apave::shadowAllowed 0]
     if {[::apave::getOption -themed {*}$args] in {"" "0"} && \
@@ -2809,16 +2801,19 @@ oo::class create ::apave::APave {
       set modal yes
     }
     set args [::apave::removeOptions $args -centerme -ontop -modal]
-    array set opt \
-      [list -focus "" -onclose "" -geometry "" -decor 0 -root $root {*}$args]
+    array set opt [list -focus "" -onclose "" -geometry "" -decor 0 \
+      -root $root -resizable "" -variable "" {*}$args]
     lassign [split [wm geometry $root] x+] rw rh rx ry
     if {! $opt(-decor)} {
       wm transient $win $root
     }
-    if {$opt(-onclose) == ""} {
+    if {$opt(-onclose) eq ""} {
       set opt(-onclose) [list set ${_pav(ns)}PN::AR($win) 0]
     } else {
       set opt(-onclose) [list $opt(-onclose) ${_pav(ns)}PN::AR($win)]
+    }
+    if {$opt(-resizable) ne ""} {
+       wm resizable $win {*}$opt(-resizable)
     }
     set opt(-onclose) "::apave::obj EXPORT CleanUps $win; $opt(-onclose)"
     wm protocol $win WM_DELETE_WINDOW $opt(-onclose)
@@ -2867,7 +2862,8 @@ oo::class create ::apave::APave {
       tkwait visibility $win
     }
     if {$modal} {grab set $win}
-    tkwait variable ${_pav(ns)}PN::AR($win)
+    if {[set var $opt(-variable)] eq ""} {set var ${_pav(ns)}PN::AR($win)}
+    tkwait variable $var
     if {$modal} {grab release $win}
     ::apave::modalsOpen [expr {[::apave::modalsOpen] - 1}]
     my GetOutputValues

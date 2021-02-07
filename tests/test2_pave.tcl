@@ -10,7 +10,7 @@ set tcltk_version "Tcl/Tk [package require Tk]"
 set ::testdirname [file normalize [file dirname [info script]]]
 set ::pavedirname [file normalize [file join $::testdirname ..]]
 cd $::testdirname
-set ::test2dirs [list "$::testdirname/.." "$::testdirname" "$::testdirname/../bartabs" "$::testdirname/../hl_tcl" "$::testdirname/../../screenshooter"]
+set ::test2dirs [list "$::testdirname/.." "$::testdirname" "$::testdirname/../bartabs" "$::testdirname/../hl_tcl" "$::testdirname/../../screenshooter" "$::testdirname/../fsdialog"]
 lappend ::auto_path {*}$::test2dirs
 set apavever [package require apave]
 set pkg_versions0 "\n  <red>apave $apavever</red>\n\n"
@@ -18,6 +18,7 @@ append pkg_versions0 "  <red>e_menu $apavever</red>\n\n"
 append pkg_versions0 "  <red>bartabs [package require bartabs]</red>\n\n"
 append pkg_versions0 "  <red>hl_tcl [package require hl_tcl]</red>\n\n"
 append pkg_versions0 "  <red>baltip [package require baltip]</red>"
+#package require fsdialog
 set pkg_versions [string map {<red> "" </red> "" \n\n , \n ""} $pkg_versions0]
 set ::e_menu_dir [file normalize [file join $::pavedirname ../e_menu]]
 catch {source [file join $::e_menu_dir e_menu.tcl]}
@@ -96,7 +97,7 @@ namespace eval t {
    \u2022 Reference on <link2>hl_tcl</link2>
    \u2022 Reference on <link2>baltip</link2>
 
-  License: MIT.
+  License: <linkMIT>MIT</linkMIT>.
   _____________________________________
 
   <red> $::tcltk_version </red> <link3></link3>
@@ -148,14 +149,11 @@ namespace eval t {
       [pave BuT_IMG_1] configure -state disabled
       [pave BuT_IMG_2] configure -state normal
     }
-    [pave Menu] entryconfig 2 -state [[pave BuT_IMG_2] cget -state] ;# for fun
-    [pave File] entryconfig 2 -state [[pave BuT_IMG_2] cget -state]
+    [pave File] entryconfig 2 -state [[pave BuT_IMG_2] cget -state] ;# for fun
     [pave File] entryconfig 3 -state [[pave BuT_IMG_2] cget -state]
     set forfun "For fun only:
        It's disabled by 'Stop progress' button
        shown as \[x\] in the toolbar below."
-    baltip::tip [pave Menu] $forfun -index 2
-    baltip::tip [pave Help] $forfun -index 0
     baltip::tip [pave File] $forfun -index 2
     baltip::tip [pave File] $forfun -index 3
 
@@ -205,6 +203,7 @@ namespace eval t {
       [list "link1" "::apave::openDoc %t@@https://%l@@"] \
       [list "link2" "::apave::openDoc %t@@https://aplsimple.github.io/en/tcl/%l/%l.html@@"] \
       [list "link3" "::apave::openDoc %t@@https://wiki.tcl-lang.org@@"] \
+      [list "linkMIT" "::apave::openDoc %t@@https://en.wikipedia.org/wiki/MIT_License@@"] \
       ]
     if {$t::ans4==12} {
       set ::t::restart 0
@@ -305,7 +304,7 @@ namespace eval t {
   }
 
   proc textImaged {w} {
-    pave labelFlashing [pave textLink $w 5] "" 1 \
+    pave labelFlashing [pave textLink $w 6] "" 1 \
       -file [file join $::testdirname feather.png] -pause 0.5 -incr 0.1 -after 40
   }
 
@@ -343,7 +342,7 @@ namespace eval t {
         -start [expr {$a-15}] -extent 30 -fill $color]
     }
     set c .win.fra.fra.nbk.f4.can
-    $c create text 180 20 -text {Demo canvas from Tk's demos/ctext.tcl}
+    $c create text 180 20 -text {Demo canvas from Tk's demos/ctext.tcl} -fill red
     for {set i0 0} {$i0<12} {incr i0} {
       set i1 [expr {$i0*30}]
       set i2 [expr {$i0>9 ? [expr {($i0-10)*30}]: [expr {90+$i1}]}]
@@ -918,7 +917,7 @@ namespace eval t {
       {dir1 labBdir1 L 1 9 {} {-tvar t::dir1 -title {Pick a directory}}}
       {fon1 labBfon1 L 1 9 {} {-tvar t::fon1 -title {Pick a font}}}
       {clr1 labBclr1 L 1 9 {} {-tvar t::clr1 -title {Pick a color}}}
-      {dat1 labBdat1 L 1 9 {} {-tvar t::dat1 -title {Pick a date} -dateformat %Y.%m.%d}}
+      {dat1 labBdat1 L 1 9 {} {-tvar t::dat1 -title {Pick a date} -dateformat %Y.%m.%d -parent .win}}
       {Ftx1 labBftx1 L 1 9 {} {-h 7 -ro 0 -tvar ::t::ftx1 -title {Pick a file to view} -filetypes {{{Tcl scripts} .tcl} {{Text files} {.txt .test}}} -wrap word -tooltip "After choosing a file\nthe text will be read-only." -tabnext "[t::pave Opc1]"}}
       {labOpc labBftx1 T 2 1 {-st ens} {-t "tk_optionCascade:"}}
       {frAopc labOpc L 1 9 {-st w -pady 9}}
