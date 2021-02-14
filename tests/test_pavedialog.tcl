@@ -121,15 +121,15 @@ multiline entry field aka
     #   $varname for integers and booleans
     #   $::t8tex1 for text
     set rellist {- Father Mother Son Daughter Brother Sister Uncle Aunt Cousin {Big Brother} "Second cousin" "1000th cousin"}
-    set res [dlg input - "Dialog INPUT$::csN" [list \
+    set res [dlg2 input - "Dialog INPUT$::csN" [list \
       seh1 {{} {-pady 9}} {} \
       ent1 {{Enter general info........}} [list $::t8ent1] \
-      fil1 {{Choose a file to read.....}} [list $::t8fil1] \
-      fis1 {{Choose a file to save.....}} "{$::t8fis1}" \
-      dir1 {{Choose a directory........}} "{$::t8dir1}" \
-      fon1 {{Choose a font.............}} "{$::t8fon1}" \
-      clr1 {{Choose a color............}} "{$::t8clr1}" \
-      dat1 {{Choose a date.............}} "{$::t8dat1}" \
+      fil1 {{Choose a file to read.....} {} {-title {Choose a file to read}}} [list $::t8fil1] \
+      fis1 {{Choose a file to save.....} {} {-title {Choose a file to save}}} "{$::t8fis1}" \
+      dir1 {{Choose a directory........} {} {-title {Choose a directory}}} "{$::t8dir1}" \
+      fon1 {{Choose a font.............} {} {-title {Choose a font}}} "{$::t8fon1}" \
+      clr1 {{Choose a color............} {} {-title {Choose a color}}} "{$::t8clr1}" \
+      dat1 {{Choose a date.............} {} {-title {Choose a date}}} "{$::t8dat1}" \
       seh2 {{} {-pady 9}} {} \
       chb1 {{Check the demo checkbox...}} $::t8chb1 \
       rad1 {{Check the radio button....}} [list "$::t8rad1" Giant Big Small "None of these"] \
@@ -146,7 +146,9 @@ multiline entry field aka
       seh4 {{} {-pady 9}} {} \
       tex1 {{Text field................} {} {-h 4 -w 55 -tabnext butOK}} $::t8tex1 \
     ] -size 14 -weight bold -head "Entries, choosers, switchers, boxes..." {*}$args]
-    lassign [dlg valueInput] ::t8ent1 ::t8fil1 ::t8fis1 ::t8dir1 ::t8fon1 ::t8clr1 ::t8dat1 ::t8chb1 ::t8rad1 ::t8spx1 ::t8lbx1 ::t8cbx1 ::t8opc1 ::t8fco1 ::t8tex1
+    if {[lindex $res 0]} {
+      lassign [dlg2 valueInput] ::t8ent1 ::t8fil1 ::t8fis1 ::t8dir1 ::t8fon1 ::t8clr1 ::t8dat1 ::t8chb1 ::t8rad1 ::t8spx1 ::t8lbx1 ::t8cbx1 ::t8opc1 ::t8fco1 ::t8tex1
+    }
     return $res
   }
 
@@ -162,7 +164,6 @@ multiline entry field aka
     ] -weight bold -head "\n Enter to register here:" {*}$args]
     if {[lindex $res 0]} {
       lassign [dlg valueInput] ::login ::password
-      puts "login=$::login, password=$::password"
     }
     return $res
   }
@@ -176,7 +177,7 @@ apave::initWM
 
 # firstly show dialogs without checkboxes
 apave::APaveInput create dlg
-
+apave::APaveInput create dlg2
 catch {::transpops::run [file join $::testdirname ../.bak/transpops_dialog.txt] {<Control-t> <Alt-t>} .dia}
 set ::csN ""
 set dn "Don't show this again"
@@ -203,7 +204,9 @@ while 1 {
   set curr [set totr 0]
   foreach {n type} {1 OK 2 YN 3 OC 4 YNC 5 RC 6 ARC 7 MSC 8 INP 9 PAVEDOC} {
     if {[set r$n]<10} {
-      puts "$type = [set r$n [lindex [t::test$n -ch "$dn" -centerme 0] 0]]"
+      set res [t::test$n -ch "$dn" -centerme yes]
+      puts "$type = $res"
+      set r$n [lindex $res 0]
       if {![string is integer [set r$n]]} {
         set r$n [expr {[string last 10 [set r$n]]>0} ? 10 : 0]
       }

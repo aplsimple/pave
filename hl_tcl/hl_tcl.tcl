@@ -6,7 +6,7 @@
 # License: MIT.
 # _______________________________________________________________________ #
 
-package provide hl_tcl 0.7.8
+package provide hl_tcl 0.8
 
 # _______________ Common data of ::hl_tcl:: namespace ______________ #
 
@@ -828,8 +828,7 @@ proc ::hl_tcl::hl_init {txt args} {
   if {[dict exists $args -font]} {
     set ::hl_tcl::my::data(FONT,$txt) [dict get $args -font]
   } else {
-    set ::hl_tcl::my::data(FONT,$txt) [font configure TkFixedFont]
-    dict set ::hl_tcl::my::data(FONT,$txt) -size 12
+    set ::hl_tcl::my::data(FONT,$txt) [font actual TkFixedFont]
   }
   hl_readonly $txt $::hl_tcl::my::data(READONLY,$txt)
 }
@@ -841,7 +840,7 @@ proc ::hl_tcl::hl_text {txt} {
 
   set font0 $::hl_tcl::my::data(FONT,$txt)
   set font1 [set font2 $font0]
-  $txt tag config tagSTD -font "$font0"
+  $txt tag configure tagSTD -font "$font0"
   $txt tag add tagSTD 1.0 end
   dict set font1 -weight bold
   dict set font2 -slant italic
@@ -855,7 +854,7 @@ proc ::hl_tcl::hl_text {txt} {
   $txt tag configure tagPROC -font "$font1" -foreground $clrPROC
   $txt tag configure tagOPT -font "$font0" -foreground $clrOPT
   $txt tag configure tagBRACKET -font "$font1" -foreground magenta
-  $txt tag configure tagBRACKETERR -foreground white -background red
+  $txt tag configure tagBRACKETERR -font "$font1" -foreground white -background red
   $txt tag configure tagCURLINE -background $clrCURL
   $txt tag raise sel
   $txt tag raise tagBRACKETERR

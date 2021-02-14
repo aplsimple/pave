@@ -7,7 +7,7 @@
 # _______________________________________________________________________ #
 
 package require Tk
-package provide bartabs 1.2.3
+package provide bartabs 1.2.6
 catch {package require baltip}
 
 # __________________ Common data of bartabs:: namespace _________________ #
@@ -377,7 +377,7 @@ method Tab_Font {BID} {
     if {[set font [ttk::style configure TLabel -font]] eq ""} {
       set font TkDefaultFont
     }
-    set font [font configure $font]
+    set font [font actual $font]
   }
   return "-font {$font}"
 }
@@ -964,7 +964,7 @@ method Bar_Data {barOptions} {
   variable btData
   set BID bar[incr bartabs::NewBarID]
   # defaults:
-  set barOpts [dict create -wbar ""  -wbase "" -wproc "" -static no \
+  set barOpts [dict create -wbar ""  -wbase "" -wproc "" -static no -lowlist no \
     -hidearrows no -scrollsel yes -lablen 0 -tiplen 0 -tleft 0 -tright end \
     -disable [list] -select [list] -mark [list] -fgmark #800080  -fgsel "." \
     -relief groove -bd 1 -padx 3 -pady 3 -expand 1 -tabcurrent -1 -dotip no \
@@ -1044,15 +1044,18 @@ method Bar_MenuList {BID TID popi {ilist ""} {pop ""}} {
 
   if {$pop eq ""} {set pop $popi}
   catch {::apave::obj themePopup $pop}
-  lassign [my $BID cget -tabcurrent -select -FGOVER -BGOVER] \
-    tabcurr fewsel fgo bgo
+  lassign [my $BID cget -tabcurrent -select -FGOVER -BGOVER -lowlist] \
+    tabcurr fewsel fgo bgo ll
+  if {$ll || [catch {set fs "-size [dict get [$pop cget -font] -size]"}]} {
+    set fs ""
+  }
   for {set i 0} {$i<[llength $ilist]} {incr i} {
     if {[set tID [lindex $ilist $i]] eq "s"} continue
     set opts [my Tab_MarkAttrs $BID $tID no]
     if {"-image" ni $opts} {
       append opts " -image bts_ImgNone -compound left"
     }
-    set font [list -font [font configure TkDefaultFont]]
+    set font [list -font "[font actual TkDefaultFont] $fs"]
     if {$tID==$tabcurr || [lsearch $fewsel $tID]>-1} {
       set font [my Tab_SelAttrs $font "" ""]
     }
@@ -1560,13 +1563,15 @@ method clear {} {
 # Forgets (hides) the shown tabs.
 
   if {[my Locked [set BID [my ID]]]} return
+  set wlist []
   foreach tab [my $BID listTab] {
     lassign $tab TID text wb wb1 wb2 pf
     if {[my Tab_Is $wb] && $pf ne ""} {
-      pack forget $wb
+      lappend wlist $wb
       my $TID configure -pf ""
     }
   }
+  if {[llength $wlist]} {pack forget {*}$wlist}
 }
 #_____
 

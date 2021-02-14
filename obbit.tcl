@@ -24,12 +24,6 @@ namespace eval ::apave {
   # - current color scheme data
   variable ::apave::_C_
   array set ::apave::_C_ [list]
-  set ::apave::_CS_(initall) 1
-  set ::apave::_CS_(initWM) 1
-  set ::apave::_CS_(textFont) [font configure "TkFixedFont" -family]
-  set ::apave::_CS_(!FG) #000000
-  set ::apave::_CS_(!BG) #c3c3c3
-  set ::apave::_CS_(expo,tfg1) "-"
 
 # Colors for <MildDark CS> : 1) meanings 2) code names
 
@@ -90,19 +84,20 @@ black #6d95b3  -   #3c546e black #b0b04c #2b3338 #003 #004 #005 #006 #007}
 {TKE-AnatomyOfGrey #dfdfdf #dddddd #131313 #282828 #FEEFA8 #818181 #000 #ff9900 grey #ffd486 black #828282 - #363636 black #b0b04c #1b1b1b #003 #004 #005 #006 #007}
 {TKE-Default #dbdbdb #dbdbdb black #282828 #FEEFA8 #0a0acc white #ff9900 grey orange white #0000d3 - #383838 black #b0b04c #0d0e0e #003 #004 #005 #006 #007}
 }
-#-RUNF1: ./tests/test2_pave.tcl
-#RUNF1: ./tests/test2_pave.tcl 0 13 12 small
-
+  set ::apave::_CS_(initall) 1
+  set ::apave::_CS_(initWM) 1
+  set ::apave::_CS_(!FG) #000000
+  set ::apave::_CS_(!BG) #c3c3c3
+  set ::apave::_CS_(expo,tfg1) "-"
+  set ::apave::_CS_(defFont) [font actual TkDefaultFont -family]
+  set ::apave::_CS_(textFont) [font actual TkFixedFont -family]
+  set ::apave::_CS_(fs) [font actual TkDefaultFont -size]
+  set ::apave::_CS_(untouch) [list]
+  set ::apave::_CS_(STDCS) [expr {[llength $::apave::_CS_(ALL)] - 1}]
   set ::apave::_CS_(NONCS) -2
   set ::apave::_CS_(MINCS) -1
-  set ::apave::_CS_(STDCS) [expr {[llength $::apave::_CS_(ALL)] - 1}]
   set ::apave::_CS_(MAXCS) $::apave::_CS_(STDCS)
   set ::apave::_CS_(old) $::apave::_CS_(NONCS)
-
-  set ::apave::_CS_(defFont) [ttk::style lookup "." -font]
-  set ::apave::_CS_(def_FontSize) [font config $::apave::_CS_(defFont) -size]
-  set ::apave::_CS_(fs) $::apave::_CS_(def_FontSize)
-  set ::apave::_CS_(untouch) [list]
 }
 
 # _______________________________________________________________________ #
@@ -545,6 +540,7 @@ oo::class create ::apave::ObjectTheming {
 
     if {$::apave::_CS_(initall)} {
       my basicFontSize 10 ;# initialize main font size
+      my basicTextFont $::apave::_CS_(textFont) ;# initialize main font for text
       my ColorScheme  ;# initialize default colors
       set ::apave::_CS_(initall) 0
     }
@@ -667,6 +663,23 @@ oo::class create ::apave::ObjectTheming {
 
   ###########################################################################
 
+  method basicDefFont {{deffont ""}} {
+
+    # Gets/Sets a basic default font.
+    #    deffont - font
+    #
+    # If 'deffont' is omitted or =="", this method gets it.
+    # If 'deffont' is set, this method sets it.
+
+    if {$deffont ne ""} {
+      return [set ::apave::_CS_(defFont) $deffont]
+    } else {
+      return $::apave::_CS_(defFont)
+    }
+  }
+
+  ###########################################################################
+
   method basicTextFont {{textfont ""}} {
 
     # Gets/Sets a basic font used in editing/viewing text widget.
@@ -690,7 +703,7 @@ oo::class create ::apave::ObjectTheming {
     #    fs - font size
 
     if {$fs eq ""} {set fs [expr {2+[my basicFontSize]}]}
-    set bf [font configure TkFixedFont]
+    set bf [font actual TkFixedFont]
     return [dict replace $bf -family [my basicTextFont] -weight bold -size $fs]
   }
 
@@ -1076,9 +1089,9 @@ oo::class create ::apave::ObjectTheming {
           set ::apave::_C_($ts,7) "-disabledbackground $tbgD"
           set ::apave::_C_($ts,8) "-highlightcolor $bclr"
           if {$ts eq "text"} {
-            set ::apave::_C_($ts,9) "-font {[font configure apaveFontMono]}"
+            set ::apave::_C_($ts,9) "-font {[font actual apaveFontMono]}"
           } else {
-            set ::apave::_C_($ts,9) "-font {[font configure apaveFontDef]}"
+            set ::apave::_C_($ts,9) "-font {[font actual apaveFontDef]}"
           }
           set ::apave::_C_($ts,10) "-insertwidth $::apave::_CS_(CURSORWIDTH)"
           set ::apave::_C_($ts,11) "-insertbackground $tcur"
@@ -1087,8 +1100,8 @@ oo::class create ::apave::ObjectTheming {
           set ::apave::_C_($ts,0) 12
           set ::apave::_C_($ts,4) "-insertbackground $tcur"
           set ::apave::_C_($ts,5) "-buttonbackground $tbg2"
-          set ::apave::_C_($ts,6) "-selectforeground $::apave::_CS_(!FG)" ;# $tfgS
-          set ::apave::_C_($ts,7) "-selectbackground $::apave::_CS_(!BG)" ;# $tbgS
+          set ::apave::_C_($ts,6) "-selectforeground $::apave::_CS_(!FG)"
+          set ::apave::_C_($ts,7) "-selectbackground $::apave::_CS_(!BG)"
           set ::apave::_C_($ts,8) "-disabledforeground $tfgD"
           set ::apave::_C_($ts,9) "-disabledbackground $tbgD"
           set ::apave::_C_($ts,10) "-font apaveFontDef"
@@ -1380,7 +1393,7 @@ oo::class create ::apave::ObjectTheming {
     lassign [my csGet] - fg - bg2 - bgS fgS - - - - - - bg
     if {[my csCurrent] > $::apave::_CS_(STDCS)} {set bg $bg2}
     my ThemePopup $mnu -foreground $fg -background $bg \
-      -activeforeground $fgS -activebackground $bgS
+      -activeforeground $fgS -activebackground $bgS -font [font actual apaveFontDef]
   }
 
   ###########################################################################
@@ -1444,9 +1457,8 @@ oo::class create ::apave::ObjectTheming {
   }
   
 }
-
-###########################################################################
-
-  #%   DOCTEST   SOURCE   tests/obbit_1.test
-
 ################################# EOF #####################################
+
+#%   DOCTEST   SOURCE   tests/obbit_1.test
+#-RUNF1: ./tests/test2_pave.tcl
+#RUNF1: ./tests/test2_pave.tcl 0 13 12 small

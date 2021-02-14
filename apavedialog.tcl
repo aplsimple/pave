@@ -863,7 +863,7 @@ oo::class create ::apave::APaveDialog {
     set optsFont [string trim $optsFont]
     set optsHeadFont $optsFont
     set fs [my basicFontSize]
-    set textfont "-font \"[font configure TkFixedFont]"
+    set textfont "-family {[my basicTextFont]}"
     if {$optsFont ne ""} {
       if {[string first "-size " $optsFont]<0} {
         append optsFont " -size $fs"
@@ -872,16 +872,21 @@ oo::class create ::apave::APaveDialog {
         append optsFontM " -size $fs"
       }
       if {[string first "-family " $optsFont]>=0} {
-        set optsFont "-font \"$optsFont"
+        set optsFont "-font \{$optsFont"
       } else {
-        set optsFont "-font \"-family Helvetica $optsFont"
+        set optsFont "-font \{$optsFont -family {[my basicDefFont]}"
       }
-      set optsFontM "$textfont $optsFontM\""
-      append optsFont "\""
+      append optsFont "\}"
     } else {
-      set optsFont "-font \"-size $fs\""
-      set optsFontM "$textfont -size $fs\""
+      set optsFont "-font \{-size $fs\}"
+      set optsFontM "-size $fs"
     }
+    set msgonly [expr {$readonly || $hidefind || $chmsg ne ""}]
+    if {!$textmode || $msgonly} {
+      set textfont "-family {[my basicDefFont]}"
+    }
+    set optsFontM [string trim $optsFontM]
+    set optsFontM "-font \{$optsFontM $textfont\}"
     # layout: add the icon
     if {$icon ni {"" "-"}} {
       set widlist [list [list labBimg - - 99 1 \
@@ -980,7 +985,7 @@ oo::class create ::apave::APaveDialog {
       set wt "\[[self] TexM\]"
       set binds "set pop $wt.popupMenu
         bind $wt <Button-3> \{[self] themePopup $wt.popupMenu; tk_popup $wt.popupMenu %X %Y \}"
-      if {$readonly || $hidefind || $chmsg ne ""} {
+      if {$msgonly} {
         append binds "
           menu \$pop
            \$pop add command [my iconA copy] -accelerator Ctrl+C -label \"Copy\" \\

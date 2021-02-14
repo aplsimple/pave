@@ -483,7 +483,6 @@ namespace eval t {
     set TID [::bt cget -tabcurrent]
     ::hl_tcl::hl_init [pave Text] -seen 500 -dark [pave csDarkEdit] \
       -readonly [getLock $TID] -font [pave csFontMono] -multiline $::multiline
-    #puts [time {::hl_tcl::hl_text [pave Text]} 10]
     ::hl_tcl::hl_text [pave Text]
     textPos [pave Text]
   }
@@ -538,9 +537,13 @@ namespace eval t {
       "sep {} {} menusw" \
       "mnu {Others} {} menusw.oth" \
       "com {Switch -redraw option} {::t::RefillBar yes} menusw.oth ::t::switchAtt" \
-      "com {Switch -lablen option} {::t::switchBts %b %t -lablen} menusw.oth ::t::switchAtt" \
       "com {Switch -fgsel option} {::t::switchBts %b %t -fgsel} menusw.oth ::t::switchAtt" \
       "com {Switch -imagemark option} {::t::switchBts %b %t -imagemark} menusw.oth ::t::switchAtt" \
+      "com {Switch -lablen option} {::t::switchBts %b %t -lablen} menusw.oth ::t::switchAtt" \
+      "sep {} {} menusw.oth" \
+      "com {Switch -lowlist option} {::t::switchBts %b %t -lowlist} menusw.oth ::t::switchAtt" \
+      "com {Switch -tiplen option} {::t::switchBts %b %t -tiplen} menusw.oth ::t::switchAtt" \
+      "sep {} {} menusw.oth" \
       "com {Switch -padx} {::t::switchBts %b %t -padx} menusw.oth ::t::switchAtt" \
       "com {Switch -pady} {::t::switchBts %b %t -pady} menusw.oth ::t::switchAtt" \
       ]]
@@ -719,11 +722,11 @@ namespace eval t {
          if {$::multiline} {set img ICN27-small} {set img ICN28-small}
          set res [list 0 $img]
       }
-      -static - -scrollsel - -hidearrows - -expand - -bd - -redraw {
+      -static - -scrollsel - -hidearrows - -expand - -bd - -redraw - -lowlist {
         if {[::bt cget $opt]} {set img ICN27-small} {set img ICN28-small}
         set res [list 0 $img]
       }
-      -lablen - -fgsel - -pady - -padx {
+      -lablen - -tiplen - -fgsel - -pady - -padx {
         set val [::bt cget $opt]
         set res [list 0 "" "$label ($val)"]
       }
@@ -746,7 +749,7 @@ namespace eval t {
         return
       }
       -bd     {if {!$val} {set val 1} {set val 0}}
-      -lablen {if {!$val} {set val 16} {set val 0}}
+      -lablen - -tiplen {if {!$val} {set val 16} {set val 0}}
       -fgsel  {if {$val eq ""} {set val "."} {set val ""}}
       -pady - -padx {if {$val==10} {set val 3} {set val 10}}
       -imagemark {if {$val eq ""} {set val ICN59-small} {set val ""}}
@@ -917,7 +920,7 @@ namespace eval t {
       {dir1 labBdir1 L 1 9 {} {-tvar t::dir1 -title {Pick a directory}}}
       {fon1 labBfon1 L 1 9 {} {-tvar t::fon1 -title {Pick a font}}}
       {clr1 labBclr1 L 1 9 {} {-tvar t::clr1 -title {Pick a color}}}
-      {dat1 labBdat1 L 1 9 {} {-tvar t::dat1 -title {Pick a date} -dateformat %Y.%m.%d -parent .win}}
+      {Dat1 labBdat1 L 1 9 {} {-tvar t::dat1 -title {Pick a date} -dateformat %Y.%m.%d}}
       {Ftx1 labBftx1 L 1 9 {} {-h 7 -ro 0 -tvar ::t::ftx1 -title {Pick a file to view} -filetypes {{{Tcl scripts} .tcl} {{Text files} {.txt .test}}} -wrap word -tooltip "After choosing a file\nthe text will be read-only." -tabnext "[t::pave Opc1]"}}
       {labOpc labBftx1 T 2 1 {-st ens} {-t "tk_optionCascade:"}}
       {frAopc labOpc L 1 9 {-st w -pady 9}}

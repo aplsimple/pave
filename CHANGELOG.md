@@ -1,9 +1,17 @@
 # Last changes:
 
 
-Version `3.3a1 (3 Feb'21)`
+Version `3.3 (14 Feb'21)`
 
-  - theming file/dir/color choosers in Unix
+  - color (Tk's modified) and date (new) choosers in 'src/pickers'
+  - theming file/dir choosers in Unix
+  - checking for screen's edges in ShowModal
+  - args for 'toplevel' in makeWindow
+  - for apave dialog with text: TkDefaultFont if not editing
+  - "font actual" instead of "font configure"
+  - hl_tcl & bartabs packages updated
+  - BUGFIX (and recommendation): in -lbxname checking "winfo exists"
+  - BUGFIX: in input method, checking $res is true (not "1")
 
 
 Version `3.2.8 (31 Jan'21)`

@@ -354,7 +354,6 @@ oo::class create ::apave::APave {
     set _pav(moveall) 0
     set _pav(tonemoves) 1
     set _pav(initialcolor) ""
-    set _pav(clnddate) ""
     set _pav(modalwin) "."
     set _pav(fgbut) [ttk::style lookup TButton -foreground]
     set _pav(bgbut) [ttk::style lookup TButton -background]
@@ -436,6 +435,28 @@ oo::class create ::apave::APave {
 
   #########################################################################
 
+  method CheckXY {w h x y} {
+    # Checks the coordinates of window (against the screen).
+    #   w - width of window
+    #   h - height of window
+    #   x - window's X coordinate
+    #   y - window's Y coordinate
+    # Returns new coordinates in +X+Y form.
+
+    # check for left/right edge of screen (accounting decors)
+    set scrw [expr [winfo screenwidth .] - 12]
+    set scrh [expr {[winfo screenheight .] - 36}]
+    if {($x + $w) > $scrw } {
+      set x [expr {$scrw - $w}]
+    }
+    if {($y + $h) > $scrh } {
+      set y [expr {$scrh - $h}]
+    }
+    return +$x+$y
+  }
+
+  #########################################################################
+
   method CenteredXY {rw rh rx ry w h} {
 
     # Gets the coordinates of centered window (against its parent).
@@ -449,16 +470,7 @@ oo::class create ::apave::APave {
 
     set x [expr {max(0, $rx + ($rw - $w) / 2)}]
     set y [expr {max(0,$ry + ($rh - $h) / 2)}]
-    # check for left/right edge of screen (accounting decors)
-    set scrw [expr [winfo screenwidth .] - 12]
-    set scrh [expr {[winfo screenheight .] - 36}]
-    if {($x + $w) > $scrw } {
-      set x [expr {$scrw - $w}]
-    }
-    if {($y + $h) > $scrh } {
-      set y [expr {$scrh - $h}]
-    }
-    return +$x+$y
+    return [my CheckXY $w $h $x $y]
   }
 
   #########################################################################
@@ -1263,20 +1275,17 @@ oo::class create ::apave::APave {
 
     # Date chooser (calendar widget).
     #   tvar - name of variable containing a date
-    #   args - options of *::apave::klnd::calendar*
-    #
-    # The *tvar* sets the initial date for the chooser and
-    # it gets a date selected in the chooser.
+    #   args - options of *::klnd::calendar*
     #
     # Returns a selected date.
 
-    if {$_pav(clnddate) eq ""} {
+    if {[info commands ::klnd::calendar] eq ""} {
+      # imo, it's more effective to source on request than to require on possibility
       source [file join $::apave::apaveDir pickers klnd klnd.tcl]
-      set _pav(clnddate) 1
     }
-    if {[catch {set val [set $tvar]}]} {set val ""}
-    set res [::apave::klnd::calendar {*}$args -value $val]
-    if {$res ne ""} {catch {set $tvar $res}}
+    set ent [my [my ownWName [::apave::getOption -entry {*}$args]]]
+    dict set args -entry $ent
+    set res [::klnd::calendar {*}$args -tvar $tvar -parent [winfo toplevel $ent]]
     return $res
   }
 
@@ -1509,14 +1518,14 @@ oo::class create ::apave::APave {
       lset args 6 $attrs1
       append addattrs2 " -filetypes {$filetypes}"
     }
-    set an ""
+    set an [set entname ""]
     lassign [my LowercaseWidgetName $name] n
     switch -glob -- [my ownWName $n] {
       "fil*" { set chooser "tk_getOpenFile" }
       "fis*" { set chooser "tk_getSaveFile" }
       "dir*" { set chooser "tk_chooseDirectory" }
       "fon*" { set chooser "fontChooser" }
-      "dat*" { set chooser "dateChooser" }
+      "dat*" { set chooser "dateChooser"; set entname "-entry " }
       "ftx*" {
         set chooser [set view "ftx_OpenFile"]
         if {$tvar ne "" && [info exist $tvar]} {
@@ -1536,7 +1545,7 @@ oo::class create ::apave::APave {
     set tvar [set vv [set addopt ""]]
     set attmp [list]
     foreach {nam val} $attrs1 {
-      if {$nam in {-title -parent -dateformat -weekday}} {
+      if {$nam in {-title -parent -dateformat -weekday -modal -centerme}} {
         append addopt " $nam \{$val\}"
       } else {
         lappend attmp $nam $val
@@ -1573,14 +1582,16 @@ oo::class create ::apave::APave {
       }
       set entf [list $txtnam - - - - "pack -side left -expand 1 -fill both -in $w.$name" "$attrs1"]
     } else {
+      set tname [my Transname Ent $name]
+      if {$entname ne ""} {append entname $tname}
       append attrs1 " -callF2 {.ent .buT}"
-      set entf [list [my Transname ent $name] - - - - "pack -side left -expand 1 -fill x -in $w.$name" "$attrs1 $tvar"]
+      set entf [list $tname - - - - "pack -side left -expand 1 -fill x -in $w.$name" "$attrs1 $tvar"]
     }
     set icon "folder"
     foreach ic {OpenFile SaveFile font color date} {
       if {[string first $ic $chooser] >= 0} {set icon $ic; break}
     }
-    set com "[self] chooser $chooser \{$vv\} $addopt $wpar $addattrs2"
+    set com "[self] chooser $chooser \{$vv\} $addopt $wpar $addattrs2 $entname"
     set butf [list [my Transname buT $name] - - - - "pack -side right -anchor n -in $w.$name -padx 1" "-com \{$com\} -compound none -image [::apave::iconImage $icon small] -font \{-weight bold -size 5\} -fg $_pav(fgbut) -bg $_pav(bgbut) $takefocus"]
     if {$view ne ""} {
       set scrolh [list [my Transname sbh $name] $txtnam T - - "pack -in $w.$name" ""]
@@ -2246,9 +2257,9 @@ oo::class create ::apave::APave {
     }
     $w configure -foreground $fg -background $bg
     if {[set font [$w cget -font]] eq ""} {
-      set font [font configure TkDefaultFont]
+      set font [font actual TkDefaultFont]
     } else {
-      catch {set font [font configure $font]}
+      catch {set font [font actual $font]}
     }
     foreach {o v} [my initLinkFont] {dict set font $o $v}
     set font [dict set font -size [my basicFontSize]]
@@ -2401,16 +2412,21 @@ oo::class create ::apave::APave {
     foreach aop $_pav(widgetopts) {
       lassign $aop optnam vn v1 v2
       switch -glob -- $optnam {
-        -lbxname* { ;# to get a listbox's value, its methods are used
-          lassign [$vn curselection] s1
-          if {$s1 eq {}} {set s1 0}
-          set w [string range $vn [string last . $vn]+1 end]
-          if {$optnam eq "-lbxnameALL"} {
-            # when -ALL option is set to 1, listbox returns
-            # a list of 3 items - sel index, sel contents and all contents
-            set $v1 [list $s1 [$vn get $s1] [set $v1]]
-          } else {
-            set $v1 [$vn get $s1]
+        -lbxname* { 
+          # To get a listbox's value, its methods are used.
+          # The widget may not exist when an apave object is used for
+          # several dialogs which is a bad style (very very bad).
+          if {[winfo exists $vn]} {
+            lassign [$vn curselection] s1
+            if {$s1 eq {}} {set s1 0}
+            set w [string range $vn [string last . $vn]+1 end]
+            if {$optnam eq "-lbxnameALL"} {
+              # when -ALL option is set to 1, listbox returns
+              # a list of 3 items - sel index, sel contents and all contents
+              set $v1 [list $s1 [$vn get $s1] [set $v1]]
+            } else {
+              set $v1 [$vn get $s1]
+            }
           }
         }
         -retpos { ;# a range to cut from -tvar/-lvar variable
@@ -2765,20 +2781,7 @@ oo::class create ::apave::APave {
 
     # Shows a window as modal.
     #   win - window's name
-    #   args - attributes of window set with "-name value" pairs
-    # The "-modal false" option of 'args' allows to show the window as
-    # non-modal which may be needed in some cases.
-    #
-    # Examples of "-name value" pairs:
-    #  -focus NAME - a name of focused widget
-    #  -onclose PROC - a name of procedure being called \
-          at closing window by "X" button; the procedure gets \
-          the variable name that can be changed to 0 \
-          in order to close the window indeed
-    #  -geometry GEOMETRY - a geometry of window
-    #  -decor DECOR - decorative buttons of window (if DECOR=1)
-    #  -resizable {byX byY} - list of 0/1 meaning "may be resized by X/Y"
-    #  -variable - variable's name for tkwait
+    #   args - attributes of window ("-name value" pairs)
 
     set shal [::apave::shadowAllowed 0]
     if {[::apave::getOption -themed {*}$args] in {"" "0"} && \
@@ -2833,9 +2836,9 @@ oo::class create ::apave::APave {
     set ${_pav(ns)}PN::AR($win) "-"
     bind $win <Escape> $opt(-onclose)
     update
+    set w [winfo width $win]
+    set h [winfo height $win]
     if {$inpgeom == ""} {  ;# final geometrizing with actual sizes
-      set w [winfo width $win]
-      set h [winfo height $win]
       if {($h/2-$ry-$rh/2)>30 && $root != "."} {
         # ::tk::PlaceWindow needs correcting in rare cases, namely:
         # when 'root' is of less sizes than 'win' and at screen top
@@ -2844,6 +2847,10 @@ oo::class create ::apave::APave {
         ::tk::PlaceWindow $win widget $root
       }
     } else {
+      lassign [lrange [split $inpgeom +] end-1 end] x y
+      if {$x ne "" && $y ne "" && [string first x $inpgeom]<0} {
+        set inpgeom [my CheckXY $w $h $x $y]
+      }
       wm geometry $win $inpgeom
     }
     if {[::iswindows]} {
@@ -2901,11 +2908,12 @@ oo::class create ::apave::APave {
 
   #########################################################################
 
-  method makeWindow {w ttl} {
+  method makeWindow {w ttl args} {
 
     # Creates a toplevel window that has to be paved.
     #   w - window's name
     #   ttl - window's title
+    #   args - options for 'toplevel' command
     # If $w matches "*.fra" then ttk::frame is created with name $w.
 
     my CleanUps
@@ -2916,7 +2924,7 @@ oo::class create ::apave::APave {
       set wtop [string range $w 0 $pp-1]
     }
     catch {destroy $wtop}
-    toplevel $wtop
+    toplevel $wtop {*}$args
     if {[::iswindows]} { ;# maybe nice to hide all windows manipulations
       wm attributes $wtop -alpha 0.0
     } else {
@@ -3053,7 +3061,7 @@ oo::class create ::apave::APave {
     }
     lassign [my csGet] fg fg2 bg bg2
     set lfont [$w cget -font]
-    catch {set lfont [font configure $lfont]}
+    catch {set lfont [font actual $lfont]}
     foreach {o v} [my initLinkFont] {dict set lfont $o $v}
     set ::apave::__TEXTLINKS__($w) [list]
     for {set it [llength $taglist]} {[incr it -1]>=0} {} {
