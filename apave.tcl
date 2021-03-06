@@ -45,7 +45,6 @@
 #
 # See tests/test*.tcl files for the detailed examples of use.
 #
-#RUNF1: ./tests/test2_pave.tcl 1 13 12 'small icons'
 ###########################################################################
 
 package require Tk
@@ -121,13 +120,13 @@ namespace eval ::apave {
   set _AP_VARS(.,SHADOW) 0
   set _AP_VARS(.,MODALS) 0
   set _AP_VARS(TIMW) [list]
+  set _AP_VARS(MODALWIN) [list]
   set _AP_VARS(LINKFONT) [list -underline 1]
   set _AP_VARS(HILI) 0
   variable _AP_VISITED;  array set _AP_VISITED [list]
   set _AP_VISITED(ALL) [list]
   variable UFF "\uFFFF"
   variable _OBJ_ ""
-
 
 # _______________________ A bit of apave procedures _____________________ #
 
@@ -183,22 +182,89 @@ namespace eval ::apave {
 
   ##########################################################################
 
-  proc modalsOpen {{val ""} {w .}} {
+  proc infoWindow {{val ""} {w .} {modal no} {var ""} {regist no}} {
 
-    # Sets/gets 'count of open modal windows'.
+    # Registers/unregisters windows. Also sets/gets 'count of open modal windows'.
     #   val - current number of open modal windows
     #   w - root window's path
-    # See also: APave::showModal
+    #   modal - yes, if the window is modal
+    #   var - variable's name for tkwait
+    #   regist - yes or no for registering/unregistering
+    # See also: APave::showWindow
 
-    return [IntStatus $w MODALS $val]
+    variable _AP_VARS
+    if {$modal || $regist} {
+      set info [list $w $var $modal]
+      set i [lsearch -exact $_AP_VARS(MODALWIN) $info]
+      if {$regist} {
+        lappend _AP_VARS(MODALWIN) $info
+      } else {
+        set _AP_VARS(MODALWIN) [lreplace $_AP_VARS(MODALWIN) $i $i]
+      }
+      set res [IntStatus . MODALS $val]
+    } else {
+      set res [IntStatus . MODALS]
+    }
+    return $res
+  }
+
+  ##########################################################################
+
+  proc infoFind {w modal} {
+
+    # Searches data of a window in a list of registered windows.
+    #   w - root window's path
+    #   modal - yes, if the window is modal
+    # Returns: the window's path or "" if not found.
+    # See also: infoWindow
+
+   variable _AP_VARS
+   foreach winfo [lrange $_AP_VARS(MODALWIN) 1 end] {  ;# skip 1st window
+     incr i
+     lassign $winfo w1 var1 modal1
+     if {[winfo exists $w1]} {
+       if {[string first $w $w1]==0 && $modal==$modal1} {
+         return $w1
+       }
+     } else {
+       set _AP_VARS(MODALWIN) [lreplace $_AP_VARS(MODALWIN) $i $i]
+     }
+   }
+   return ""
+
+  }
+
+  ##########################################################################
+
+  proc endWM {args} {
+
+    # Finishes the window management by apave, closing and clearing all.
+    #   args - if any set, means "ask if apave's WM is finished"
+
+    variable _AP_VARS
+    if {[llength $args]} {
+      return [expr {[info exists _AP_VARS(EOP)]}]
+    }
+    # Check existing windows, except for the first one.
+    while {1} {
+      set i [expr {[llength $_AP_VARS(MODALWIN)] - 1}]
+      if {$i>0} {
+        lassign [lindex $_AP_VARS(MODALWIN) $i] w var
+        if {[winfo exists $w]} {set $var 0}
+        set _AP_VARS(MODALWIN) [lreplace $_AP_VARS(MODALWIN) $i $i]
+      } else {
+        break
+      }
+    }
+    set _AP_VARS(EOP) yes
   }
 
   ##########################################################################
 
   proc iconImage {{icon ""} {iconset "small"}} {
 
-    # Gets a defined icon's image or list of icons. \
-    If *icon* equals to "-init", initializes apave's icon set.
+    # Gets a defined icon's image or list of icons.
+    # If *icon* equals to "-init", initializes apave's icon set.
     #   icon - icon's name
     #   iconset - one of small/middle/large
     # Returns the icon's image or, if *icon* is blank, a list of icons
@@ -295,9 +361,12 @@ namespace eval ::apave {
 
   proc obj {com args} {
 
-    # Calls a command of APaveInput class.
-    #   com - a command
-    #   args - arguments of the command
+    # Calls a method of APaveInput class.
+    #   com - a method
+    #   args - arguments of the method
+    #
+    # It can (and must) be used only for temporary tasks.
+    # For persistent tasks, use a "normal" apave object.
     #
     # Returns the command's result.
 
@@ -882,6 +951,10 @@ oo::class create ::apave::APave {
     lassign [dict get $::apave::_Defaults $k] defopts defattrs
     set options "[subst $defopts] $options"
     set attrs "[subst $defattrs] $attrs"
+    if {[dict exists $attrs -t]} {
+      set t [dict get $attrs -t]
+      set attrs [dict set attrs -t [::apave::mc $t]]
+    }
     switch -glob -- $nam3 {
       "bts" {
         package require bartabs
@@ -1326,10 +1399,8 @@ oo::class create ::apave::APave {
       set args "-initialdir \"[set $tvar]\" [my ParentOpt] $args"
       incr isfilename
     }
-    if {$::tcl_platform(platform) eq "unix" && $choosname ne "dateChooser" && \
-    [set cs [my csCurrent]] != -2} {
-      my untouchWidgets *.foc.*                   ;# don't touch tkcc's boxes
-      after idle [list [self] csSet $cs . -doit]  ;# theme the chooser
+    if {$::tcl_platform(platform) eq "unix" && $choosname ne "dateChooser"} {
+      my themeExternal *.foc.* *f1.demo  ;# don't touch tkcc's boxes
     }
     set res [{*}$nchooser {*}$args]
     if {"$res" ne "" && "$tvar" ne ""} {
@@ -1782,8 +1853,9 @@ oo::class create ::apave::APave {
       for {set i2 [expr {$i-1}]} {$i2 >=0} {incr i2 -1} {
         lassign [lindex $lwidgets $i2] name2
         if {[string index $name2 0] ne "."} {
+          set name2 [lindex [my LowercaseWidgetName $name2] 0]
           set wname "$name2$name"
-          lassign [my LowercaseWidgetName $name] name
+          set name [lindex [my LowercaseWidgetName $name] 0]
           set name "$name2$name"
           break
         }
@@ -1810,11 +1882,9 @@ oo::class create ::apave::APave {
     set root1 [string index [my ownWName $name] 0]
     if {[string is upper $root1]} {
       lassign [my LowercaseWidgetName $name] name method
-      if {[catch {info object definition [self] $method}]} {
-        oo::objdefine [self] "
-          method $method {} {return $w.$an$name}
-          export $method"
-      }
+      oo::objdefine [self] "
+        method $method {} {return $w.$an$name}
+        export $method"
     }
     return [set ${_pav(ns)}PN::wn $w.$name]
   }
@@ -2305,7 +2375,7 @@ oo::class create ::apave::APave {
     set tt [string map [list %l $txt] $tt]
     set v [string map [list %l $txt %t $tt] $v]
     if {$tt ne ""} {
-      ::baltip tip $lab $tt
+      catch {::baltip tip $lab $tt}
       lappend ::apave::_AP_VARS(TIMW) $lab
     }
     if {$inv} {
@@ -2753,10 +2823,8 @@ oo::class create ::apave::APave {
     foreach {w lwidgets} $args {
       lappend res {*}[my Window $w $lwidgets]
       lappend _pav(lwidgets) $lwidgets ;# possibly useful
-      if {[string match *.dia $w]} {
-        set wdia $w
-      } elseif {[set _ [string first .dia. $w]]>0} {
-        set wdia [string range $w 0 $_+3]
+      if {[set ifnd [regexp -indices -inline {[.]dia\d+} $w]] ne ""} {
+        set wdia [string range $w 0 [lindex $ifnd 0 1]]
       } else {
         set wmain .[lindex [split $w .] 1]
       }
@@ -2773,6 +2841,35 @@ oo::class create ::apave::APave {
     # See also: paveWindow
 
     return [uplevel 1 [list [self] paveWindow {*}$args]]
+  }
+
+  #########################################################################
+
+  method showWindow {win modal ontop var} {
+    # Displays a windows and goes in tkwait cycle to interact with a user.
+    #   win - the window's path
+    #   modal - yes at showing the window as modal
+    #   ontop - yes at showing the window as topmost
+    #   var - variable's name to receive a result (tkwait's variable)
+
+    ::apave::infoWindow [expr {[::apave::infoWindow] + 1}] $win $modal $var yes
+    if {[::iswindows]} {
+      if {[wm attributes $win -alpha] < 0.1} {wm attributes $win -alpha 1.0}
+    } else {
+      catch {wm deiconify $win ; raise $win}
+    }
+    wm minsize $win [set w [winfo width $win]] [set h [winfo height $win]]
+    bind $win <Configure> "[namespace current]::WinResize $win"
+    if {$ontop} {wm attributes $win -topmost 1}
+    if {$modal} {
+      grab set $win
+    } elseif {[set wgr [grab current]] ne ""} {
+      grab release $wgr
+    }
+    if {![::iswindows]} {tkwait visibility $win}
+    tkwait variable $var
+    if {$modal} {grab release $win}
+    ::apave::infoWindow [expr {[::apave::infoWindow] - 1}] $win $modal $var
   }
 
   #########################################################################
@@ -2853,36 +2950,22 @@ oo::class create ::apave::APave {
       }
       wm geometry $win $inpgeom
     }
-    if {[::iswindows]} {
-      if {[wm attributes $win -alpha] < 0.1} {wm attributes $win -alpha 1.0}
-    } else {
-      catch {wm deiconify $win ; raise $win}
-    }
-    wm minsize $win [set w [winfo width $win]] [set h [winfo height $win]]
-    bind $win <Configure> "[namespace current]::WinResize $win"
-    if {$ontop} {
-      wm attributes $win -topmost 1
-    }
-    after 50 [list if "\[winfo exist $opt(-focus)\]" "focus -force $opt(-focus)"]
-    ::apave::modalsOpen [expr {[::apave::modalsOpen] + 1}]
-    if {![::iswindows]} {
-      tkwait visibility $win
-    }
-    if {$modal} {grab set $win}
     if {[set var $opt(-variable)] eq ""} {set var ${_pav(ns)}PN::AR($win)}
-    tkwait variable $var
-    if {$modal} {grab release $win}
-    ::apave::modalsOpen [expr {[::apave::modalsOpen] - 1}]
-    my GetOutputValues
+    after 50 [list if "\[winfo exist $opt(-focus)\]" "focus -force $opt(-focus)"]
+    my showWindow $win $modal $ontop $var
+    set res 0
+    catch {
+      my GetOutputValues
+      set res [set [set _ ${_pav(ns)}PN::AR($win)]]
+    }
     ::apave::shadowAllowed $shal ;# restore shadowing
-    return [set [set _ ${_pav(ns)}PN::AR($win)]]
+    return $res
   }
 
   #########################################################################
 
   method res {win {result "get"}} {
 
-    # Gets/sets a variable for *vwait* command.
     # Gets/sets a variable for *vwait* command.
     #   win - window's path
     #   result - value of variable
@@ -2898,7 +2981,6 @@ oo::class create ::apave::APave {
     #
     # Returns a value of variable that controls an event cycle.
 
-    if {[winfo exists $win.dia]} {set win $win.dia}
     if {$result == "get"} {
       return [set ${_pav(ns)}PN::AR($win)]
     }
@@ -3088,3 +3170,5 @@ oo::class create ::apave::APave {
   }
 
 }
+# _____________________________ EOF _____________________________________ #
+#RUNF1: ~/PG/github/pave/tests/test2_pave.tcl 0 9 12 "small icons"

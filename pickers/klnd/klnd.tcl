@@ -7,8 +7,7 @@
 # _______________________________________________________________________ #
 
 package require Tk
-package require msgcat
-package provide klnd 1.0
+package provide klnd 1.1
 
 namespace eval ::klnd {
   namespace export calendar
@@ -47,7 +46,6 @@ proc ::klnd::my::InitCalendar {} {
 
   variable p
   variable locales
-  package require msgcat
   # colors to be used
   lassign [::apave::obj csGet] p(fg0) p(fg1) p(bg0) p(bg1) - p(bg) p(fg) - - p(fgh) - - - - p(fg2) p(bg2)
   CurrentDate
@@ -55,7 +53,7 @@ proc ::klnd::my::InitCalendar {} {
   set p(mvis) $p(m)
   set p(dvis) $p(d)
   # get localized setting of 1st week day
-  set loc [lindex [msgcat::mcpreferences] 0]
+  set loc [lindex [::msgcat::mcpreferences] 0]
   if {$p(weekday) eq ""} {
     if {[array names locales $loc] ne ""} {
       set p(weekday) $locales($loc)
@@ -258,7 +256,7 @@ proc ::klnd::calendar {args} {
   if {$tvar ne ""} {set datevalue [set $tvar]}
   catch {unset my::p(after)} ;# to pause more at start
   my::InitCalendar
-  set p(close) [string map {& ""} [::msgcat::mc "Close"]]
+  set p(close) [::apave::mc Close]
   # make the icons
   foreach {i icon} {0 date 1 previous2 2 previous 3 next 4 next2} {
     image create photo IM_AP_$i -data [::apave::iconData $icon]

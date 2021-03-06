@@ -66,8 +66,8 @@ oo::class create ::apave::APaveDialog {
     proc exitEditor {resExit} {
       upvar $resExit res
       if {[[my TexM] edit modified]} {
-        set w [set [namespace current]::_pdg(win)]
-        set pdlg [::apave::APaveDialog new $w.dia]
+        set w [set [namespace current]::_pdg(dlg)]
+        set pdlg [::apave::APaveDialog new $w]
         set r [$pdlg misc warn "Save text?" \
           "\n Save changes made to the text? \n" \
           {Save 1 "Don't save " Close Cancel 0} \
@@ -336,12 +336,12 @@ oo::class create ::apave::APaveDialog {
         set tmo ""
       }
       lappend widlist [list $but $neighbor $pos 1 1 "-st we" \
-        "-t \"$txt\" -com \"${_pdg(ns)}my res $_pdg(win).dia $res\"$tt $tmo"]
+        "-t \"$txt\" -com \"${_pdg(ns)}my res $_pdg(dlg) $res\"$tt $tmo"]
       set neighbor $but
       set pos L
     }
-    lassign [my LowercaseWidgetName $_pdg(win).dia.fra.$defb1] _pdg(defb1)
-    lassign [my LowercaseWidgetName $_pdg(win).dia.fra.$defb2] _pdg(defb2)
+    lassign [my LowercaseWidgetName $_pdg(dlg).fra.$defb1] _pdg(defb1)
+    lassign [my LowercaseWidgetName $_pdg(dlg).fra.$defb2] _pdg(defb2)
     return
   }
 
@@ -787,17 +787,16 @@ oo::class create ::apave::APaveDialog {
     # See also:
     # [aplsimple.github.io](https://aplsimple.github.io/en/tcl/pave/index.html)
 
-    set qdlg $_pdg(win).dia
-    if {[winfo exists $qdlg]} {
-      puts "$qdlg already exists: select other window"
-      return 0
-    }
+    set wdia $_pdg(win).dia
+    append wdia [lindex [split [self] :] end] ;# be unique per apave object
+    set qdlg [set _pdg(dlg) $wdia[incr _pdg(idxdlg)]]
     # remember the focus (to restore it after closing the dialog)
     set focusback [focus]
     set focusmatch ""
     # options of dialog
     lassign "" chmsg geometry optsLabel optsMisc optsFont optsFontM root ontop \
-               rotext head optsHead hsz binds postcom onclose timeout modal
+               rotext head optsHead hsz binds postcom onclose timeout
+    set modal yes
     set tags ""
     set wasgeo [set textmode 0]
     set cc [set themecolors [set optsGrid [set addpopup ""]]]
@@ -849,7 +848,7 @@ oo::class create ::apave::APaveDialog {
         -post {set postcom $val}
         -focusback {set focusback $val}
         -timeout {set timeout $val}
-        -modal {set modal "-modal $val"}
+        -modal {set modal $val}
         -popup {set addpopup [string map [list %w $qdlg.fra.texM] "$val"]}
         -scroll {set scroll "$val"}
         default {
@@ -860,6 +859,15 @@ oo::class create ::apave::APaveDialog {
         }
       }
     }
+    if {[set wprev [::apave::infoFind $wdia $modal]] ne ""} {
+      catch {
+        wm withdraw $wprev
+        wm deiconify $wprev
+        puts "$wprev already exists: selected now"
+      }
+      return 0
+    }
+    set modal "-modal $modal"
     set optsFont [string trim $optsFont]
     set optsHeadFont $optsFont
     set fs [my basicFontSize]
@@ -1095,11 +1103,11 @@ oo::class create ::apave::APaveDialog {
           -background white -selectforeground black \
           -selectbackground gray -insertbackground black] v0 v1 v2 v3 v4
         # the rest colors should be added, namely:
-        #   tfg2 tbg2 tfgS tbgS tfgD tbgD tcur bclr help fI bI fM bM
-        lappend themecolors $v0 $v1 $v2 $v3 $v3 $v1 $v4 $v4 $v3 $v2 $v3 $v0 $v1
+        #   tfg2 tbg2 tfgS tbgS tfgD tbgD tcur bclr help fI bI fM bM fW bW bHL2
+        lappend themecolors $v0 $v1 $v2 $v3 $v3 $v1 $v4 $v4 $v3 $v2 $v3 $v0 $v1 black #ffff9e $v1
       }
       catch {
-        my themeWindow $qdlg {*}$themecolors false
+        my themeWindow $qdlg $themecolors no
       }
     }
     # after creating widgets - show dialog texts if any
@@ -1184,4 +1192,6 @@ oo::class create ::apave::APaveDialog {
   }
 
 }
+# _____________________________ EOF _____________________________________ #
+#RUNF1: ~/PG/github/pave/tests/test2_pave.tcl -1 9 12 "small icons"
 #RUNF1: ./tests/test_pavedialog.tcl

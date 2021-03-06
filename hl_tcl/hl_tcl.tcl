@@ -6,7 +6,7 @@
 # License: MIT.
 # _______________________________________________________________________ #
 
-package provide hl_tcl 0.8
+package provide hl_tcl 0.8.1
 
 # _______________ Common data of ::hl_tcl:: namespace ______________ #
 
@@ -821,7 +821,7 @@ proc ::hl_tcl::hl_init {txt args} {
       } else {
         if {$clrCURL eq ""} {set clrCURL #efe0cd}
         set ::hl_tcl::my::data(COLORS,$txt) [list \
-          "#923B23" #7d1c00 #035103 #4A181B #646464 #A106A1 #463e11 $clrCURL]
+          "#923B23" #7d1c00 #035103 #4A181B #505050 #A106A1 #463e11 $clrCURL]
       }
     }
   }

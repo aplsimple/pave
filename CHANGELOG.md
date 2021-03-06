@@ -1,6 +1,16 @@
 # Last changes:
 
 
+Version `3.3.1 (6 Mar'21)`
+
+  - better handling for modal/non-modal windows
+  - color hues in.
+  - themes rearranged
+  - klnd, hl_tcl, baltip packages upd.
+  - BUGFIX: remove the tailing " &" in openDoc
+  - BUGFIX: -disabledforeground for menu
+  - BUGFIX: use uppercased parent
+
 Version `3.3 (14 Feb'21)`
 
   - color (Tk's modified) and date (new) choosers in 'src/pickers'

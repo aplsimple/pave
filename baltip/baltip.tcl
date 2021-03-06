@@ -9,7 +9,7 @@
 # License: MIT.
 # _______________________________________________________________________ #
 
-package provide baltip 1.0.2
+package provide baltip 1.0.3
 
 package require Tk
 
@@ -169,8 +169,9 @@ proc ::baltip::repaint {w args} {
   [dict exists $my::ttdata(optvals,$w) -text]} {
     set optvals $my::ttdata(optvals,$w)
     lappend optvals {*}$args
-    after idle [list ::baltip::my::Show $w \
-      [dict get $my::ttdata(optvals,$w) -text] yes {} $optvals]
+    catch {after cancel $my::ttdata(after)}
+    set my::ttdata(after) [after idle [list ::baltip::my::Show $w \
+      [dict get $my::ttdata(optvals,$w) -text] yes {} $optvals]]
   }
 }
 
@@ -307,12 +308,14 @@ proc ::baltip::my::Show {w text force geo optvals} {
     if {$force} {
       Fade $win $aint $fint $icount {} $data(-alpha) 1 $geo
     } else {
-      after $data(-pause) [list \
-        ::baltip::my::Fade $win $aint $fint $icount {} $data(-alpha) 1 $geo]
+      catch {after cancel $ttdata(after)}
+      set ttdata(after) [after $data(-pause) [list \
+        ::baltip::my::Fade $win $aint $fint $icount {} $data(-alpha) 1 $geo]]
     }
   } else {
     # just showing, no fading
-    after $data(-pause) [list ::baltip::my::ShowWindow $win]
+    catch {after cancel $ttdata(after)}
+    set ttdata(after) [after $data(-pause) [list ::baltip::my::ShowWindow $win]]
   }
   if {$data(-bell)} [list after [expr {$data(-pause)/4}] bell]
   array unset data
@@ -332,10 +335,12 @@ proc ::baltip::my::Fade {w aint fint icount Un alpha show geo {geos ""}} {
   #   geos - saved coordinates (+X+Y) of shown tip
   # See also: FadeNext, UnFadeNext
 
+  variable ttdata
   update
   if {[winfo exists $w]} {
-    after idle [list after $aint \
-      [list ::baltip::my::${Un}FadeNext $w $aint $fint $icount $alpha $show $geo $geos]]
+    catch {after cancel $ttdata(after)}
+    set ttdata(after) [after idle [list after $aint \
+      [list ::baltip::my::${Un}FadeNext $w $aint $fint $icount $alpha $show $geo $geos]]]
   }
 }
 #_____

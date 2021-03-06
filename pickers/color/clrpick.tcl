@@ -21,6 +21,7 @@ namespace eval ::tk::dialog {}
 namespace eval ::tk::dialog::color {
   namespace import ::tk::msgcat::*
 }
+::msgcat::mcload [file join [file dirname [info script]] msgs]
 
 # ::tk::dialog::color:: --
 #
@@ -326,15 +327,30 @@ proc ::tk::dialog::color::BuildDialog {w} {
   #
   set botFrame [ttk::frame $w.bot -relief raised]
 
+  ttk::button $botFrame.ok0 -text [mc "From clipboard"] \
+      -command [list tk::dialog::color::OkCmd0 $w]
+  if {[set aloupe [info commands ::aloupe::run]] ne ""} {
+    ttk::button $botFrame.loupe -text [mc "Loupe"] \
+        -command [list tk::dialog::color::Loupe $w]
+  }
   ttk::button $botFrame.ok -text [string map {& ""} [mc "OK"]] \
       -command [list tk::dialog::color::OkCmd $w]
   ttk::button $botFrame.cancel -text [string map {& ""} [mc "Cancel"]] \
       -command [list tk::dialog::color::CancelCmd $w]
 
-  set data(okBtn)      $botFrame.ok
+  if {![catch {set clb [clipboard get]}] && \
+  [regexp {^(#*\d{3,6}|[[:alnum:] ]{3,})$} $clb]} {
+    set data(okBtn) $botFrame.ok0
+  } else {
+    set data(okBtn) $botFrame.ok
+  }
   set data(cancelBtn)  $botFrame.cancel
 
-  grid x x x $botFrame.ok $botFrame.cancel -sticky ew
+  if {$aloupe eq ""} {
+    grid $botFrame.ok0 x x x $botFrame.ok $botFrame.cancel -sticky ew
+  } else {
+    grid $botFrame.ok0 $botFrame.loupe x x x $botFrame.ok $botFrame.cancel -sticky ew
+  }
   grid configure $botFrame.ok $botFrame.cancel -padx 2 -pady 4
   grid columnconfigure $botFrame 2 -weight 2 -uniform space
   pack $botFrame -side bottom -fill x
@@ -753,6 +769,27 @@ proc ::tk::dialog::color::LeaveColorBar {w color} {
   $data($color,sel) itemconfigure $data($color,index) -fill black
 }
 
+# user hits "From clipboard" button
+#
+proc ::tk::dialog::color::OkCmd0 {w} {
+  set mainentry ".[winfo name $w].top.sel.ent"
+  # try #RGB and RGB
+  catch {
+    set clb [clipboard get]
+    foreach c {"" "#"} {
+      $mainentry delete 0 end
+      $mainentry insert 0 "$c$clb"
+      tk::dialog::color::HandleSelEntry $w
+    }
+  }
+}
+
+# user hits "Loupe" button
+#
+proc ::tk::dialog::color::Loupe {w} {
+  ::aloupe::run -exit no -parent $w -command "::tk::dialog::color::OkCmd0 $w"
+}
+
 # user hits OK button
 #
 proc ::tk::dialog::color::OkCmd {w} {
@@ -767,3 +804,5 @@ proc ::tk::dialog::color::CancelCmd {w} {
   variable ::tk::Priv
   set Priv(selectColor) ""
 }
+# _________________________________ EOF _________________________________ #
+#RUNF1: ~/PG/github/pave/tests/test2_pave.tcl 23 9 12 "small icons"

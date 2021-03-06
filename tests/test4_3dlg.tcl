@@ -12,7 +12,7 @@ set win .win
 set winf $win.fra
 apave::APaveDialog create pdlg
 pdlg makeWindow $winf "Adding Shortcuts"
-pdlg csSet 0
+pdlg csSet 23
 set fontbold "-font \"-weight bold\""
 pdlg paveWindow $winf {
   {frAU - - 1 6   {-st new} {-relief groove -borderwidth 1}}
