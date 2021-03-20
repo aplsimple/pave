@@ -771,12 +771,14 @@ proc ::tk::dialog::color::LeaveColorBar {w color} {
 
 # user hits "From clipboard" button
 #
-proc ::tk::dialog::color::OkCmd0 {w} {
+proc ::tk::dialog::color::OkCmd0 {w {clb ""}} {
   set mainentry ".[winfo name $w].top.sel.ent"
+  if {$clb eq ""} {
+    if {[catch {set clb [clipboard get]}]} return
+  }
   # try #RGB and RGB
-  catch {
-    set clb [clipboard get]
-    foreach c {"" "#"} {
+  foreach c {"" "#"} {
+    catch {
       $mainentry delete 0 end
       $mainentry insert 0 "$c$clb"
       tk::dialog::color::HandleSelEntry $w
@@ -787,7 +789,8 @@ proc ::tk::dialog::color::OkCmd0 {w} {
 # user hits "Loupe" button
 #
 proc ::tk::dialog::color::Loupe {w} {
-  ::aloupe::run -exit no -parent $w -command "::tk::dialog::color::OkCmd0 $w"
+  ::aloupe::run -exit no -parent $w -commandname [mc "Color"] \
+    -command "::tk::dialog::color::OkCmd0 $w %c"
 }
 
 # user hits OK button

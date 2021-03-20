@@ -7,7 +7,7 @@
 # _______________________________________________________________________ #
 
 package require Tk
-package provide bartabs 1.2.6
+package provide bartabs 1.3a1
 catch {package require baltip}
 
 # __________________ Common data of bartabs:: namespace _________________ #
@@ -193,7 +193,9 @@ method Tab_Create {BID TID w text} {
       {*}[my Tab_Font $BID]
   }
   lassign [my Tab_TextEllipsed $BID $text] text ttip
-  catch {baltip::tip $wb1 $ttip; baltip::tip $wb2 $ttip}
+  if {[set tip [my $TID cget -tip]] ne ""} {
+    my $TID configure -tip $tip  ;# run baltip after creating $wb1 & $wb2
+  }
   $wb1 configure -text $text
   if {[my Tab_Iconic $BID]} {
     $wb2 configure -state normal
@@ -266,7 +268,18 @@ method Tab_configure {args} {
 
   lassign [my Tab_BID [set TID [my ID]]] BID i tab
   lassign $tab tID data
-  foreach {opt val} $args {dict set data $opt $val}
+  foreach {opt val} $args {
+    dict set data $opt $val
+    if {$opt eq "-tip"} {   ;# configure the tab's tip
+      lassign [my $TID cget -wb1 -wb2] wb1 wb2
+      if {$wb1 ne ""} {
+        catch {
+          baltip::tip $wb1 $val -under 3
+          baltip::tip $wb2 $val -under 3
+        }
+      }
+    }
+  }
   set tab [list $TID $data]
   my $BID configure -TABS [lreplace [my $BID cget -TABS] $i $i $tab]
 }
@@ -566,28 +579,32 @@ method Tab_CloseFew {{TID -1} {left no}} {
 #   left - "yes" if to close all at left of TID, "no" if at right
 
   set BID [my ID]
-  if {$TID!=-1} {lassign [my Tab_BID $TID] BID icur}
+  if {$TID ne "-1"} {lassign [my Tab_BID $TID] BID icur}
   set tabs [my $BID listTab]
+  set doupdate no
   for {set i [llength $tabs]} {$i} {} {
     incr i -1
     set tID [lindex $tabs $i 0]
-    if {$TID==-1 || ($left && $i<$icur) || (!$left && $i>$icur)} {
-      if {[my $tID close no] eq "-1"} break
+    if {$TID eq "-1" || ($left && $i<$icur) || (!$left && $i>$icur)} {
+      if {![set res [my $tID close no]]} break
+      if {$res==1} {set doupdate yes}
     }
   }
-  my $BID clear
-  if {$TID==-1} {
-    my $BID Refill 0 yes
-  } else {
-    lassign [my Tab_BID $TID] BID icur
-    my $BID Refill $icur $left
+  if {$doupdate} {
+    my $BID clear
+    if {$TID eq "-1"} {
+      my $BID Refill 0 yes
+    } else {
+      my $BID $TID show
+    }
   }
 }
 #_____
 
-method Tab_Cmd {opt} {
+method Tab_Cmd {opt args} {
 # Executes a command bound to an action on a tab.
 #   opt - command option (-csel, -cmov, -cdel)
+#   args - additional argumens of the command
 # The commands can include wildcards: %b for bar ID, %t for tab ID, %l for tab label.
 # Returns 1, if no command set; otherwise: 1 for Yes, 0 for No, -1 for Cancel.
 
@@ -602,9 +619,9 @@ method Tab_Cmd {opt} {
     }
     set label [string map {\{ ( \} )} $label]
     set com [string map [list %b $BID %t $TID %l $label] $com]
-    if {[catch {set res [{*}$com]}]} {set res yes}
+    if {[catch {set res [{*}$com {*}$args]}]} {set res yes}
     if {$res eq "" || !$res} {return 0}
-    if {$res eq "-1"} {return $res}
+    return $res
   }
   return 1
 }
@@ -888,6 +905,7 @@ method OnPopup {X Y {BID "-1"} {TID "-1"} {textcur ""}} {
     }
   }
   if {[llength $lpops]} {
+    catch {::apave::obj themePopup $pop}
     my Bar_MenuList $BID $TID $pop ;# main menu
     foreach popi $lpops {my Bar_MenuList $BID $TID $popi $ipops}
     if {$TID ne "-1"} {
@@ -924,14 +942,15 @@ method show {{anyway yes}} {
 }
 #_____
 
-method close {{redraw yes}} {
+method close {{redraw yes} args} {
 # Closes a tab and updates the bar.
 #   redraw - if "yes", update the bar and select the new tab
+#   args - additional argumens of the -cdel command
 # Returns "1" if the deletion was successful, otherwise 0 (no) or -1 (cancel).
 
   lassign [my Tab_BID [set TID [my ID]]] BID icurr
   if {[my Disabled $TID]} {return 0}
-  if {[set res [my $TID Tab_Cmd -cdel]]<1} {return $res}
+  if {[set res [my $TID Tab_Cmd -cdel {*}$args]]!=1} {return $res}
   if {$redraw} {my $BID clear}
   lassign [my $BID cget -TABS -tleft -tright -tabcurrent] tabs tleft tright tcurr
   my Tab_RemoveLinks $BID $TID
@@ -1029,8 +1048,8 @@ method Bar_DefaultMenu {BID popName} {
   "s {} {} {} $dsbl" \
   "c {Close} {[self] %t close} {} $dsbl" \
   "c {Close All} {$bar Tab_CloseFew} {} $dsbl" \
-  "c {Close All to the Left} {$bar Tab_CloseFew %t 1} {} $dsbl" \
-  "c {Close All to the Right} {$bar Tab_CloseFew %t} {} $dsbl"] {
+  "c {Close All at Left} {$bar Tab_CloseFew %t 1} {} $dsbl" \
+  "c {Close All at Right} {$bar Tab_CloseFew %t} {} $dsbl"] {
     lappend pop $item
   }
 }
@@ -1372,11 +1391,11 @@ method CheckDsblPopup {BID TID mnuit} {
     }
     "Close" - "Close All" - "" {
       if {$static} {return 2}}
-    "Close All to the Left" {
+    "Close All at Left" {
       if {$static} {return 2}
       return [expr {$dsbl || !$icur}]
     }
-    "Close All to the Right" {
+    "Close All at Right" {
       if {$static} {return 2}
       return [expr {$dsbl || $icur==($llen-1)}]
     }
@@ -1499,13 +1518,14 @@ method cget {args} {
   set BID [my ID]
   variable btData
   set res [list]
+  set llen [dict get $btData $BID -LLEN]
   foreach opt $args {
     if {$opt eq "-listlen"} {
-      lappend res [dict get $btData $BID -LLEN]
+      lappend res $llen
     } elseif {$opt eq "-width"} {
       lassign [dict get [dict get $btData $BID] -wbar] wbar
       lappend res [my Aux_WidgetWidth $wbar]
-    } elseif {[dict exists $btData $BID $opt]} {
+    } elseif {[dict exists $btData $BID $opt] && ($llen || $opt ne "-tabcurrent")} {
       lappend res [dict get $btData $BID $opt]
     } else {
       lappend res ""
@@ -1742,6 +1762,43 @@ method remove {} {
   }
   return no
 }
+#_____
+
+method checkDisabledMenu {BID TID func} {
+# Checks whether the popup menu's items are disabled.
+#   func - close function
+# *func* equals to:
+#   1 - for "Close All"
+#   2 - for "Close All at Left"
+#   3 - for "Close All at Right"
+# Returns "yes" if the menu's item is disabled.
+
+  switch $func {
+    1 {set item "Close All"}
+    2 {set item "Close All at Left"}
+    3 {set item "Close All at Right"}
+    default {set item "Close"}
+  }
+  return [my CheckDsblPopup $BID $TID $item]
+}
+#_____
+
+method closeAll {BID TID func args} {
+# Closes tabs of bar.
+#   func - close function
+# *func* equals to:
+#   1 - for "Close All"
+#   2 - for "Close All at Left"
+#   3 - for "Close All at Right"
+
+  switch $func {
+    1 {my $BID Tab_CloseFew -1   no}
+    2 {my $BID Tab_CloseFew $TID yes}
+    3 {my $BID Tab_CloseFew $TID no}
+  }
+  
+}
+
 } ;#  bartabs::Bar
 
 # ___________________________ Methods of Bars ___________________________ #

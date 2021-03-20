@@ -815,8 +815,9 @@ oo::class create ::apave::APaveDialog {
         -ch - -checkbox {set chmsg "$val"}
         -g - -geometry {
           set geometry $val
-          set wasgeo 1
-          lassign [split $geometry +] - gx gy
+          if {[set wasgeo [expr {[string first "pointer" $val]<0}]]} {
+            lassign [split $geometry +] - gx gy
+          }
         }
         -c - -color {append optsLabel " -foreground {$val}"}
         -a { ;# additional grid options of message labels

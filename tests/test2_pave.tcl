@@ -98,7 +98,7 @@ namespace eval t {
    \u2022 Reference on <link2>hl_tcl</link2>
    \u2022 Reference on <link2>baltip</link2>
 
-  License: <linkMIT>MIT</linkMIT>.
+  License: <linkMIT>MIT</linkMIT>
   _____________________________________
 
   <red> $::tcltk_version </red> <link3></link3>
@@ -135,7 +135,7 @@ namespace eval t {
 
   # imitating save & exit function
   proc okProc {} {
-    ::t::pdlg ok info "SAVE" "Finita la comedia.\nCurtain." -weight bold -size 16
+    ::t::pdlg ok info "SAVE" "Finita la commedia.\nCurtain." -weight bold -size 16
     pave res .win 1
   }
 
@@ -196,7 +196,7 @@ namespace eval t {
       set ic [expr {$cs>22 ? 3 : 2}]  ;# "|" was added
       set ::t::opcc [pave optionCascadeText [lindex $::t::opcColors $cs+$ic]]
       .win.fra.fra.nbk tab .win.fra.fra.nbk.f5 -text \
-      " Color scheme $cs: [pave csGetName $cs]"
+      " Color scheme [pave csGetName $cs]"
       if {$::t::hue !=0} hueUpdate
       catch {::t::colorBar; ::bt draw}
       pave fillGutter [pave Text]
@@ -620,6 +620,9 @@ namespace eval t {
     }
     bartabs::Bars create ::bts                ;# ::bts is Bars object
     set ::t::BID [::bts create ::bt $bar1Opts [file tail $::t::ftx1]]
+    foreach tab [::bt listTab] ffil $::t::tclfiles {
+      ::bt [lindex $tab 0] configure -tip [lindex $ffil 1]
+    }
     bind [pave Text] <Control-Left> "::bt scrollLeft ; break"
     bind [pave Text] <Control-Right> "::bt scrollRight ; break"
     bind .win <F5> "::t::e_menu; break"
@@ -945,7 +948,7 @@ namespace eval t {
             File "&File"
             edit &Edit
             Help "&{Help (wordy)}"
-      }}}
+      }} ::t::fillMenu}
       {labB1 - - 1 1   {-st es}  {-t "First option:"}}
       {ent1 labB1 L 1 9 {-st wes -cw 1} {-tvar t::en1}}
       {labB2 labB1 T 1 1 {-st es}  {-t "Second option:"}}
@@ -1043,7 +1046,7 @@ namespace eval t {
        stat - - - - {pack -side bottom} {-array {
             {Row:       -font {-slant italic -size 10}} 7
             {" Column:" -font {-slant italic -size 10}} 5
-            {Encoding: -font {-slant italic -size 10} -anchor e} 30
+            {"" -font {-slant italic -size 10} -anchor e} 30
       }}}
       {lab1 - - - - {pack -pady 0} {-t \
       "It's a bit modified Tk's demos/ttkpane.tcl" -font "-weight bold -size 12"}}
@@ -1143,7 +1146,7 @@ namespace eval t {
 \n\nas above, i.e.\nnot  ttk::scrollbar\n\ntext is read-only"}}
       {frAT.TextNT - - - - {pack -side left -expand 1 -fill both} {-h 5 -wrap none -rotext ::t::filetxt -tabnext .win.fra.fral.butHome}}
       {frAT.sbV frAT.textNT L - - {pack}}
-      {frAT.sbH frAT.textNT T - - {pack}}
+      {frAT.sbH frAT.textNT T - - {pack -before %w}}
     }
   }
 
@@ -1188,7 +1191,7 @@ where:
       ####################################################################
       # {#                TAB-5: COLOR SCHEMES                           }
       ####################################################################
-      {BuTClrB  - - 1 4 {-st nsew -rw 1 -cw 1} {-com {::t::toolBut 4 -1} -text "Color scheme -1\nBasic"}}
+      {BuTClrB  - - 1 4 {-st nsew -rw 1 -cw 1} {-com {::t::toolBut 4 -1} -text "CS -1: Basic"}}
       {tcl {
         set prt BuTClrB
         for {set i 0} {$i<48} {incr i} {
@@ -1196,7 +1199,7 @@ where:
           if {$i%4} {set n $pr; set p L} {set n $prt; set p T; set prt $cur}
           set pr $cur
           set lwid "$cur $n $p 1 1 {-st nsew -rw 1 -cw 1} {-com \
-           {::t::toolBut 4 $i} -t \"Color scheme $i\n[t::pave csGetName $i]\"}"
+           {::t::toolBut 4 $i} -t \"CS [t::pave csGetName $i]\"}"
           %C $lwid
         }
       }}
@@ -1223,8 +1226,8 @@ where:
       {fraflb.lab - - - - {pack -side left -anchor nw} {-t "Listbox of file content:\n\nSee also:\nGeneral/Misc. tab" -link "
       ::t::chanTab nbk .win.fra.fra.nbk.f4 no yes; focus [::t::pave SpxMisc]@@Click to select 'Misc.'\n... and mark the link as visited.@@"}}
       {fraflb.flb - - - - {pack -side left -fill x -expand 1} {-lvar ::t::lv1 -lbxsel Cont -ALL 1 -w 50 -h 5 -tooltip "The 'flb' listbox contains:\n 1)  four literal lines\n  2) data from 'test2_fco.dat' file" -values {@@-div1 " \[" -div2 "\] " test2_fco.dat@@   INFO: @@-pos 22 -ret 1 -list {{Content of test2_fco.dat} {another item} trunk DOC} test2_fco.dat@@ Code of test2_pave.tcl: @@-RE {^(\s*)([^#]+)$} ./test2_pave.tcl@@}}}
-      {fraflb.sbv fraflb.flb L - - {pack -side left}}
-      {fraflb.sbh fraflb.flb T - - {pack -side left}}
+      {fraflb.sbv fraflb.flb L - - {pack -side left -after %w}}
+      {fraflb.sbh fraflb.flb T - - {pack -side left -before %w}}
       {LabImg fraflb T 1 1 {} {-link "::t::goWiki@@Click to enter the bird's wiki@@"}}
       {LabImgInfo LabImg T 1 1 {} {-link "
       ::t::chanTab nbk .win.fra.fra.nbk.f4 no yes; focus [::t::pave SpxMisc]@@Click to select 'Misc.'\n... and mark the link as visited\n(to test the multiple visited links).@@" -afteridle ::t::labelImaged}}
@@ -1259,7 +1262,7 @@ where:
       0 Id right \
       0 Msc right
     }
-    foreach {k v} $::apave::_Defaults {
+    foreach {k v} [pave defaultAttrs] {
       incr itbll
       lappend ::t::tbllist [list $k [lindex [pave widgetType $k {} {}] 0] \
         $itbll [string range $k [expr {$itbll%3}] end]]
@@ -1270,7 +1273,7 @@ where:
     set ::t::opcColors [list {{Color schemes}}]
     for {set i -1; set n [apave::cs_MaxBasic]} {$i<=$n} {incr i} {
       if {(($i+2) % ($n/2+2)) == 0} {lappend ::t::opcColors "|"}
-      lappend ::t::opcColors [list "$i: [pave csGetName $i]"]
+      lappend ::t::opcColors [list [pave csGetName $i]]
     }
     set ::t::opcIconSet [list "{small icons  }" "{middle icons  }" "{large icons  }"]
     variable arrayTab
@@ -1295,7 +1298,7 @@ where:
     set ::bgst [ttk::style lookup TScrollbar -troughcolor]
     ttk::style conf TLabelframe -labelmargins {5 10 1 1} -padding 3
     trace add variable t::sc write "::t::tracer ::t::sc"
-    pave setDefaultAttrs chB {} {-padx 11 -pady 3}  ;# to test setDefaultAttrs
+    pave defaultAttrs chB {} {-padx 11 -pady 3}  ;# to test defaultAttrs
     set ::t::restart 1
 
     # making main window object and dialog object
@@ -1325,15 +1328,15 @@ where:
 
     # 3d frame - "Options" (not too much efforts applied ;^)
     set lst3 {
-      {but1 -    - 1 1 {-st we} {-t "Options1" -com "t::pdlg ok info O1 Opts1..."}}
-      {but2 but1 T 1 1 {-st we} {-t "Options2" -com "t::pdlg ok ques O2 Opts2..."}}
-      {but3 but2 T 1 1 {-st we} {-t "Options3" -com "t::pdlg ok warn O3 Opts3..."}}
-      {but4 but3 T 1 1 {-st we} {-t "Options4" -com "t::pdlg ok err  O4 Opts4..."}}
-      {but5 but1 L 1 1 {-st we} {-t "more..."  -com "t::pdlg ok info M  More..."}}
+      {but1 -    - 1 1 {-st we} {-t "Options1" -com "t::pdlg ok info O1 Opts1... -g pointer"}}
+      {but2 but1 T 1 1 {-st we} {-t "Options2" -com "t::pdlg ok ques O2 Opts2... -g pointer"}}
+      {but3 but2 T 1 1 {-st we} {-t "Options3" -com "t::pdlg ok warn O3 Opts3... -g pointer"}}
+      {but4 but3 T 1 1 {-st we} {-t "Options4" -com "t::pdlg ok err  O4 Opts4... -g pointer"}}
+      {but5 but1 L 1 1 {-st we} {-t "more..."  -com "t::pdlg ok info M  More... -g pointer"}}
     }
     foreach b {6 7 8 9 a b c d e f g h i} p {5 6 7 8 9 a b c d e f g h} {
       lappend lst3 [list but$b but$p T 1 1 {-st we} \
-        {-t "more..." -com "t::pdlg ok warn M More...[incr ::iMORE] -text 1 -w 10"}]
+        {-t "more..." -com "t::pdlg ok warn M More...[incr ::iMORE] -text 1 -w 10 -g pointer"}]
     }
     ttk::notebook .win.fra.fra.nb3
     .win.fra.fra.nb3 add [ttk::frame .win.fra.fra.nb3.f1] -text "Editor options"
@@ -1357,12 +1360,9 @@ where:
     for {set i 0} {$i<[llength $imgl]} {incr i} {
       set ico [lindex $imgl $i]
       [pave BuT_ICN$i] configure -command \
-        [list ::t::msg info " This is just a demo.\n\n Icon$i was clicked:\n <link3></link3> $ico" -tags ::t::textTags -my "after idle {::t::textIco %w $ico}" -text 1 -scroll 0]
+        [list ::t::msg info " This is just a demo.\n\n Icon$i was clicked:\n <link3></link3> $ico" -tags ::t::textTags -my "after idle {::t::textIco %w $ico}" -text 1 -scroll 0 -g pointer+-10+10]
     }
     [pave Labstat3] configure -text "System encoding: [encoding system]"
-
-    # filling the menu
-    after idle [list ::t::fillMenu]
 
     if {$firstin} {
       set ::t::nextcs [apave::cs_Min]
