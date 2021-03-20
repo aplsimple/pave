@@ -6,7 +6,7 @@
 # License: MIT.
 # _______________________________________________________________________ #
 
-package provide hl_tcl 0.8.1
+package provide hl_tcl 0.8.2
 
 # _______________ Common data of ::hl_tcl:: namespace ______________ #
 
@@ -27,7 +27,7 @@ namespace eval ::hl_tcl {
     switch default linsert lsort lset lmap lrepeat catch variable concat \
     format scan regexp regsub upvar uplevel namespace try throw read eval \
     after update error global puts file chan open close eof seek flush mixin \
-    msgcat gets rename glob fconfigure fblocked fcopy cd pwd mathfunc \
+    msgcat gets rename glob fconfigure fblocked fcopy cd pwd mathfunc then \
     mathop apply fileevent unset join next exec refchan package source \
     exit vwait binary lreverse registry auto_execok subst encoding load \
     auto_load tell auto_mkindex memory trace time clock auto_qualify \
@@ -113,10 +113,11 @@ proc ::hl_tcl::my::NotEscaped {line i} {
 }
 #_____
 
-proc ::hl_tcl::my::FirstQtd {lineName iName} {
+proc ::hl_tcl::my::FirstQtd {lineName iName currQtd} {
   # Searches the quote characters in line.
   #   lineName - variable's name for 'line'
   #   iName - variable's name for 'i'
+  #   currQtd - yes, if searching inside the quoted
   # Returns "yes" if a quote character was found.
 
   variable data
@@ -124,6 +125,7 @@ proc ::hl_tcl::my::FirstQtd {lineName iName} {
   while {1} {
     if {[set i [string first \" $line $i]]==-1} {return no}
     if {[NotEscaped $line $i]} {
+      if {$currQtd} {return yes}
       set i1 [expr {$i-1}]
       set i2 [expr {$i+1}]
       if {[NotEscaped $line $i1]} {
@@ -278,7 +280,7 @@ proc ::hl_tcl::my::HighlightLine {txt ln prevQtd} {
   set i [set pri [set lasti 0]]
   set k -1
   while {1} {
-    if {![FirstQtd line i]} break
+    if {![FirstQtd line i $currQtd]} break
     set lasti $i
     if {$currQtd} {
       HighlightStr $txt $ln.$pri "$ln.$i +1 char"
@@ -288,7 +290,7 @@ proc ::hl_tcl::my::HighlightLine {txt ln prevQtd} {
         set i $lasti
         set st [string range $line $i $j]
         set it 0
-        if {[FirstQtd st it]} continue  ;# there is a quote yet
+        if {[FirstQtd st it $currQtd]} continue  ;# there is a quote yet
         set k $j
         break
       }
@@ -590,11 +592,12 @@ proc ::hl_tcl::my::LineState {txt tSTR tCMN l1} {
       }
       set i1 $nl.0
     }
-    set f1 [expr {[SearchTag $tSTR [$txt index "$i1 -1 chars"]]!=-1}]
+    lassign [split [$txt index $i1] .] l c
+    if {$c} {set icc 1} {set icc 2}
+    set f1 [expr {[SearchTag $tSTR [$txt index "$i1 -$icc chars"]]!=-1}]
     set f  [expr {[SearchTag $tSTR [$txt index "$i1"]]!=-1}]
     set f2 [expr {[SearchTag $tSTR [$txt index "$i1 +1 chars"]]!=-1}]
     set ch [$txt get "$i1" "$i1 +1 chars"]
-    lassign [split [$txt index $i1] .] l c
     if {![NotEscaped $line $c]} {set ch ""}
     set currQtd [expr {
       $prev!=-1 && ($ch!="\"" && $f || $ch=="\"" && !$f1) ||

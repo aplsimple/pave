@@ -15,7 +15,7 @@ Version `3.3.2a6 (20 Mar'21)`
   - icons for mc-labels
   - "pack/grid propagate" for "pan" if -w and -h set
   - clrpick.tcl updated
-  - bartabs updated
+  - bartabs, hl_tcl packages updated
   - BUGFIX: menu's colors restored for themes
 
 

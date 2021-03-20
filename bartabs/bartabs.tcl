@@ -7,7 +7,7 @@
 # _______________________________________________________________________ #
 
 package require Tk
-package provide bartabs 1.3a1
+package provide bartabs 1.3a2
 catch {package require baltip}
 
 # __________________ Common data of bartabs:: namespace _________________ #
