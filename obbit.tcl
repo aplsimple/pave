@@ -186,8 +186,14 @@ proc ::apave::initWM {args} {
   try {ttk::style theme use $theme}
   ttk::style configure TButton -anchor center -width $buttonwidth \
     -relief raised -borderwidth $buttonborder -padding $padding
-  ttk::style configure TLabel -borderwidth $labelborder -padding $padding
   ttk::style configure TMenubutton -width 0 -padding 0
+  # TLabel's standard style saved for occasional uses
+  ttk::style configure TLabelSTD {*}[ttk::style configure TLabel]
+  ttk::style configure TLabelSTD -anchor w
+  ttk::style map       TLabelSTD {*}[ttk::style map TLabel]
+  ttk::style layout    TLabelSTD [ttk::style layout TLabel]
+  # ... and TLabel new style
+  ttk::style configure TLabel -borderwidth $labelborder -padding $padding
   initPOP .
   initStyles
   return
@@ -329,11 +335,11 @@ proc ::apave::parseOptionsFile {strict inpargs args} {
 
 ###########################################################################
 
-proc ::apave::parseOptions {inpargs args} {
+proc ::apave::parseOptions {opts args} {
 
   # Parses argument list containing options.
-  #  inpargs - list of options and values
-  #  args  - list of option/defaultvalue repeated pairs
+  #  opts - list of options and values
+  #  args - list of "option / default value" pairs
   #
   # It's the same as parseOptionsFile, excluding the file name stuff.
   #
@@ -341,9 +347,29 @@ proc ::apave::parseOptions {inpargs args} {
   #
   # See also: parseOptionsFile
 
-  lassign [::apave::parseOptionsFile 0 $inpargs {*}$args] tmp
+  lassign [::apave::parseOptionsFile 0 $opts {*}$args] tmp
   foreach {nam val} $tmp {
     lappend retlist $val
+  }
+  return $retlist
+}
+
+###########################################################################
+
+proc ::apave::extractOptions {optsVar args} {
+
+  # Gets options' values and removes the options from the input list.
+  #  optsVar - variable name for the list of options and values
+  #  args  - list of "option / default value" pairs
+  #
+  # Returns a list of options' values, according to args.
+  #
+  # See also: parseOptions
+
+  upvar 1 $optsVar opts
+  set retlist [::apave::parseOptions $opts {*}$args]
+  foreach {o v} $args {
+    set opts [::apave::removeOptions $opts $o]
   }
   return $retlist
 }
@@ -1157,7 +1183,6 @@ oo::class create ::apave::ObjectTheming {
       my Ttk_style configure $ts -font apaveFontDef
       my Ttk_style configure $ts -selectforeground $tfgS
       my Ttk_style configure $ts -selectbackground $tbgS
-      my Ttk_style configure $ts -font apaveFontDef
       my Ttk_style map $ts -selectforeground [list !focus $::apave::_CS_(!FG)]
       my Ttk_style map $ts -selectbackground [list !focus $::apave::_CS_(!BG)]
       my Ttk_style configure $ts -fieldforeground $tfg2

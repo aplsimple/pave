@@ -101,9 +101,10 @@ namespace eval ::apave {
     "spx" {{} {}} \
     "spX" {{} {}} \
     "tbl" {{} {-selectborderwidth 1 -highlightthickness 2 \
-               -labelcommand tablelist::sortByColumn -stretch all \
-               -showseparators 1}} \
-    "tex" {{} {-undo 1 -maxundo 0 -highlightthickness 2 -insertwidth 0.6m -wrap word}} \
+          -labelcommand tablelist::sortByColumn -stretch all \
+          -showseparators 1}} \
+    "tex" {{} {-undo 1 -maxundo 0 -highlightthickness 2 -insertwidth 0.6m -wrap word
+          -selborderwidth 1}} \
     "tre" {{} {}} \
     "h_" {{-sticky ew -csz 3 -padx 3} {}} \
     "v_" {{-sticky ns -rsz 3 -pady 3} {}}]
@@ -678,9 +679,8 @@ oo::class create ::apave::APave {
     if {[string first "-state disabled" $attrs]<0 && $vn ne ""} {
       set all ""
       if {$varopt eq "-lvar"} {
-        lassign [::apave::parseOptions $attrs -values "" -ALL 0] iv a
+        lassign [::apave::extractOptions attrs -values "" -ALL 0] iv a
         if {[string is boolean -strict $a] && $a} {set all "ALL"}
-        set attrs [::apave::removeOptions $attrs -values -ALL]
         lappend _pav(widgetopts) "-lbxname$all $wnamefull $vn"
       }
       if {$rp ne ""} {
@@ -1003,9 +1003,9 @@ oo::class create ::apave::APave {
       "gut" {set widget "canvas"}
       "lab" {
         set widget "ttk::label"
-        if {[::apave::parseOptions $attrs -state normal] eq "disabled"} {
-          set attrs "-foreground grey $attrs"
-          set attrs [::apave::removeOptions $attrs -state]
+        if {[::apave::extractOptions attrs -state normal] eq "disabled"} {
+          set grey [lindex [my csGet] 8]
+          set attrs "-foreground $grey $attrs"
         }
         if {[set cmd [::apave::getOption -link {*}$attrs]] ne ""} {
           set attrs "-linkcom {$cmd} $attrs"
@@ -1770,7 +1770,7 @@ oo::class create ::apave::APave {
         my NormalizeName name i lwidgets
         set dattr "[lrange $v1 1 end]"
         set wid1 [list .[my ownWName [my Transname Lab ${name}_[incr j]]] - - - - "pack -side left -in $w.$name" "-t {[lindex $v1 0]} $dattr"]
-        set wid2 [list .[my ownWName [my Transname Lab $name$j]] - - - - "pack -side left $expand -in $w.$name" "-relief sunken -w $v2 -t { } $dattr"]
+        set wid2 [list .[my ownWName [my Transname Lab $name$j]] - - - - "pack -side left $expand -in $w.$name" "-style TLabelSTD -relief sunken -w $v2 -t { } $dattr"]
       } elseif {$typ eq "toolBar"} {  ;# toolbar
         set packreq ""
         switch -nocase -glob -- $v1 {
@@ -2029,7 +2029,7 @@ oo::class create ::apave::APave {
         -disabledtext - -rotext - -lbxsel - -cbxsel - -notebazook - \
         -entrypop - -entrypopRO - -textpop - -textpopRO - -ListboxSel - \
         -callF2 - -timeout - -bartabs - -onReturn - -linkcom - \
-        -afteridle - -gutter - -propagate {
+        -afteridle - -gutter - -propagate - -columnoptions - -selborderwidth {
           # attributes specific to apave, processed below in "Post"
           set v2 [string trimleft $v "\{"]
           set v2 [string range $v2 0 end-[expr {[string length $v]-[string length $v2]}]]
@@ -2174,6 +2174,14 @@ oo::class create ::apave::APave {
           } else {
             grid propagate $w 0
           }
+        }
+        -columnoptions {
+          foreach {col opts} $v {
+            $w column $col {*}$opts
+          }
+        }
+        -selborderwidth {
+          $w tag configure sel -borderwidth $v
         }
       }
     }
@@ -2604,9 +2612,8 @@ oo::class create ::apave::APave {
     }
     if {[::apave::getOption -ro {*}$attrs] ne "" || \
     [::apave::getOption -readonly {*}$attrs] ne ""} {
-      lassign [::apave::parseOptions $attrs -ro 0 -readonly 0] ro readonly
+      lassign [::apave::extractOptions attrs -ro 0 -readonly 0] ro readonly
       lappend addcomms [list my readonlyWidget $wdg [expr $ro||$readonly]]
-      set attrs [::apave::removeOptions $attrs -ro -readonly]
     }
     if {[set wnext [::apave::getOption -tabnext {*}$attrs]] ne ""} {
       set wnext [string trim $wnext "\{\}"]

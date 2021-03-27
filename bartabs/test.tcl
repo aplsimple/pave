@@ -31,11 +31,9 @@ xEhpdgYIMABQrSEzlY7wIwAAAABJRU5ErkJggg==}
 #----------------------------------
 
 proc ::TestDel {b t l} {
-  set res [tk_messageBox -title "Closing \"$l\"" \
-    -message "\nReally close \"$l\"?" \
-    -detail "\nDetails: bar=$b tab=$t label=$l" \
-    -icon question -type yesnocancel]
-  return [expr {$res eq "yes" ? 1 : ($res eq "no" ? 0 : -1)}]
+  return [bartabs::messageBox yesnocancel "Closing \"$l\"" "\nReally close \"$l\"?" \
+    -icon question -detail "\nDetails: bar=$b tab=$t label=$l"]
+  return [expr {$res eq "yes" ? 1 : ($res eq "no" ? 2 : 0)}]
 }
 
 #----------------------------------
@@ -148,6 +146,7 @@ proc ::FillBarTabs {} {
     -wbase $::frm -wproc "winfo width $::l1" \
     -hidearrows yes -relief sunken  -static 1 -tiplen -1 \
     -csel {::TestComm sel %b %t {%l}} \
+    -cdel {::TestDel %b %t {%l}} \
     -menu [list sep "com {Append $::noname} {::TestAdd %b} {} ::TestDsbl" sep \
     "com {Switch -static option} {::TestSwitch %b %t -static}" \
     "com {Switch -scrollsel option} {::TestSwitch %b %t -scrollsel}" \

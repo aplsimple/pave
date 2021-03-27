@@ -1,7 +1,7 @@
 # Last changes:
 
 
-Version `3.3.2a6 (20 Mar'21)`
+Version `3.3.2b1 (27 Mar'21)`
 
   - CS rearranged & renamed
   - active/focus colors for sca/sb*/nbk.tab
@@ -10,12 +10,16 @@ Version `3.3.2a6 (20 Mar'21)`
   - "-pointer/pointer+x+y" for showModal/showWindow's -geometry
   - "-escape" option for showModal
   - "-wrap word" default for 'tex'
-  - writeTextFile & error procs introduced
+  - -selborderwidth for 'tex' (default 1)
+  - -columnoptions for 'tre'
+  - for menuBar: 7th arg as 'fillmenu' command
+  - TLabelSTD, e.g. for statusbar labels
+  - extractOptions, writeTextFile & error procs introduced
   - defaultAttrs instead of setDefaultAttrs, with more options
   - icons for mc-labels
   - "pack/grid propagate" for "pan" if -w and -h set
   - clrpick.tcl updated
-  - bartabs, hl_tcl packages updated
+  - bartabs, hl_tcl, baltip packages updated
   - BUGFIX: menu's colors restored for themes
 
 

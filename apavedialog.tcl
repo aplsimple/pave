@@ -1030,8 +1030,7 @@ oo::class create ::apave::APaveDialog {
             bind \[[self] Entfind\] <FocusIn> {\[[self] Entfind\] selection range 0 end}
             bind $qdlg <F3> {[self] findInText 1}
             bind $qdlg <Control-f> \"[self] InitFindInText 1; focus \[[self] Entfind\]; break\"
-            bind $qdlg <Control-F> \"[self] InitFindInText 1; focus \[[self] Entfind\]; break\"
-            \[[self] TexM\] tag configure sel -borderwidth 1"
+            bind $qdlg <Control-F> \"[self] InitFindInText 1; focus \[[self] Entfind\]; break\""
         }
         if {$readonly} {
           if {!$hidefind} {

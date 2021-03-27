@@ -6,7 +6,7 @@
 # License: MIT.
 # _______________________________________________________________________ #
 
-package provide hl_tcl 0.8.2
+package provide hl_tcl 0.8.5
 
 # _______________ Common data of ::hl_tcl:: namespace ______________ #
 
@@ -414,11 +414,17 @@ proc ::hl_tcl::my::MemPos {txt} {
   variable data
   set ln [ShowCurrentLine $txt]
   set data(CURPOS,$txt) $ln
-  set data(CUR_LEN,$txt) [$txt index end]
+  set data(CUR_LEN,$txt) [$txt index "end -1 char"]
   lassign [CountQSH $txt $ln] \
     data(CNT_QUOTE,$txt) data(CNT_SLASH,$txt) data(CNT_COMMENT,$txt)
   if {[$txt tag ranges tagBRACKET] ne ""}    {$txt tag remove tagBRACKET 1.0 end}
   if {[$txt tag ranges tagBRACKETERR] ne ""} {$txt tag remove tagBRACKETERR 1.0 end}
+  if {[set cmd $data(CMDPOS,$txt)] ne ""} {
+    # run a command after changing position (with the state as arguments)
+    append cmd " $txt $data(CUR_LEN,$txt) $ln $data(CNT_QUOTE,$txt) \
+      $data(CNT_SLASH,$txt) $data(CNT_COMMENT,$txt)"
+    after idle $cmd
+  }
 }
 #_____
 
@@ -448,7 +454,7 @@ proc ::hl_tcl::my::CoroModified {txt {i1 -1} {i2 -1}} {
   # current line:
   set ln [expr {int([$txt index insert])}]
   # ending line:
-  set endl [expr {int([$txt index end])}]
+  set endl [expr {int([$txt index "end -1 char"])}]
   # range of change:
   if {$i1!=-1} {
     set dl [expr {abs($i2-$i1)}]
@@ -457,8 +463,8 @@ proc ::hl_tcl::my::CoroModified {txt {i1 -1} {i2 -1}} {
     set dl [expr {abs(int($data(CUR_LEN,$txt)) - $endl)}]
   }
   # begin and end of changes:
-  set ln1 [expr {max(($ln-$dl),1)}]
-  set ln2 [expr {min(($ln+$dl),$endl)}]
+  set ln1 [set lno1 [expr {max(($ln-$dl),1)}]]
+  set ln2 [set lno2 [expr {min(($ln+$dl),$endl)}]]
   lassign [CountQSH $txt $ln] cntq cnts ccmnt
   # flag "highlight to the end":
   set bf1 [expr {abs($ln-int($data(CURPOS,$txt)))>1 || $dl>1 \
@@ -499,6 +505,11 @@ proc ::hl_tcl::my::CoroModified {txt {i1 -1} {i2 -1}} {
       yield
     }
     incr ln1
+  }
+  if {[set cmd $data(CMD,$txt)] ne ""} {
+    # run a command after changes done (its arguments are txt, ln1, ln2)
+    append cmd " $txt $lno1 $lno2"
+    {*}$cmd
   }
   return
 }
@@ -572,38 +583,57 @@ proc ::hl_tcl::my::LineState {txt tSTR tCMN l1} {
     set i1 [$txt index "$i1 -1 chars"]
   }
   set ch [$txt get "$i1" "$i1 +1 chars"]
-  set currQtd 0
   if {[SearchTag $tCMN $i1]!=-1} {    ;# is a comment continues?
-    if {$ch eq "\\"} {set currQtd -1}
+    if {$ch eq "\\"} {return -1}
   } else {                            ;# is a string continues?
     set nl [lindex [split $l1 .] 0]
-    set line ""
     if {$prev>-1} {
+      # is the start of line quoted?
+      # Tk tag ranges refer only to non-empty lines
+      # => previous two non-empty chars' coordinates are needed
+      # to analize whether they:
+      # - end the range
+      # - are inside of the range
+      # - begin the range
+      set co1 [set co2 ""]
       while {$nl>1} {
         incr nl -1
-        if {[set line [$txt get $nl.0 $nl.end]] ne ""} break
+        if {[set line [$txt get $nl.0 $nl.end]] ne ""} {
+          if {$co2 eq ""} {
+            set co2 [$txt index "$nl.end -1 char"]
+            if {[string length $line]>1} {
+              set co1 [$txt index "$nl.end -2 char"]
+              break
+            }
+          } else {
+            set co1 [$txt index "$nl.end -1 char"]
+            break
+          }
+        }
       }
-      set i1 [$txt index "$nl.end -1 char"]
-    } else {
-      set nltot [lindex [split [$txt index end] .] 0]
-      while {$nl<$nltot} {
-        incr nl
-        if {[set line [$txt get $nl.0 $nl.end]] ne ""} break
-      }
-      set i1 $nl.0
+      if {$co2 eq ""} {return 0}   {set f2 [expr {[SearchTag $tSTR $co2]!=-1}]}
+      if {$co1 eq ""} {set f1 $f2} {set f1 [expr {[SearchTag $tSTR $co1]!=-1}]}
+      set ch [$txt get $co2 "$co2 +1 chars"]
+      set c [lindex [split [$txt index $co2] .] 1]
+      if {![NotEscaped $line $c]} {set ch ""}
+      return [expr {$ch!="\"" && $f2 || $ch=="\"" && !$f1}]
     }
-    lassign [split [$txt index $i1] .] l c
-    if {$c} {set icc 1} {set icc 2}
-    set f1 [expr {[SearchTag $tSTR [$txt index "$i1 -$icc chars"]]!=-1}]
-    set f  [expr {[SearchTag $tSTR [$txt index "$i1"]]!=-1}]
-    set f2 [expr {[SearchTag $tSTR [$txt index "$i1 +1 chars"]]!=-1}]
-    set ch [$txt get "$i1" "$i1 +1 chars"]
+    # is the end of line quoted?
+    set line ""
+    set nltot [lindex [split [$txt index end] .] 0]
+    while {$nl<$nltot} {
+      incr nl
+      if {[set line [$txt get $nl.0 $nl.end]] ne ""} break
+    }
+    set i1 $nl.0
+    set ch [$txt get $i1 "$i1 +1 chars"]
+    set c [lindex [split [$txt index $i1] .] 1]
     if {![NotEscaped $line $c]} {set ch ""}
-    set currQtd [expr {
-      $prev!=-1 && ($ch!="\"" && $f || $ch=="\"" && !$f1) ||
-      $prev==-1 && ($ch!="\"" && $f || $ch=="\"" && !$f2)}]
+    set f1 [expr {[SearchTag $tSTR [$txt index $i1]]!=-1}]
+    set f2 [expr {[SearchTag $tSTR [$txt index "$i1 +1 chars"]]!=-1}]
+    return [expr {$ch!="\"" && $f1 || $ch=="\"" && !$f2}]
   }
-  return $currQtd
+  return 0
 }
 
 # __________ HEROIC EFFORTS to highlight the matching brackets __________ #
@@ -756,18 +786,18 @@ proc ::hl_tcl::hl_readonly {txt {ro -1} {com2 ""}} {
   # Makes the text widget be readonly or gets its 'read-only' state.
   #   txt - text widget's path
   #   ro - flag "the text widget is readonly"
-  #   com2 - command to be called after changes
+  #   com2 - command to be called at viewing and after changes
   # If 'ro' argument is omitted, returns the widget's 'read-only' state.
 
   if {$ro==-1} {
     return [expr {[info exists ::hl_tcl::my::data(READONLY,$txt)] && $::hl_tcl::my::data(READONLY,$txt)}]
   }
   set ::hl_tcl::my::data(READONLY,$txt) $ro
-  set ::hl_tcl::my::data(CMD,$txt) $com2
+  if {$com2 ne ""} {set ::hl_tcl::my::data(CMD,$txt) $com2}
   set newcom "::$txt.internal"
   if {[info commands $newcom] eq ""} {rename $txt $newcom}
   set com "[namespace current]::my::Modified $txt"
-  if {$com2 ne ""} {append com " ; $com2"}
+  #if {$com2 ne ""} {append com " ; $com2"}
   if {$ro} {proc ::$txt {args} "
       switch -exact -- \[lindex \$args 0\] \{
           insert \{$com2\}
@@ -799,13 +829,15 @@ proc ::hl_tcl::hl_init {txt args} {
   #   -optRE - flag "use of RE to highlight options"
   #   -multiline - flag "allowed multi-line strings"
   #   -cmd - command to watch editing/viewing
+  #   -cmdpos - command to watch cursor positioning
   #   -colors - list of colors: clrCOM, clrCOMTK, clrSTR, clrVAR, clrCMN, clrPROC
   #   -font - attributes of font
   #   -seen - lines seen at start
   # This procedure has to be called before writing a text in the text widget.
 
   set ::hl_tcl::my::data(REG_TXT,$txt) ""  ;# disables Modified at changing the text
-  foreach {opt val} {-dark 0 -readonly 0 -cmd "" -optRE 1 -multiline 1 -seen 500} {
+  foreach {opt val} {-dark 0 -readonly 0 -cmd "" -cmdpos "" -optRE 1 \
+  -multiline 1 -seen 500} {
     if {[dict exists $args $opt]} {set val [dict get $args $opt]}
     set ::hl_tcl::my::data([string toupper [string range $opt 1 end]],$txt) $val
   }
@@ -834,6 +866,9 @@ proc ::hl_tcl::hl_init {txt args} {
     set ::hl_tcl::my::data(FONT,$txt) [font actual TkFixedFont]
   }
   hl_readonly $txt $::hl_tcl::my::data(READONLY,$txt)
+  if {[string first "::hl_tcl::" [bind $txt]]<0} {
+    bind $txt <FocusIn> [list + ::hl_tcl::my::ShowCurrentLine $txt]
+  }
 }
 #_____
 
