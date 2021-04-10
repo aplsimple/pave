@@ -52,6 +52,7 @@ package require Tk
 namespace eval ::apave {
 
   ;# default grid options & attributes of widgets (no abbreviations here)
+  variable cursorwidth 1
   variable _Defaults [dict create \
     "bts" {{} {}} \
     "but" {{} {}} \
@@ -62,7 +63,7 @@ namespace eval ::apave {
     "cbx" {{} {}} \
     "fco" {{} {}} \
     "ent" {{} {}} \
-    "enT" {{} {-insertwidth 0.6m}} \
+    "enT" {{} {-insertwidth $::apave::cursorwidth -insertofftime 250 -insertontime 750}} \
     "fil" {{} {}} \
     "fis" {{} {}} \
     "dir" {{} {}} \
@@ -79,7 +80,7 @@ namespace eval ::apave {
     "laB" {{-sticky w} {}} \
     "lfr" {{} {}} \
     "lfR" {{} {-relief groove}} \
-    "lbx" {{} {}} \
+    "lbx" {{} {-activestyle none -exportselection 0}} \
     "flb" {{} {}} \
     "meb" {{} {}} \
     "meB" {{} {}} \
@@ -103,7 +104,7 @@ namespace eval ::apave {
     "tbl" {{} {-selectborderwidth 1 -highlightthickness 2 \
           -labelcommand tablelist::sortByColumn -stretch all \
           -showseparators 1}} \
-    "tex" {{} {-undo 1 -maxundo 0 -highlightthickness 2 -insertwidth 0.6m -wrap word
+    "tex" {{} {-undo 1 -maxundo 0 -highlightthickness 2 -insertofftime 250 -insertontime 750 -insertwidth $::apave::cursorwidth -wrap word
           -selborderwidth 1}} \
     "tre" {{} {}} \
     "h_" {{-sticky ew -csz 3 -padx 3} {}} \
@@ -124,6 +125,7 @@ namespace eval ::apave {
   set _AP_VARS(MODALWIN) [list]
   set _AP_VARS(LINKFONT) [list -underline 1]
   set _AP_VARS(HILI) 0
+  set _AP_VARS(INDENT) "  "
   variable _AP_VISITED;  array set _AP_VISITED [list]
   set _AP_VISITED(ALL) [list]
   variable UFF "\uFFFF"
@@ -630,7 +632,7 @@ oo::class create ::apave::APave {
     #   - else: a list of updated options and attributes of the widget type
 
     if {$typ eq ""} {return $::apave::_Defaults}
-    set def1 [dict get $::apave::_Defaults $typ]
+    set def1 [subst [dict get $::apave::_Defaults $typ]]
     if {"$opt$atr" eq ""} {return $def1}
     lassign $def1 defopts defattrs
     set newval [list "$defopts $opt" "$defattrs $atr"]
@@ -1912,7 +1914,8 @@ oo::class create ::apave::APave {
     if {[bind $wt <<Paste>>] eq ""} {
       set res "
       bind $wt <<Paste>> {+ [self] pasteText $wt}
-      bind $wt <KeyPress> {+ [self] onKeyTextM $wt %K}"
+      bind $wt <Return> {+ [self] onKeyTextM $wt %K}
+      catch {bind $wt <braceright> {+ [self] onKeyTextM $wt %K}}"
     }
     append res "
       bind $wt <Control-d> {[self] doubleText $wt}
@@ -2424,15 +2427,45 @@ oo::class create ::apave::APave {
   #########################################################################
 
   method onKeyTextM {w K} {
+    # Processes indents and braces at pressing keys.
+    #   w - text's path
+    #   K - key's name
 
-    if {$K eq "Return"} {
-      set idx1 [$w index "insert linestart"]
-      set idx2 [$w index "insert lineend"]
-      set line [$w get $idx1 $idx2]
-      set indent [string repeat " " \
-        [expr {[string length $line]-[string length [string trimleft $line]]}]]
-      if {$indent ne ""} {
-        after idle [list $w insert [$w index "$idx1 +1 line"] $indent]
+    set lindt [string length $::apave::_AP_VARS(INDENT)]
+    switch -exact $K {
+      Return {
+        # at pressing Enter key, indent (and possibly add the right brace)
+        set idx1 [$w index "insert linestart"]
+        set idx2 [$w index "insert lineend"]
+        set line [$w get $idx1 $idx2]
+        set nchars [expr {[string length $line]-[string length [string trimleft $line]]}]
+        set indent [string range $line 0 [expr {$nchars-1}]]
+        set ch [string index $line end]
+        if {$indent ne "" || $ch eq "\{"} {
+          set idx1 [$w index "insert"]
+          set idx2 [$w index "$idx1 +1 line"]
+          set st1 [$w get "$idx1" "$idx1 lineend"]
+          if {$ch eq "\{" && $st1 eq ""} {
+            set st2 [string trim [$w get "$idx2 linestart" "$idx2 lineend"]]
+            if {$st2 eq ""} {
+              append indent $::apave::_AP_VARS(INDENT) \n $indent "\}"
+            } else {
+              append indent $::apave::_AP_VARS(INDENT)
+            }
+            incr nchars $lindt
+          }
+          $w insert [$w index "$idx1"] \n$indent
+          ::tk::TextSetCursor $w [$w index "$idx2 linestart +$nchars char"]
+          return -code break
+        }
+      }
+    braceright {
+        # right brace pressed: if no other chars in the line, shift the brace
+        set idx1 [$w index "insert"]
+        set st [$w get "$idx1 linestart" "$idx1 lineend"]
+        if {[string trim $st] eq "" && [string length $st]>=$lindt} {
+          $w delete "$idx1 lineend -$lindt char" "$idx1 lineend"
+        }
       }
     }
   }

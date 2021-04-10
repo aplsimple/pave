@@ -1,8 +1,11 @@
 # Last changes:
 
 
-Version `3.3.2b1 (27 Mar'21)`
+Version `3.3.2b3 (3 Apr'21)`
 
+  - highlighted string for searching with F3
+  - an indenting amended
+  - cursor settings modified
   - CS rearranged & renamed
   - active/focus colors for sca/sb*/nbk.tab
   - "-after/-before %w" for packing sbv/sbh instead of default setting

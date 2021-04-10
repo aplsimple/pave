@@ -429,7 +429,6 @@ namespace eval t {
       bind $ent $k "::t::pave findInText 0 $tex ::t::Find; $closefind"
     }
     foreach k {<Escape> <FocusOut>} {bind $ent $k $closefind}
-    bind $tex <F3> ::t::findTclNext
   }
 
   proc findTclNext {{dochan no}} {
@@ -1320,6 +1319,7 @@ where:
     bind $wtex <KeyRelease> "+ t::textPos $wtex"
     bind $wtex <<Modified>> ::t::tabModified
     bind $wtex <Control-f> ::t::findTclFirst
+    bind $wtex <F3> ::t::findTclNext
     pave displayText $wtex $::t::filetxt
     # at first, Ftx1 widget is editable
     pave makePopup [pave Ftx1] no yes
