@@ -117,7 +117,7 @@ proc ::FillBarTabs {} {
   toplevel $::frm
   wm minsize $::frm 200 350
   wm geometry $::frm +500+200
-  wm protocol $::frm WM_DELETE_WINDOW {::bts destroy; exit}
+  wm protocol $::frm WM_DELETE_WINDOW {catch {::bts destroy}; exit}
   ttk::label $::l0 -text "Absolutely static:"
   ttk::label $::l1 -text [string repeat "0123456789" 6]
   ttk::label $::l2 -text [string repeat "0123456789" 12]
@@ -152,7 +152,7 @@ proc ::FillBarTabs {} {
     "com {Switch -scrollsel option} {::TestSwitch %b %t -scrollsel}" \
     "com {Switch -hidearrows option} {::TestSwitch %b %t -hidearrows}"] ]
 
-  set barOpts2 [list -wbar $::w2 -wbase $::l2 \
+  set barOpts2 [list -wbar $::w2 -wbase $::l2 -pady 3 \
     -lablen 11 -expand 0 -imagemark markimg -tiplen 15 -dotip yes \
     -tleft 3 -fgsel black -bgsel #999999 \
     -cmov {::TestComm mov %b %t {%l}} \
@@ -164,7 +164,7 @@ proc ::FillBarTabs {} {
     sep \
     "com {Switch -expand option} {::TestSwitch %b %t -expand}" ]]
   
-  set barOpts3 [list -wbar $::w5 -wbase $::frm -tleft 7 -bd 0 -pady 0 \
+  set barOpts3 [list -wbar $::w5 -wbase $::frm -tleft 7 -bd 0 \
     -wproc "expr {\[winfo width $::frm\]-\[winfo width $::l3\]-80}" \
     -menu [list sep "com {Switch -bd option} {::TestSwitch %b %t -bd}"]]
   
@@ -182,6 +182,7 @@ proc ::FillBarTabs {} {
     lappend barOpts2 -tab $tab
     lappend barOpts3 -tab $tab
   }
+
   bartabs::Bars create ::bts
   ::bts create ::bar0 $barOpts0
   ::bts create ::bar1 $barOpts1

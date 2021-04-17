@@ -1,13 +1,14 @@
 # Last changes:
 
 
-Version `3.3.2b3 (3 Apr'21)`
+Version `3.3.2 (17 Apr'21)`
 
   - highlighted string for searching with F3
   - an indenting amended
   - cursor settings modified
   - CS rearranged & renamed
   - active/focus colors for sca/sb*/nbk.tab
+  - "-tip" may be used along with "-tooltip"
   - "-after/-before %w" for packing sbv/sbh instead of default setting
   - "-minsize" for showModal/showWindow
   - "-pointer/pointer+x+y" for showModal/showWindow's -geometry

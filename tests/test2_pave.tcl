@@ -309,7 +309,7 @@ namespace eval t {
   }
 
   # displaying the cursor position and the current line's contents
-  proc textPos {txt} {
+  proc textPos {txt args} {
     lassign [split [$txt index insert] .] r c
     [pave Labstat1] configure -text $r
     [pave Labstat2] configure -text [incr c]
@@ -423,8 +423,7 @@ namespace eval t {
     pack [pave FraFind]
     $ent selection range 0 end
     focus $ent
-    set closefind "pack forget [::t::pave FraFind]; \
-      focus $tex; ::t::textPos $tex; break"
+    set closefind "pack forget [::t::pave FraFind]; focus $tex; break"
     foreach k {<Return> <KP_Enter>} {
       bind $ent $k "::t::pave findInText 0 $tex ::t::Find; $closefind"
     }
@@ -434,7 +433,6 @@ namespace eval t {
   proc findTclNext {{dochan no}} {
     chanTab nbk .win.fra.fra.nbk.f2 $dochan
     pave findInText 1 [pave Text] ::t::Find
-    textPos [pave Text]
   }
 
   proc screenshooter {} {
@@ -530,10 +528,9 @@ namespace eval t {
 
   proc highlighting_editor {} {
     set TID [::bt cget -tabcurrent]
-    ::hl_tcl::hl_init [pave Text] -seen 500 -dark [pave csDarkEdit] \
+    ::hl_tcl::hl_init [pave Text] -seen 500 -dark [pave csDarkEdit] -cmdpos ::t::textPos \
       -readonly [getLock $TID] -font [pave csFontMono] -multiline $::multiline
     ::hl_tcl::hl_text [pave Text]
-    textPos [pave Text]
   }
 
   proc highlighting_others {{ro 1}} {
@@ -1315,8 +1312,6 @@ where:
     # text widget's name is uppercased, so we can use the Text method
     set wtex [pave Text]
     # bindings and contents for text widget
-    bind $wtex <ButtonRelease> [list t::textPos $wtex]
-    bind $wtex <KeyRelease> "+ t::textPos $wtex"
     bind $wtex <<Modified>> ::t::tabModified
     bind $wtex <Control-f> ::t::findTclFirst
     bind $wtex <F3> ::t::findTclNext
