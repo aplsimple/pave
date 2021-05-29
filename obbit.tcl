@@ -16,9 +16,10 @@ namespace eval ::apave {
   # variables global to apave objects:
 
   # - common options/constants of apave utils
-  variable _PU_opts
-  array set _PU_opts [list -NONE =NONE=]
+  variable _PU_opts;       array set _PU_opts [list -NONE =NONE=]
+  variable _AP_Properties; array set _AP_Properties [list]
   set _PU_opts(_ERROR_) ""
+  set _PU_opts(_EOL_) ""
   # - main color scheme data
   variable _CS_
   array set _CS_ [list]
@@ -77,7 +78,7 @@ namespace eval ::apave {
 {{36: CoolGlow} "#e0e0e0" #e0e0e0 #06071d #1e2038 #FEEFA8 #5c6999 #000 #f4f49f #6e6e6e #ffbb6d #000 #7f8bbe - #2e3048 #000 #b0b04c #121329 #003 #004 #005 #006 #007}
 {{37: Inkpot} "#d3d3ff" #AFC2FF #16161f #1E1E27 #FEEFA8 #6767a8 #000 #f4f49f #6e6e6e #ffbb6d #000 #8585c6 - #292936 #000 #a2a23e #202029 #003 #004 #005 #006 #007}
 {{38: Quiverly} "#cdd8d8" #cdd8d8 #2b303b #333946 #FEEFA8 #6f7582 #000 #f4f49f #757575 #eda95b #000 #9197a4 - #414650 #000 #b0b04c #323742 #003 #004 #005 #006 #007}
-{{39: Sleepy} "#fff" #fff #3c3c3c #5a5a5a #FEEFA8 #395472 #fff #f4f49f #969696 orange #fff #2d4866 - #4F4F4F #000 #cdcd69 #3b3b3b #003 #004 #005 #006 #007}
+{{39: Sleepy} "#fff" #fff #3c3c3c #5a5a5a #FEEFA8 #215d9c #fff #f4f49f #969696 orange #fff #2d4866 - #4F4F4F #000 #cdcd69 #474747 #003 #004 #005 #006 #007}
 {{40: Monokai} "#f8f8f2" #f8f8f2 #353630 #4e5044 #FEEFA8 #707070 #000 #f4f49f #9a9a9a #ffbb6d #000 #777777 - #46473d #000 #cdcd69 #3c3d37 #003 #004 #005 #006 #007}
 {{41: Desert} "#fff" #fff #47382d #5a4b40 #FEEFA8 #78695e #000 #f4f49f #a2a2a2 #ffbb6d #000 #7f7065 - #55463b #000 #eded89 #503f34 #003 #004 #005 #006 #007}
 {{42: Magenta} "#E8E8E8" #F0E8E8 #381e44 #4A2A4A #FEEC9A #846484 #000 #f4f49f grey #ffbb6d #000 #ad8dad - #573757 #000 #cdcd69 #42284e #003 #004 #005 #006 #007}
@@ -111,12 +112,18 @@ namespace eval ::apave {
   }
 }
 
-# _______________________________________________________________________ #
+# _____________________________ Misc procs ________________________________ #
 
 proc ::iswindows {} {
 
   # Checks if the platform is MS Windows.
   return [expr {$::tcl_platform(platform) eq "windows"} ? 1: 0]
+}
+
+proc ::islinux {} {
+
+  # Checks if the platform is Linux.
+  return [expr {$::tcl_platform(platform) eq "unix"} ? 1: 0]
 }
 
 #########################################################################
@@ -149,26 +156,75 @@ proc ::apave::initPOP {w} {
 
 #########################################################################
 
-proc ::apave::initStyles {args} {
+proc ::apave::initStyles {} {
 
   # Initializes miscellaneous styles, e.g. button's.
-  #   args - options ("name value" pairs)
 
   ::apave::obj create_Fonts
+  set font  "[font actual apaveFontDef]"
+  set fontB "[font actual apaveFontDefBold]"
+
   ttk::style configure TButtonWest {*}[ttk::style configure TButton]
-  ttk::style configure TButtonWest -anchor w
+  ttk::style configure TButtonWest -anchor w -font $font
   ttk::style map       TButtonWest {*}[ttk::style map TButton]
   ttk::style layout    TButtonWest [ttk::style layout TButton]
 
   ttk::style configure TButtonBold {*}[ttk::style configure TButton]
-  ttk::style configure TButtonBold -font [font actual apaveFontDefBold]
+  ttk::style configure TButtonBold -font $fontB
   ttk::style map       TButtonBold {*}[ttk::style map TButton]
   ttk::style layout    TButtonBold [ttk::style layout TButton]
 
   ttk::style configure TButtonWestBold {*}[ttk::style configure TButton]
-  ttk::style configure TButtonWestBold -anchor w -font [font actual apaveFontDefBold]
+  ttk::style configure TButtonWestBold -anchor w -font $fontB
   ttk::style map       TButtonWestBold {*}[ttk::style map TButton]
   ttk::style layout    TButtonWestBold [ttk::style layout TButton]
+}
+
+#########################################################################
+
+proc ::apave::initStylesFS {args} {
+
+  # Initializes miscellaneous styles, e.g. button's.
+  #   args - font options ("name value" pairs)
+
+  ::apave::obj create_Fonts
+  set font  "[font actual apaveFontDef] $args"
+  set fontB "[font actual apaveFontDefBold] $args"
+
+  ttk::style configure TLabelFS {*}[ttk::style configure TLabel]
+  ttk::style configure TLabelFS -font $font
+  ttk::style map       TLabelFS {*}[ttk::style map TLabel]
+  ttk::style layout    TLabelFS [ttk::style layout TLabel]
+
+  ttk::style configure TCheckbuttonFS {*}[ttk::style configure TCheckbutton]
+  ttk::style configure TCheckbuttonFS -font $font
+  ttk::style map       TCheckbuttonFS {*}[ttk::style map TCheckbutton]
+  ttk::style layout    TCheckbuttonFS [ttk::style layout TCheckbutton]
+
+  ttk::style configure TComboboxFS {*}[ttk::style configure TCombobox]
+  ttk::style configure TComboboxFS -font $font
+  ttk::style map       TComboboxFS {*}[ttk::style map TCombobox]
+  ttk::style layout    TComboboxFS [ttk::style layout TCombobox]
+
+  ttk::style configure TRadiobuttonFS {*}[ttk::style configure TRadiobutton]
+  ttk::style configure TRadiobuttonFS -font $font
+  ttk::style map       TRadiobuttonFS {*}[ttk::style map TRadiobutton]
+  ttk::style layout    TRadiobuttonFS [ttk::style layout TRadiobutton]
+
+  ttk::style configure TButtonWestFS {*}[ttk::style configure TButton]
+  ttk::style configure TButtonWestFS -anchor w -font $font
+  ttk::style map       TButtonWestFS {*}[ttk::style map TButton]
+  ttk::style layout    TButtonWestFS [ttk::style layout TButton]
+
+  ttk::style configure TButtonBoldFS {*}[ttk::style configure TButton]
+  ttk::style configure TButtonBoldFS -font $fontB
+  ttk::style map       TButtonBoldFS {*}[ttk::style map TButton]
+  ttk::style layout    TButtonBoldFS [ttk::style layout TButton]
+
+  ttk::style configure TButtonWestBoldFS {*}[ttk::style configure TButton]
+  ttk::style configure TButtonWestBoldFS -anchor w -font $fontB
+  ttk::style map       TButtonWestBoldFS {*}[ttk::style map TButton]
+  ttk::style layout    TButtonWestBoldFS [ttk::style layout TButton]
 }
 
 #########################################################################
@@ -394,8 +450,8 @@ proc ::apave::getOption {optname args} {
   #   args - option list
   # Returns an option value or "".
   # Example:
-  #     set options [list -name some -value "any value" -tooltip "some tip"]
-  #     set optvalue [::apave::getOption -tooltip {*}$options]
+  #     set options [list -name some -value "any value" -tip "some tip"]
+  #     set optvalue [::apave::getOption -tip {*}$options]
 
   set optvalue [lindex [::apave::parseOptions $args $optname ""] 0]
   return $optvalue
@@ -470,6 +526,40 @@ proc ::apave::error {{fileName ""}} {
 
 ###########################################################################
 
+proc ::apave::textsplit {textcont} {
+  # Splits a text's contents by EOLs. Those inventors of EOLs...
+  #   textcont - text's contents
+
+  return [split [string map [list \r\n \n \r \n] $textcont] \n]
+}
+
+###########################################################################
+
+proc ::apave::textEOL {{EOL "-"}} {
+  # Gets/sets End-of-Line for text reqding/writing.
+  #   EOL - LF, CR, CRLF or {}
+  # If EOL omitted or equals to {} or "-", return the current EOL.
+  # If EOL equals to "translation", return -translation option or {}.
+
+  variable _PU_opts
+  if {$EOL eq "-"} {return $_PU_opts(_EOL_)}
+  if {$EOL eq "translation"} {
+    if {$_PU_opts(_EOL_) eq ""} {return ""}
+    return "-translation $_PU_opts(_EOL_)"
+  }
+  set _PU_opts(_EOL_) [string trim [string tolower $EOL]]
+}
+
+proc ::apave::textChanConfigure {channel} {
+  # Configures a channel for text file.
+  #   channel - the channel
+
+  chan configure $channel -encoding utf-8
+  chan configure $channel {*}[::apave::textEOL translation]
+}
+
+###########################################################################
+
 proc ::apave::readTextFile {fileName {varName ""} {doErr 0}} {
 
   # Reads a text file.
@@ -485,7 +575,7 @@ proc ::apave::readTextFile {fileName {varName ""} {doErr 0}} {
     if {$doErr} {error [::apave::error $fileName]}
     set fvar ""
   } else {
-    chan configure $chan -encoding utf-8
+    ::apave::textChanConfigure $chan
     set fvar [read $chan]
     close $chan
   }
@@ -513,7 +603,7 @@ proc ::apave::writeTextFile {fileName {varName ""} {doErr 0}} {
     if {$doErr} {error [::apave::error $fileName]}
     set res no
   } else {
-    chan configure $chan -encoding utf-8
+    ::apave::textChanConfigure $chan
     puts -nonewline $chan $contents
     close $chan
     set res yes
@@ -551,7 +641,70 @@ proc ::apave::openDoc {url} {
   }
 }
 
+proc ::apave::setProperty {name args} {
+
+  # Sets a property's value as "application-wide".
+  #   name - name of property
+  #   args - value of property
+  #
+  # If *args* is omitted, the method returns a property's value.
+  #
+  # If *args* is set, the method sets a property's value as $args.
+
+  variable _AP_Properties
+  switch [llength $args] {
+    0 {return [getProperty $name]}
+    1 {return [set _AP_Properties($name) [lindex $args 0]]}
+  }
+  puts -nonewline stderr \
+    "Wrong # args: should be \"::apave::setProperty propertyname ?value?\""
+  return -code error
+}
+
 ###########################################################################
+
+proc ::apave::getProperty {name {defvalue ""}} {
+  # Gets a property's value as "application-wide".
+  #   name - name of property
+  #   defvalue - default value
+  #
+  # If the property had been set, the method returns its value.
+  #
+  # Otherwise, the method returns the default value (`$defvalue`).
+
+  variable _AP_Properties
+  if {[info exists _AP_Properties($name)]} {
+    return $_AP_Properties($name)
+  }
+  return $defvalue
+}
+
+
+proc ::apave::countChar {str ch} {
+  # Counts a character in a string.
+  #   str - a string
+  #   ch - a character
+  #
+  # Returns a number of non-escaped occurences of character *ch* in
+  # string *str*.
+  #
+  # See also:
+  # [wiki.tcl-lang.org](https://wiki.tcl-lang.org/page/Reformatting+Tcl+code+indentation)
+
+  set icnt 0
+  while {[set idx [string first $ch $str]] >= 0} {
+    set backslashes 0
+    set nidx $idx
+    while {[string equal [string index $str [incr nidx -1]] \\]} {
+      incr backslashes
+    }
+    if {$backslashes % 2 == 0} { incr icnt }
+    set str [string range $str [incr idx] end]
+  }
+  return $icnt
+}
+
+# ________________________ ObjectProperty _________________________ #
 #
 # 1st bit: Set/Get properties of object.
 #
@@ -591,7 +744,7 @@ oo::class create ::apave::ObjectProperty {
 
   method setProperty {name args} {
 
-    # Sets a property's value.
+    # Sets a property's value as "object-wide".
     #   name - name of property
     #   args - value of property
     #
@@ -601,7 +754,7 @@ oo::class create ::apave::ObjectProperty {
 
     switch [llength $args] {
       0 {return [my getProperty $name]}
-      1 {return [set _OP_Properties($name) $args]}
+      1 {return [set _OP_Properties($name) [lindex $args 0]]}
     }
     puts -nonewline stderr \
       "Wrong # args: should be \"[namespace current] setProperty propertyname ?value?\""
@@ -611,8 +764,7 @@ oo::class create ::apave::ObjectProperty {
   ###########################################################################
 
   method getProperty {name {defvalue ""}} {
-
-    # Gets a property's value.
+    # Gets an property's value as "object-wide".
     #   name - name of property
     #   defvalue - default value
     #
@@ -620,7 +772,7 @@ oo::class create ::apave::ObjectProperty {
     #
     # Otherwise, the method returns the default value (`$defvalue`).
 
-    if [info exists _OP_Properties($name)] {
+    if {[info exists _OP_Properties($name)]} {
       return $_OP_Properties($name)
     }
     return $defvalue
@@ -628,7 +780,8 @@ oo::class create ::apave::ObjectProperty {
 
 }
 
-###########################################################################
+
+# ________________________ ObjectTheming _________________________ #
 # Another bit - theming manager
 
 oo::class create ::apave::ObjectTheming {
@@ -658,6 +811,23 @@ oo::class create ::apave::ObjectTheming {
       set ::apave::_CS_(initall) 0
     }
     return
+  }
+
+  ###########################################################################
+
+  method create_FontsType {type args} {
+    # Creates fonts used in apave, with additional options.
+    #   type - type of the created fonts
+    #   args - pairs "option value"
+    # Returns a list of two created font names (default & mono).
+
+    set name1 apaveFontDefTyped$type
+    set name2 apaveFontMonoTyped$type
+    catch {font delete $name1}
+    catch {font delete $name2}
+    font create $name1 -family $::apave::_CS_(defFont) -size $::apave::_CS_(fs) {*}$args
+    font create $name2 -family $::apave::_CS_(textFont) -size $::apave::_CS_(fs) {*}$args
+    return [list $name1 $name2]
   }
 
   ###########################################################################
@@ -1187,7 +1357,7 @@ oo::class create ::apave::ObjectTheming {
       my Ttk_style configure $ts -foreground $tfg1
       my Ttk_style configure $ts -background $tbg1
       my Ttk_style map $ts -background [list pressed $tbg1 active $tbg2 alternate $tbg2 focus $tbg2 selected $tbg2]
-      my Ttk_style map $ts -foreground [list disabled $tfgD pressed $tfg1 active $tfg2 alternate $tfg2 focus $tfg2 selected $tfg2]
+      my Ttk_style map $ts -foreground [list disabled $tfgD pressed $bclr active $tfg2 alternate $tfg2 focus $tfg2 selected $tfg1]
       my Ttk_style map $ts -bordercolor [list focus $bclr pressed $bclr]
       my Ttk_style map $ts -lightcolor [list focus $bclr]
       my Ttk_style map $ts -darkcolor [list focus $bclr]
@@ -1200,11 +1370,22 @@ oo::class create ::apave::ObjectTheming {
     foreach ts {TNotebook.Tab} {
       my Ttk_style configure $ts -font apaveFontDef
       my Ttk_style map $ts -foreground [list selected $tfgS active $tfg2]
-      my Ttk_style map $ts -background [list selected $tbgS active $tbg2]
+      my Ttk_style map $ts -background [list selected $tbgS {active disabled} $tbg1 active $tbg2]
     }
     foreach ts {TEntry Treeview TSpinbox TCombobox TCombobox.Spinbox TMatchbox TNotebook.Tab TScrollbar TScale} {
       my Ttk_style map $ts -lightcolor [list focus $bclr active $bclr]
       my Ttk_style map $ts -darkcolor [list focus $bclr active $bclr]
+    }
+    if {[set cs [my csCurrent]]<20} {
+      ttk::style conf TSeparator -background #a2a2a2
+    } elseif {$cs<23} {
+      ttk::style conf TSeparator -background #656565
+    } elseif {$cs<28} {
+      ttk::style conf TSeparator -background #3c3c3c
+    } elseif {$cs>35 && $cs<39} {
+      ttk::style conf TSeparator -background #313131
+    } elseif {$cs==43 || $cs>44} {
+      ttk::style conf TSeparator -background #2e2e2e
     }
     foreach ts {TEntry Treeview TSpinbox TCombobox TCombobox.Spinbox TMatchbox} {
       my Ttk_style configure $ts -font apaveFontDef
@@ -1697,5 +1878,7 @@ oo::class create ::apave::ObjectTheming {
 ################################# EOF #####################################
 
 #%   DOCTEST   SOURCE   tests/obbit_1.test
+
+#RUNF1: ../../src/alited.tcl DEBUG
 #-RUNF1: ./tests/test2_pave.tcl
-#RUNF1: ./tests/test2_pave.tcl 9 10 12 "small icons"
+#RUNF1: ./tests/test2_pave.tcl 10 10 12 "small icons"

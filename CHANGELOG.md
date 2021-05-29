@@ -1,6 +1,17 @@
 # Last changes:
 
 
+Version `3.3.3 (26 Apr'21)`
+
+  - "-expand 1" option for 'sta'
+  - create_FontsType to make apaveFont*Typed* fonts from apaveFont*
+  - leadingSpaces
+  - initStylesFS to style lab/chb/cbx/rad/but
+  - some CS colors mod.
+  - LowercaseWidgetName for Toolbar (making its method, to refer its buttons)
+  - catch for 'options/attrs' (to get literals instead of errors of variables' subst)
+
+
 Version `3.3.2 (17 Apr'21)`
 
   - highlighted string for searching with F3

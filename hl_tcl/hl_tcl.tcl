@@ -6,7 +6,7 @@
 # License: MIT.
 # _______________________________________________________________________ #
 
-package provide hl_tcl 0.8.10
+package provide hl_tcl 0.9.3
 
 # _______________ Common data of ::hl_tcl:: namespace ______________ #
 
@@ -22,10 +22,10 @@ namespace eval ::hl_tcl {
     oo::define oo::class oo::objdefine oo::object
   ]]
   set data(CMD_TCL) [lsort [list \
-    set incr if string expr list lindex lrange llength lappend lreplace lsearch \
-    lassign append split info array dict foreach for while break continue \
-    switch default linsert lsort lset lmap lrepeat catch variable concat \
-    format scan regexp regsub upvar uplevel namespace try throw read eval \
+    set incr if else elseif string expr list lindex lrange llength lappend \
+    lreplace lsearch lassign append split info array dict foreach for while \
+    break continue switch default linsert lsort lset lmap lrepeat catch variable \
+    concat format scan regexp regsub upvar uplevel namespace try throw read eval \
     after update error global puts file chan open close eof seek flush mixin \
     msgcat gets rename glob fconfigure fblocked fcopy cd pwd mathfunc then \
     mathop apply fileevent unset join next exec refchan package source \
@@ -71,11 +71,8 @@ namespace eval ::hl_tcl {
   set data(S_SPACE) [list "" " " "\t" ";"]
   set data(S_BOTH) [concat $data(S_SPACE) [list "\"" "="]]
 
-  set data(RE1) {(^|\[|\{|\}|;)+\s*(:|\w)+}
-  set data(RE2else) "\}\\s+(else)\\s+\{"
-  set data(RE2elseif) "\}\\s+(elseif)\\s+\{"
-  set data(RE3) {(^|[^\\])\$+\{?(:|\w|\(|\))+\}?}
-  set data(RE4) {(\s*|^)(-[[:alpha:]]+\w*)(\s*|$)}
+  set data(RE0) {(^|\[|\{|\}|;)+\s*([:_[:alpha:]])+}
+  set data(RE1) {(\[|\{|\}|;)+\s*([:_[:alpha:]])+}
   set data(RE5) {(^|[^\\])(\[|\]|\$|\{|\})+}
   }
 }
@@ -90,9 +87,22 @@ proc ::hl_tcl::my::AuxEnding {kName lineName iName} {
   # See also: HighlightLine
 
   upvar 1 $kName k $lineName line $iName i
-  return [expr {[set k [string first "#" $line $i]]>-1 && \
-    ([string trimleft [string range $line 0 $k-1]] eq "" || [string index \
-    [string trimright [string range $line $i $k-1]] end] eq ";")}]
+  if {[set k [string first "#" $line $i]]>-1 && \
+  [string index [string trimleft $line] 0] eq "#"} {
+    return 1
+  }
+  # not found a full line comment => try to find "good" ending comments i.e. ";# ..."
+  # at that even proper comments like
+  #   if {cond} { #...
+  #   }
+  # are skipped as "bad"
+  set k [lindex [regexp -inline -indices {;\s*#} [string range $line $i end]] 0 0]
+  if {$k eq ""} {
+    set k -1
+    return 0
+  }
+  set k [expr {$k+$i+1}]
+  return 1
 }
 #_____
 
@@ -110,6 +120,131 @@ proc ::hl_tcl::my::NotEscaped {line i} {
     incr cntq
   }
   return [expr {($cntq%2)==0}]
+}
+#_____
+
+proc ::hl_tcl::my::RemoveTags {txt from to} {
+  # Removes tags in text.
+  #   txt - text widget's path
+  #   from - starting index
+  #   to - ending index
+
+  foreach tag {tagCOM tagCOMTK tagSTR tagVAR tagCMN tagPROC tagOPT} {
+    $txt tag remove $tag $from $to
+  }
+  return
+}
+#_____
+
+proc ::hl_tcl::my::HighlightCmd {txt line ln pri i} {
+  # Highlights Tcl/Tk commands.
+  #   txt - text widget's path
+  #   line - line to be highlighted
+  #   ln - line number
+  #   pri - column number to highlighted from
+  #   i - current position in 'line'
+
+  variable data
+  $txt tag add tagSTD "$ln.$pri" "$ln.$i +1 chars"
+  set st [string range $line $pri $i-1]
+  if {$pri} {set RE $data(RE1)} {set RE $data(RE0)}
+  set lcom [regexp -inline -all -indices $RE $st]
+  # commands
+  foreach {lc _ _} $lcom {
+    lassign $lc i1 i2
+    set c [string trim [string range $st $i1 $i2] "\{\}\[;\t "]
+    set ik [expr {$i2-$i1+1-[string length $c]}]
+    if {$c ne ""} {
+      incr i1 $ik
+      incr i2
+      if {[lsearch -exact -sorted $data(CMD_TCL) $c]>-1} {
+        $txt tag add tagCOM "$ln.$pri +$i1 char" "$ln.$pri +$i2 char"
+      } elseif {[lsearch -exact -sorted $data(PROC_TCL) $c]>-1} {
+        $txt tag add tagPROC "$ln.$pri +$i1 char" "$ln.$pri +$i2 char"
+      } elseif {[lsearch -exact -sorted $data(CMD_TK) $c]>-1} {
+        $txt tag add tagCOMTK "$ln.$pri +$i1 char" "$ln.$pri +$i2 char"
+      }
+    }
+  }
+  # $variables:
+  set dlist [list]
+  set slen [expr {[string length $st]-1}]
+  set cnt [CountChar $st \$ dlist no]
+  foreach dl $dlist {
+    if {[string index $st $dl+1] eq "\{"} {
+      if {[set br2 [string first "\}" $st $dl+2]]!=-1} {
+        $txt tag add tagVAR "$ln.$pri +$dl char" "$ln.$pri +[incr br2] char"
+      }
+      continue
+    }
+    for {set i [set dl2 $dl]} {$i<$slen} {} {
+      incr i
+      set ch [string index $st $i]
+      if {[string is wordchar $ch] || $ch eq {:}} {
+        set dl2 $i
+        continue
+      } elseif {$ch eq {(}} {
+        if {[set br2 [string first {)} $st $i+1]]>-1} {
+          set dl2 $br2
+        }
+      }
+      break
+    }
+    if {$dl2>$dl} {
+      $txt tag add tagVAR "$ln.$pri +$dl char" "$ln.$pri +[incr dl2] char"
+    }
+  }
+  # -options
+  set dl -1
+  while {[set dl [string first - $st [incr dl]]]>-1} {
+    if {[string index $st $dl-1] ni $data(S_SPACE)} continue
+    if {[string index $st $dl+1] eq {-}} {
+      incr dl ;# for --longoption
+    }
+    set i $dl
+    set ch [string index $st $i+1]
+    if {![string is alpha -strict $ch]} { ;# || ![string is ascii -strict $ch]
+      continue ;# first, a Latin letter
+    }
+    set dl2 -1
+    while {$i<$slen} {
+      incr i
+      set ch [string index $st $i]
+      if {![string is wordchar $ch] && $ch ne {-}} break
+      set dl2 $i
+    }
+    if {$dl2>-1} {
+      $txt tag add tagOPT "$ln.$pri +$dl char" "$ln.$pri +[incr dl2] char"
+      set dl $dl2
+    }
+  }
+  return
+}
+#_____
+
+proc ::hl_tcl::my::HighlightStr {txt p1 p2} {
+  # Highlights strings.
+  #   txt - text widget's path
+  #   p1 - starting index of the string in 'txt'
+  #   p2 - ending index of the string in 'txt'
+
+  variable data
+  set p1 [$txt index $p1]
+  set p2 [$txt index $p2]
+  $txt tag add tagSTR $p1 $p2
+  set st [$txt get $p1 $p2]
+  set lcom [regexp -inline -all -indices $data(RE5) $st]
+  foreach {lc g1 g2} $lcom {
+    lassign $lc i1 i2
+    incr i2
+    while {$i1<$i2} {
+      if {[string first [string index $st $i1] "\[\]\$\{\}"]>-1} {
+        $txt tag add tagVAR "$p1 +$i1 char" "$p1 +$i2 char"
+      }
+      incr i1
+    }
+  }
+  return
 }
 #_____
 
@@ -149,117 +284,6 @@ proc ::hl_tcl::my::FirstQtd {lineName iName currQtd} {
     }
     incr i
   }
-}
-#_____
-
-proc ::hl_tcl::my::RemoveTags {txt from to} {
-  # Removes tags in text.
-  #   txt - text widget's path
-  #   from - starting index
-  #   to - ending index
-
-  foreach tag {tagCOM tagCOMTK tagSTR tagVAR tagCMN tagPROC tagOPT} {
-    $txt tag remove $tag $from $to
-  }
-  return
-}
-#_____
-
-proc ::hl_tcl::my::HighlightCmd {txt line ln pri i} {
-  # Highlights Tcl/Tk commands.
-  #   txt - text widget's path
-  #   line - line to be highlighted
-  #   ln - line number
-  #   pri - column number to highlighted from
-  #   i - current position in 'line'
-
-  variable data
-  $txt tag add tagSTD "$ln.$pri" "$ln.$i -1 chars"
-  set st [string range $line $pri $i-1]
-  set lcom [regexp -inline -all -indices $data(RE1) $st]
-  # commands
-  foreach {lc _ _} $lcom {
-    lassign $lc i1 i2
-    set c [string trim [string range $st $i1 $i2] "\{\}\[;\t "]
-    set ik [expr {$i2-$i1+1-[string length $c]}]
-    if {$c ne ""} {
-      incr i1 $ik
-      incr i2
-      if {[lsearch -exact -sorted $data(CMD_TCL) $c]>-1} {
-        $txt tag add tagCOM "$ln.$pri +$i1 char" "$ln.$pri +$i2 char"
-      } elseif {[lsearch -exact -sorted $data(PROC_TCL) $c]>-1} {
-        $txt tag add tagPROC "$ln.$pri +$i1 char" "$ln.$pri +$i2 char"
-      } elseif {[lsearch -exact -sorted $data(CMD_TK) $c]>-1} {
-        $txt tag add tagCOMTK "$ln.$pri +$i1 char" "$ln.$pri +$i2 char"
-      }
-    }
-  }
-  foreach el {else elseif} {
-    set lcom [regexp -inline -all -indices $data(RE2$el) $st]
-    foreach {_ lc} $lcom {
-      lassign $lc i1 i2
-      $txt tag add tagCOM "$ln.$pri +$i1 char" "$ln.$pri +[incr i2] char"
-    }
-  }
-  # $variables
-  set lcom [regexp -inline -all -indices $data(RE3) $st]
-  foreach {lc _ _} $lcom {
-    lassign $lc i1 i2
-    set i [string first \$ [set c [string range $st $i1 $i2]]]
-    if {[string last \} $c]>0 && [string first \$\{ $c]==-1} {incr i2 -1}
-    if {[incr i1 $i]<[incr i2]} {
-      $txt tag add tagVAR "$ln.$pri +$i1 char" "$ln.$pri +$i2 char"
-    }
-  }
-  # -options
-  if {$::hl_tcl::my::data(OPTRE,$txt)} {
-    set lcom [regexp -inline -all -indices $data(RE4) $st]
-    foreach {_ _ lc _} $lcom {
-      lassign $lc i1 i2
-      $txt tag add tagOPT "$ln.$pri +$i1 char" "$ln.$pri +[incr i2] char"
-    }
-  } else {
-    # "-options without regexp":
-    # performance improved by 10% or so, but it's not very strict mode
-    set i1 -1
-    while {[set i1 [string first "-" $st [incr i1]]]>-1 && 
-    [string is alpha [string index $st $i1+1]]} {
-      if {[set i2 [string first " " $st $i1]]>-1} {
-        $txt tag add tagOPT "$ln.$pri +$i1 char" "$ln.$pri +$i2 char"
-        set i1 $i2
-      } else {
-        $txt tag add tagOPT "$ln.$pri +$i1 char" "$ln.end"
-        break
-      }
-    }
-  }
-  return
-}
-#_____
-
-proc ::hl_tcl::my::HighlightStr {txt p1 p2} {
-  # Highlights strings.
-  #   txt - text widget's path
-  #   p1 - starting index of the string in 'txt'
-  #   p2 - ending index of the string in 'txt'
-
-  variable data
-  set p1 [$txt index $p1]
-  set p2 [$txt index $p2]
-  $txt tag add tagSTR $p1 $p2
-  set st [$txt get $p1 $p2]
-  set lcom [regexp -inline -all -indices $data(RE5) $st]
-  foreach {lc g1 g2} $lcom {
-    lassign $lc i1 i2
-    incr i2
-    while {$i1<$i2} {
-      if {[string first [string index $st $i1] "\[\]\$\{\}"]>-1} {
-        $txt tag add tagVAR "$p1 +$i1 char" "$p1 +$i2 char"
-      }
-      incr i1
-    }
-  }
-  return
 }
 #_____
 
@@ -340,18 +364,20 @@ proc ::hl_tcl::my::CoroHighlightAll {txt} {
   # See also: HighlightAll
 
   variable data
-  if {!$data(PLAINTEXT,$txt)} {
-    set tlen [lindex [split [$txt index end] .] 0]
-    RemoveTags $txt 1.0 end
-    set maxl [expr {min($::hl_tcl::my::data(SEEN,$txt),$tlen)}]
-    set maxl [expr {min($::hl_tcl::my::data(SEEN,$txt),$tlen)}]
-    for {set currQtd [set ln [set lnseen 0]]} {$ln<=$tlen} {} {
-      set currQtd [HighlightLine $txt $ln $currQtd]
-      incr ln
-      if {[incr lnseen]>$::hl_tcl::my::data(SEEN,$txt)} {
-        set lnseen 0
-        after idle after 1 [info coroutine]
-        yield
+  catch {  ;# $txt may be destroyed, so catch this
+    if {!$data(PLAINTEXT,$txt)} {
+      set tlen [lindex [split [$txt index end] .] 0]
+      RemoveTags $txt 1.0 end
+      set maxl [expr {min($::hl_tcl::my::data(SEEN,$txt),$tlen)}]
+      set maxl [expr {min($::hl_tcl::my::data(SEEN,$txt),$tlen)}]
+      for {set currQtd [set ln [set lnseen 0]]} {$ln<=$tlen} {} {
+        set currQtd [HighlightLine $txt $ln $currQtd]
+        incr ln
+        if {[incr lnseen]>$::hl_tcl::my::data(SEEN,$txt)} {
+          set lnseen 0
+          after idle after 1 [info coroutine]
+          yield
+        }
       }
     }
   }
@@ -361,31 +387,6 @@ proc ::hl_tcl::my::CoroHighlightAll {txt} {
 
 # _________________________ DYNAMIC highlighting ________________________ #
 
-proc ::hl_tcl::my::CountChar {str ch} {
-  # Counts a character in a string.
-  #   str - a string
-  #   ch - a character
-  #
-  # Returns a number of non-escaped occurences of character *ch* in
-  # string *str*.
-  #
-  # See also:
-  # [wiki.tcl-lang.org](https://wiki.tcl-lang.org/page/Reformatting+Tcl+code+indentation)
-
-  set icnt 0
-  while {[set idx [string first $ch $str]] >= 0} {
-    set backslashes 0
-    set nidx $idx
-    while {[string equal [string index $str [incr nidx -1]] \\]} {
-      incr backslashes
-    }
-    if {$backslashes % 2 == 0} { incr icnt }
-    set str [string range $str [incr idx] end]
-  }
-  return $icnt
-}
-#_____
-
 proc ::hl_tcl::my::CountQSH {txt ln} {
   # Counts quotes, slashes, hashes in a line
   #   txt - text widget's path
@@ -393,7 +394,7 @@ proc ::hl_tcl::my::CountQSH {txt ln} {
 
   set ln [expr {int($ln)}]
   set st [$txt get $ln.0 $ln.end]
-  return [list [CountChar2 $st "\""] [CountChar2 $st "\\"] [CountChar2 $st "#"]]
+  return [list [CountChar $st "\""] [CountChar $st "\\"] [CountChar $st "#"]]
 }
 #_____
 
@@ -410,13 +411,27 @@ proc ::hl_tcl::my::ShowCurrentLine {txt} {
 }
 #_____
 
-proc ::hl_tcl::my::MemPos1 {txt {donorm yes}} {
+proc ::hl_tcl::my::MemPos1 {txt {donorm yes} {K ""} {s ""}} {
   # Checks and sets the cursor's width, depending on its position.
   #   txt - text widget's path
   #   donorm - if yes, forces "normal" cursor
+  #   K - key (%K of bind)
+  #   s - state (%s of bind)
   # This fixes an issue with text cursor: less width at 0th column.
 
   variable data
+  if {$K eq "Home" && [string is digit -strict $s] && \
+  [expr {$s & 4}]==0 && [expr {$s & 1}]==0} {
+    # Ctrl-Home & Shift-Home are passed
+    set p1 [$txt index insert]
+    set line [$txt get "$p1 linestart" "$p1 lineend"]
+    set p [expr {[string length $line]-[string length [string trimleft $line]]}]
+    set p2 [expr {int($p1)}].$p
+    if {$p && $p2 ne $p1} {
+      after idle "::tk::TextSetCursor $txt $p2"
+      return
+    }
+  }
   if {$data(INSERTWIDTH,$txt)==1} {
     if {[$txt cget -insertwidth]!=1} {$txt configure -insertwidth 1}
     return 0
@@ -475,11 +490,7 @@ proc ::hl_tcl::my::Modified {txt oper pos1 args} {
   }
   switch $oper {
     insert {
-      set nl [expr {[llength [split $ar2 \n]] - 1}]
-      set pos2 [$txt index "$pos1 +$nl lines"]
-      if {($pos1+$nl)>$pos2} {
-        set pos1 [expr {1.0*int(max(1,abs($pos2-$nl)))}]
-      }
+      set pos2 [expr {$pos1 + [llength [split $ar2 \n]]}]
     }
     delete {
       if {$ar2 eq "" || [catch {set pos2 [$txt index $ar2]}]} {
@@ -648,7 +659,7 @@ proc ::hl_tcl::my::LineState {txt tSTR tCMN l1} {
     set i1 [$txt index "$i1 -1 chars"]
   }
   set ch [$txt get "$i1" "$i1 +1 chars"]
-  if {[SearchTag $tCMN $i1]!=-1} {    ;# is a comment continues?
+  if {[SearchTag $tCMN [$txt index "$i1 -1 chars"]]!=-1} {    ;# is a comment continues?
     if {$ch eq "\\"} {return -1}
   } else {                            ;# is a string continues?
     set nl [lindex [split $l1 .] 0]
@@ -747,13 +758,15 @@ proc ::hl_tcl::my::MergePosList {none args} {
 #% puts MergePosList:[time {::hl_tcl::my::MergePosList -1 {11 12} 13} 10000]
 #_____
 
-proc ::hl_tcl::my::CountChar2 {str ch {plistName ""}} {
+proc ::hl_tcl::my::CountChar {str ch {plistName ""} {escaped yes}} {
   # Counts a character in a string.
-  #   str - a string
-  #   ch - a character
+  #   str - the string
+  #   ch - the character
   #   plistName - variable name for a list of positions of *ch*
-  # Returns a number of ANY occurences of character *ch* in string *str*.
-  # See also: my::CountChar
+  #   escaped - true, if the character is escaped.
+  # Returns a number of any occurences of character *ch* in string *str*
+  # if the character is escaped, but if it is not escaped, only non-escaped
+  # characters are counted.
 
   if {$plistName ne ""} {
     upvar 1 $plistName plist
@@ -762,12 +775,26 @@ proc ::hl_tcl::my::CountChar2 {str ch {plistName ""}} {
   set icnt [set begidx 0]
   while {[set idx [string first $ch $str]] >= 0} {
     set nidx $idx
-    incr icnt
-    if {$plistName ne ""} {lappend plist [expr {$begidx+$idx}]}
+    if {$escaped || ![Escaped $str $idx]} {
+      incr icnt
+      if {$plistName ne ""} {lappend plist [expr {$begidx+$idx}]}
+    }
     incr begidx [incr idx]
     set str [string range $str $idx end]
   }
   return $icnt
+}
+#_____
+
+proc ::hl_tcl::my::Escaped {line curpos} {
+  # Checks if a character is escaped in a string.
+  #   line - the string
+  #   curpos - position of the character in the line
+  # Returns 1 if the character is escaped in the string.
+
+  set line [string range $line 0 $curpos-1]
+  set linetrim [string trimright $line \\]
+  return [expr {([string length $line]-[string length $linetrim])%2}]
 }
 #_____
 
@@ -780,6 +807,7 @@ proc ::hl_tcl::my::MatchedBrackets {inplist curpos schar dchar dir} {
   #   dir - search direction: 1 to the end, -1 to the beginning of list
 
   lassign [split $curpos .] nl nc
+  set escaped [Escaped [lindex $inplist $nl-1] $nc]
   if {$dir==1} {set rng1 "$nc end"} else {set rng1 "0 $nc"; set nc 0}
   set retpos ""
   set scount [set dcount 0]
@@ -788,8 +816,8 @@ proc ::hl_tcl::my::MatchedBrackets {inplist curpos schar dchar dir} {
   while {$nl>=0 && $nl<$inplen} {
     set line [lindex $inplist $nl]
     set line [string range $line {*}$rng1]
-    set sc [CountChar2 $line $schar slist]
-    set dc [CountChar2 $line $dchar dlist]
+    set sc [CountChar $line $schar slist $escaped]
+    set dc [CountChar $line $dchar dlist $escaped]
     set plen [llength [set plist [MergePosList -1 $slist $dlist]]]
     for {set i [expr {$dir>0?0:($plen-1)}]} {$i>=0 && $i<$plen} {incr i $dir} {
       lassign [lindex $plist $i] src pos
@@ -957,7 +985,7 @@ proc ::hl_tcl::hl_text {txt} {
   dict set font1 -weight bold
   dict set font2 -slant italic
   lassign $::hl_tcl::my::data(COLORS,$txt) \
-    clrCOM clrCOMTK clrSTR clrVAR clrCMN clrPROC clrOPT clrCURL
+    clrCOM clrCOMTK clrSTR clrVAR clrCMN clrPROC clrOPT clrBRA clrCURL
   $txt tag configure tagCOM -font "$font1" -foreground $clrCOM
   $txt tag configure tagCOMTK -font "$font1" -foreground $clrCOMTK
   $txt tag configure tagSTR -font "$font0" -foreground $clrSTR
@@ -965,7 +993,7 @@ proc ::hl_tcl::hl_text {txt} {
   $txt tag configure tagCMN -font "$font2" -foreground $clrCMN
   $txt tag configure tagPROC -font "$font1" -foreground $clrPROC
   $txt tag configure tagOPT -font "$font0" -foreground $clrOPT
-  $txt tag configure tagBRACKET -font "$font1" -foreground magenta
+  $txt tag configure tagBRACKET -font "$font0" -foreground $clrBRA
   $txt tag configure tagBRACKETERR -font "$font1" -foreground white -background red
   $txt tag configure tagCURLINE -background $clrCURL
   $txt tag raise sel
@@ -974,7 +1002,7 @@ proc ::hl_tcl::hl_text {txt} {
   my::HighlightAll $txt
   if {![info exists ::hl_tcl::my::data(BIND_TXT,$txt)]} {
     bind $txt <FocusIn> [list + ::hl_tcl::my::MemPos $txt]
-    bind $txt <KeyPress> [list + ::hl_tcl::my::MemPos1 $txt]
+    bind $txt <KeyPress> [list + ::hl_tcl::my::MemPos1 $txt yes %K %s]
     bind $txt <KeyRelease> [list + ::hl_tcl::my::MemPos $txt]
     bind $txt <ButtonRelease-1> [list + ::hl_tcl::my::MemPos $txt]
     foreach ev {Enter KeyRelease ButtonRelease-1} {
@@ -1019,7 +1047,7 @@ proc ::hl_tcl::hl_all {args} {
 proc ::hl_tcl::hl_colors {txt {dark ""}} {
   # Gets the main colors for highlighting (except for "curr.line").
   #   txt - text widget's path
-  # Returns a list of colors for COM COMTK STR VAR CMN PROC OPT \
+  # Returns a list of colors for COM COMTK STR VAR CMN PROC OPT BRAC \
    or, if the colors aren't initialized, "standard" colors.
 
   if {[info exists ::hl_tcl::my::data(COLORS,$txt)]}  {
@@ -1027,11 +1055,31 @@ proc ::hl_tcl::hl_colors {txt {dark ""}} {
   }
   if {$dark eq ""} {set dark $::hl_tcl::my::data(DARK,$txt)}
   if {$dark} {
-    return [list orange #ff7e00 lightgreen #f1b479 #76a396 #d485d4 #b9b96e]
+    return [list orange #ff7e00 lightgreen #f1b479 #76a396 #d485d4 #b9b96e cyan]
   } else {
-    return [list "#923B23" #7d1c00 #035103 #4A181B #505050 #A106A1 #463e11]
+    return [list "#923B23" #7d1c00 #035103 #4A181B #505050 #A106A1 #463e11 #FF0000]
   }
+}
+#_____
+
+proc ::hl_tcl::hl_line {txt} {
+  # Updates a current line's highlighting.
+  #   txt - text's path
+
+  if {!$::hl_tcl::my::data(PLAINTEXT,$txt)} {
+    set ln [expr {int([$txt index insert])}]
+    set tSTR [$txt tag ranges tagSTR]
+    set tCMN [$txt tag ranges tagCMN]
+    if {$ln==1} {
+      set currQtd 0
+    } else {
+      set currQtd [::hl_tcl::my::LineState $txt $tSTR $tCMN "$ln.0 -1 chars"]
+    }
+    ::hl_tcl::my::HighlightLine $txt $ln $currQtd
+  }
+  ::hl_tcl::my::MemPos $txt
 }
 
 # _________________________________ EOF _________________________________ #
+#RUNF1: ../../src/alited.tcl DEBUG
 #RUNF1: ~/PG/github/pave/tests/test2_pave.tcl 37 9 12
