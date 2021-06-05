@@ -974,12 +974,12 @@ namespace eval t {
       {labOpc labBftx1 T 2 1 {-st ens} {-t "tk_optionCascade:"}}
       {frAopc labOpc L 1 9 {-st w -pady 9}}
       ###############____opc1____good_way
-      {.lab1 - - - - {-st e} {-t " 1st way, good:"}}
-      {.Opc1 frAopc.lab1 L 1 1 {-st w} {::t::opcvar ::t::opcItems {-width -4} \
+      {#.lab1 - - - - {-st e} {-t " 1st way, good:"}}
+      {.Opc1 - - 1 1 {-st w} {::t::opcvar ::t::opcItems {-width -4} \
         {t::opcPre %a} -command t::opcPost }}
       ###############____opc2____bad_way
-      {.lab2 frAopc.opc1 L 1 2 {-st e} {-t "       2nd way, bad:"}}
-      {.opc2 frAopc.lab2 L 1 1 {-st w} {::t::opcvar \
+      {#.lab2 frAopc.opc1 L 1 2 {-st e} {-t "       2nd way, bad:"}}
+      {#.opc2 frAopc.lab2 L 1 1 {-st w} {::t::opcvar \
         {{color red green blue -- {colored yellow magenta cyan \
         | #52CB2F #FFA500 #CB2F6A | #FFC0CB #90EE90 #8B6914}} \
         {hue dark medium light} -- {{multi word example}} ok} {-width 16} \
