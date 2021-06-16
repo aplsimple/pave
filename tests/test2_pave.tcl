@@ -30,6 +30,8 @@ namespace eval t {
 
   variable ftx0 [file join $::testdirname [file tail [info script]]]
   variable ftx1 $ftx0
+  variable ftx2 $ftx0
+  variable ftx3 $ftx0
   # variables used in layouts
   variable v 1 v2 1 c1 0 c2 0 c3 0 en1 "" en2 "" tv 1 tv2 "enter value" sc 0 sc2 0 cb3 "Content of test2_fco.dat" lv1 {}
   variable fil1 "" fis1 "" dir1 "" clr1 "" fon1 "" dat1 ""
@@ -843,43 +845,42 @@ namespace eval t {
   }
 
   proc putsResult1 {} {
-    puts "
-      text file name = \"$::t::ftx1\"
-      text file contents =
-  -------------------------------
-  [pave getTextContent ::t::ftx1]
-  -------------------------------
-    "
+    puts " \n      \
+      text file name = \"$::t::ftx1\" \n      \
+      text file contents = \n   \
+  ------------------------------- \n   \
+  \n[pave getTextContent ::t::ftx1] \n\n   \
+  ------------------------------- \n\n"
   }
 
   proc putsResult2 {} {
-    puts "
-      v   = $t::v
-      v2  = $t::v2
-      c1  = $t::c1
-      c2  = $t::c2
-      c3  = $t::c3
-      cb3 = \"$t::cb3\"
-      en1 = \"$t::en1\"
-      en2 = \"$t::en2\"
-      fil1= \"$t::fil1\"
-      fis1= \"$t::fis1\"
-      dir1= \"$t::dir1\"
-      fon1= \"$t::fon1\"
-      clr1= $t::clr1
-      dat1= $t::dat1
+    puts " \n      \
+      v   = $t::v \n      \
+      v2  = $t::v2 \n      \
+      c1  = $t::c1 \n      \
+      c2  = $t::c2 \n      \
+      c3  = $t::c3 \n      \
+      cb3 = \"$t::cb3\" \n      \
+      en1 = \"$t::en1\" \n      \
+      en2 = \"$t::en2\" \n      \
+      fil1= \"$t::fil1\" \n      \
+      fis1= \"$t::fis1\" \n      \
+      dir1= \"$t::dir1\" \n      \
+      fon1= \"$t::fon1\" \n      \
+      clr1= $t::clr1 \n      \
+      dat1= $t::dat1 \n      \
     "
   }
 
   proc putsResult3 {} {
-    puts "
-      lvar ALL: $t::lvar
-  
-      lv1 ALL: $t::lv1
-  
-      tblWid1 curselection: [lindex $::t::tbllist 0]
-      tblWid1 curitem     : [lindex $::t::tbllist 1]
-      tblWid1 items       : [lindex $::t::tbllist 2]
+    puts " \n      \
+      lvar ALL: $t::lvar \n      \
+   \n      \
+      lv1 ALL: $t::lv1 \n      \
+   \n      \
+      tblWid1 curselection: [lindex $::t::tbllist 0] \n      \
+      tblWid1 curitem     : [lindex $::t::tbllist 1] \n      \
+      tblWid1 items       : [lindex $::t::tbllist 2] \n      \
     "
   }
 
@@ -916,8 +917,8 @@ namespace eval t {
         -traverse yes -select f2
       }}
       {fra.nbk2 - - - - {pack forget -side top} {
-        f1 {-text "First of View" -underline 1}
-        f2 {-text "Second of View" -underline 10}
+        f1 {-text "Links etc."}
+        f2 {-text "Scrolled frame"}
         -tr {just to test "-tr*" to call ttk::notebook::enableTraversal}
       }}
     }
@@ -943,7 +944,7 @@ namespace eval t {
       {Menu - - - - - {-array {
             File "&File"
             edit &Edit
-            Help "&{Help (wordy)}"
+            Help "&Help (wordy)"
       }} ::t::fillMenu}
       {labB1 - - 1 1   {-st es}  {-t "First option:"}}
       {ent1 labB1 L 1 9 {-st wes -cw 1} {-tvar t::en1}}
@@ -1232,8 +1233,27 @@ where:
 
   proc pave_Nbk2_Tab2 {} {
     return {
-      {lab - - - - {pack -expand 1 -fill both} {-t "Some text of 2nd View" \
-      -font "-weight bold -size 11"}}
+      {v_ - - 1 1}
+      {ftx v_ T 1 9 {} {-h 7 -w 77 -ro 1 -tvar ::t::ftx2 -title {Pick a file to view} -filetypes {{{Tcl scripts} .tcl} {{Text files} {.txt .test}}} -wrap word -tooltip {Just for demo} -tabnext .win.fra.fral.butHome}}
+      {fra ftx T 1 1 {-st nsew -cw 1 -rw 1}}
+      {fra.scf - - 1 1  {pack -fill both -expand 1}}
+      {tcl {
+        set ftx Ftx2
+        set pr fra.scf.ftx2
+        set lwid ".$ftx - - 1 9 {} {-h 7 -w 77 -ro 1 -tvar ::t::ftx3 -title {Pick a file to view} -filetypes {{{Tcl scripts} .tcl} {{Text files} {.txt .test}}} -wrap word -tooltip {Just for demo} -tabnext .win.fra.fral.butHome}"
+        %C $lwid
+        set values {a b c d}
+        for {set i 0} {$i<40} {incr i} {
+          lappend values $i
+          set lab "lab$i"
+          set cbx "CbxKey$i"
+          set lwid ".$lab $pr T 1 1 {-st w -pady 1 -padx 3} {-t \"Label $i\"}"
+          %C $lwid
+          set lwid ".$cbx fra.scf.$lab L 1 1 {-st we} {-tvar ::t::scfvar$i -values {$values} -state readonly}"
+          %C $lwid
+          set pr fra.scf.$lab
+        }
+      }}
     }
   }
 

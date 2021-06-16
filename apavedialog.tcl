@@ -370,8 +370,11 @@ oo::class create ::apave::APaveDialog {
 
     set err [catch {$txt tag ranges sel} sel]
     if {!$err && [llength $sel]==2} {
-      lassign $sel pos pos2
-      $txt delete $pos $pos2
+      lassign $sel pos1 pos2
+      set pos [$txt index insert]
+      if {[$txt compare $pos >= $pos1] && [$txt compare $pos <= $pos2]} {
+        $txt delete $pos1 $pos2
+      }
     }
   }
 
@@ -770,18 +773,18 @@ oo::class create ::apave::APaveDialog {
     if {!$pos} return
     my set_HighlightedString $sel
     switch $mode {
-      0 { # backward
+      0 { ;# backward
         set nc [expr {[string length $sel] - 1}]
         set pos [$txt index "$pos - $nc chars"]
         set pos [$txt search -backwards -- $sel $pos 1.0]
       }
-      1 { # forward
+      1 { ;# forward
         set pos [$txt search -- $sel $pos2 end]
       }
-      2 { # to first
+      2 { ;# to first
         set pos [$txt search -- $sel 1.0 end]
       }
-      3 { # to last
+      3 { ;# to last
         set pos [$txt search -backwards -- $sel end 1.0]
       }
     }
@@ -925,7 +928,9 @@ oo::class create ::apave::APaveDialog {
     set msgonly [expr {$readonly || $hidefind || $chmsg ne {}}]
     if {!$textmode || $msgonly} {
       set textfont "-family {[my basicDefFont]}"
-      set msg [string map [list \\ \\\\ \{ \\\\\{ \} \\\\\}] $msg]
+      if {!$textmode} {
+        set msg [string map [list \\ \\\\ \{ \\\\\{ \} \\\\\}] $msg]
+      }
     }
     set optsFontM [string trim $optsFontM]
     set optsFontM "-font \{$optsFontM $textfont\}"
