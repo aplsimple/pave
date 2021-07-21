@@ -54,60 +54,60 @@ namespace eval ::apave {
   ;# default grid options & attributes of widgets (no abbreviations here)
   variable cursorwidth 1
   variable _Defaults [dict create \
-    "bts" {{} {}} \
-    "but" {{} {}} \
-    "buT" {{} {-width -20 -pady 1}} \
-    "can" {{} {}} \
-    "chb" {{} {}} \
-    "chB" {{} {-relief sunken -padx 6 -pady 2}} \
-    "cbx" {{} {}} \
-    "fco" {{} {}} \
-    "ent" {{} {}} \
-    "enT" {{} {-insertwidth $::apave::cursorwidth -insertofftime 250 -insertontime 750}} \
-    "fil" {{} {}} \
-    "fis" {{} {}} \
-    "dir" {{} {}} \
-    "fon" {{} {}} \
-    "clr" {{} {}} \
-    "dat" {{} {}} \
-    "sta" {{} {}} \
-    "too" {{} {}} \
-    "fra" {{} {}} \
-    "ftx" {{} {}} \
-    "frA" {{} {}} \
-    "gut" {{} {-width 0 -highlightthickness 1}} \
-    "lab" {{-sticky w} {}} \
-    "laB" {{-sticky w} {}} \
-    "lfr" {{} {}} \
-    "lfR" {{} {-relief groove}} \
-    "lbx" {{} {-activestyle none -exportselection 0 -selectmode browse}} \
-    "flb" {{} {}} \
-    "meb" {{} {}} \
-    "meB" {{} {}} \
-    "nbk" {{} {}} \
-    "opc" {{} {}} \
-    "pan" {{} {}} \
-    "pro" {{} {}} \
-    "rad" {{} {}} \
-    "raD" {{} {-padx 6 -pady 2}} \
-    "sca" {{} {-orient horizontal -takefocus 0}} \
-    "scA" {{} {-orient horizontal -takefocus 0}} \
-    "sbh" {{-sticky ew} {-orient horizontal -takefocus 0}} \
-    "sbH" {{-sticky ew} {-orient horizontal -takefocus 0}} \
-    "sbv" {{-sticky ns} {-orient vertical -takefocus 0}} \
-    "sbV" {{-sticky ns} {-orient vertical -takefocus 0}} \
-    "scf" {{} {}} \
-    "seh" {{-sticky ew} {-orient horizontal -takefocus 0}} \
-    "sev" {{-sticky ns} {-orient vertical -takefocus 0}} \
-    "siz" {{} {}} \
-    "spx" {{} {}} \
-    "spX" {{} {}} \
-    "tbl" {{} {-selectborderwidth 1 -highlightthickness 2 \
+    bts {{} {}} \
+    but {{} {}} \
+    buT {{} {-width -20 -pady 1}} \
+    can {{} {}} \
+    chb {{} {}} \
+    chB {{} {-relief sunken -padx 6 -pady 2}} \
+    cbx {{} {}} \
+    fco {{} {}} \
+    ent {{} {}} \
+    enT {{} {-insertwidth $::apave::cursorwidth -insertofftime 250 -insertontime 750}} \
+    fil {{} {}} \
+    fis {{} {}} \
+    dir {{} {}} \
+    fon {{} {}} \
+    clr {{} {}} \
+    dat {{} {}} \
+    sta {{} {}} \
+    too {{} {}} \
+    fra {{} {}} \
+    ftx {{} {}} \
+    frA {{} {}} \
+    gut {{} {-width 0 -highlightthickness 1}} \
+    lab {{-sticky w} {}} \
+    laB {{-sticky w} {}} \
+    lfr {{} {}} \
+    lfR {{} {-relief groove}} \
+    lbx {{} {-activestyle none -exportselection 0 -selectmode browse}} \
+    flb {{} {}} \
+    meb {{} {}} \
+    meB {{} {}} \
+    nbk {{} {}} \
+    opc {{} {}} \
+    pan {{} {}} \
+    pro {{} {}} \
+    rad {{} {}} \
+    raD {{} {-padx 6 -pady 2}} \
+    sca {{} {-orient horizontal -takefocus 0}} \
+    scA {{} {-orient horizontal -takefocus 0}} \
+    sbh {{-sticky ew} {-orient horizontal -takefocus 0}} \
+    sbH {{-sticky ew} {-orient horizontal -takefocus 0}} \
+    sbv {{-sticky ns} {-orient vertical -takefocus 0}} \
+    sbV {{-sticky ns} {-orient vertical -takefocus 0}} \
+    scf {{} {}} \
+    seh {{-sticky ew} {-orient horizontal -takefocus 0}} \
+    sev {{-sticky ns} {-orient vertical -takefocus 0}} \
+    siz {{} {}} \
+    spx {{} {}} \
+    spX {{} {}} \
+    tbl {{} {-selectborderwidth 1 -highlightthickness 2 \
           -labelcommand tablelist::sortByColumn -stretch all \
           -showseparators 1}} \
-    "tex" {{} {-undo 1 -maxundo 0 -highlightthickness 2 -insertofftime 250 -insertontime 750 -insertwidth $::apave::cursorwidth -wrap word
+    tex {{} {-undo 1 -maxundo 0 -highlightthickness 2 -insertofftime 250 -insertontime 750 -insertwidth $::apave::cursorwidth -wrap word
           -selborderwidth 1}} \
-    "tre" {{} {}} \
+    tre {{} {}} \
     "h_" {{-sticky ew -csz 3 -padx 3} {}} \
     "v_" {{-sticky ns -rsz 3 -pady 3} {}}]
   variable apaveDir [file dirname [info script]]
@@ -125,7 +125,6 @@ namespace eval ::apave {
   set _AP_VARS(TIMW) [list]
   set _AP_VARS(MODALWIN) [list]
   set _AP_VARS(LINKFONT) [list -underline 1]
-  set _AP_VARS(HILI) 0
   set _AP_VARS(INDENT) "  "
   set _AP_VARS(KEY,CtrlD) [list Control-D Control-d]
   set _AP_VARS(KEY,CtrlY) [list Control-Y Control-y]
@@ -1007,7 +1006,7 @@ oo::class create ::apave::APave {
     #   nam3 - 3 initial letters of widget's name
     #   disabled - flag of *disabled* state
 
-    set disabled [expr {[::apave::getOption -state {*}$attrs] eq "disabled"}]
+    set disabled [expr {[::apave::getOption -state {*}$attrs] eq {disabled}}]
     set pack $options
     set name [my ownWName $wnamefull]
     set nam3 [string tolower [string index $name 0]][string range $name 1 2]
@@ -1016,51 +1015,51 @@ oo::class create ::apave::APave {
     set options "[subst $defopts] $options"
     set attrs "[subst $defattrs] $attrs"
     switch -glob -- $nam3 {
-      "bts" {
+      bts {
+        set widget ttk::frame
         if {![info exists ::bartabs::NewBarID]} {package require bartabs}
         set attrs "-bartabs {$attrs}"
-        set widget "ttk::frame"
       }
-      "but" {
-        set widget "ttk::button"
+      but {
+        set widget ttk::button
         my AddButtonIcon $name attrs
       }
-      "buT" {
-        set widget "button"
+      buT {
+        set widget button
         my AddButtonIcon $name attrs
         }
-      "can" {set widget "canvas"}
-      "chb" {set widget "ttk::checkbutton"}
-      "chB" {set widget "checkbutton"}
-      "cbx" - "fco" {
-        set widget "ttk::combobox"
-        if {$nam3 eq "fco"} {  ;# file content combobox
+      can {set widget canvas}
+      chb {set widget ttk::checkbutton}
+      chB {set widget checkbutton}
+      cbx - fco {
+        set widget ttk::combobox
+        if {$nam3 eq {fco}} {  ;# file content combobox
           set attrs [my FCfieldValues $wnamefull $attrs]
         }
         set attrs [my FCfieldAttrs $wnamefull $attrs -tvar]
       }
-      "ent" {set widget "ttk::entry"}
-      "enT" {set widget "entry"}
-      "fil" -
-      "fis" -
-      "dir" -
-      "fon" -
-      "clr" -
-      "dat" -
-      "sta" -
-      "too" -
-      "fra" {
+      ent {set widget ttk::entry}
+      enT {set widget entry}
+      fil -
+      fis -
+      dir -
+      fon -
+      clr -
+      dat -
+      sta -
+      too -
+      fra {
         # + frame for choosers and bars
-        set widget "ttk::frame"
+        set widget ttk::frame
       }
-      "ftx" {set widget "ttk::labelframe"}
-      "frA" {
-        set widget "frame"
+      frA {
+        set widget frame
         if {$disabled} {set attrs [::apave::removeOptions $attrs -state]}
       }
-      "gut" {set widget "canvas"}
-      "lab" {
-        set widget "ttk::label"
+      ftx {set widget ttk::labelframe}
+      gut {set widget canvas}
+      lab {
+        set widget ttk::label
         if {[::apave::extractOptions attrs -state normal] eq "disabled"} {
           set grey [lindex [my csGet] 8]
           set attrs "-foreground $grey $attrs"
@@ -1070,31 +1069,31 @@ oo::class create ::apave::APave {
           set attrs [::apave::removeOptions $attrs -link]
         }
       }
-      "laB" {set widget "label"}
-      "lfr" {set widget "ttk::labelframe"}
-      "lfR" {
-        set widget "labelframe"
+      laB {set widget label}
+      lfr {set widget ttk::labelframe}
+      lfR {
+        set widget labelframe
         if {$disabled} {set attrs [::apave::removeOptions $attrs -state]}
       }
-      "lbx" - "flb" {
-        set widget "listbox"
-        if {$nam3 eq "flb"} {  ;# file content listbox
+      lbx - flb {
+        set widget listbox
+        if {$nam3 eq {flb}} {  ;# file content listbox
           set attrs [my FCfieldValues $wnamefull $attrs]
         }
         set attrs "[my FCfieldAttrs $wnamefull $attrs -lvar]"
         set attrs "[my ListboxesAttrs $wnamefull $attrs]"
         my AddPopupAttr $wnamefull attrs -entrypop 1
       }
-      "meb" {set widget "ttk::menubutton"}
-      "meB" {set widget "menubutton"}
-      "nbk" {
-        set widget "ttk::notebook"
+      meb {set widget ttk::menubutton}
+      meB {set widget menubutton}
+      nbk {
+        set widget ttk::notebook
         set attrs "-notebazook {$attrs}"
       }
-      "opc" {
+      opc {
         ;# tk_optionCascade - example of "my method" widget
         ;# arguments: vname items mbopts precom args
-        set widget "my tk_optionCascade"
+        set widget {my tk_optionCascade}
         set imax [expr {min(4,[llength $attrs])}]
         for {set i 0} {$i<$imax} {incr i} {
           set atr [lindex $attrs $i]
@@ -1105,64 +1104,64 @@ oo::class create ::apave::APave {
           }
         }
       }
-      "pan" {set widget "ttk::panedwindow"
+      pan {set widget ttk::panedwindow
         if {[string first -w $attrs]>-1 && [string first -h $attrs]>-1} {
           set attrs "-propagate {$options} $attrs"
         }
       }
-      "pro" {set widget "ttk::progressbar"}
-      "rad" {set widget "ttk::radiobutton"}
-      "raD" {set widget "radiobutton"}
-      "sca" {set widget "ttk::scale"}
-      "scA" {set widget "scale"}
-      "sbh" {set widget "ttk::scrollbar"}
-      "sbH" {set widget "scrollbar"}
-      "sbv" {set widget "ttk::scrollbar"}
-      "sbV" {set widget "scrollbar"}
-      "scf" {
+      pro {set widget ttk::progressbar}
+      rad {set widget ttk::radiobutton}
+      raD {set widget radiobutton}
+      sca {set widget ttk::scale}
+      scA {set widget scale}
+      sbh {set widget ttk::scrollbar}
+      sbH {set widget scrollbar}
+      sbv {set widget ttk::scrollbar}
+      sbV {set widget scrollbar}
+      scf {
         if {![namespace exists ::apave::sframe]} {
           namespace eval ::apave {
             source [file join $::apave::apaveDir sframe.tcl]
           }
         }
         ;# scrolledFrame - example of "my method" widget
-        set widget "my scrolledFrame"
+        set widget {my scrolledFrame}
       }
-      "seh" {set widget "ttk::separator"}
-      "sev" {set widget "ttk::separator"}
-      "siz" {set widget "ttk::sizegrip"}
-      "spx" - "spX" {
-         if {$nam3 eq "spx"} {set widget "ttk::spinbox"} {set widget "spinbox"}
+      seh {set widget ttk::separator}
+      sev {set widget ttk::separator}
+      siz {set widget ttk::sizegrip}
+      spx - spX {
+         if {$nam3 eq {spx}} {set widget "ttk::spinbox"} {set widget "spinbox"}
          lassign [::apave::parseOptions $attrs -command "" -from "" -to "" ] cmd from to
          set attrs "-onReturn {$::apave::UFF{$cmd} {$from} {$to}$::apave::UFF} $attrs"
       }
-      "tbl" { ;# tablelist
+      tbl { ;# tablelist
         package require tablelist
-        set widget "tablelist::tablelist"
+        set widget tablelist::tablelist
         set attrs "[my FCfieldAttrs $wnamefull $attrs -lvar]"
         set attrs "[my ListboxesAttrs $wnamefull $attrs]"
       }
-      "tex" {set widget "text"
-        if {[::apave::getOption -textpop {*}$attrs] eq ""} {
+      tex {set widget text
+        if {[::apave::getOption -textpop {*}$attrs] eq {}} {
           my AddPopupAttr $wnamefull attrs -textpop \
-            [expr {[::apave::getOption -rotext {*}$attrs] ne ""}] -- disabled
+            [expr {[::apave::getOption -rotext {*}$attrs] ne {}}] -- disabled
         }
-        lassign [::apave::parseOptions $attrs -ro "" -readonly "" -rotext "" \
-          -gutter "" -gutterwidth 5 -guttershift 6] r1 r2 r3 g1 g2 g3
+        lassign [::apave::parseOptions $attrs -ro {} -readonly {} -rotext {} \
+          -gutter {} -gutterwidth 5 -guttershift 6] r1 r2 r3 g1 g2 g3
         set b1 [expr [string is boolean -strict $r1]]
         set b2 [expr [string is boolean -strict $r2]]
         if {($b1 && $r1) || ($b2 && $r2) || \
-        ($r3 ne "" && !($b1 && !$r1) && !($b2 && !$r2))} {
+        ($r3 ne {} && !($b1 && !$r1) && !($b2 && !$r2))} {
           set attrs "-takefocus 0 $attrs"
         }
         set attrs [::apave::removeOptions $attrs -gutter -gutterwidth -guttershift]
-        if {$g1 ne ""} {
+        if {$g1 ne {}} {
           set attrs "$attrs -gutter {-canvas $g1 -width $g2 -shift $g3}"
         }
       }
-      "tre" {set widget "ttk::treeview"}
-      "h_*" {set widget "ttk::frame"}
-      "v_*" {set widget "ttk::frame"}
+      tre {set widget ttk::treeview}
+      h_* {set widget ttk::frame}
+      v_* {set widget ttk::frame}
       default {set widget ""}
     }
     set attrs [my GetMC $attrs]
@@ -1807,7 +1806,7 @@ oo::class create ::apave::APave {
         if {$tvar ne "" && [info exist $tvar]} {
           append addattrs " -t {[set $tvar]}"
         }
-        set an "tex"
+        set an tex
         set txtnam [my Transname $an $name]
       }
       "clr*" { set chooser "colorChooser"
@@ -1965,7 +1964,7 @@ oo::class create ::apave::APave {
         set ntmp [my Transname fra ${name}[incr j2]]
         set wid1 [list $ntmp - - - - "pack -side left -in $w.$name -fill y"]
         set wid2 [list $ntmp.[my ownWName [my Transname h_ $name$j]] - - - - "pack -fill y -expand 1 -padx $v2"]
-      } elseif {$v1 eq "sev"} {   ;# vertical separator
+      } elseif {$v1 eq {sev}} {   ;# vertical separator
         set ntmp [my Transname fra ${name}[incr j2]]
         set wid1 [list $ntmp - - - - "pack -side left -in $w.$name -fill y"]
         set wid2 [list $ntmp.[my ownWName [my Transname sev $name$j]] - - - - "pack -fill y -expand 1 -padx $v2"]
@@ -2713,24 +2712,31 @@ oo::class create ::apave::APave {
         set nchars [expr {$s ? 0 : [my leadingSpaces $line]}]
         set indent [string range $line 0 [expr {$nchars-1}]]
         set ch [string index $line end]
-        if {$indent ne {} || $s || $ch eq "\{" || $K eq {KP_Enter}} {
-          set idx1 [$w index insert]
-          set idx2 [$w index "$idx1 +1 line"]
+        set idx1 [$w index insert]
+        set idx2 [$w index "$idx1 +1 line"]
+        set st2 [$w get "$idx2 linestart" "$idx2 lineend"]
+        if {$indent ne {} || $s || $ch eq "\{" || $K eq {KP_Enter} || $st2 ne {}} {
           set st1 [$w get "$idx1" "$idx1 lineend"]
           if {[string index $st1 0] in [list \t { }]} {
             # if space(s) are at the right, remove them at cutting
             set n1 [my leadingSpaces $st1]
             $w delete [$w index $idx1] [$w index "$idx1 +$n1 char"]
-          } else {
-            if {$ch eq "\{" && $st1 eq {}} {
-              set st2 [string trim [$w get "$idx2 linestart" "$idx2 lineend"]]
-              if {$st2 eq ""} {
-                append indent $::apave::_AP_VARS(INDENT) \n $indent "\}"
-              } else {
-                append indent $::apave::_AP_VARS(INDENT)
-              }
-              incr nchars $lindt
+          } elseif {$ch eq "\{" && $st1 eq {}} {
+            # indent + closing brace
+            if {$st2 eq {}} {
+              append indent $::apave::_AP_VARS(INDENT) \n $indent "\}"
+            } else {
+              append indent $::apave::_AP_VARS(INDENT)
             }
+            incr nchars $lindt
+          } elseif {!$s && $indent eq {} && $st2 ne {}} {
+            # no indent of previous line, try to get it from the next
+            if {[string trim $st2] eq "\}"} {
+              # add indentation for the next brace
+              set st2 "$::apave::_AP_VARS(INDENT)$st2"
+            }
+            set nchars [my leadingSpaces $st2]
+            set indent [string range $st2 0 [expr {$nchars-1}]]
           }
           $w insert [$w index $idx1] \n$indent
           ::tk::TextSetCursor $w [$w index "$idx2 linestart +$nchars char"]
