@@ -1,6 +1,18 @@
 # Last changes:
 
 
+Version `3.4.1 (4 Aug'21)`
+
+  - scf (scrolled frame) widget
+  - chooseDate used independently
+  - text's find next corrected
+  - HILI (highlighting) bound to a text widget
+  - onKeyTextM modified (to cut a text by Return/Enter)
+  - getting -topmost option of dialogue corrected
+  - modal mode corrected for Linux
+  - hl_tcl, bartabs, baltip packages updated
+
+
 Version `3.3.3 (26 Apr'21)`
 
   - "-expand 1" option for 'sta'
