@@ -960,17 +960,17 @@ namespace eval t {
       {labBfis1 labBfil1 T 1 1 {-st e} {-t "Pick a file to save as:"}}
       {labBdir1 labBfis1 T 1 1 {-st e} {-t "Pick a directory:"}}
       {labBfon1 labBdir1 T 1 1 {-st e} {-t "Pick a font:"}}
-      {labBclr1 labBfon1 T 1 1 {-st e} {-t "Pick a color:"}}
-      {labBdat1 labBclr1 T 1 1 {-st e} {-t "Pick a date:"}}
-      {labBftx1 labBdat1 T 1 1 {-st ne -ipady 8}
+      {labBdat1 labBfon1 T 1 1 {-st e} {-t "Pick a date:"}}
+      {labBclr1 labBdat1 T 1 1 {-st e} {-t "Pick a color:"}}
+      {labBftx1 labBclr1 T 1 1 {-st ne -ipady 8}
         {-t "Pick a file to view:\n\n\n\nBut the first 'view'\nmay be modified!"}}
       {fil1 labBfil1 L 1 9 {} {-tvar t::fil1 -title {Pick a file}
         -filetypes {{{Tcl scripts} .tcl} {{All files} .* }}}}
       {fis1 labBfis1 L 1 9 {} {-tvar t::fis1 -title {Save as}}}
       {dir1 labBdir1 L 1 9 {} {-tvar t::dir1 -title {Pick a directory}}}
       {fon1 labBfon1 L 1 9 {} {-tvar t::fon1 -title {Pick a font}}}
-      {clr1 labBclr1 L 1 9 {} {-tvar t::clr1 -title {Pick a color}}}
       {Dat1 labBdat1 L 1 9 {} {-tvar t::dat1 -title {Pick a date} -dateformat %Y.%m.%d}}
+      {clr1 labBclr1 L 1 9 {} {-tvar t::clr1 -title {Pick a color}}}
       {Ftx1 labBftx1 L 1 9 {} {-h 7 -ro 0 -tvar ::t::ftx1 -title {Pick a file to view} -filetypes {{{Tcl scripts} .tcl} {{Text files} {.txt .test}}} -wrap word -tooltip "After choosing a file\nthe text will be read-only." -tabnext "[t::pave Opc1]"}}
       {labOpc labBftx1 T 2 1 {-st ens} {-t "tk_optionCascade:"}}
       {frAopc labOpc L 1 9 {-st w -pady 9}}

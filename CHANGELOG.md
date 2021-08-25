@@ -1,6 +1,20 @@
 # Last changes:
 
 
+Version `3.4.4 (25 Aug'21)`
+  - default colors changed in InitWM
+  - "opc" allows -com/-command option
+  - background color of entry, spinbox and alike
+  - ttk theme + apave's color scheme = love
+  - CS revised; azure, forest, sun-valley added; got 3rd reserved color
+  - colorized color chooser
+  - colorWindow in.
+  - fonts brought to order
+  - log messages
+  - -themed option of showModal
+  - hl_tcl, baltip packages updated
+
+
 Version `3.4.1 (4 Aug'21)`
 
   - scf (scrolled frame) widget
