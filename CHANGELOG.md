@@ -1,6 +1,13 @@
 # Last changes:
 
 
+Version `3.4.5a2 (1 Sep'21)`
+  - switch widget
+  - heading for treeview
+  - choosers' options (-initialdir, -initialfile, -defaultextension, -multiple)
+  - ForestDark CS modified
+
+
 Version `3.4.4 (25 Aug'21)`
   - default colors changed in InitWM
   - "opc" allows -com/-command option

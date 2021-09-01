@@ -45,46 +45,46 @@ set mtip3 [msgcat::mc "Allows replacements by the empty string,\nin fact, to era
 set mtip4 [msgcat::mc "Keeps the dialogue above other windows."]
 # create apave object and pave its window
 apave::APave create pave
-pave makeWindow $win.fra $mttl
-pave paveWindow $win.fra {
-  {labB1 - - 1 1    {-st e}  {-t {$::mfind}}}
-  {cbx1 labB1 L 1 9 {-st wes} {-tvar ::en1 -values {$::values1}}}
-  {labB2 labB1 T 1 1 {-st e}  {-t {$::mrepl}}}
-  {cbx2 labB2 L 1 9 {-st wes} {-tvar ::en2 -values {$::values2}}}
-  {labBm labB2 T 1 1 {-st e}  {-t {$::mmatch}}}
-  {radA labBm L 1 1 {-st ws}  {-t {$::mexact} -var ::v1 -value 1}}
-  {radB radA L 1 1 {-st ws}  {-t "Glob" -var ::v1 -value 2 -tooltip {$::mtip1}}}
-  {radC radB L 1 1 {-st es}  {-t "RE  " -var ::v1 -value 3 -tooltip {$::mtip2}}}
-  {h_1 radC L 1 2  {-cw 1}}
-  {h_2 labBm T 1 9  {-st es -rw 1}}
-  {seh  h_2 T 1 9  {-st ews}}
-  {chb1 seh  T 1 2 {-st w} {-t {$::mword} -var ::c1}}
-  {chb2 chb1 T 1 2 {-st w} {-t {$::mcase}  -var ::c2}}
-  {chb3 chb2 T 1 2 {-st w} {-t {$::mwrap} -var ::c3}}
-  {chb4 chb3 T 1 2 {-st w} {-t {$::mblnk} -var ::c4 -tooltip {$::mtip3}}}
-  {sev1 chb1 L 5 1 }
-  {labB3 sev1 L 1 2 {-st w} {-t {$::mdir}}}
-  {rad1 labB3 T 1 1 {-st we} {-t {$::mdown} -var ::v2 -value 1}}
-  {rad2 rad1 L 1 1 {-st we} {-t {$::mup} -var ::v2 -value 2}}
-  {h_3 rad1}
-  {chb5 h_3 T 1 2 {-st w} {-t {$::montop} -var ::c5 -tooltip {$::mtip4}}}
-  {sev2 cbx1 L 10 1 }
-  {but1 sev2 L 1 1 {-st we} {-t {$::mfind1} -com "::pave res $win 1" -style TButtonWestBold}}
-  {but2 but1 T 1 1 {-st we} {-t {$::mfind2} -com "::pave res $win 2" -style TButtonWest}}
-  {but3 but2 T 1 1 {-st we} {-t {$::mfind3} -com "::pave res $win 3" -style TButtonWest}}
-  {h_4 but3 T 2 1 {-pady 6}}
-  {but4 h_4 T 1 1 {-st we} {-t {$::mrepl1}  -com "::pave res $win 4" -style TButtonWestBold}}
-  {but5 but4 T 1 1 {-st nwe} {-t {$::mfind2} -com "::pave res $win 5" -style TButtonWest}}
-  {but6 but5 T 1 1 {-st nwe} {-t {$::mfind3} -com "::pave res $win 6" -style TButtonWest}}
-  {but0 but6 T 1 1 {-st swe} {-t "Close" -com "::pave res $win 0" -style TButtonWestBold}}
-}
-bind $win.fra.cbx1 <Return> {$win.fra.but1 invoke}  ;# the Enter key is
-bind $win.fra.cbx2 <Return> {$win.fra.but4 invoke}  ;# hot in comboboxes
-set foc $win.fra.cbx1
-set geo +200+200   ;# these geometry options
-set minsize ""     ;# are possibly stored in some INI file
-set res 1
 while {1} {
+  pave makeWindow $win.fra $mttl
+  pave paveWindow $win.fra {
+    {labB1 - - 1 1    {-st e}  {-t {$::mfind}}}
+    {cbx1 labB1 L 1 9 {-st wes} {-tvar ::en1 -values {$::values1}}}
+    {labB2 labB1 T 1 1 {-st e}  {-t {$::mrepl}}}
+    {cbx2 labB2 L 1 9 {-st wes} {-tvar ::en2 -values {$::values2}}}
+    {labBm labB2 T 1 1 {-st e}  {-t {$::mmatch}}}
+    {radA labBm L 1 1 {-st ws}  {-t {$::mexact} -var ::v1 -value 1}}
+    {radB radA L 1 1 {-st ws}  {-t "Glob" -var ::v1 -value 2 -tooltip {$::mtip1}}}
+    {radC radB L 1 1 {-st es}  {-t "RE  " -var ::v1 -value 3 -tooltip {$::mtip2}}}
+    {h_1 radC L 1 2  {-cw 1}}
+    {h_2 labBm T 1 9  {-st es -rw 1}}
+    {seh  h_2 T 1 9  {-st ews}}
+    {chb1 seh  T 1 2 {-st w} {-t {$::mword} -var ::c1}}
+    {chb2 chb1 T 1 2 {-st w} {-t {$::mcase}  -var ::c2}}
+    {chb3 chb2 T 1 2 {-st w} {-t {$::mwrap} -var ::c3}}
+    {chb4 chb3 T 1 2 {-st w} {-t {$::mblnk} -var ::c4 -tooltip {$::mtip3}}}
+    {sev1 chb1 L 5 1 }
+    {labB3 sev1 L 1 2 {-st w} {-t {$::mdir}}}
+    {rad1 labB3 T 1 1 {-st we} {-t {$::mdown} -var ::v2 -value 1}}
+    {rad2 rad1 L 1 1 {-st we} {-t {$::mup} -var ::v2 -value 2}}
+    {h_3 rad1}
+    {chb5 h_3 T 1 2 {-st w} {-t {$::montop} -var ::c5 -tooltip {$::mtip4}}}
+    {sev2 cbx1 L 10 1 }
+    {but1 sev2 L 1 1 {-st we} {-t {$::mfind1} -com "::pave res $win 1" -style TButtonWestBold}}
+    {but2 but1 T 1 1 {-st we} {-t {$::mfind2} -com "::pave res $win 2" -style TButtonWest}}
+    {but3 but2 T 1 1 {-st we} {-t {$::mfind3} -com "::pave res $win 3" -style TButtonWest}}
+    {h_4 but3 T 2 1 {-pady 6}}
+    {but4 h_4 T 1 1 {-st we} {-t {$::mrepl1}  -com "::pave res $win 4" -style TButtonWestBold}}
+    {but5 but4 T 1 1 {-st nwe} {-t {$::mfind2} -com "::pave res $win 5" -style TButtonWest}}
+    {but6 but5 T 1 1 {-st nwe} {-t {$::mfind3} -com "::pave res $win 6" -style TButtonWest}}
+    {but0 but6 T 1 1 {-st swe} {-t "Close" -com "::pave res $win 0" -style TButtonWestBold}}
+  }
+  bind $win.fra.cbx1 <Return> {$win.fra.but1 invoke}  ;# the Enter key is
+  bind $win.fra.cbx2 <Return> {$win.fra.but4 invoke}  ;# hot in comboboxes
+  set foc $win.fra.cbx1
+  set geo +200+200   ;# these geometry options
+  set minsize ""     ;# are possibly stored in some INI file
+  set res 1
   if {$minsize eq ""} {      ;# save default min.sizes
     after idle [list after 10 {
       set ::minsize "-minsize {[winfo width $::win] [winfo height $::win]}"
@@ -108,23 +108,11 @@ while {1} {
     }
   }
   # here might be some procedures to process the input data, e.g. showing:
-  if {$::c2} {set c ""} {set c "-nocase "}
-  switch $::v1 {
-    2 {
-      set r [string match {*}$c $en1 $en2]
-    }
-    3 {
-      if {[catch {set r [regexp {*}$c $en1 $en2]}]} {set r 0}
-    }
-    default {
-      set r [string match {*}$c "*$en1*" $en2]
-    }
-  }
-  set fnd "Applying \"Find\" to \"Replace\": [if $r {set - yes} {set - no}]"
   puts "
+      res=$res
+
       $mfind $en1
       $mrepl $en2
-      $fnd
 
       E/G/R=$v1
       $mword=$c1
@@ -135,7 +123,7 @@ while {1} {
       $mdir $v2
       Mode=$res
       _________________________________"
+  destroy $win
 }
 pave destroy
-destroy $win
 exit
