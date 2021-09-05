@@ -1,7 +1,11 @@
 # Last changes:
 
 
-Version `3.4.5a2 (1 Sep'21)`
+Version `3.4.5a5 (4 Sep'21)`
+  - bg color of disabled toolbar icons
+  - listbox' bg color corrected
+  - azure, forest, sun-valley and some other CS modified
+  - create_Fonts run at changing default font size
   - switch widget
   - heading for treeview
   - choosers' options (-initialdir, -initialfile, -defaultextension, -multiple)
@@ -13,7 +17,7 @@ Version `3.4.4 (25 Aug'21)`
   - "opc" allows -com/-command option
   - background color of entry, spinbox and alike
   - ttk theme + apave's color scheme = love
-  - CS revised; azure, forest, sun-valley added; got 3rd reserved color
+  - CS revised;  added; got 3rd reserved color
   - colorized color chooser
   - colorWindow in.
   - fonts brought to order
