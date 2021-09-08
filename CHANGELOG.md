@@ -1,15 +1,19 @@
 # Last changes:
 
 
-Version `3.4.5a5 (4 Sep'21)`
+Version `3.4.5b1 (8 Sep'21)`
+  - bugfix: font chooser's returned value (in Windows)
   - bg color of disabled toolbar icons
   - listbox' bg color corrected
   - azure, forest, sun-valley and some other CS modified
+  - menu's borderwidth 1 for themes by rdbende
   - create_Fonts run at changing default font size
   - switch widget
   - heading for treeview
+  - Shift/Ctrl+Enter in texts corrected
+  - text undo/redo separators
+  - resetText, precedeWidgetName added, displayTaggedText modified
   - choosers' options (-initialdir, -initialfile, -defaultextension, -multiple)
-  - ForestDark CS modified
 
 
 Version `3.4.4 (25 Aug'21)`
