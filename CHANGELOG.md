@@ -1,8 +1,11 @@
 # Last changes:
 
 
-Version `3.4.5b1 (8 Sep'21)`
+Version `3.4.5b4 (15 Sep'21)`
   - bugfix: font chooser's returned value (in Windows)
+  - -selectcolor for menus' check/radio
+  - paveoptionValue method
+  - TLabelframe's style changed
   - bg color of disabled toolbar icons
   - listbox' bg color corrected
   - azure, forest, sun-valley and some other CS modified
@@ -14,6 +17,7 @@ Version `3.4.5b1 (8 Sep'21)`
   - text undo/redo separators
   - resetText, precedeWidgetName added, displayTaggedText modified
   - choosers' options (-initialdir, -initialfile, -defaultextension, -multiple)
+  - hl_tcl package updated
 
 
 Version `3.4.4 (25 Aug'21)`
