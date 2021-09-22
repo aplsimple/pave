@@ -1,9 +1,13 @@
 # Last changes:
 
 
-Version `3.4.5b4 (15 Sep'21)`
+Version `3.4.5b6 (22 Sep'21)`
   - bugfix: font chooser's returned value (in Windows)
+  - AwDark, AwLight color schemes instead of Dark and Celestial
+  - Dusk CS above Darcula, to align light and dark "themed" CS
+  - themePopup, themeNonThemed to touch a parent popup menu
   - -selectcolor for menus' check/radio
+  - modified style of TScrollbar, TProgressbar
   - paveoptionValue method
   - TLabelframe's style changed
   - bg color of disabled toolbar icons
@@ -17,6 +21,8 @@ Version `3.4.5b4 (15 Sep'21)`
   - text undo/redo separators
   - resetText, precedeWidgetName added, displayTaggedText modified
   - choosers' options (-initialdir, -initialfile, -defaultextension, -multiple)
+  - test2_pave.tcl got "theme" option
+  - menu/tool/status bars allow to set "# comment" to comment lines out
   - hl_tcl package updated
 
 

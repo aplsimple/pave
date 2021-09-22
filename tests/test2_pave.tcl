@@ -42,7 +42,7 @@ namespace eval t {
   variable pdlg
   variable pave
   variable savedtext; array set savedtext [list]
-  variable transpopsFile "transpops_loup1.txt"
+  variable transpopsFile "transpops1.txt"
 
 # _________________ The code from Tk's demos/ttkpane.tcl ________________ #
 
@@ -142,7 +142,7 @@ namespace eval t {
   }
 
   proc restartHint {cs} {
-    return "\nRestart with CS = \"$::t::opcc\", font size = $::t::fontsz?\nIt's a good choice, as the CS would be properly set up.\n"
+    return "\nRestart with:\n    theme = \"$::t::opct\"\n    CS = \"$::t::opcc\"\n    font size = $::t::fontsz\n?\n\nIt's a good choice, as GUI would be properly set up.\n"
   }
 
   # imitating the toolbar functions
@@ -203,10 +203,10 @@ namespace eval t {
       catch {::t::colorBar; ::bt draw}
       pave fillGutter [pave Text]
     }
-    baltip::tip [pave BuT_IMG_4] \
-      "Next is $::t::nextcs: [pave csGetName $::t::nextcs]" -under 5
-    baltip::tip [pave BuT_IMG_3] \
-      "Previous is $::t::prevcs: [pave csGetName $::t::prevcs]" -under 5
+#    baltip::tip [pave BuT_IMG_4] \
+#      "Next is $::t::nextcs: [pave csGetName $::t::nextcs]" -under 5
+#    baltip::tip [pave BuT_IMG_3] \
+#      "Previous is $::t::prevcs: [pave csGetName $::t::prevcs]" -under 5
     lassign [pave csGet] fg - bg - - bS fS
     set ::t::textTags [list \
       [list "red" " -font {-weight bold} -foreground $fS -background $bS"] \
@@ -288,12 +288,8 @@ namespace eval t {
   proc hueCheck {} {
     catch {after cancel $::afters}
     set ::afters [after 100 {
-      if {$::t::hue} {
-        ::t::hueUpdate
-        ::t::toolBut 0
-      } else {
-        ::t::toolBut 4 [::t::csCurrent]
-      }
+      ::t::hueUpdate
+      ::t::toolBut 0
     }]
   }
 
@@ -334,8 +330,8 @@ namespace eval t {
     $m add command -label "Copy" -command {::t::msg warn "This is just a demo: no action."}
     $m add command -label "Paste" -command {::t::msg err "This is just a demo: no action."}
     $m add separator
-    $m add command -label "Find..." -command {::t::findTclFirst yes}
-    $m add command -label "Find Next" -command {::t::findTclNext yes}
+    $m add command -label "Find..." -command {::t::findTclFirst yes} -accelerator Ctrl+F
+    $m add command -label "Find Next" -command {::t::findTclNext yes} -accelerator F3
     $m add separator
     $m add command -label "Reload the bar of tabs" -command {::t::RefillBar}
     set m .win.menu.help
@@ -518,7 +514,8 @@ namespace eval t {
   }
 
   proc opcToolPost {} {
-    if {[set cs [::t::csCurrent]] != -2} {toolBut 4 $cs}
+    ttk::style theme use $::t::opct
+    toolBut 4 [::t::csCurrent]
   }
 
   proc opcIconSetPost {} {
@@ -652,7 +649,7 @@ namespace eval t {
     set ::t::savedtext($tcurr,pos) [[pave Text] index insert]
     if {$tcurr in [::bt cget -mark] && $::t::ansSelTab<10} {
       set fname [getTabFile $tcurr]
-      set ::t::ansSelTab [msg warn "The file $fname was modified (marked).\nThere might be some actions taken before quitting it.\n\nThe text buffer is one for all files, thus no saved undo/redo after quitting it.\nIt's a detail of implementation." -ch "Don't show again" -modal 0]
+      set ::t::ansSelTab [msg warn "The file $fname was modified (marked).\nThere might be some actions taken before quitting it.\n\nThe text buffer is one for all files, thus no saved undo/redo after quitting it.\nIt's a detail of implementation specific for this test." -ch "Don't show again" -modal 0]
     }
     set ::t::ftx1 [getTabFile $TID]
     if {[catch {set ::t::filetxt $::t::savedtext($TID,text)}]} {
@@ -943,6 +940,7 @@ namespace eval t {
       ####################################################################
       {Menu - - - - - {-array {
             File "&File"
+            #Commented &Commented
             edit &Edit
             Help "&Help (wordy)"
       }} ::t::fillMenu}
@@ -1020,14 +1018,16 @@ namespace eval t {
             IMG_7 {{::t::aloupe} -tooltip "Run aloupe@@ -under 5"}
             sev 7
             h_ 1
-            IMG_3 {{::t::toolBut 3 \[set ::t::prevcs\]}}
+            opcTheme {::t::opct ::t::opcThemes {-width 7} {} -command ::t::opcToolPost -tooltip "Current ttk theme@@ -under 3"}
+            {# h_ 1}
+            {IMG_3 {{::t::toolBut 3 \[set ::t::prevcs\]}}}
             h_ 1
-            opcTool {::t::opcc ::t::opcColors {-width 20} {::t::opcToolPre %a} -command ::t::opcToolPost -tooltip "Current color scheme@@ -under 3"}
-            h_ 1
-            IMG_4 {{::t::toolBut 4 \[set ::t::nextcs\]}}
+            opcTool {::t::opcc ::t::opcColors {-width 16} {::t::opcToolPre %a} -command ::t::opcToolPost -tooltip "Current color scheme@@ -under 3"}
+            {# h_ 1}
+            {IMG_4 {{::t::toolBut 4 \[set ::t::nextcs\]}}}
             h_ 4
             ChbRestart {-var ::t::restart -t "Restart" -command {::t::toolBut 0 -2 no no} \
-              -tooltip "To restart test2\nif CS changes@@ -under 3"}
+              -tooltip "To restart test2_pave.tcl\nwhen theme / CS changes\n\nlike File/Restart menu item@@ -under 3"}
             sev 4
             lab1 {" Hue:"}
             Spx_Hue  {-tvar ::t::hue -command {::t::hueCheck} -from -7 -to 7 -w 3 -justify center -tooltip "Color hues: -7..7\n- enabled if 'Color scheme' is chosen@@ -under 3"}
@@ -1065,6 +1065,7 @@ namespace eval t {
       {.lfrB.fraHead.fraFind.lab  - - - - {pack -side left} {-t "Find:"}}
       {.lfrB.fraHead.fraFind.EntFind  - - - - {pack -side left -pady 3 -padx 5} {-tvar ::t::Find -w 20}}
       {.lfrB.stat - - - - {pack -side bottom} {-array {
+        {# Commented       -font {-slant italic -size 10}} 7
         {Row:       -font {-slant italic -size 10}} 7
         {" Column:" -font {-slant italic -size 10}} 5
         {"" -font {-slant italic -size 10} -anchor e} 40
@@ -1286,7 +1287,7 @@ where:
     set ::t::opcItems [list {{Color list} red green blue -- {colored yellow magenta cyan
       | #52CB2F #FFA500 #CB2F6A | #FFC0CB #90EE90 #8B6914}} \
       {hue dark medium light} -- {{multi word example}} ok]
-    set ::t::opcColors [list {{Color schemes}}]
+    set ::t::opcColors [list {{-2: None}}]
     for {set i -1; set n [apave::cs_MaxBasic]} {$i<=$n} {incr i} {
       if {(($i+2) % ($n/2+2)) == 0} {lappend ::t::opcColors "|"}
       lappend ::t::opcColors [list [pave csGetName $i]]
@@ -1393,7 +1394,7 @@ where:
     set ::t::newCS [apave::cs_Non]
     toolBut 0
     after 1000 ::t::highlighting_others  ;# it's unseen at changing the theme
-    catch {::transpops::run [file join $::pavedirname .bak/$::t::transpopsFile] {<Control-t> <Alt-t>} {.win .win._a_loupe_loup .win._a_loupe_disp .__tk__color .win._apave_CALENDAR_}}
+    catch {::transpops::run [file join ~/PG/github/DEMO/pave $::t::transpopsFile] {<Alt-t> <Alt-y>} {.win .win._a_loupe_loup .win._a_loupe_disp .__tk__color .win._apave_CALENDAR_}}
 
     # Open the window at last
     set ::t::curTab ""
@@ -1417,15 +1418,25 @@ where:
 # __________________________ Running the test ___________________________ #
 
 puts "\nThis is just a demo. Take it easy."
-set test2script $::t::ftx1
-apave::initWM
-if {$::argc>=4} {
-  lassign $::argv ::t::newCS ::t::fontsz ::t::ans4 ::t::opcIcon ::t::hue
-  set ::t::transpopsFile "transpops_loup2.txt"
+if {[catch {
+  package require awthemes
+  package require ttk::theme::awlight
+  package require ttk::theme::awdark
+}]} then {
+  set ::t::opcThemes [list default clam classic alt]
 } else {
-  set ::t::newCS [apave::cs_Non]
+  set ::t::opcThemes [list default clam classic alt -- {{light / dark} awlight awdark}]
+}
+set test2script $::t::ftx1
+set ::t::opct default
+if {$::argc>=5} {
+  lassign $::argv ::t::opct ::t::newCS ::t::fontsz ::t::ans4 ::t::opcIcon ::t::hue
+  set ::t::transpopsFile "transpops2.txt"
+} else {
+  set ::t::newCS 25 ;# ForestDark CS
   set ::t::opcIcon "small"
 }
+if {[catch {apave::initWM -theme $::t::opct}]} apave::initWM
 if {![info exists ::t::hue] || ![string is integer -strict $::t::hue]} {set ::t::hue 0}
 # check for CloudTk by Jeff Smith (on wiki.tcl-lang.org)
 set ::noRestart [expr {[string match "/home/tclhttp*" $::t::ftx1]}]
@@ -1436,7 +1447,7 @@ append ::t::opcIcon " icons  "
 set test2res [t::test2_pave]
 puts "\nResult of test2 = $test2res\n[string repeat - 77]"
 if {$::t::newCS!=[apave::cs_Non] || $test2res==100} {  ;# at restart, newCS is set
-  exec tclsh $test2script [::t::csCurrent] $::t::fontsz $::t::ans4 "$::t::opcIcon" $::t::hue &
+  exec tclsh $test2script $::t::opct [::t::csCurrent] $::t::fontsz $::t::ans4 "$::t::opcIcon" $::t::hue &
 }
 ::apave::endWM
 exit
