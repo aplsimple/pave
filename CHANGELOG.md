@@ -1,8 +1,11 @@
 # Last changes:
 
 
-Version `3.4.5b6 (22 Sep'21)`
+Version `3.4.5b8 (26 Sep'21)`
   - bugfix: font chooser's returned value (in Windows)
+  - at pressing Enter: "-", "*", "#" duplicated with indentation
+  - focused "opc" widget at mouse clicking
+  - TButtonWestHL ttk::style
   - AwDark, AwLight color schemes instead of Dark and Celestial
   - Dusk CS above Darcula, to align light and dark "themed" CS
   - themePopup, themeNonThemed to touch a parent popup menu
@@ -23,7 +26,7 @@ Version `3.4.5b6 (22 Sep'21)`
   - choosers' options (-initialdir, -initialfile, -defaultextension, -multiple)
   - test2_pave.tcl got "theme" option
   - menu/tool/status bars allow to set "# comment" to comment lines out
-  - hl_tcl package updated
+  - hl_tcl, bartabs packages updated
 
 
 Version `3.4.4 (25 Aug'21)`

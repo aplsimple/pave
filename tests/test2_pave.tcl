@@ -10,7 +10,7 @@ set tcltk_version "Tcl/Tk [package require Tk]"
 set ::testdirname [file normalize [file dirname [info script]]]
 set ::pavedirname [file normalize [file join $::testdirname ..]]
 cd $::testdirname
-set ::test2dirs [list "$::testdirname/.." "$::testdirname" "$::testdirname/../bartabs" "$::testdirname/../hl_tcl" "$::testdirname/../../screenshooter" "$::testdirname/../../aloupe" "$::testdirname/../fsdialog"]
+set ::test2dirs [list "$::testdirname/.." "$::testdirname" "$::testdirname/../bartabs" "$::testdirname/../hl_tcl" "$::testdirname/../../screenshooter" "$::testdirname/../../aloupe" "$::testdirname/../.bak/fsdialog" "$::testdirname/../.bak/tablelist"]
 lappend ::auto_path {*}$::test2dirs
 set apavever [package require apave]
 set pkg_versions0 "\n  <red>apave $apavever</red>\n\n"
@@ -560,7 +560,7 @@ namespace eval t {
     set ::t::ansSelTab [set ::t::ansSwBta 0]
     set wbase [pave LfrB]
     set bar1Opts [list -wbar $wframe -wbase $wbase -lablen 16 \
-      -csel {::t::selTab %t} -csel2 {::t::selTab2 %t} \
+      -csel {::t::selTab %t} -csel2 {::t::selTab2 %t} -bd 1 -expand 1 \
       -cdel {::t::delTab %t} -redraw $::BTS_REDRAW \
       -menu [list \
       sep \
@@ -965,7 +965,8 @@ namespace eval t {
       {fil1 labBfil1 L 1 9 {} {-tvar t::fil1 -title {Pick a file}
         -filetypes {{{Tcl scripts} .tcl} {{All files} .* }}}}
       {fis1 labBfis1 L 1 9 {} {-tvar t::fis1 -title {Save as}}}
-      {dir1 labBdir1 L 1 9 {} {-tvar t::dir1 -title {Pick a directory}}}
+      {diR1 labBdir1 L 1 9 {} {-tvar t::dir1 -title {Pick a directory}
+      -values {saved/dir/path1 "C:\\Users\\I Me My\\my saved path"}}}
       {fon1 labBfon1 L 1 9 {} {-tvar t::fon1 -title {Pick a font}}}
       {Dat1 labBdat1 L 1 9 {} {-tvar t::dat1 -title {Pick a date} -dateformat %Y.%m.%d}}
       {clr1 labBclr1 L 1 9 {} {-tvar t::clr1 -title {Pick a color}}}
@@ -1428,7 +1429,7 @@ if {[catch {
   set ::t::opcThemes [list default clam classic alt -- {{light / dark} awlight awdark}]
 }
 set test2script $::t::ftx1
-set ::t::opct default
+set ::t::opct clam
 if {$::argc>=5} {
   lassign $::argv ::t::opct ::t::newCS ::t::fontsz ::t::ans4 ::t::opcIcon ::t::hue
   set ::t::transpopsFile "transpops2.txt"
