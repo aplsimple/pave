@@ -3158,9 +3158,10 @@ oo::class create ::apave::APave {
       set lst1 [lindex $lwidgets $i]
       if {[my Replace_Tcl i lwlen lwidgets {*}$lst1] ne ""} {incr i}
     }
-    set lwlen [llength $lwidgets]
     # firstly, normalize all names that are "subwidgets": .lab instead fra.lab etc
-    for {set i $lwlen} {$i} {incr i -1} {
+    set i [set lwlen [llength $lwidgets]]
+    while {$i>1} {
+      incr i -1
       set lst1 [lindex $lwidgets $i]
       lassign $lst1 name neighbor
       lassign [my NormalizeName name i lwidgets] name wname

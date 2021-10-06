@@ -680,15 +680,14 @@ proc ::hl_c::hl_line {txt} {
   #   txt - text's path
 
   if {!$::hl_c::my::data(PLAINTEXT,$txt)} {
-    set ln [expr {int([$txt index insert])}]
     set tSTR [$txt tag ranges tagSTR]
     set tCMN [$txt tag ranges tagCMN]
-    if {$ln==1} {
-      set currQtd -1
-    } else {
-      set currQtd [::hl_c::my::LineState $txt $tSTR $tCMN "$ln.0 -1 chars"]
-    }
-    ::hl_c::my::HighlightLine $txt $ln $currQtd
+    set ln0 [expr {int([$txt index insert])}]
+    set ln2 [expr {int([$txt index end])}]
+    set ln1 [expr {max (1,$ln0-1)}]
+    set ln2 [expr {min ($ln2,$ln0+1)}]
+    # update lines: previous, current, next 
+    after idle "::hl_c::my::CoroRun $txt $ln1 $ln2"
   }
   ::hl_c::my::MemPos $txt yes
   $txt configure -insertwidth $::hl_c::my::data(INSERTWIDTH,$txt)

@@ -42,7 +42,7 @@ namespace eval t {
   variable pdlg
   variable pave
   variable savedtext; array set savedtext [list]
-  variable transpopsFile "transpops1.txt"
+  variable transpopsFile "transpops.txt"
 
 # _________________ The code from Tk's demos/ttkpane.tcl ________________ #
 
@@ -1432,9 +1432,9 @@ set test2script $::t::ftx1
 set ::t::opct clam
 if {$::argc>=5} {
   lassign $::argv ::t::opct ::t::newCS ::t::fontsz ::t::ans4 ::t::opcIcon ::t::hue
-  set ::t::transpopsFile "transpops2.txt"
+  set ::t::transpopsFile "transpops.txt"
 } else {
-  set ::t::newCS 25 ;# ForestDark CS
+  set ::t::newCS 26 ;# ForestDark CS
   set ::t::opcIcon "small"
 }
 if {[catch {apave::initWM -theme $::t::opct}]} apave::initWM

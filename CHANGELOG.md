@@ -1,8 +1,13 @@
 # Last changes:
 
 
-Version `3.4.5b8 (26 Sep'21)`
+Version `3.4.5 (6 Oct'21)`
+
   - bugfix: font chooser's returned value (in Windows)
+  - comboboxed fiL, fiS, diR, foN, clR types of choosers
+  - swi (switch) widget
+  - new methods: resetText, precedeWidgetName, paveoptionValue
+  - modified methods: displayTaggedText
   - at pressing Enter: "-", "*", "#" duplicated with indentation
   - focused "opc" widget at mouse clicking
   - TButtonWestHL ttk::style
@@ -10,26 +15,23 @@ Version `3.4.5b8 (26 Sep'21)`
   - Dusk CS above Darcula, to align light and dark "themed" CS
   - themePopup, themeNonThemed to touch a parent popup menu
   - -selectcolor for menus' check/radio
-  - modified style of TScrollbar, TProgressbar
-  - paveoptionValue method
-  - TLabelframe's style changed
+  - modified style of TScrollbar, TProgressbar, TLabelframe
   - bg color of disabled toolbar icons
   - listbox' bg color corrected
   - azure, forest, sun-valley and some other CS modified
   - menu's borderwidth 1 for themes by rdbende
   - create_Fonts run at changing default font size
-  - switch widget
-  - heading for treeview
+  - heading style for treeview
   - Shift/Ctrl+Enter in texts corrected
   - text undo/redo separators
-  - resetText, precedeWidgetName added, displayTaggedText modified
   - choosers' options (-initialdir, -initialfile, -defaultextension, -multiple)
   - test2_pave.tcl got "theme" option
   - menu/tool/status bars allow to set "# comment" to comment lines out
-  - hl_tcl, bartabs packages updated
+  - hl_tcl, bartabs, klnd packages updated
 
 
 Version `3.4.4 (25 Aug'21)`
+
   - default colors changed in InitWM
   - "opc" allows -com/-command option
   - background color of entry, spinbox and alike
