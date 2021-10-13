@@ -542,6 +542,7 @@ proc ::hl_c::hl_init {txt args} {
     set args [lrange $args 1 end]
   }
   set ::hl_c::my::data(REG_TXT,$txt) {}  ;# disables Modified at changing the text
+  set ::hl_c::my::data(KEYWORDS,$txt) {}
   foreach {opt val} {-dark 0 -readonly 0 -cmd {} -cmdpos {} -optRE 1 \
   -multiline 1 -seen 500 -plaintext no -insertwidth 2 -keywords {}} {
     if {[dict exists $args $opt]} {

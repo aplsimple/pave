@@ -1,6 +1,17 @@
 # Last changes:
 
 
+Version `3.4.5.4 (12 Oct'21)`
+
+  - bugfix: issues with pressing Enter at "-", "*", "#" starting lines
+  - bugfix: -initialdir option for file chooser
+  - modified style of TButton, TNotebook.Tab
+  - some CS modified (bg of menus)
+  - topmost attribute in showModal depending on a window's olders
+  - few CS modified (menu bg)
+  - hl_tcl package updated
+
+
 Version `3.4.5 (6 Oct'21)`
 
   - bugfix: font chooser's returned value (in Windows)

@@ -7,7 +7,7 @@
 # License: MIT.
 ###########################################################
 
-package provide hl_tcl 0.9.24
+package provide hl_tcl 0.9.26
 
 # ______________________ Common data ____________________ #
 
@@ -57,13 +57,13 @@ namespace eval ::hl_tcl {
   ]
 
   # Tk/ttk commands united
-  set data(CMD_TK) [lsort [concat $data(CMD_TTK) $data(CMD_TK2) [list \
+  set data(CMD_TK) [concat $data(CMD_TTK) $data(CMD_TK2) [list \
     button entry checkbutton radiobutton label menubutton menu wm winfo bind \
     grid pack event bell text canvas frame listbox grab scale scrollbar \
     labelframe focus font bindtags image selection toplevel destroy \
     option options spinbox bitmap photo keysyms send lower clipboard colors \
     console message cursors panedwindow place raise \
-  ]]]
+  ]]
 
   # allowed edges of string (as one and only)
   set data(S_LEFT) [list \{ \[]
@@ -73,8 +73,8 @@ namespace eval ::hl_tcl {
   set data(S_SPACE2) [concat $data(S_SPACE) [list \{]]
   set data(S_BOTH) [concat $data(S_SPACE) [list \" \}]]
 
-  set data(RE0) {(^|[\{\}\[;])+\s*([:\w*]+)([\s\}\];]|$){1}}
-  set data(RE1) {([\{\}\[;])+\s*([:\w*]+)([\s\}\];]|$){1}}
+  set data(RE0) {(^|[\{\}\[;])+\s*([:\w*]+)(\s|\]|\}|\\|$)}
+  set data(RE1) {([\{\}\[;])+\s*([:\w*]+)(\s|\]|\}|\\|$)}
   set data(RE5) {(^|[^\\])(\[|\]|\$|\{|\})+}
 
   set data(LBR) {\{(\[}
@@ -171,7 +171,7 @@ proc ::hl_tcl::my::HighlightCmd {txt line ln pri i} {
         $txt tag add tagCOM "$ln.$pri +$i1 char" "$ln.$pri +$i2 char"
       } elseif {[lsearch -exact -sorted $data(PROC_TCL) $c]>-1} {
         $txt tag add tagPROC "$ln.$pri +$i1 char" "$ln.$pri +$i2 char"
-      } elseif {[lsearch -exact -sorted $data(CMD_TK) $c]>-1} {
+      } elseif {[lsearch -exact -sorted $data(CMD_TK_EXP) $c]>-1} {
         $txt tag add tagCOMTK "$ln.$pri +$i1 char" "$ln.$pri +$i2 char"
       }
     }
@@ -974,8 +974,9 @@ proc ::hl_tcl::hl_init {txt args} {
     set args [lrange $args 1 end]
   }
   set ::hl_tcl::my::data(REG_TXT,$txt) {}  ;# disables Modified at changing the text
+  set ::hl_tcl::my::data(KEYWORDS,$txt) {}
   foreach {opt val} {-dark 0 -readonly 0 -cmd {} -cmdpos {} -optRE 1 \
-  -multiline 1 -seen 500 -plaintext no -insertwidth 2} {
+  -multiline 1 -seen 500 -plaintext no -insertwidth 2 -keywords {}} {
     if {[dict exists $args $opt]} {
       set val [dict get $args $opt]
     } elseif {$setonly} {
@@ -983,6 +984,9 @@ proc ::hl_tcl::hl_init {txt args} {
     }
     set ::hl_tcl::my::data([string toupper [string range $opt 1 end]],$txt) $val
   }
+  set ::hl_tcl::my::data(CMD_TK_EXP) [lsort [list \
+    {*}$::hl_tcl::my::data(CMD_TK) {*}$::hl_tcl::my::data(KEYWORDS,$txt)]]
+  unset ::hl_tcl::my::data(KEYWORDS,$txt)
   if {[dict exists $args -colors]} {
     set ::hl_tcl::my::data(COLORS,$txt) [dict get $args -colors]
     set ::hl_tcl::my::data(SETCOLORS,$txt) 1
