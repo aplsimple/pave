@@ -7,6 +7,9 @@
 
 set tcltk_version "Tcl/Tk [package require Tk]"
 
+# to get TCLLIBPATH variable when run from tclkit
+if {[info exists ::env(TCLLIBPATH)]} {lappend ::auto_path {*}$::env(TCLLIBPATH)}
+
 set ::testdirname [file normalize [file dirname [info script]]]
 set ::pavedirname [file normalize [file join $::testdirname ..]]
 cd $::testdirname
@@ -173,6 +176,8 @@ namespace eval t {
         if {[set cs [::t::csCurrent]]<[apave::cs_Min]} {set cs [apave::cs_Min]}
         pave basicFontSize $::t::fontsz
       }
+      set ic [expr {$cs>22 ? 3 : 2}]  ;# "|" was added
+      set ::t::opcc [pave optionCascadeText [lindex $::t::opcColors $cs+$ic]]
       if {!$starting && $::t::restart} {
         if {$t::ans4<10} {
           set t::ans4 [lindex [::t::pdlg yesnocancel warn "RESTART" \
@@ -195,8 +200,6 @@ namespace eval t {
       } else {
         set ::t::nextcs [apave::cs_Min]
       }
-      set ic [expr {$cs>22 ? 3 : 2}]  ;# "|" was added
-      set ::t::opcc [pave optionCascadeText [lindex $::t::opcColors $cs+$ic]]
       .win.fra.fra.nbk tab .win.fra.fra.nbk.f5 -text \
       " Color scheme [pave csGetName $cs]"
       if {$::t::hue !=0} hueUpdate
@@ -1031,9 +1034,9 @@ namespace eval t {
               -tooltip "To restart test2_pave.tcl\nwhen theme / CS changes\n\nlike File/Restart menu item@@ -under 3"}
             sev 4
             lab1 {" Hue:"}
-            Spx_Hue  {-tvar ::t::hue -command {::t::hueCheck} -from -7 -to 7 -w 3 -justify center -tooltip "Color hues: -7..7\n- enabled if 'Color scheme' is chosen@@ -under 3"}
+            Spx_Hue  {-tvar ::t::hue -command {::t::hueCheck} -from -7 -to 7 -w 3 -justify center -tooltip "Color hues:\n- enabled if 'Color scheme' is chosen@@ -under 3"}
             lab2 {"  Zoom:"}
-            Spx_FS  {-tvar ::t::fontsz -command {::t::fontszCheck} -from 8 -to 16 -w 3 -justify center -tooltip "Font size: 8..16\n- enabled if 'Restart' is off@@ -under 3" -myown {
+            Spx_FS  {-tvar ::t::fontsz -command {::t::fontszCheck} -from 8 -to 16 -w 3 -justify center -tooltip "Font size:\n- enabled if 'Restart' is off@@ -under 3" -myown {
               puts "\nA local/global configuration may be set with -myown attribute, e.g.\
               \n  %w configure -bg yellow -font {-weight bold}\
               \n  ::NS::GLOBAL_CONFIG %w"}}
@@ -1434,7 +1437,7 @@ if {$::argc>=5} {
   lassign $::argv ::t::opct ::t::newCS ::t::fontsz ::t::ans4 ::t::opcIcon ::t::hue
   set ::t::transpopsFile "transpops.txt"
 } else {
-  set ::t::newCS 26 ;# ForestDark CS
+  set ::t::newCS 27 ;# ForestDark CS
   set ::t::opcIcon "small"
 }
 if {[catch {apave::initWM -theme $::t::opct}]} apave::initWM

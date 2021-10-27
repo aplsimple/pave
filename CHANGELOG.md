@@ -1,15 +1,20 @@
 # Last changes:
 
 
-Version `3.4.5.4 (12 Oct'21)`
+Version `3.4.6a3 (27 Oct'21)`
 
-  - bugfix: issues with pressing Enter at "-", "*", "#" starting lines
-  - bugfix: -initialdir option for file chooser
-  - modified style of TButton, TNotebook.Tab
-  - some CS modified (bg of menus)
-  - topmost attribute in showModal depending on a window's olders
-  - few CS modified (menu bg)
-  - hl_tcl package updated
+  - BUGFIX: issues with pressing Enter at "-", "*", "#" starting lines
+  - BUGFIX: -initialdir option for file chooser
+  - BUGFIX: default/classic/alt theme & dark CS: selected check/radio buttons' bg
+  - NEW   : 'pack -after .a.b.c' may be 'pack -after C', then [my C] used
+  - NEW   : using TCLLIBPATH (spec.feature for tclkits)
+  - NEW   : tooltip of spinbox (from..to)
+  - NEW   : -padx, -pady options for entry fields of choosers
+  - NEW   : topmost attribute in showModal depending on a window's ancestors
+  - NEW   : cs_Active to set/get flag "no CS changes"
+  - CHANGE: modified style of TButton, TNotebook.Tab
+  - CHANGE: modified CS: bg of menus, Oscuros, MildDarks, rdbende's Darks
+  - CHANGE: hl_tcl, klnd packages updated
 
 
 Version `3.4.5 (6 Oct'21)`
