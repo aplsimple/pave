@@ -80,12 +80,13 @@ namespace eval ::apave {
     dir {{} {}} \
     fon {{} {}} \
     clr {{} {}} \
+    dat {{} {}} \
     fiL {{} {}} \
     fiS {{} {}} \
     diR {{} {}} \
     foN {{} {}} \
     clR {{} {}} \
-    dat {{} {}} \
+    daT {{} {}} \
     sta {{} {}} \
     too {{} {}} \
     fra {{} {}} \
@@ -1093,7 +1094,7 @@ oo::class create ::apave::APave {
       dir - diR -
       fon - foN -
       clr - clR -
-      dat -
+      dat - daT -
       sta -
       too -
       fra {
@@ -1552,6 +1553,18 @@ oo::class create ::apave::APave {
 
   #########################################################################
 
+  method SourceKlnd {fname} {
+    # Loads klnd package at need.
+    #   fname - name of package file
+
+    if {[info commands ::klnd::calendar] eq ""} {
+      # imo, it's more effective to source on request than to require on possibility
+      source [file join $::apave::apaveDir pickers klnd $fname.tcl]
+    }
+  }
+
+  #########################################################################
+
   method dateChooser {tvar args} {
 
     # Date chooser (calendar widget).
@@ -1560,10 +1573,7 @@ oo::class create ::apave::APave {
     #
     # Returns a selected date.
 
-    if {[info commands ::klnd::calendar] eq ""} {
-      # imo, it's more effective to source on request than to require on possibility
-      source [file join $::apave::apaveDir pickers klnd klnd.tcl]
-    }
+    my SourceKlnd klnd
     if {![catch {set ent [my [my ownWName [::apave::getOption -entry {*}$args]]]}]} {
       dict set args -entry $ent
       set res [::klnd::calendar {*}$args -tvar $tvar -parent [winfo toplevel $ent]]
@@ -1847,7 +1857,7 @@ oo::class create ::apave::APave {
 
     upvar 1 $r1 _ii $r2 _lwlen $r3 _lwidgets
     lassign $args _name _code
-    if {[my ownWName $_name] ne "tcl"} {return $args}
+    if {[my ownWName $_name] ne {tcl}} {return $args}
     proc lwins {lwName i w} {
       upvar 2 $lwName lw
       set lw [linsert $lw $i $w]
@@ -1855,7 +1865,7 @@ oo::class create ::apave::APave {
     set _lwidgets [lreplace $_lwidgets $_ii $_ii]  ;# removes tcl item
     set _inext [expr {$_ii-1}]
     eval [string map {%C {lwins $r3 [incr _inext] }} $_code]
-    return ""
+    return {}
   }
 
   #########################################################################
@@ -1891,25 +1901,34 @@ oo::class create ::apave::APave {
     set an [set entname {}]
     lassign [my LowercaseWidgetName $name] n
     set ownname [my ownWName $n]
-    switch -glob -nocase -- $ownname {
-      fil* {set chooser tk_getOpenFile}
-      fis* {set chooser tk_getSaveFile}
-      dir* {set chooser tk_chooseDirectory}
-      fon* {set chooser fontChooser}
-      dat* {set chooser dateChooser; set entname {-entry }}
-      ftx* {
+    set wtyp [string range $ownname 0 2]
+    if {$wtyp eq {daT}} {
+      # embed calendar widgets into $ownname frame
+#      my SourceKlnd klnd2
+#      set lwidgets2 [::klnd::calendar2 $w $ownname {*}$args]
+#      set lwidgets [linsert $lwidgets [incr i] {*}$lwidgets2]
+#      incr lwlen [llength $lwidgets2]
+      return $args
+    }
+    switch -exact $wtyp {
+      fil - fiL {set chooser tk_getOpenFile}
+      fis - fiS {set chooser tk_getSaveFile}
+      dir - diR {set chooser tk_chooseDirectory}
+      fon - foN {set chooser fontChooser}
+      clr - clR {
+        set chooser colorChooser
+        if {$showcolor eq {}} {set showcolor 1} ;# default is "show color label"
+        set showcolor [string is true -strict $showcolor]
+        set wpar "-parent $w" ;# specific for color chooser (parent of $w)
+      }
+      dat {set chooser dateChooser; set entname {-entry }}
+      ftx {
         set chooser [set view ftx_OpenFile]
         if {$tvar ne {} && [info exist $tvar]} {
           append addattrs " -t {[set $tvar]}"
         }
         set an tex
         set txtnam [my Transname $an $name]
-      }
-      clr* {
-        set chooser colorChooser
-        if {$showcolor eq {}} {set showcolor 1} ;# default is "show color label"
-        set showcolor [string is true -strict $showcolor]
-        set wpar "-parent $w" ;# specific for color chooser (parent of $w)
       }
       default {
         return $args
@@ -1960,7 +1979,7 @@ oo::class create ::apave::APave {
       }
       set entf [list $txtnam - - - - "pack -side left -expand 1 -fill both -in $inname" "$attrs1"]
     } else {
-      if {[string range $ownname 0 2] in {fiL fiS diR foN clR}} {
+      if {$wtyp in {fiL fiS diR foN clR}} {
         set field cbx
         set tname [my Transname Cbx $name]
       } else {

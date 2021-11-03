@@ -1233,6 +1233,8 @@ where:
       {LabImg fraflb T 1 1 {} {-link "::t::goWiki@@Click to enter the bird's wiki@@"}}
       {LabImgInfo LabImg T 1 1 {} {-link "
       ::t::chanTab nbk .win.fra.fra.nbk.f4 no yes; focus [::t::pave SpxMisc]@@Click to select 'Misc.'\n... and mark the link as visited\n(to test the multiple visited links).@@" -afteridle ::t::labelImaged}}
+      {labklnd LabImgInfo T 1 4 {-st nswe} {-t {\nExample of calendar shown:}}}
+      {daTklnd labklnd T 4 4 {-st nswe} {}}
     }
   }
 
