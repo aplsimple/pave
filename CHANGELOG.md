@@ -1,11 +1,20 @@
 # Last changes:
 
 
-Version `3.4.6a5 (3 Nov'21)`
+Version `3.4.6b4 (8 Nov'21)`
+
+  - TODO  : NEW   : calendar: proc for right click (%y, %m, %d, %X, %Y wildcards)
+  - TODO  : NEW   : calendar: list of selected (fg) days
+  - TODO  : NEW   : calendar: updating for y/m
+  - TODO  : NEW   : unit tree for apave.tcl, obbit.tcl, apaveinput.tcl, apavedialog.tcl
+  - TODO  : CHANGE: docs
+  - TODO  : CHANGE: demos
 
   - BUGFIX: issues with pressing Enter at "-", "*", "#" starting lines
   - BUGFIX: -initialdir option for file chooser
   - BUGFIX: default/classic/alt theme & dark CS: selected check/radio buttons' bg
+  - NEW   : progress procs (begin, go, end); add it to widgetType method & test2
+  - NEW   : daT widget - calendar widget
   - NEW   : ru.msg, ua.msg for klnd
   - NEW   : 'pack -after .a.b.c' may be 'pack -after C', then [my C] used
   - NEW   : using TCLLIBPATH (spec.feature for tclkits)

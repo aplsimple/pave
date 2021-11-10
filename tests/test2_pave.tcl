@@ -171,7 +171,6 @@ namespace eval t {
 
     if {$num in {3 4}} {
       if {$num == 3} {set cs $::t::prevcs}
-      if {$num == 4 && $cs==-2} {set cs $::t::nextcs}
       if {$num == 4 && $cs==-3} {
         if {[set cs [::t::csCurrent]]<[apave::cs_Min]} {set cs [apave::cs_Min]}
         pave basicFontSize $::t::fontsz
@@ -919,6 +918,7 @@ namespace eval t {
       {fra.nbk2 - - - - {pack forget -side top} {
         f1 {-text "Links etc."}
         f2 {-text "Scrolled frame"}
+        f3 {-text "Calendar $::t::year"}
         -tr {just to test "-tr*" to call ttk::notebook::enableTraversal}
       }}
     }
@@ -1022,7 +1022,7 @@ namespace eval t {
             IMG_7 {{::t::aloupe} -tooltip "Run aloupe@@ -under 5"}
             sev 7
             h_ 1
-            opcTheme {::t::opct ::t::opcThemes {-width 7} {} -command ::t::opcToolPost -tooltip "Current ttk theme@@ -under 3"}
+            opcTheme {::t::opct ::t::opcThemes {-width 7} {} -command ::t::opcToolPost -tooltip {Current ttk theme\n\nNOTE: awthemes are active only\nif a color scheme isn't "-2 None".@@ -under 3}}
             {# h_ 1}
             {IMG_3 {{::t::toolBut 3 \[set ::t::prevcs\]}}}
             h_ 1
@@ -1193,9 +1193,10 @@ where:
       ####################################################################
       # {#                TAB-5: COLOR SCHEMES                           }
       ####################################################################
-      {BuTClrB  - - 1 4 {-st nsew -rw 1 -cw 1} {-com {::t::toolBut 4 -1} -text "CS -1: Basic"}}
+      {BuTClrN  - - 1 2 {-st nsew -rw 1 -cw 1} {-com {::t::toolBut 4 -2} -text "CS -2: Default"}}
+      {BuTClrB  BuTClrN L 1 2 {-st nsew -rw 1 -cw 1} {-com {::t::toolBut 4 -1} -text "CS -1: Basic"}}
       {tcl {
-        set prt BuTClrB
+        set prt BuTClrN
         for {set i 0} {$i<48} {incr i} {
           set cur "BuTClr$i"
           if {$i%4} {set n $pr; set p L} {set n $prt; set p T; set prt $cur}
@@ -1210,6 +1211,11 @@ where:
 
   proc pave_Nbk2_Tab1 {} {
 
+    set sec [clock seconds]
+    set ::t::formatKlnd1 %d.%m.%Y
+    set ::t::formatKlnd2 %m/%d/%Y
+    set ::t::dateKlnd1 [clock format $sec -format $::t::formatKlnd1]
+    set ::t::dateKlnd2 10/30/2021
     return {
       ####################################################################
       # {#               TABS OF VIEW (JUST TO BE PRESENT)               }
@@ -1233,8 +1239,10 @@ where:
       {LabImg fraflb T 1 1 {} {-link "::t::goWiki@@Click to enter the bird's wiki@@"}}
       {LabImgInfo LabImg T 1 1 {} {-link "
       ::t::chanTab nbk .win.fra.fra.nbk.f4 no yes; focus [::t::pave SpxMisc]@@Click to select 'Misc.'\n... and mark the link as visited\n(to test the multiple visited links).@@" -afteridle ::t::labelImaged}}
-      {labklnd LabImgInfo T 1 4 {-st nswe} {-t {\nExample of calendar shown:}}}
-      {daTklnd labklnd T 4 4 {-st nswe} {}}
+      {labklnd LabImgInfo T 1 4 {-st nswe} {-t {\nExample of calendar #1}}}
+      {daTklnd labklnd T 1 1 {-st nw} {-borderwidth 1 -relief raised -dateformat $::t::formatKlnd1 -tvar ::t::dateKlnd1 -com {puts date1=$::t::dateKlnd1}}}
+      {labklnd2 labklnd L 1 4 {-st nswe} {-t {\nExample of calendar #2}}}
+      {daTklnd2 labklnd2 T 1 1 {-st nw} {-borderwidth 1 -relief raised -dateformat $::t::formatKlnd2 -tvar ::t::dateKlnd2 -com {puts date2=$::t::dateKlnd2} -locale en_us}}
     }
   }
 
@@ -1264,12 +1272,40 @@ where:
     }
   }
 
+  proc pave_Nbk2_Tab3 {} {
+    return {
+      {fra - - - - {-st nsew -cw 1 -rw 1}}
+      {fra.scf - - 1 1  {pack -fill both -expand 1}}
+      {tcl {
+        set day1 [clock scan "$::t::year/5/1" -format %Y/%N/%e]
+        set day1 [clock format $day1 -format $::t::formatKlnd1]
+        set prevW -
+        set prevP -
+        for {set m 1} {$m<=12} {incr m} {
+          if {$m==$::t::month} {
+            set sel "-currentmonth $::t::year/$::t::month"
+          } else {
+            set sel "-currentmonth {}"
+          }
+          set day2 [clock scan "$::t::year/$m/1" -format %Y/%N/%e]
+          set day2 [clock format $day2 -format $::t::formatKlnd1]
+          set ::t::idateKlnd$m $day2
+          set lwid [list fra.scf.daT$m $prevW $prevP 1 1 {-st nw} "-relief raised -dateformat $::t::formatKlnd1 -tvar ::t::idateKlnd$m -com \"puts date=\$::t::idateKlnd$m\" -staticdate $day1 $sel -locale en"]
+          %C $lwid
+          set prevW fra.scf.daT[expr {$m - ($m%2?0:1)}]
+          if {$m % 2} {set prevP L} {set prevP T}
+        }
+      }}
+    }
+  }
+
 # ______________________ The test's main procedure ______________________ #
 
   proc test2_pave {} {
 
     variable pdlg
     variable pave
+    ::apave::obj progress_Begin {} .win Starting {Wait a little...} {} 1280 -length 250
     set firstin [expr {$::t::newCS==[apave::cs_Non]}]
     apave::APaveInput create pdlg .win
     apave::APaveInput create pave .win $::t::newCS
@@ -1322,6 +1358,8 @@ where:
     ttk::style conf TLabelframe -labelmargins {5 10 1 1} -padding 3
     trace add variable t::sc write "::t::tracer ::t::sc"
     pave defaultAttrs chB {} {-padx 11 -pady 3}  ;# to test defaultAttrs
+    source [file join $::pavedirname pickers klnd klnd.tcl]
+    lassign [::klnd::currentYearMonthDay] ::t::year ::t::month
     set ::t::restart 1
 
     # making main window object and dialog object
@@ -1334,7 +1372,8 @@ where:
       .win.fra.fra.nbk.f4 [pave_Nbk1_Tab4] \
       .win.fra.fra.nbk.f5 [pave_Nbk1_Tab5] \
       .win.fra.fra.nbk2.f1 [pave_Nbk2_Tab1] \
-      .win.fra.fra.nbk2.f2 [pave_Nbk2_Tab2]
+      .win.fra.fra.nbk2.f2 [pave_Nbk2_Tab2] \
+      .win.fra.fra.nbk2.f3 [pave_Nbk2_Tab3]
 
     # text widget's name is uppercased, so we can use the Text method
     set wtex [pave Text]
@@ -1403,9 +1442,10 @@ where:
     catch {::transpops::run [file join ~/PG/github/DEMO/pave $::t::transpopsFile] {<Alt-t> <Alt-y>} {.win .win._a_loupe_loup .win._a_loupe_disp .__tk__color .win._apave_CALENDAR_}}
 
     # Open the window at last
+    ::apave::obj progress_End
     set ::t::curTab ""
     chanTab nbk
-    set res [pave showModal .win -geometry +350+30 -decor 1 -onclose t::exitProc]
+    set res [pave showModal .win -decor 1 -onclose t::exitProc]
     if {$::t::newCS==[apave::cs_Non]} { ;# at restart, newCS is set
       # getting result and clearance
       set res [pave res .win]
@@ -1424,15 +1464,6 @@ where:
 # __________________________ Running the test ___________________________ #
 
 puts "\nThis is just a demo. Take it easy."
-if {[catch {
-  package require awthemes
-  package require ttk::theme::awlight
-  package require ttk::theme::awdark
-}]} then {
-  set ::t::opcThemes [list default clam classic alt]
-} else {
-  set ::t::opcThemes [list default clam classic alt -- {{light / dark} awlight awdark}]
-}
 set test2script $::t::ftx1
 set ::t::opct clam
 if {$::argc>=5} {
@@ -1441,6 +1472,14 @@ if {$::argc>=5} {
 } else {
   set ::t::newCS 27 ;# ForestDark CS
   set ::t::opcIcon "small"
+}
+set ::t::opcThemes [list default clam classic alt]
+if {$::t::newCS!=-2 && ![catch {
+package require awthemes
+package require ttk::theme::awlight
+package require ttk::theme::awdark
+}]} then {
+  set ::t::opcThemes [list default clam classic alt -- {{light / dark} awlight awdark}]
 }
 if {[catch {apave::initWM -theme $::t::opct}]} apave::initWM
 if {![info exists ::t::hue] || ![string is integer -strict $::t::hue]} {set ::t::hue 0}
