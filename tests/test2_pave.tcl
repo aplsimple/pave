@@ -374,16 +374,20 @@ namespace eval t {
   proc TextConfigPie {} {
     ##################################################################
     # This code is taken from Tk's demos/ctext.tcl
-    proc mkTextConfigPie {w x y a option value color} {
-      set item [$w create arc $x $y [expr {$x+90}] [expr {$y+90}] \
+    proc mkTextConfigPie {w x y i0 a option value color} {
+      set arcid [$w create arc $x $y [expr {$x+90}] [expr {$y+90}] \
         -start [expr {$a-15}] -extent 30 -fill $color]
+      $w addtag ArcTag[incr i0] withtag $arcid
+      ::baltip::tip $w "This is an $i0-th arc\nwith tag 'ArcTag$i0'" -ctag ArcTag$i0
     }
     set c .win.fra.fra.nbk.f4.can
-    $c create text 180 20 -text {Demo canvas from Tk's demos/ctext.tcl} -fill red
+    set txtid [$c create text 180 20 -text {Demo canvas from Tk's demos/ctext.tcl} -fill red]
+    $c addtag TextTag withtag $txtid
+    ::baltip::tip $c "This is a text\nwith tag 'TextTag'" -ctag TextTag
     for {set i0 0} {$i0<12} {incr i0} {
       set i1 [expr {$i0*30}]
       set i2 [expr {$i0>9 ? [expr {($i0-10)*30}]: [expr {90+$i1}]}]
-      mkTextConfigPie $c 140 30 $i1 -angle  $i2 Yellow
+      mkTextConfigPie $c 140 30 $i0 $i1 -angle  $i2 Yellow
     }
   }
 
@@ -468,7 +472,7 @@ namespace eval t {
       }
       set cs [pave csCurrent]
       set seltxt [pave selectedWordText [pave Text]]
-      ::em::main -prior 1 -modal 0 -remain 0 "md=~/.tke/plugins/e_menu/menus" m=menu.mnu "f=$fname" "PD=~/PG/e_menu_PD.txt" "s=$seltxt" b=chromium h=~/DOC/www.tcl.tk/man/tcl8.6 "tt=xterm -fs 12 -geometry 90x30+400+100" g=$geo om=0 c=$cs o=-1 t=1
+      ::em::main -prior 1 -modal 0 -remain 0 "md=~/.tke/plugins/e_menu/menus" m=menu.mnu "f=$fname" "PD=~/PG/e_menu_PD.txt" "s=$seltxt" b=chromium h=~/DOC/www.tcl.tk/man/tcl8.6 "tt=xterm -fs 12 -geometry 90x30+400+100" g=$geo om=0 c=$cs o=0 t=1
       set cs2 [::t::csCurrent]
       if {$cs!=$cs2} {toolBut 4 $cs2}
     } else {
@@ -561,9 +565,9 @@ namespace eval t {
     set ::t::noname "<No name>"
     set ::t::ansSelTab [set ::t::ansSwBta 0]
     set wbase [pave LfrB]
-    set bar1Opts [list -wbar $wframe -wbase $wbase -lablen 16 \
+    set bar1Opts [list -wbar $wframe -wbase $wbase -lablen 16 -tiplen 20 \
       -csel {::t::selTab %t} -csel2 {::t::selTab2 %t} -bd 1 -expand 1 \
-      -cdel {::t::delTab %t} -redraw $::BTS_REDRAW \
+      -cdel {::t::delTab %t} -redraw $::BTS_REDRAW -popuptip ::t::popupTip \
       -menu [list \
       sep \
       "com {Mark the tab} {::t::markTab %t} {} ::t::checkMark" \
@@ -624,6 +628,10 @@ namespace eval t {
     bind [pave Text] <Control-Right> "::bt scrollRight ; break"
     bind .win <F5> "::t::e_menu; break"
     colorBar
+  }
+
+  proc popupTip {wmenu idx TID} {
+    catch {::baltip tip $wmenu [getTabFile $TID] -index $idx}
   }
 
   proc colorBar {} {
@@ -881,6 +889,7 @@ namespace eval t {
       tblWid1 curitem     : [lindex $::t::tbllist 1] \n      \
       tblWid1 items       : [lindex $::t::tbllist 2] \n      \
     "
+    puts "Days selected: [klnd::getDaylist $::t::paveobj]"
   }
 
 # __________________________ Paving procedures __________________________ #
@@ -908,17 +917,17 @@ namespace eval t {
       {#fra2 fral L 8 9 {-st nsew}}
       {fra fral L 8 9 {-st nsew}}
       {fra.Nbk - - - - {pack -side top} {
-        f1 {-text " 1st tab of General " -underline 2}
-        f2 {-text " Ttk demos/ttkpane.tcl " -underline 1}
-        f3 {-text " Non-themed " -underline 1}
-        f4 {-text " Misc. widgets " -underline 1}
-        f5 {-text " Color schemes " -underline 1}
+        f1 {-text " 1st tab of General " -underline 2 -tip "General widgets:\n- entries\n- choosers\n- text viewer/editor\n- tk_optionCascade\n- tablelist"}
+        f2 {-text " Ttk demos/ttkpane.tcl " -underline 1 -tip "The code taken from\nTk's demos/ctext.tcl.\n\nDistributed with Tcl/Tk."}
+        f3 {-text " Non-themed " -underline 1 -tip "Non-ttk widgets,\nthough themed in apave."}
+        f4 {-text " Misc. widgets " -underline 1 -tip "Miscellaneous ttk widgets."}
+        f5 {-text " Color schemes " -underline 1 -tip "Colored patterns\nof color schemes."}
         -traverse yes -select f2
       }}
       {fra.nbk2 - - - - {pack forget -side top} {
-        f1 {-text "Links etc."}
-        f2 {-text "Scrolled frame"}
-        f3 {-text "Calendar $::t::year"}
+        f1 {-text "Links etc." -tip "Various widgets:\n- check/radio buttons\n- links from text/image\n- listbox from file\n- two independent calendars"}
+        f2 {-text "Scrolled frame" -tip "Example of scrolled frame\nwith file viewer and comboboxes"}
+        f3 {-text "< Calendar $::t::year >" -tip "All-months-of-year calendar.\n\nIt allows to select a list\nof days in years and months.\n\nAll of days allow left and right\nclicks to call callbacks with\nthe wildcards:\n- %y, %m, %d (date)\n- %X, %Y (pointer coordinates)"}
         -tr {just to test "-tr*" to call ttk::notebook::enableTraversal}
       }}
     }
@@ -1240,9 +1249,9 @@ where:
       {LabImgInfo LabImg T 1 1 {} {-link "
       ::t::chanTab nbk .win.fra.fra.nbk.f4 no yes; focus [::t::pave SpxMisc]@@Click to select 'Misc.'\n... and mark the link as visited\n(to test the multiple visited links).@@" -afteridle ::t::labelImaged}}
       {labklnd LabImgInfo T 1 4 {-st nswe} {-t {\nExample of calendar #1}}}
-      {daTklnd labklnd T 1 1 {-st nw} {-borderwidth 1 -relief raised -dateformat $::t::formatKlnd1 -tvar ::t::dateKlnd1 -com {puts date1=$::t::dateKlnd1}}}
+      {daTklnd labklnd T 1 1 {-st nw} {-borderwidth 1 -relief raised -dateformat $::t::formatKlnd1 -tvar ::t::dateKlnd1 -com {puts "date1=$::t::dateKlnd1 (DMY=%d.%m.%y)"}}}
       {labklnd2 labklnd L 1 4 {-st nswe} {-t {\nExample of calendar #2}}}
-      {daTklnd2 labklnd2 T 1 1 {-st nw} {-borderwidth 1 -relief raised -dateformat $::t::formatKlnd2 -tvar ::t::dateKlnd2 -com {puts date2=$::t::dateKlnd2} -locale en_us}}
+      {daTklnd2 labklnd2 T 1 1 {-st nw} {-borderwidth 1 -relief raised -dateformat $::t::formatKlnd2 -tvar ::t::dateKlnd2 -com {puts "date2=$::t::dateKlnd2 (DMY=%d.%m.%y)"} -locale en_us}}
     }
   }
 
@@ -1272,15 +1281,49 @@ where:
     }
   }
 
+  proc yearCurr {} {
+    set wy [pave ButKlndYear]
+    set year [$wy cget -text]
+    set to [expr {[lindex [::klnd::currentYearMonthDay] 0] - $year}]
+    yearNext $to
+  }
+
+  proc yearNext {to} {
+    set wy [pave ButKlndYear]
+    set year [$wy cget -text]
+    incr year $to
+    set yearmin [::klnd::minYear]
+    set yearmax [::klnd::maxYear]
+    if {$year<$yearmin} {set year $yearmin}
+    if {$year>$yearmax} {set year $yearmax}
+    $wy configure -text $year
+    foreach month {1 2 3 4 5 6 7 8 9 10 11 12} {
+      ::klnd::update [expr {$month+2}] $year $month
+    }
+    .win.fra.fra.nbk2 tab .win.fra.fra.nbk2.f3 -text "< Calendar $year >"
+    update
+  }
+
   proc pave_Nbk2_Tab3 {} {
     return {
       {fra - - - - {-st nsew -cw 1 -rw 1}}
       {fra.scf - - 1 1  {pack -fill both -expand 1}}
+      {fra.scf.fra - - 1 2 {-st ew}}
+      {.buT1 - - - - {pack -side left} {-image ICN43 -compound left -com {::t::yearNext -50} -t {Prior 50}}}
+      {.buT12 - - - - {pack -side left} {-image ICN41 -compound left -com {::t::yearNext -1} -t {Prior 1}}}
+      {.ButKlndYear - - - - {pack -side left -anchor center -expand 1} {-com ::t::yearCurr -t $::t::year -style TButtonBold -tip "Click to set\nthe current."}}
+      {.buT22 - - - - {pack -side left} {-image ICN42 -compound right -com {::t::yearNext 1} -t {Next 1}}}
+      {.buT2 - - - - {pack -side left} {-image ICN44 -compound right -com {::t::yearNext 50} -t {Next 50}}}
       {tcl {
         set day1 [clock scan "$::t::year/5/1" -format %Y/%N/%e]
         set day1 [clock format $day1 -format $::t::formatKlnd1]
-        set prevW -
-        set prevP -
+        set day2 [clock scan "$::t::year/9/20" -format %Y/%N/%e]
+        set day2 [clock format $day2 -format $::t::formatKlnd1]
+        set day3 [clock scan "$::t::year/12/15" -format %Y/%N/%e]
+        set day3 [clock format $day3 -format $::t::formatKlnd1]
+        set daylist [list $day1 $day2 $day3]
+        set prevW fra.scf.fra
+        set prevP T
         for {set m 1} {$m<=12} {incr m} {
           if {$m==$::t::month} {
             set sel "-currentmonth $::t::year/$::t::month"
@@ -1290,7 +1333,7 @@ where:
           set day2 [clock scan "$::t::year/$m/1" -format %Y/%N/%e]
           set day2 [clock format $day2 -format $::t::formatKlnd1]
           set ::t::idateKlnd$m $day2
-          set lwid [list fra.scf.daT$m $prevW $prevP 1 1 {-st nw} "-relief raised -dateformat $::t::formatKlnd1 -tvar ::t::idateKlnd$m -com \"puts date=\$::t::idateKlnd$m\" -staticdate $day1 $sel -locale en"]
+          set lwid [list fra.scf.daT$m $prevW $prevP 1 1 {-st nw} "-relief raised -dateformat $::t::formatKlnd1 -tvar ::t::idateKlnd$m -daylist {$daylist} -com \"puts date=\$::t::idateKlnd$m\" -popup {puts {%y/%m/%d, at (%X,%Y)}} -united yes $sel -locale en"]
           %C $lwid
           set prevW fra.scf.daT[expr {$m - ($m%2?0:1)}]
           if {$m % 2} {set prevP L} {set prevP T}
@@ -1308,7 +1351,7 @@ where:
     ::apave::obj progress_Begin {} .win Starting {Wait a little...} {} 1280 -length 250
     set firstin [expr {$::t::newCS==[apave::cs_Non]}]
     apave::APaveInput create pdlg .win
-    apave::APaveInput create pave .win $::t::newCS
+    set ::t::paveobj [apave::APaveInput create pave .win $::t::newCS]
     pave initLinkFont -slant italic -underline 1
     pave untouchWidgets *buTClr*
     if {!$firstin} {pave basicFontSize $::t::fontsz}
@@ -1348,11 +1391,8 @@ where:
         image create photo $img -data [::apave::iconData none]
       }
       catch {image create photo $img-small -data [::apave::iconData $icon small]}
-      if {$i<$llen/2} {
-        append ::t::toolList " $img {{} -tooltip {Icon$i: $icon@@ -under 4}}"
-      } else {
-        append ::t::toolList2 " $img {{} -tooltip {Icon$i: $icon@@ -under 4}}"
-      }
+      set tta " $img {{} -tooltip { Icon $i \n $icon @@ -under 4 -image $img -per10 5000}}"
+      if {$i<$llen/2} {append ::t::toolList $tta} {append ::t::toolList2 $tta}
     }
     set ::bgst [ttk::style lookup TScrollbar -troughcolor]
     ttk::style conf TLabelframe -labelmargins {5 10 1 1} -padding 3

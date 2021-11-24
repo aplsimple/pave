@@ -1,18 +1,21 @@
 # Last changes:
 
 
-Version `3.4.6b4 (8 Nov'21)`
+Version `3.4.6b13 (24 Nov'21)`
 
-  - TODO  : NEW   : calendar: proc for right click (%y, %m, %d, %X, %Y wildcards)
-  - TODO  : NEW   : calendar: list of selected (fg) days
-  - TODO  : NEW   : calendar: updating for y/m
-  - TODO  : NEW   : unit tree for apave.tcl, obbit.tcl, apaveinput.tcl, apavedialog.tcl
+  - TODO  : NEW   : unit tree for obbit.tcl, apaveinput.tcl, apavedialog.tcl
   - TODO  : CHANGE: docs
   - TODO  : CHANGE: demos
 
   - BUGFIX: issues with pressing Enter at "-", "*", "#" starting lines
   - BUGFIX: -initialdir option for file chooser
   - BUGFIX: default/classic/alt theme & dark CS: selected check/radio buttons' bg
+  - BUGFIX: treeview's ttk::style for CS=-2 (i.e. if no CS)
+  - NEW   : tooltip for notebook tab
+  - NEW   : unit tree for apave.tcl
+  - NEW   : calendar: updating for y/m
+  - NEW   : calendar: proc for right click (%y, %m, %d, %X, %Y wildcards)
+  - NEW   : calendar: list of selected (fg) days
   - NEW   : progress procs (begin, go, end); add it to widgetType method & test2
   - NEW   : daT widget - calendar widget
   - NEW   : ru.msg, ua.msg for klnd
@@ -22,11 +25,13 @@ Version `3.4.6b4 (8 Nov'21)`
   - NEW   : -padx, -pady options for entry fields of choosers
   - NEW   : topmost attribute in showModal depending on a window's ancestors
   - NEW   : cs_Active to set/get flag "no CS changes"
+  - CHANGE: csMainColors includes e_menu colors
+  - CHANGE: test0, test1, test2 modified
   - CHANGE: klnd.tcl refactored (unit tree, inits)
   - CHANGE: modified style of TButton, TNotebook.Tab
-  - CHANGE: modified CS for: bg of menus, cursor, selection
+  - CHANGE: modified CS for: bg of menus, cursor, selection, tips
   - CHANGE: modified CS: Oscuros, MildDarks, rdbende's Darks
-  - CHANGE: hl_tcl, klnd packages updated
+  - CHANGE: hl_tcl, baltip, bartabs packages updated
 
 
 Version `3.4.5 (6 Oct'21)`

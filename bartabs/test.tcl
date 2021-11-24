@@ -100,6 +100,13 @@ proc ::TestDsbl {BID TID menuitem} {
 
 #----------------------------------
 
+proc ::TestPopupTip {wmenu idx TID} {
+  set text "Some tips about\n\"[::bts $TID cget -text]\""
+  catch {::baltip tip $wmenu $text -index $idx}
+}
+
+#----------------------------------
+
 proc ::FillBarTabs {} {
 
   set ::noname "<No name>"
@@ -140,10 +147,11 @@ proc ::FillBarTabs {} {
   pack $::w4 -side left -after $::w3 -expand 1 -fill x -anchor ne
 
   set barOpts0 [list -wbar $::w0 -wbase $::frm -wproc "winfo width $::l1" \
+    -popuptip ::TestPopupTip \
     -static yes -hidearrows yes -padx 6 -pady 6 -csel "::TestComm sel %b %t {%l}"]
 
   set barOpts1 [list -tleft 1 -tright 5 -wbar $::w1 -fgsel "" \
-    -wbase $::frm -wproc "winfo width $::l1" \
+    -wbase $::frm -wproc "winfo width $::l1" -popuptip ::TestPopupTip \
     -hidearrows yes -relief sunken  -static 1 -tiplen -1 \
     -csel {::TestComm sel %b %t {%l}} \
     -cdel {::TestDel %b %t {%l}} \
@@ -154,7 +162,7 @@ proc ::FillBarTabs {} {
 
   set barOpts2 [list -wbar $::w2 -wbase $::l2 -pady 3 \
     -lablen 11 -expand 0 -imagemark markimg -tiplen 15 -dotip yes \
-    -tleft 3 -fgsel black -bgsel #999999 \
+    -tleft 3 -fgsel black -bgsel #999999 -popuptip ::TestPopupTip \
     -cmov {::TestComm mov %b %t {%l}} \
     -csel {::TestComm sel %b %t {%l}} \
     -cdel {::TestDel %b %t {%l}} \
@@ -164,7 +172,7 @@ proc ::FillBarTabs {} {
     sep \
     "com {Switch -expand option} {::TestSwitch %b %t -expand}" ]]
   
-  set barOpts3 [list -wbar $::w5 -wbase $::frm -tleft 7 -bd 0 \
+  set barOpts3 [list -wbar $::w5 -wbase $::frm -tleft 7 -bd 0 -popuptip ::TestPopupTip \
     -wproc "expr {\[winfo width $::frm\]-\[winfo width $::l3\]-80}" \
     -menu [list sep "com {Switch -bd option} {::TestSwitch %b %t -bd}"]]
   

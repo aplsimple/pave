@@ -108,21 +108,27 @@ while {1} {
     }
   }
   # here might be some procedures to process the input data, e.g. showing:
-  puts "
-      res=$res
+  apave::APaveDialog create pdlg
+  pdlg ok info Results " \
+    $mfind $en1 \n \
+    $mrepl $en2 \n \
+    E/G/R: $v1 \n \
+    ______________________________      \n \
+    \n \
+    $mword: $c1 \n \
+    $mcase: $c2 \n \
+    $mwrap: $c3 \n \
+    $mblnk: $c4 \n \
+    ______________________________      \n \
+    \n \
+    $mdir $v2 \n \
+    $montop: $c5 \n \
+    ______________________________      \n \
+    \n \
+    Button chosen: $res \n \
+    "
+  pdlg destroy
 
-      $mfind $en1
-      $mrepl $en2
-
-      E/G/R=$v1
-      $mword=$c1
-      $mcase=$c2
-      $mwrap=$c3
-      $mblnk=$c4
-      $montop=$c5
-      $mdir $v2
-      Mode=$res
-      _________________________________"
   destroy $win
 }
 pave destroy

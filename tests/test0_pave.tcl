@@ -46,16 +46,26 @@ pave paveWindow $win.fra {
   {but5 seh3 T 3 1 {-st we} {-t "Close" -com "::pave res $win 0"}}
 }
 set res [pave showModal $win -focus $win.fra.ent1 -geometry +200+200]
-puts "
-    Entry1=$en1
-    Entry2=$en2
-    E/G/R=$v1
-    CheckBox1=$c1
-    CheckBox2=$c2
-    CheckBox3=$c3
-    Direction=$v2
-    Result=$res
-    "
+
+apave::APaveDialog create pdlg
+pdlg ok info Results " \
+  Entry1: $en1 \n \
+  Entry2: $en2 \n \
+  E/G/R: $v1 \n \
+  ______________________________      \n \
+  \n \
+  CheckBox1: $c1 \n \
+  CheckBox2: $c2 \n \
+  CheckBox3: $c3 \n \
+  ______________________________      \n \
+  \n \
+  Direction: $v2 \n \
+  ______________________________      \n \
+  \n \
+  Button chosen: $res \n \
+  "
+pdlg destroy
+
 pave destroy
 destroy $win
 

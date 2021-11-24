@@ -249,10 +249,10 @@ proc ::klnd::my::InitCalendar {args} {
   lassign [::apave::parseOptions $args \
   -title {} -value {} -tvar {} -locale {} -parent {} -dateformat %D \
   -weekday {} -centerme {} -geometry {} -entry {} -com {} -command {} \
-  -static 0 -currentmonth {} -staticdate {}] \
+  -currentmonth {} -united no -daylist {-} -popup {}] \
     title datevalue tvar loc parent p(dformat) \
     p(weekday) centerme geo entry com1 com2 \
-    p(static) p(currentmonth) p(staticdate)
+    p(currentmonth) p(united) p(daylist) p(popup)
   if {$com2 eq {}} {set p(com) $com1} {set p(com) $com2}
   # get localized week day names
   lassign [::klnd::weekdays $loc] p(days) p(weekday)
@@ -262,6 +262,8 @@ proc ::klnd::my::InitCalendar {args} {
   set p(tvar) $tvar
   if {$tvar ne {}} {
     set datevalue [set $tvar]
+  } elseif {$p(daylist) ne {-}} {
+    set datevalue [lindex $p(daylist) 0]
   }
   catch {unset p(after)} ;# to pause more at start
   # colors to be used
@@ -330,6 +332,20 @@ proc ::klnd::my::DefaultLocale {} {
 
 # ________________________ UI _________________________ #
 
+proc ::klnd::minYear {} {
+  # Gets minimal year that is correct.
+
+  return 1753
+}
+#_______________________
+
+proc ::klnd::maxYear {} {
+  # Gets maximal year that is correct.
+
+  return 9999
+}
+#_______________________
+
 proc ::klnd::currentYearMonthDay {} {
   # Gets current year, month, day.
   # Return a list of  current year, month, day.
@@ -387,7 +403,7 @@ proc ::klnd::clearArgs {args} {
   # Removes specific options from args.
   #   args - list of options
 
-  return [::apave::removeOptions $args -title -value -tvar -locale -parent -dateformat -weekday -com -command -currentmonth -staticdate]
+  return [::apave::removeOptions $args -title -value -tvar -locale -parent -dateformat -weekday -com -command -currentmonth -united -daylist -popup]
 }
 #_______________________
 

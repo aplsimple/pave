@@ -54,17 +54,25 @@ proc ::klnd::my::GoMonth2 {obj i {dobreak no}} {
 }
 #_______________________
 
-proc ::klnd::my::ShowMonth2 {obj m y {doenter yes}} {
+proc ::klnd::my::MapYMD {script y m d} {
+  # Gets a script with %y, %m, %d wildcards.
+
+  return [string map [list %y $y %m $m %d $d] $script]
+}
+#_______________________
+
+proc ::klnd::my::ShowMonth2 {obj m y {doenter yes} {dopopup no}} {
   # Displays a month's days.
   #   obj - index of calendar
   #   m - month
-  #   y -year
+  #   y - year
   #   doenter - yes, if perform Enter2 proc
+  #   dopopup - yes, if bind a popup menu
 
   variable p
-  set y [expr {max($y,1753)}]
-  # if calendars are linked with staticdate, no display of year in a title
-  if {$p(staticdate$obj) eq {}} {set yd " $y"} {set yd {}}
+  set y [expr {max($y,[::klnd::minYear])}]
+  # if calendars are linked with united, no display of year in a title
+  if {$p(united$obj)} {set yd {}} {set yd " $y"}
   [$p($obj) LabMonth$obj] configure -text  "[lindex $p(months$obj) [expr {$m-1}]]$yd" \
     -font "[$p($obj) csFontDef] -size [expr {[$p($obj) basicFontSize]+3}]"
   # display day names
@@ -79,22 +87,41 @@ proc ::klnd::my::ShowMonth2 {obj m y {doenter yes}} {
   set lday [clock format [clock scan "[incr ml]/1/$yl 1 day ago"] -format %d]
   set iday [set p(icurr$obj) 0]
   for {set i 1} {$i<43} {incr i} {
+    set fg $p(fg1)
+    set bg $p(bg1)
+    set wbut [$p($obj) BuT$obj-${i}KLND]
     if {$i<=$i0 || $iday>=$lday} {
       set att "-takefocus 0 -text {    } -activebackground $p(bg1)"
+      set script {}
     } else {
       set att "-takefocus 0 -text {[incr iday]} -activeforeground $p(fg0) -activebackground $p(bg0)"
       if {$doenter && ($iday==$p(dvis$obj) || ($iday==$lday && $iday<$p(dvis$obj)))} {
-        if {[info exists p(after$obj)]} {set af 20} {set af 200} ;# at key pressing tight
         catch {after cancel $p(after$obj)}
-        set p(after$obj) [after $af \
+        set p(after$obj) [after idle \
           "::klnd::my::Enter2 $obj $i; ::klnd::my::HighlightCurrentDay2 $obj"]
       }
       if {$iday==1} {set p(d1st) $i}
       if {$y==$p(y) && $m==$p(m) && $iday==$p(d)} {
         set p(icurr$obj) $i  ;# button's index of the current date
       }
+      if {$p(daylist$obj) ne {-}} {
+        set dt [FormatDay2 $obj $y $m $iday]
+        if {[lsearch -exact $p(daylist$obj) $dt]>-1} {
+          set fg $p(fgsel)
+          set bg $p(bgsel)
+        } elseif {$p(currentdate) eq "$y/$m/$iday"} {
+          set fg $p(fg2)
+          set bg $p(bg2)
+        }
+      }
+      if {$dopopup} {
+        set script [MapYMD $p(popup$obj) $y $m $iday]
+      }
     }
-    [$p($obj) BuT$obj-${i}KLND] configure {*}$att -relief flat -overrelief flat -fg $p(fg1) -bg $p(bg1)
+    if {$dopopup && $p(popup$obj) ne {}} {
+      bind $wbut <Button-3> $script
+    }
+    $wbut configure {*}$att -relief flat -overrelief flat -fg $fg -bg $bg
   }
   set p(mvis$obj) $m  ;# month & year currently visible
   set p(yvis$obj) $y
@@ -124,16 +151,30 @@ proc ::klnd::my::HighlightCurrentDay2 {obj} {
       catch {set p(wcurr$obj) [$p($obj) BuT$obj-$p(icurr$obj)KLND]}
     }
     catch {
-      $p(wcurr$obj) configure -fg $p(fg2) -bg $p(bg2)
-      if {$p(staticdate$obj) ne {}} {
-        # if calendars are linked with staticdate, one COMMON day selected for all
+      if {[$p(wcurr$obj) cget -bg] ne $p(bgsel)} {
+        $p(wcurr$obj) configure -fg $p(fg2) -bg $p(bg2)
+      }
+      if {$p(united$obj)} {
+        # if calendars are linked with united, one COMMON day selected for all
         set p(wcurrdate) $p(wcurr$obj)
       }
     }
-    return [expr {[info exists p(wstaticdate$obj)] && [info exists p(wcurr$obj)] && \
-      $p(wstaticdate$obj) eq $p(wcurr$obj)}]
+    return [expr {[info exists p(wunited$obj)] && [info exists p(wcurr$obj)] && \
+      $p(wunited$obj) eq $p(wcurr$obj)}]
   }
   return no
+}
+#_______________________
+
+proc ::klnd::my::FormatDay2 {obj y m d} {
+  # Gets a date formatted according to a current format.
+  #   obj - index of calendar
+  #   y - year of the date
+  #   m - month of the date
+  #   d - day of the date
+
+  variable p
+  return [clock format [clock scan $m/$d/$y -format %D] -format $p(dformat$obj) -locale $p(loc$obj)]
 }
 #_______________________
 
@@ -149,58 +190,66 @@ proc ::klnd::my::Enter2 {obj i {focusin 0}} {
   if {![IsDay2 $obj $i]} return
   set w [$p($obj) BuT$obj-${i}KLND]
   set p(dvis$obj) [$w cget -text]
-  set date [clock format [clock scan $p(mvis$obj)/$p(dvis$obj)/$p(yvis$obj) -format %D] -format $p(dformat$obj)]
-  ShowMonth2 $obj $p(mvis$obj) $p(yvis$obj) no
+  set date [FormatDay2 $obj $p(yvis$obj) $p(mvis$obj) $p(dvis$obj)]
   if {$focusin} {
-    set p(olddate$obj) $date
-    if {$p(staticdate$obj) ne {}} {
-      # if calendars are linked with staticdate, unselect previously selected COMMON day
-      # and then highlight the current date
-      catch {
-        $p(wstaticdate) configure -fg $p(fg1) -bg $p(bg1)
-        $p(wcurrdate) configure -fg $p(fg2) -bg $p(bg2)
+    if {$p(daylist$obj) ne {-}} {
+      # add/delete the date to/from the list of selected days
+      if {[set di [lsearch -exact $p(daylist$obj) $date]]>-1} {
+        set p(daylist$obj) [lreplace $p(daylist$obj) $di $di]
+        ShowMonth2 $obj $p(mvis$obj) $p(yvis$obj) no
+        return
+      } else {
+        lappend p(daylist$obj) $date
       }
     }
   }
-  Leave2 $obj
+  ShowMonth2 $obj $p(mvis$obj) $p(yvis$obj) no
+  if {$focusin} {
+    set p(olddate$obj) $date
+    if {$p(united$obj)} {
+      # if calendars are linked with united, unselect previously selected COMMON day
+      # and then highlight the current date
+      catch {
+        if {$p(daylist$obj) eq {-}} {
+          $p(wunited) configure -fg $p(fg1) -bg $p(bg1)
+        }
+        if {[$p(wcurr$obj) cget -bg] ne $p(bgsel)} {
+          $p(wcurr$obj) configure -fg $p(fg2) -bg $p(bg2)
+        }
+      }
+    }
+  }
   set p(ienter) $i
   if {$p(tvar$obj) ne {}} {
     set $p(tvar$obj) $date
     if {$p(olddate$obj) eq $date} {
-      catch {
-        # unselect previously selected day of THIS month
-        if {![HighlightCurrentDay2 $obj]} {
-          $p(wstaticdate$obj) configure -fg $p(fg1) -bg $p(bg1)
+      if {$p(daylist$obj) ne {-}} {
+        ShowMonth2 $obj $p(mvis$obj) $p(yvis$obj) no
+      } else {
+        catch {
+          # unselect previously selected day of THIS month
+          if {![HighlightCurrentDay2 $obj]} {
+            $p(wunited$obj) configure -fg $p(fg1) -bg $p(bg1)
+          }
         }
+        # show selected day
+        $w configure -fg $p(fgsel) -bg $p(bgsel)
       }
-      # show selected day
-      $w configure -fg $p(fgsel) -bg $p(bgsel)
       # save the selected widget for THIS month
-      # and as COMMON for calendars linked with staticdate
-      set p(wstaticdate$obj) $w
-      if {$p(staticdate$obj) ne {}} {set p(wstaticdate) $w}
+      # and as COMMON for calendars linked with united
+      set p(wunited$obj) $w
+      if {$p(united$obj)} {set p(wunited) $w}
     }
   }
-  if {$focusin && $p(com$obj) ne {}} {eval $p(com$obj)}
-}
-#_______________________
-
-proc ::klnd::my::Leave2 {obj {i 0}} {
-  # Unhighlights a button.
-  #   obj - index of calendar
-  #   i - button index
-
-  variable p
-  if {$i && ![[$p($obj) BuT$obj-${i}KLND] cget -takefocus]} return
-  foreach n [list $i $p(ienter)] {
-    if {$n} {[$p($obj) BuT$obj-${n}KLND] configure -fg $p(fg1) -bg $p(bg1)}
+  if {$focusin && $p(com$obj) ne {}} {
+    eval [MapYMD $p(com$obj) $p(yvis$obj) $p(mvis$obj) $p(dvis$obj)]
   }
   HighlightCurrentDay2 $obj
 }
 #_______________________
 
 proc ::klnd::my::BindButtons2 {obj} {
-  # Bind events to buttons of a calendar.
+  # Binds events to buttons of a calendar.
   #   obj - index of calendar
 
   variable p
@@ -223,8 +272,8 @@ proc ::klnd::my::MainWidgets2 {obj ownname} {
     "[::msgcat::mc {Current date}]: \
       [clock format [CurrentDate] -format $p(dformat$obj) -locale $p(loc$obj)]"
   set res [list "$ownname.fra - - 1 10 {-st new} {}"]
-  # if calendars are linked with staticdate, no display of tool bar
-  if {$p(staticdate$obj) ne {}} {
+  # if calendars are united, no display of tool bar
+  if {$p(united$obj)} {
     lappend res \
       "$ownname.fra.LabMonth$obj - - - - {pack -fill x -expand 1} {-anchor center -w 14}"
   } else {
@@ -265,8 +314,47 @@ proc ::klnd::my::MainWidgets2 {obj ownname} {
 
 # ________________________ UI _________________________ #
 
+proc ::klnd::update {obj year month} {
+  # Redraws a calendar
+  #   obj - index of the calendar
+  #   year - year to redraw
+  #   month - month to redraw
+
+  my::ShowMonth2 $obj $month $year yes yes
+}
+#_______________________
+
+proc ::klnd::getDaylist {pobj {min 0} {max 9999999}} {
+  # Gets a day list which was set initially and possibly changed by a user.
+  #   pobj - apave object
+  #   min - minimal index of calendar widget
+  #   max - maximal index of calendar widget
+  # The pobj is the same as passed to klnd::calendar2.
+  # See also: calendar2
+
+  variable my::p
+  set res [list]
+  if {![catch {set objNUM $my::p(objNUM)}]} {
+    for {set obj 0} {$obj<$objNUM} {} {
+      incr obj
+      if {$my::p($obj) eq $pobj && [info exist my::p(daylist$obj)]} {
+        if {$my::p(daylist$obj) ne {-} && $min<=$obj && $obj<=$max} {
+          foreach d $my::p(daylist$obj) {
+            if {[lsearch -exact $res $d]<0} {
+              lappend res $d
+            }
+          }
+        }
+      }
+    }
+  }
+  return $res
+}
+#_______________________
+
 proc ::klnd::calendar2 {pobj w ownname args} {
   # The main procedure of the calendar embedded widget.
+  #   pobj - apave object
   #   w - container widget for *ownname*
   #   ownname - frame widget for calendar
   #   args - options of the calendar
@@ -277,23 +365,36 @@ proc ::klnd::calendar2 {pobj w ownname args} {
   set my::p($obj) $pobj
   my::InitSettings
   my::InitCalendar {*}$args
-  if {$p(currentmonth) eq {}} {
-    lassign [::klnd::currentYearMonthDay] year month
-    set p(currentmonth) "$year/$month"
+  if {$my::p(currentmonth) eq {}} {
+    lassign [::klnd::currentYearMonthDay] year month day
+    set my::p(currentmonth) "$year/$month"
+    set my::p(currentdate) "$year/$month/$day"
   }
+  # save options for current calendar
   foreach opt {weekday months days loc yvis mvis dvis \
-  com tvar dformat static staticdate currentmonth} {
+  com tvar dformat united currentmonth daylist popup} {
     set my::p($opt$obj) $my::p($opt)
   }
-  # if calendars are linked with staticdate, it's selected at start
+  if {$my::p(daylist) ne {-} && $my::p(united)} {
+    # for calendars united, initialize day lists per month
+    set my::p(daylist$obj) [list]
+    foreach date $my::p(daylist) {
+      set d [clock format [clock scan $date -format $my::p(dformat)] -format %Y/%N/%d]
+      lassign [split $d /] y m
+      set m [string trim $m]
+      lappend my::p(daylist$obj) $date
+    }
+  }
+  # if calendars are united, it's selected at start
   # and saved as previously selected one
-  set p(olddate$obj) $p(staticdate)
+  set my::p(olddate$obj) {}
   # binds for day buttons and show and work with the calendar
   after idle "::klnd::my::BindButtons2 $obj; \
-    ::klnd::my::ShowMonth2 $obj $my::p(m) $my::p(y)"
+    ::klnd::my::ShowMonth2 $obj $my::p(m) $my::p(y) yes yes"
   set res [my::MainWidgets2 $obj $ownname]
   return $res
 }
+#_______________________
 
 # _________________________________ EOF _________________________________ #
 
