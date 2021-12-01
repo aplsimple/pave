@@ -1158,6 +1158,7 @@ oo::class create ::apave::APave {
       }
       pan {set widget ttk::panedwindow
         if {[string first -w $attrs]>-1 && [string first -h $attrs]>-1} {
+          # important for panes with fixed (customized) dimensions
           set attrs "-propagate {$options} $attrs"
         }
       }
@@ -1799,6 +1800,7 @@ oo::class create ::apave::APave {
       # embed calendar widgets into $ownname frame
       my SourceKlnd {}
       my SourceKlnd 2
+      set attrs1 [subst $attrs1]
       set lwidgets2 [::klnd::calendar2 [self] $w $n {*}$attrs1]
       set lwlen2 [llength $lwidgets2]
       for {set i2 0} {$i2 < $lwlen2} {} {
@@ -2047,7 +2049,12 @@ oo::class create ::apave::APave {
               set img "-image $v1 -background $bg"
             }
             set v2 "$img -command $v2 -relief flat -highlightthickness 0 -takefocus 0"
+            lassign [::apave::extractOptions v2 -method {}] ismeth
             set v1 [my Transname $but _$v1]
+            if {[string is true -strict $ismeth]} {
+              # -method option forces making "WidgetName" method from "widgetName"
+              my MakeWidgetName $w.$name [string totitle $v1 0 0]
+            }
           }
         }
         set wid1 [list $name.$v1 - - - - "pack -side left $packreq" $v2]
@@ -2140,8 +2147,7 @@ oo::class create ::apave::APave {
     # See also: MakeWidgetName
 
     set root [my ownWName $name]
-    return [list [string range $name 0 [string last . $name]][string tolower \
-      [string index $root 0]][string range $root 1 end] $root]
+    return [list [string range $name 0 [string last . $name]][string tolower $root 0 0] $root]
   }
   #_______________________
 
@@ -2415,7 +2421,7 @@ oo::class create ::apave::APave {
               set wt $w.$fr
               $w add [ttk::frame $wt] {*}$attr
               if {[append t1 $t2] ne {}} {
-                ::baltip::tip $w $t1 -nbktab $wt
+                catch {::baltip::tip $w $t1 -nbktab $wt}
               }
             }
           }

@@ -1,7 +1,7 @@
 # Last changes:
 
 
-Version `3.4.6b13 (24 Nov'21)`
+Version `3.4.6 (8 Dec'21)`
 
   - TODO  : NEW   : unit tree for obbit.tcl, apaveinput.tcl, apavedialog.tcl
   - TODO  : CHANGE: docs
@@ -11,6 +11,7 @@ Version `3.4.6b13 (24 Nov'21)`
   - BUGFIX: -initialdir option for file chooser
   - BUGFIX: default/classic/alt theme & dark CS: selected check/radio buttons' bg
   - BUGFIX: treeview's ttk::style for CS=-2 (i.e. if no CS)
+  - NEW   : -method option to define a method in apave object
   - NEW   : tooltip for notebook tab
   - NEW   : unit tree for apave.tcl
   - NEW   : calendar: updating for y/m

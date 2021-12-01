@@ -1,23 +1,28 @@
 #! /usr/bin/env tclsh
 #
 # It's a test for baltip package.
-# _______________________________________________________________________ #
+# ____________________________________ auto_path ______________________________________ #
 
 cd [file dirname [info script]]
 lappend auto_path .
 package require baltip
 
-# _______________________________________________________________________ #
+# _____________________________________ Callbacks _____________________________________ #
 
 proc ::butComm {} {
+#  ::baltip::clear .
   ::baltip hide .b
   if {[incr ::ttt]%2} {
     puts "the button's tip disabled"; bell
+    ::baltip::tip .lb "Listbox tip:\nfor a lisbox as a whole.\n%%i used." -reset yes
+    ::baltip::tip .tre "Treeview tip:\nfor a treeview as a whole.\n%%i, %%c used." -reset yes
     ::baltip tip .b "" -image TEST_TCL_IMAGE1 -compound right
-    ::baltip update .l "      Danger!\n\nDon't trespass!" \
-      -fg white -bg red -font "-weight bold" -padx 20 -pady 15 -global 0
+    ::baltip update .l "        Danger!\n  Don't trespass!\n\n\"Eternal\" warning." \
+      -per10 0 -fg white -bg red -font {-weight bold} -padx 20 -pady 15 -global 0
   } else {
     puts "the button's tip enabled"; bell
+    ::baltip::tip .lb {::LbxTip %i} -reset yes
+    ::baltip::tip .tre {::TreTip %i %c} -reset yes
     if $::ttt>1 {
       set img TEST_TCL_IMAGE2
       set msg {smaller and smaller...}
@@ -32,10 +37,11 @@ proc ::butComm {} {
     ::baltip tip .b "Hi again, world! \
       \nI feel $msg" -under 0 -force yes -image $img -compound $cmpd
     ::baltip update .l "It's okay. Come on!" \
-      {*}[::baltip cget -fg -bg -font -padx -pady]
+      {*}[::baltip cget -fg -bg -font -padx -pady]  -per10 1500
   }
   if {$::ttt>7} {set ::ttt -2}
 }
+#_______________________
 
 proc ::chbComm {}  {
     puts "all tips [if $::on {set _ enabled} {set _ disabled}]"
@@ -44,8 +50,30 @@ proc ::chbComm {}  {
       -fg maroon -padding 2 -padx 15 -pady 15 -global 0
     if {$::on} {::baltip repaint .cb}
 }
+#_______________________
 
-# _______________________________________________________________________ #
+proc ::LbxTip {idx} {
+  set item [lindex $::lbxlist $idx]
+  return "Tip for \"$item\"\nindex=$idx"
+}
+
+#_______________________
+
+proc ::TreTip {id c} {
+  set item [.tre item $id -text]
+  return "Tip for \"$item\"\nID=$id, column=$c"
+}
+
+proc ::TreTipId {id} {
+  set item [.tre item $id -text]
+  return "Tip for \"$item\"\nID=$id"
+}
+
+proc ::TreTipC {c} {
+  return "Tip for column=$c"
+}
+
+# _____________________________________ Images _____________________________________ #
 
 set tclimg {iVBORw0KGgoAAAANSUhEUgAAAEgAAABICAMAAABiM0N1AAAABlBMVEUAAAC1CgZ1fsiLAAAAAnRS
 TlMA/1uRIrUAAADmSURBVFjD3djLEsIgDIXhc97/pd24aFXIhR9xzJK23zApJaHSP4ZNOYYYAPIz
@@ -67,6 +95,8 @@ image create photo TEST_TCL_IMAGE1 -data $tclimg
 
 image create photo TEST_TCL_IMAGE2 -data $warnimg
 
+# _____________________________________ Widgets _____________________________________ #
+
 button .b -text Hello -command ::butComm
 
 set geo +999999+85  ;# 999999 to get it the most right
@@ -83,6 +113,49 @@ button .b2 -text "Balloon at $geo" -command {::baltip tip "" \
   -geometry $geo -bell yes -on yes -padding 2 -relief raised -image TEST_TCL_IMAGE1}
 
 label .l -text "Click me (tearoff popup)"
+
+text .t -width 24 -height 4
+.t insert 1.0 "1st line: tag1\n2nd line: tag2\n3rd line: no tags"
+.t tag configure UnderLine1 -font "-underline 1"
+.t tag configure UnderLine2 -font "-weight bold"
+.t tag add UnderLine1 1.10 1.15
+.t tag add UnderLine2 2.10 2.15
+
+set ::lbxlist {
+  Listbox:
+  {Listbox: 2nd item}
+  {Listbox: qwerty}
+  {Listbox: next to last item}
+  {Listbox: last item}
+}
+
+listbox .lb -listvariable ::lbxlist -height 3
+
+ttk::treeview .tre -columns {COL2} -displaycolumns {COL2} -height 3
+.tre column #0 -width 20
+.tre column COL2 -width 10 -anchor e
+.tre heading #0 -text {Treeview}
+.tre heading COL2 -text {index}
+foreach idx {0 1 2 3 4 5} {
+  .tre insert {} end -text "Item #[expr $idx+1]" -value $idx
+}
+
+set ::on 1
+checkbutton .cb -text "Tips on" -variable ::on -command ::chbComm
+
+# _____________________________________ Pack _____________________________________ #
+
+pack .b .l .b2
+pack .t -expand 1 -fill x
+pack .lb -expand 1 -fill x
+pack .tre -expand 1 -fill both
+pack .cb
+update
+set ww [winfo width .]
+set wh [winfo height .]
+wm minsize . [incr ww 10] [incr wh 30]
+
+# _____________________________________ Menu _____________________________________ #
 
 set m [menu .popupMenu]
 $m add command -label \
@@ -104,6 +177,8 @@ $m add command -label "Open..." -command {puts "\"Open...\" entry"}
 $m add command -label "New" -command {puts "\"New\" entry"}
 $m add command -label "Save" -command {puts "\"Save\" entry"}
 $m add separator
+$m add command -label "Balloon" -command {after idle {.b2 invoke}} -accelerator F5
+$m add separator
 $m add command -label "Exit" -command {exit}
 set m .menu.help
 menu $m -tearoff 0
@@ -113,18 +188,10 @@ $m add command -label "About" -command { \
     \n  https://chiselapp.com/user/aplsimple \
     \n  https://github.com/aplsimple\n"}
 
-text .t -width 24 -height 4
-.t insert 1.0 "1st line: tag1\n2nd line: tag2\n3rd line: no tags"
-.t tag configure UnderLine1 -font "-underline 1"
-.t tag configure UnderLine2 -font "-weight bold"
-.t tag add UnderLine1 1.10 1.15
-.t tag add UnderLine2 2.10 2.15
-
-set ::on 1
-checkbutton .cb -text "Tips on" -variable ::on -command ::chbComm
-
-pack .b .l .b2 .t .cb
 . configure -menu .menu
+bind . <F5> {.b2 invoke}
+
+# _____________________________________ Tips _____________________________________ #
 
 ::baltip::configure -per10 1200 -fade 300 -font {-size 11}
 ::baltip::tip .b "Hello, world!\nIt's me o Lord!" -under 0 -per10 3000 \
@@ -140,14 +207,20 @@ pack .b .l .b2 .t .cb
 ::baltip::tip .menu.file "Opens a file\n(stub)" -index 0
 ::baltip::tip .menu.file "Creates a file\n(stub)" -index 1
 ::baltip::tip .menu.file "Saves a file\n(stub)" -index 2
-::baltip::tip .menu.file "Closes the test" -index 4
-::baltip::tip .menu.help "About the package" -index 0
+::baltip::tip .menu.file "Shows a balloon\nat right top corner" -index 4
+::baltip::tip .menu.file "Closes the test" -index 6
+::baltip::tip .menu.help "Info on the package\ndisplayed in terminal" -index 0
 ::baltip::tip .t "There are two tags\nwith their own tips." -under 0
 ::baltip::tip .t "1st tag's tip!" -tag UnderLine1
 ::baltip::tip .t "2nd tag's tip!" -tag UnderLine2
 ::baltip::tip .cb "Switches all tips on/off\nexcept for balloons with \"-on yes\"."
+::baltip::tip .lb {::LbxTip %i}
+::baltip::tip .tre {::TreTip %i %c}   ;# per line & column
+#::baltip::tip .tre {::TreTipId %i}   ;# per line
+#::baltip::tip .tre {::TreTipC %c}   ;# per column
+#::baltip::tip . "Testing tip for . path:\nsort of application tip.\n\nNot of much taste, though."
 
-# _______________________________________________________________________ #
+# ____________________________________ EOF ___________________________________ #
 
 catch {source [file join ../transpops transpops.tcl]}
 catch {::transpops::run ../transpops/demos/baltip/transpops.txt {<Alt-t> <Alt-y>} . white #055328}

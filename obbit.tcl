@@ -731,6 +731,8 @@ proc ::apave::openDoc {url} {
   }
 }
 
+###########################################################################
+
 proc ::apave::setProperty {name args} {
 
   # Sets a property's value as "application-wide".
@@ -751,8 +753,6 @@ proc ::apave::setProperty {name args} {
   return -code error
 }
 
-###########################################################################
-
 proc ::apave::getProperty {name {defvalue ""}} {
   # Gets a property's value as "application-wide".
   #   name - name of property
@@ -769,6 +769,7 @@ proc ::apave::getProperty {name {defvalue ""}} {
   return $defvalue
 }
 
+###########################################################################
 
 proc ::apave::countChar {str ch} {
   # Counts a character in a string.
@@ -792,6 +793,36 @@ proc ::apave::countChar {str ch} {
     set str [string range $str [incr idx] end]
   }
   return $icnt
+}
+
+###########################################################################
+
+proc ::apave::blinkWidget {w {fg #000} {bg #fff} {fg2 {}} {bg2 red} \
+  {pause 1000} {count -1} {mode 1}} {
+  # Makes a widget blink.
+  #   w - the widget's path
+  #   fg - normal foreground color
+  #   bg - normal background color
+  #   fg2 - blinking foreground color (if {}, stops the blinking)
+  #   bg2 - blinking background color
+  #   pause - pause in millisec between blinkings
+  #   count - means how many times do blinking
+  #   mode - for recursive calls
+
+  if {![winfo exists $w]} return
+  if {$count==0 || $fg2 eq {}} {
+    $w configure -foreground $fg
+    $w configure -background $bg
+  } elseif {$mode==1} {
+    incr count -1
+    $w configure -foreground $fg2
+    $w configure -background $bg2
+    after $pause ::apave::blinkWidget $w $fg $bg $fg2 $bg2 $pause $count 2
+  } elseif {$mode==2} {
+    $w configure -foreground $fg
+    $w configure -background $bg
+    after $pause ::apave::blinkWidget $w $fg $bg $fg2 $bg2 $pause $count 1
+  }
 }
 
 # ________________________ ObjectProperty _________________________ #

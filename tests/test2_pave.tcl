@@ -13,7 +13,7 @@ if {[info exists ::env(TCLLIBPATH)]} {lappend ::auto_path {*}$::env(TCLLIBPATH)}
 set ::testdirname [file normalize [file dirname [info script]]]
 set ::pavedirname [file normalize [file join $::testdirname ..]]
 cd $::testdirname
-set ::test2dirs [list "$::testdirname/.." "$::testdirname" "$::testdirname/../bartabs" "$::testdirname/../hl_tcl" "$::testdirname/../../screenshooter" "$::testdirname/../../aloupe" "$::testdirname/../.bak/fsdialog" "$::testdirname/../.bak/tablelist"]
+set ::test2dirs [list "$::testdirname/.." "$::testdirname" "$::testdirname/../baltip" "$::testdirname/../bartabs" "$::testdirname/../hl_tcl" "$::testdirname/../../screenshooter" "$::testdirname/../../aloupe" "$::testdirname/../.bak/fsdialog" "$::testdirname/../.bak/tablelist"]
 lappend ::auto_path {*}$::test2dirs
 set apavever [package require apave]
 set pkg_versions0 "\n  <red>apave $apavever</red>\n\n"
@@ -378,7 +378,7 @@ namespace eval t {
       set arcid [$w create arc $x $y [expr {$x+90}] [expr {$y+90}] \
         -start [expr {$a-15}] -extent 30 -fill $color]
       $w addtag ArcTag[incr i0] withtag $arcid
-      ::baltip::tip $w "This is an $i0-th arc\nwith tag 'ArcTag$i0'" -ctag ArcTag$i0
+      ::baltip::tip $w "This is an arc #$i0\nwith tag 'ArcTag$i0'" -ctag ArcTag$i0
     }
     set c .win.fra.fra.nbk.f4.can
     set txtid [$c create text 180 20 -text {Demo canvas from Tk's demos/ctext.tcl} -fill red]
@@ -631,7 +631,7 @@ namespace eval t {
   }
 
   proc popupTip {wmenu idx TID} {
-    catch {::baltip tip $wmenu [getTabFile $TID] -index $idx}
+    catch {::baltip tip $wmenu [getTabFile $TID] -index $idx -pause 800}
   }
 
   proc colorBar {} {

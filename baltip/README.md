@@ -8,16 +8,16 @@ The original code has been modified to make the tip:
 
   * be faded/destroyed after an interval defined by a caller
   * be enabled/disabled for all or specific widgets
-  * be usable with labels, menus, text tags, canvas tags, notebook tabs etc.
+  * be usable with labels, menus, text/canvas tags, notebook tabs, listbox/treeview items etc.
   * be displayed at the screen's edges
   * be displayed under the host widget
   * be displayed as a stand-alone balloon message at given coordinates
-  * be displayed with given opacity, font, paddings, relief, colors
+  * be displayed with given font, colors, paddings, border, relief, opacity, bell
   * have -image and -compound options to display images
   * have configure/cget etc. wrapped in Tcl ensemble for convenience
 
 The video introduction to *baltip* is presented by
- [baltip-1.2.mp4](https://github.com/aplsimple/baltip/releases/download/baltip-1.2/baltip-1.2.mp4) (15 Mb).
+ [baltip-1.3.mp4](https://github.com/aplsimple/baltip/releases/download/baltip-1.3/baltip-1.3.mp4) (16 Mb).
 
 Below are several pictures just to glance at *baltip*.
 
@@ -35,10 +35,14 @@ Below are several pictures just to glance at *baltip*.
 
  <img src="https://aplsimple.github.io/en/tcl/baltip/files/btip4.png" class="media" alt="">
 
+The *tags of canvas* have tips too.
+
+ <img src="https://aplsimple.github.io/en/tcl/baltip/files/btip12.png" class="media" alt="">
+
 *Tips of menu items*. The menu items can have their own tips. The popup menus may be *tear-off* at that.
 
-The menu tips are useful e.g. when the items are displayed as short names of files, while
-the tips are wanted to be their full names.
+The menu tips are useful e.g. when the items are displayed as short names, while
+the tips are wanted to be full names.
 
  <img src="https://aplsimple.github.io/en/tcl/baltip/files/btip5.png" class="media" alt="">
 
@@ -48,9 +52,21 @@ the tips are wanted to be their full names.
 
  <img src="https://aplsimple.github.io/en/tcl/baltip/files/btip7.png" class="media" alt="">
 
+The *tabs of notebook* are also supplied with tips.
+
+ <img src="https://aplsimple.github.io/en/tcl/baltip/files/btip13.png" class="media" alt="">
+
+The *listbox* can have tips per item as well as for a whole listbox widget.
+
+ <img src="https://aplsimple.github.io/en/tcl/baltip/files/btip14.png" class="media" alt="">
+
+The *treeview* can have tips per item and/or column as well as for a whole treeview widget.
+
+ <img src="https://aplsimple.github.io/en/tcl/baltip/files/btip15.png" class="media" alt="">
+
 *Configurable tips*. The tip configuration can be global or local (for a specific tip).
 
-The configuring can include: font, colors, paddings, border, exposition time, opacity, relief, image (with -compound), bell.
+The configuring can include: font, colors, paddings, border, relief, exposition time, opacity, image (with -compound), bell.
 
  <img src="https://aplsimple.github.io/en/tcl/baltip/files/btip8.png" class="media" alt="">
 
@@ -116,6 +132,30 @@ When you click on a widget with its tip being displayed, the tip is hidden. It i
 
       ::baltip::repaint widgetpath
 
+The "text" for *listbox* can contain %i wildcard - and in such cases the text means a callback receiving a current index of item to tip:
+
+      proc ::lbxTip {idx} {
+        set item [lindex $::lbxlist $idx]
+        return "Tip for \"$item\"\nindex=$idx"
+      }
+      ::baltip tip .listbox {::lbxTip %i}
+
+The "text" for *treeview* can contain %i and/or %c wildcards - and in such cases the text means a callback receiving ID of item and/or column of item to tip:
+
+      proc ::treTip {id c} {
+        set item [.treeview item $id -text]
+        return "Tip for \"$item\"\nID=$id, column=$c"
+      }
+      ::baltip::tip .treeview {::treTip %i %c}
+
+If a tip for listbox and treeview widgets doesn't contain %i nor %c, it means a usual tip for a whole widget. At that, if those wildcards still need to be displayed, use %%i and %%c instead.
+
+If you need to switch between "per item" and "per widget" tip of listbox and treeview , use `::baltip::tip` with `-reset yes` option:
+
+      ::baltip::tip .treeview {Common tip} -reset yes      ;# sets a usual tip
+      ::baltip::tip .treeview {::treTip %i %c} -reset yes  ;# sets a callback
+
+
 ## Balloon
 
 The *normal* tip has no `-geometry` option because it's calculated by *baltip*, to position the tip under its host widget.
@@ -169,7 +209,8 @@ The following options are special:
  * `-tag` - name of text tag to tip;
  * `-ctag` - name of canvas tag to tip;
  * `-nbktab` - path to ttk::notebook tab to tip;
- * `-geometry` - geometry (+X+Y) of the balloon.
+ * `-geometry` - geometry (+X+Y) of the balloon;
+ * `-reset` - "-reset true" may be useful to set a new tip (callback or text) for listbox and treeview.
 
 If `-global yes` option is used alone, it applies all global options to all registered tips. If `-global yes` option is used along with other options, only those options are applied to all registered tips.
 
@@ -189,6 +230,14 @@ See more examples in *test.tcl* of [baltip.zip](https://chiselapp.com/user/aplsi
 
 Also, you can test *baltip* with *test2_pave.tcl* of [apave package](https://chiselapp.com/user/aplsimple/repository/pave/download).
 
+## Acknowledgements
+
+The *baltip* package has been developed with help of these kind people:
+
+  * [Nicolas Bats](https://github.com/sl1200mk2) prompted to add canvas tags' tips
+
+  * [Csaba Nemethi](https://www.nemethi.de/) sent several bug fixes and advices, incl. on listbox and treeview tips
+
 ## Links
 
   * [Source at chiselapp](https://chiselapp.com/user/aplsimple/repository/baltip/download) (baltip.zip)
@@ -197,4 +246,4 @@ Also, you can test *baltip* with *test2_pave.tcl* of [apave package](https://chi
 
   * [Reference](https://aplsimple.github.io/en/tcl/baltip/baltip.html)
 
-  * [Demo of baltip v1.2](https://github.com/aplsimple/baltip/releases/download/baltip-1.2/baltip-1.2.mp4)
+  * [Demo of baltip v1.3](https://github.com/aplsimple/baltip/releases/download/baltip-1.3/baltip-1.3.mp4)

@@ -61,6 +61,28 @@ proc ::klnd::my::MapYMD {script y m d} {
 }
 #_______________________
 
+proc ::klnd::my::fgMayHL {obj fg y m d} {
+  # Gets a foreground color (possibly highlighting).
+  #   fg - default foreground color
+  #   y - year
+  #   m - month
+  #   d - day
+
+  variable p
+  foreach item $p(hllist$obj) {
+    # date format for highlighting is %Y/%m/%d
+    lassign [split [lindex $item 0] /] yh mh dh
+    set dh [string trimleft $dh { 0}]
+    set mh [string trimleft $mh { 0}]
+    if {$y==$yh && $m==$mh && $d==$dh} {
+      set fg red
+      break
+    }
+  }
+  return $fg
+}
+#_______________________
+
 proc ::klnd::my::ShowMonth2 {obj m y {doenter yes} {dopopup no}} {
   # Displays a month's days.
   #   obj - index of calendar
@@ -74,7 +96,9 @@ proc ::klnd::my::ShowMonth2 {obj m y {doenter yes} {dopopup no}} {
   # if calendars are linked with united, no display of year in a title
   if {$p(united$obj)} {set yd {}} {set yd " $y"}
   [$p($obj) LabMonth$obj] configure -text  "[lindex $p(months$obj) [expr {$m-1}]]$yd" \
-    -font "[$p($obj) csFontDef] -size [expr {[$p($obj) basicFontSize]+3}]"
+    -font [::apave::obj boldDefFont [expr {[::apave::obj basicFontSize]+2}]]
+  # highlight color
+  set hlcolor red ;#[lindex [::apave::obj csGet] 17]
   # display day names
   for {set i 1} {$i<8} {incr i} {
     [$p($obj) LabDay$obj$i] configure -text " [lindex $p(days$obj) $i-1] "
@@ -121,6 +145,8 @@ proc ::klnd::my::ShowMonth2 {obj m y {doenter yes} {dopopup no}} {
     if {$dopopup && $p(popup$obj) ne {}} {
       bind $wbut <Button-3> $script
     }
+    # as last refuge: highlighting fg by hllist
+    set fg [fgMayHL $obj $fg $y $m $iday]
     $wbut configure {*}$att -relief flat -overrelief flat -fg $fg -bg $bg
   }
   set p(mvis$obj) $m  ;# month & year currently visible
@@ -152,7 +178,9 @@ proc ::klnd::my::HighlightCurrentDay2 {obj} {
     }
     catch {
       if {[$p(wcurr$obj) cget -bg] ne $p(bgsel)} {
-        $p(wcurr$obj) configure -fg $p(fg2) -bg $p(bg2)
+        set day [$p(wcurr$obj) cget -text]
+        set fg [fgMayHL $obj $p(fg2) $p(yvis$obj) $p(mvis$obj) $day]
+        $p(wcurr$obj) configure -fg $fg -bg $p(bg2)
       }
       if {$p(united$obj)} {
         # if calendars are linked with united, one COMMON day selected for all
@@ -175,6 +203,21 @@ proc ::klnd::my::FormatDay2 {obj y m d} {
 
   variable p
   return [clock format [clock scan $m/$d/$y -format %D] -format $p(dformat$obj) -locale $p(loc$obj)]
+}
+#_______________________
+
+proc ::klnd::my::Blinking {doit} {
+  # Makes a calendar label blink.
+  #   doit - if yes, starts blinking, else stops it
+
+  lassign [::apave::obj csGet] - fgnorm - bgnorm
+  lassign [::apave::obj csGet 45] - - - - - bgblink fgblink
+  set lab [::klnd::labelPath]
+  if {$doit} {
+    after idle "::apave::blinkWidget $lab $fgnorm $bgnorm $fgblink $bgblink 100 5"
+  } else {
+    ::apave::blinkWidget $lab $fgnorm $bgnorm
+  }
 }
 #_______________________
 
@@ -214,7 +257,8 @@ proc ::klnd::my::Enter2 {obj i {focusin 0}} {
           $p(wunited) configure -fg $p(fg1) -bg $p(bg1)
         }
         if {[$p(wcurr$obj) cget -bg] ne $p(bgsel)} {
-          $p(wcurr$obj) configure -fg $p(fg2) -bg $p(bg2)
+          set fg [fgMayHL $obj $p(fg2) $p(yvis$obj) $p(mvis$obj) $p(dvis$obj)]
+          $p(wcurr$obj) configure -fg $fg -bg $p(bg2)
         }
       }
     }
@@ -233,7 +277,8 @@ proc ::klnd::my::Enter2 {obj i {focusin 0}} {
           }
         }
         # show selected day
-        $w configure -fg $p(fgsel) -bg $p(bgsel)
+        set fg [fgMayHL $obj $p(fgsel) $p(yvis$obj) $p(mvis$obj) $p(dvis$obj)]
+        $w configure -fg $fg -bg $p(bgsel)
       }
       # save the selected widget for THIS month
       # and as COMMON for calendars linked with united
@@ -302,7 +347,7 @@ proc ::klnd::my::MainWidgets2 {obj ownname} {
         if {\$i<8} { \
           set lwid \"\$cur \$pw \$p 1 1 {-st ew} {-anchor center -foreground $::klnd::my::p(fgh)}\" \
         } else { \
-          set lwid \"\$cur \$pw \$p 1 1 {-st ew} {-relief flat -overrelief flat -bd 0 -takefocus 0 -pady 2 -com {::klnd::my::Enter2 $obj \[expr {\$i-7}\]} \$att}\" \
+          set lwid \"\$cur \$pw \$p 1 1 {-st ew} {-relief flat -overrelief flat -bd 0 -takefocus 0  -padx 8 -pady 4 -font {$::apave::FONTMAIN} -com {::klnd::my::Enter2 $obj \[expr {\$i-7}\]} \$att}\" \
         } ; \
         %C \$lwid ; \
         set pr \$cur \
@@ -314,13 +359,58 @@ proc ::klnd::my::MainWidgets2 {obj ownname} {
 
 # ________________________ UI _________________________ #
 
-proc ::klnd::update {obj year month} {
-  # Redraws a calendar
+proc ::klnd::labelPath {{obj {}}} {
+  # Gets a title label path.
+  #   obj - index of the calendar
+  # Useful to change the label's attributes.
+  # If *obj* omitted, returns a path of last created label.
+
+  variable my::p
+  if {$obj eq {}} {set obj $my::p(objNUM)}
+  return [$my::p($obj) LabMonth$obj]
+}
+#_______________________
+
+proc ::klnd::update {{obj {}} {year {}} {month {}} {hllist {}}} {
+  # Redraws a calendar.
   #   obj - index of the calendar
   #   year - year to redraw
   #   month - month to redraw
 
+  variable my::p
+  if {$obj eq {}} {
+    set obj $my::p(objNUM)
+    set year $my::p(yvis$obj)
+    set month $my::p(mvis$obj)
+    set my::p(hllist$obj) $hllist
+  }
   my::ShowMonth2 $obj $month $year yes yes
+}
+#_______________________
+
+proc ::klnd::selectedDay {{obj {}} {y {}} {m {}} {d {}}} {
+  # Gets a selected day.
+  #   obj - index of the calendar
+  #   y - year
+  #   m - month
+  #   d - day
+  # If y/m/d are set, they define currently selected date.
+  # Returns a list of year, month, day
+
+  variable my::p
+  if {$obj eq {}} {set obj $my::p(objNUM)}
+  if {$y ne {}} {
+    set my::p(yvis$obj) $y
+    set my::p(mvis$obj) $m
+    set my::p(dvis$obj) $d
+    if {$my::p(tvar$obj) ne {}} {
+      set p(olddate$obj) [my::FormatDay2 $obj $y $m $d]
+      set $my::p(tvar$obj) $p(olddate$obj)
+    }
+    set my::p(currentmonth$obj) "$y/$m"
+    after idle "::klnd::my::ShowMonth2 $obj $m $y yes yes; ::klnd::my::Blinking yes"
+  }
+  return [list $my::p(yvis$obj) $my::p(mvis$obj) $my::p(dvis$obj)]
 }
 #_______________________
 
@@ -372,7 +462,7 @@ proc ::klnd::calendar2 {pobj w ownname args} {
   }
   # save options for current calendar
   foreach opt {weekday months days loc yvis mvis dvis \
-  com tvar dformat united currentmonth daylist popup} {
+  com tvar dformat united currentmonth daylist popup hllist} {
     set my::p($opt$obj) $my::p($opt)
   }
   if {$my::p(daylist) ne {-} && $my::p(united)} {
@@ -398,5 +488,5 @@ proc ::klnd::calendar2 {pobj w ownname args} {
 
 # _________________________________ EOF _________________________________ #
 
-#RUNF1: ../../tests/test2_pave.tcl 1 13 12 'small icons'
-#RUNF1: ../../../../src/alited.tcl LOG=~/TMP/alited-DEBUG.log DEBUG
+#-RUNF1: ../../tests/test2_pave.tcl 1 13 12 'small icons'
+#RUNF1: ~/PG/github/alited/src/alited.tcl LOG=~/TMP/alited-DEBUG.log DEBUG
