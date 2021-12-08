@@ -1,6 +1,12 @@
 #! /usr/bin/env tclsh
-#
-# It's a test for baltip package.
+###########################################################
+# Name:    test.tcl
+# Author:  Alex Plotnikov  (aplsimple@gmail.com)
+# Date:    12/06/2021
+# Brief:   Handles a test for baltip package.
+# License: MIT.
+###########################################################
+
 # ____________________________________ auto_path ______________________________________ #
 
 cd [file dirname [info script]]
@@ -73,6 +79,22 @@ proc ::TreTipC {c} {
   return "Tip for column=$c"
 }
 
+proc ::Status {tip args} {
+  .status configure -text [string map [list \n { }] $tip] {*}$args
+}
+
+proc ::SomeProc {tip} {
+  lassign [split $tip] obj ID column
+  if {[info exists ::OBJsaved]} {
+    puts "$::OBJsaved object ID=[set ::IDsaved] is left... unhighlighted..."
+    unset ::OBJsaved
+  }
+  if {$obj eq {}} return
+  set ::OBJsaved $obj
+  set ::IDsaved $ID
+  puts "Now processing $obj object with ID=$ID column=$column"
+}
+
 # _____________________________________ Images _____________________________________ #
 
 set tclimg {iVBORw0KGgoAAAANSUhEUgAAAEgAAABICAMAAABiM0N1AAAABlBMVEUAAAC1CgZ1fsiLAAAAAnRS
@@ -143,6 +165,8 @@ foreach idx {0 1 2 3 4 5} {
 set ::on 1
 checkbutton .cb -text "Tips on" -variable ::on -command ::chbComm
 
+label .status -relief sunken -anchor w
+
 # _____________________________________ Pack _____________________________________ #
 
 pack .b .l .b2
@@ -150,6 +174,7 @@ pack .t -expand 1 -fill x
 pack .lb -expand 1 -fill x
 pack .tre -expand 1 -fill both
 pack .cb
+pack .status -fill x
 update
 set ww [winfo width .]
 set wh [winfo height .]
@@ -161,11 +186,11 @@ set m [menu .popupMenu]
 $m add command -label \
   "Global settings: -fg $::fg1 -bg $::bg1 -relief raised -alpha 0.8" -command " \
   ::baltip config -fg $::fg1 -bg $::bg1 -global yes -relief raised -alpha 0.8; \
-  if {\[$m entryconfigure active\] eq {}} {::baltip repaint $m -index active}"
+  ::Status {Set new colors of all tips} -font {[font actual TkTooltipFont] -weight bold}"
 $m add command -label \
   "Global settings: -fg $::fg0 -bg $::bg0 -relief solid -alpha 1.0" -command " \
   ::baltip config -fg $::fg0 -bg $::bg0 -global yes -relief solid -alpha 1.0; \
-  if {\[$m entryconfigure active\] eq {}} {::baltip repaint $m -index 2}"
+  ::Status {Restored colors of all tips} -font TkTooltipFont"
 bind .l <Button-3> {tk_popup .popupMenu %X %Y}
 
 menu .menu -tearoff 0
@@ -200,22 +225,25 @@ bind . <F5> {.b2 invoke}
 ::baltip::tip .l "Calls a popup tearoff menu.\nThis tip is switched by the button\nto an alert/message."
 ::baltip::tip .b2 "Displays a message at top right corner, having\
   \ncoordinates set with \"-geometry $geo\" option."
+::baltip::tip .status "Status bar for tips." -command {::Status {%t}}
 ::baltip::tip .popupMenu "Sets new colors of all tips" -index 1
 ::baltip::tip .popupMenu "Restores colors of all tips" -index 2
-::baltip::tip .menu "File actions" -index 0
-::baltip::tip .menu "Help actions" -index 1
-::baltip::tip .menu.file "Opens a file\n(stub)" -index 0
-::baltip::tip .menu.file "Creates a file\n(stub)" -index 1
-::baltip::tip .menu.file "Saves a file\n(stub)" -index 2
-::baltip::tip .menu.file "Shows a balloon\nat right top corner" -index 4
-::baltip::tip .menu.file "Closes the test" -index 6
-::baltip::tip .menu.help "Info on the package\ndisplayed in terminal" -index 0
+::baltip::tip .menu "File actions" -index 0 -command {::Status {%t}}
+::baltip::tip .menu "Help actions" -index 1 -command {::Status {%t}}
+::baltip::tip .menu.file "Opens a file\n(stub)" -index 0 -command {::Status {%t}}
+::baltip::tip .menu.file "Creates a file\n(stub)" -index 1 -command {::Status {%t}}
+::baltip::tip .menu.file "Saves a file\n(stub)" -index 2 -command {::Status {%t}}
+::baltip::tip .menu.file "Shows a balloon\nat right top corner" -index 4 -command {::Status {%t}}
+::baltip::tip .menu.file "Closes the test" -index 6 -command {::Status {%t}}
+::baltip::tip .menu.help "Info on the package\ndisplayed in terminal" -index 0 -command {::Status {%t}}
 ::baltip::tip .t "There are two tags\nwith their own tips." -under 0
 ::baltip::tip .t "1st tag's tip!" -tag UnderLine1
 ::baltip::tip .t "2nd tag's tip!" -tag UnderLine2
 ::baltip::tip .cb "Switches all tips on/off\nexcept for balloons with \"-on yes\"."
 ::baltip::tip .lb {::LbxTip %i}
 ::baltip::tip .tre {::TreTip %i %c}   ;# per line & column
+#::baltip::tip .lb {Listbox %i} -command {::SomeProc {%t}}
+#::baltip::tip .tre {Treeview %i %c} -command {::SomeProc {%t}}   ;# Fire some proc
 #::baltip::tip .tre {::TreTipId %i}   ;# per line
 #::baltip::tip .tre {::TreTipC %c}   ;# per column
 #::baltip::tip . "Testing tip for . path:\nsort of application tip.\n\nNot of much taste, though."

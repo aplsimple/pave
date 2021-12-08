@@ -11,6 +11,9 @@ Version `3.4.6 (8 Dec'21)`
   - BUGFIX: -initialdir option for file chooser
   - BUGFIX: default/classic/alt theme & dark CS: selected check/radio buttons' bg
   - BUGFIX: treeview's ttk::style for CS=-2 (i.e. if no CS)
+  - BUGFIX: display redefined Ctrl+Y/D, F3
+  - NEW   : ::apave::writeTextFile option of deleting empty files instead of saving
+  - NEW   : ::apave::bindToEvent
   - NEW   : -method option to define a method in apave object
   - NEW   : tooltip for notebook tab
   - NEW   : unit tree for apave.tcl
@@ -26,6 +29,7 @@ Version `3.4.6 (8 Dec'21)`
   - NEW   : -padx, -pady options for entry fields of choosers
   - NEW   : topmost attribute in showModal depending on a window's ancestors
   - NEW   : cs_Active to set/get flag "no CS changes"
+  - CHANGE: sourcing baltip.tcl modified
   - CHANGE: csMainColors includes e_menu colors
   - CHANGE: test0, test1, test2 modified
   - CHANGE: klnd.tcl refactored (unit tree, inits)

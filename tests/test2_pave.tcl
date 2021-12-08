@@ -45,7 +45,7 @@ namespace eval t {
   variable pdlg
   variable pave
   variable savedtext; array set savedtext [list]
-  variable transpopsFile "transpops.txt"
+  variable transpopsFile "transpops1.txt"
 
 # _________________ The code from Tk's demos/ttkpane.tcl ________________ #
 
@@ -276,6 +276,10 @@ namespace eval t {
             -geometry $geo -fg $fg -bg $bg -font {-weight bold -size 11} \
             -pause 1500 -fade 1500 -alpha 0.8 -padx 20 -pady 20
         }
+      }
+      if {$tab in {nb4 nb5 nb6 nb7}} {
+        lassign [pave csGet] - fg - bg
+        ::apave::blinkWidget .win.fra.fra.$tab.labB $fg $bg $bg $fg 100 7        
       }
     }
   }
@@ -566,7 +570,7 @@ namespace eval t {
     set ::t::ansSelTab [set ::t::ansSwBta 0]
     set wbase [pave LfrB]
     set bar1Opts [list -wbar $wframe -wbase $wbase -lablen 16 -tiplen 20 \
-      -csel {::t::selTab %t} -csel2 {::t::selTab2 %t} -bd 1 -expand 1 \
+      -csel {::t::selTab %t} -csel2 {::t::selTab2 %t} -bd $::t::btsbd -expand 1 \
       -cdel {::t::delTab %t} -redraw $::BTS_REDRAW -popuptip ::t::popupTip \
       -menu [list \
       sep \
@@ -1508,10 +1512,12 @@ set test2script $::t::ftx1
 set ::t::opct clam
 if {$::argc>=5} {
   lassign $::argv ::t::opct ::t::newCS ::t::fontsz ::t::ans4 ::t::opcIcon ::t::hue
-  set ::t::transpopsFile "transpops.txt"
+  set ::t::transpopsFile "transpops2.txt"
+  set ::t::btsbd 0
 } else {
   set ::t::newCS 27 ;# ForestDark CS
   set ::t::opcIcon "small"
+  set ::t::btsbd 1
 }
 set ::t::opcThemes [list default clam classic alt]
 if {$::t::newCS!=-2 && ![catch {
