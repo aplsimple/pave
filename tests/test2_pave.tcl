@@ -758,10 +758,10 @@ namespace eval t {
   proc checkLock {BID TID label} {
     if {[getLock $TID]} {
       set label [string map {Lock Unlock} $label]
-      set img ICN49-small
+      set img ICN47-small
     } else {
       set label [string map {Unlock Lock} $label]
-      set img ICN48-small
+      set img ICN50-small
     }
     return [list 0 $img $label]
   }
@@ -1255,7 +1255,7 @@ where:
       {labklnd LabImgInfo T 1 4 {-st nswe} {-t {\nExample of calendar #1}}}
       {daTklnd labklnd T 1 1 {-st nw} {-borderwidth 1 -relief raised -dateformat $::t::formatKlnd1 -tvar ::t::dateKlnd1 -com {puts "date1=$::t::dateKlnd1 (DMY=%d.%m.%y)"}}}
       {labklnd2 labklnd L 1 4 {-st nswe} {-t {\nExample of calendar #2}}}
-      {daTklnd2 labklnd2 T 1 1 {-st nw} {-borderwidth 1 -relief raised -dateformat $::t::formatKlnd2 -tvar ::t::dateKlnd2 -com {puts "date2=$::t::dateKlnd2 (DMY=%d.%m.%y)"} -locale en_us}}
+      {daTklnd2 labklnd2 T 1 1 {-st nw} {-borderwidth 1 -relief raised -dateformat $::t::formatKlnd2 -tvar ::t::dateKlnd2 -com {puts "date2=$::t::dateKlnd2 (DMY=%d.%m.%y)"} -locale en_us -hllist {2021/10/11 2021/12/12 2021/12/2}}}
     }
   }
 
@@ -1483,7 +1483,7 @@ where:
     set ::t::newCS [apave::cs_Non]
     toolBut 0
     after 1000 ::t::highlighting_others  ;# it's unseen at changing the theme
-    catch {::transpops::run [file join ~/PG/github/DEMO/pave $::t::transpopsFile] {<Alt-t> <Alt-y>} {.win .win._a_loupe_loup .win._a_loupe_disp .__tk__color .win._apave_CALENDAR_}}
+    catch {::transpops::run [file join ~/PG/github/transpops/demos/pave $::t::transpopsFile] {<Alt-t> <Alt-y>} {.win .win._a_loupe_loup .win._a_loupe_disp .__tk__color .win._apave_CALENDAR_}}
 
     # Open the window at last
     ::apave::obj progress_End

@@ -1,17 +1,14 @@
 # Last changes:
 
 
-Version `3.4.6 (8 Dec'21)`
-
-  - TODO  : NEW   : unit tree for obbit.tcl, apaveinput.tcl, apavedialog.tcl
-  - TODO  : CHANGE: docs
-  - TODO  : CHANGE: demos
+Version `3.4.6 (15 Dec'21)`
 
   - BUGFIX: issues with pressing Enter at "-", "*", "#" starting lines
   - BUGFIX: -initialdir option for file chooser
   - BUGFIX: default/classic/alt theme & dark CS: selected check/radio buttons' bg
   - BUGFIX: treeview's ttk::style for CS=-2 (i.e. if no CS)
   - BUGFIX: display redefined Ctrl+Y/D, F3
+  - NEW   : unit tree for obbit.tcl, apaveinput.tcl, apavedialog.tcl
   - NEW   : ::apave::writeTextFile option of deleting empty files instead of saving
   - NEW   : ::apave::bindToEvent
   - NEW   : -method option to define a method in apave object
