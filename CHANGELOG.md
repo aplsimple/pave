@@ -1,6 +1,12 @@
 # Last changes:
 
 
+Version `3.4.7a2 (22 Dec'21)`
+
+  - NEW   : -popup attribute (command for right-click)
+  - NEW   : <Home>, <End> bindings for listbox & treeview
+
+
 Version `3.4.6 (15 Dec'21)`
 
   - BUGFIX: issues with pressing Enter at "-", "*", "#" starting lines

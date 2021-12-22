@@ -81,6 +81,7 @@ proc ::TreTipC {c} {
 
 proc ::Status {tip args} {
   .status configure -text [string map [list \n { }] $tip] {*}$args
+  return {}  ;# means the proc executed and no tip needed
 }
 
 proc ::SomeProc {tip} {
@@ -89,10 +90,12 @@ proc ::SomeProc {tip} {
     puts "$::OBJsaved object ID=[set ::IDsaved] is left... unhighlighted..."
     unset ::OBJsaved
   }
-  if {$obj eq {}} return
-  set ::OBJsaved $obj
-  set ::IDsaved $ID
-  puts "Now processing $obj object with ID=$ID column=$column"
+  if {$obj ne {}} {
+    set ::OBJsaved $obj
+    set ::IDsaved $ID
+    puts "Now processing $obj object with ID=$ID column=$column"
+  }
+  return {}  ;# means the proc executed and no tip needed
 }
 
 # _____________________________________ Images _____________________________________ #
