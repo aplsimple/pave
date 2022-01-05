@@ -1,10 +1,12 @@
 # Last changes:
 
 
-Version `3.4.7a2 (22 Dec'21)`
+Version `3.4.7a5 (5 Jan'22)`
 
   - NEW   : -popup attribute (command for right-click)
   - NEW   : <Home>, <End> bindings for listbox & treeview
+  - NEW   : -tags option for readonly text widget & dialogue
+  - NEW   : -tab2 option for dialogue
 
 
 Version `3.4.6 (15 Dec'21)`
