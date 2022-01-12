@@ -94,6 +94,27 @@ namespace eval t {
 
   # imitating help function
   proc helpAbout {} {
+
+    set wmax 41
+    set ::t::AcknText "\n The <red>apave</red> project has received \
+     \n generous support from\n\n \
+        \u2022 <linkAN>Ashok P. Nadkarni</linkAN>\n \
+        \u2022 <linkDF>Donal Fellows</linkDF>\n \
+        \u2022 <linkTW>Trevor Williams</linkTW>\n \
+        \u2022 <linkJO>Johann Oberdorfer</linkJO>\n \
+        \u2022 <linkRS>Richard Suchenwirth</linkRS>\n \
+        \u2022 <linkCN>Csaba Nemethi</linkCN>\n \
+        \u2022 <linkSH>Steve Huntley</linkSH>\n \
+        \u2022 <linkRD>rdbende</linkRD>\n \
+        \u2022 Paul Walton\n \
+        \n Special thanks also to\n\n \
+        \u2022 <linkPO>Paul Obermeier</linkPO>\n \
+        \u2022 <linkHE>Holger Ewert</linkHE>\n \
+        \u2022 <linkCM>Colin Macleod</linkCM>\n \
+        \u2022 <linkRK>Roy Keene</linkRK>\n \
+        "
+    set tab2 [list Information Acknowledgements "{fra - - 1 99 {-st nsew -rw 1 -cw 1}} {.TexAckn - - - - {pack -side left -expand 1 -fill both} {-w $wmax -h 31 -rotext ::t::AcknText -tags ::t::textTags}} {.sbv .texAckn L - - {pack -side right}}"]
+
     ::t::msg info "  It's a demo of
     $::pkg_versions0\n\n  Details: \
 
@@ -109,7 +130,7 @@ namespace eval t {
   <red> $::tcltk_version </red> <link3></link3>
 
   <red> $::tcl_platform(os) $::tcl_platform(osVersion) </red>\n
-" -modal no -t 1 -w 41 -scroll 0 -tags ::t::textTags -my "after idle {::t::textImaged %w}"
+" -modal no -t 1 -w $wmax -scroll 0 -tags ::t::textTags -tab2 $tab2 -my "after idle {::t::textImaged %w}"
   }
 
   # imitating apply function
@@ -205,10 +226,6 @@ namespace eval t {
       catch {::t::colorBar; ::bt draw}
       pave fillGutter [pave Text]
     }
-#    baltip::tip [pave BuT_IMG_4] \
-#      "Next is $::t::nextcs: [pave csGetName $::t::nextcs]" -under 5
-#    baltip::tip [pave BuT_IMG_3] \
-#      "Previous is $::t::prevcs: [pave csGetName $::t::prevcs]" -under 5
     lassign [pave csGet] fg - bg - - bS fS
     set ::t::textTags [list \
       [list "red" " -font {-weight bold} -foreground $fS -background $bS"] \
@@ -216,6 +233,18 @@ namespace eval t {
       [list "link2" "::apave::openDoc %t@@https://aplsimple.github.io/en/tcl/%l/%l.html@@"] \
       [list "link3" "::apave::openDoc %t@@https://wiki.tcl-lang.org@@"] \
       [list "linkMIT" "::apave::openDoc %t@@https://en.wikipedia.org/wiki/MIT_License@@"] \
+      [list "linkCN" "::apave::openDoc %t@@https://www.nemethi.de/@@"] \
+      [list "linkSH" "::apave::openDoc %t@@https://wiki.tcl-lang.org/page/Steve+Huntley@@"] \
+      [list "linkHE" "::apave::openDoc %t@@https://wiki.tcl-lang.org/page/HE@@"] \
+      [list "linkRD" "::apave::openDoc %t@@https://github.com/rdbende@@"] \
+      [list "linkRS" "::apave::openDoc %t@@http://wiki.tcl-lang.org/page/Richard+Suchenwirth@@"] \
+      [list "linkAN" "::apave::openDoc %t@@https://www.magicsplat.com/@@"] \
+      [list "linkDF" "::apave::openDoc %t@@https://wiki.tcl-lang.org/page/Donal+Fellows@@"] \
+      [list "linkPO" "::apave::openDoc %t@@https://wiki.tcl-lang.org/page/Paul+Obermeier@@"] \
+      [list "linkJO" "::apave::openDoc %t@@https://www.johann-oberdorfer.eu/@@"] \
+      [list "linkTW" "::apave::openDoc %t@@https://github.com/phase1geo@@"] \
+      [list "linkRK" "::apave::openDoc %t@@https://rkeene.org/projects/info@@"] \
+      [list "linkCM" "::apave::openDoc %t@@https://colin-macleod.blogspot.com/@@"] \
       ]
     if {$t::ans4==12} {
       set ::t::restart 0

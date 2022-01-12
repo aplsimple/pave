@@ -1,12 +1,16 @@
 # Last changes:
 
 
-Version `3.4.7a5 (5 Jan'22)`
+Version `3.4.7a8 (12 Jan'22)`
 
   - NEW   : -popup attribute (command for right-click)
   - NEW   : <Home>, <End> bindings for listbox & treeview
   - NEW   : -tags option for readonly text widget & dialogue
   - NEW   : -tab2 option for dialogue
+  - NEW   : 'selection clear' at button/key pressing treeview & listbox
+  - NEW   : 'padchar' argument of setTextIndent
+  - CHANGE: test2_pave.tcl
+  - CHANGE: hl_tcl package
 
 
 Version `3.4.6 (15 Dec'21)`
