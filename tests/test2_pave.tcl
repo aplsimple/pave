@@ -225,6 +225,7 @@ namespace eval t {
       if {$::t::hue !=0} hueUpdate
       catch {::t::colorBar; ::bt draw}
       pave fillGutter [pave Text]
+      after 1000 "::t::highlighting_others $::t::v2"
     }
     lassign [pave csGet] fg - bg - - bS fS
     set ::t::textTags [list \
@@ -572,11 +573,11 @@ namespace eval t {
   }
 
   proc highlighting_others {{ro 1}} {
-
     # try to get "universal" highlighting colors (for dark&light bg):
+    set dc [lindex [pave csGet] 3]
     ::hl_tcl::hl_init [pave TextNT] -dark [pave csDarkEdit] \
       -seen 100 -readonly $ro -font [pave csFontMono] \
-      -colors {"#BC47D9" #AB21CE #0C860C #9a5465 #66a396 brown #7150cb}
+      -colors "#BC47D9 #AB21CE #0C860C #9a5465 #66a396 brown #7150cb #d400d4 $dc"
     ::hl_tcl::hl_text [pave TextNT]
     ::t::pave makePopup [pave TextNT] $ro yes
     set lab [[pave LaBNT] cget -text]
@@ -668,12 +669,13 @@ namespace eval t {
   }
 
   proc colorBar {} {
-    set cs [pave csCurrent]
-    if {$cs>-1} {
-      lassign [pave csGet $cs] cfg2 cfg1 cbg2 cbg1 cfhh - - - - fgmark
-    } else {
-      set fgmark #800080
-    }
+#    set cs [pave csCurrent]
+#    if {$cs>-1} {
+#      lassign [pave csGet $cs] cfg2 cfg1 cbg2 cbg1 cfhh - - - - fgmark
+#    } else {
+#      set fgmark #800080
+#    }
+    lassign [::hl_tcl::addingColors [pave csDarkEdit]] -> fgmark
     ::bt configure -fgmark $fgmark
   }
 
@@ -1511,7 +1513,6 @@ where:
     }
     set ::t::newCS [apave::cs_Non]
     toolBut 0
-    after 1000 ::t::highlighting_others  ;# it's unseen at changing the theme
     catch {::transpops::run [file join ~/PG/github/transpops/demos/pave $::t::transpopsFile] {<Alt-t> <Alt-y>} {.win .win._a_loupe_loup .win._a_loupe_disp .__tk__color .win._apave_CALENDAR_}}
 
     # Open the window at last
