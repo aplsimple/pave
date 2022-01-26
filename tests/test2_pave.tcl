@@ -253,7 +253,7 @@ namespace eval t {
     }
     if {$hl} {
       bartabs::drawAll
-      ::hl_tcl::hl_all -dark [pave csDarkEdit] -font [pave csFontMono]
+      ::hl_tcl::hl_all -dark [pave csDark] -font [pave csFontMono]
     }
     after idle "
       if {[::t::csCurrent]==-2} {
@@ -294,7 +294,7 @@ namespace eval t {
         if {$dotip} {
           lassign [split [winfo geometry .win] x+] w h x y
           set geo "+([expr {$w+$x}]-W-8)+$y-20"
-          if {[::apave::obj csDarkEdit]} {
+          if {[::apave::obj csDark]} {
             set fg black
             set bg yellow
           } else {
@@ -567,7 +567,7 @@ namespace eval t {
 
   proc highlighting_editor {} {
     set TID [::bt cget -tabcurrent]
-    ::hl_tcl::hl_init [pave Text] -seen 500 -dark [pave csDarkEdit] -cmdpos ::t::textPos \
+    ::hl_tcl::hl_init [pave Text] -seen 500 -dark [pave csDark] -cmdpos ::t::textPos \
       -readonly [getLock $TID] -font [pave csFontMono] -multiline $::multiline
     ::hl_tcl::hl_text [pave Text]
   }
@@ -575,7 +575,7 @@ namespace eval t {
   proc highlighting_others {{ro 1}} {
     # try to get "universal" highlighting colors (for dark&light bg):
     set dc [lindex [pave csGet] 3]
-    ::hl_tcl::hl_init [pave TextNT] -dark [pave csDarkEdit] \
+    ::hl_tcl::hl_init [pave TextNT] -dark [pave csDark] \
       -seen 100 -readonly $ro -font [pave csFontMono] \
       -colors "#BC47D9 #AB21CE #0C860C #9a5465 #66a396 brown #7150cb #d400d4 $dc"
     ::hl_tcl::hl_text [pave TextNT]
@@ -669,13 +669,7 @@ namespace eval t {
   }
 
   proc colorBar {} {
-#    set cs [pave csCurrent]
-#    if {$cs>-1} {
-#      lassign [pave csGet $cs] cfg2 cfg1 cbg2 cbg1 cfhh - - - - fgmark
-#    } else {
-#      set fgmark #800080
-#    }
-    lassign [::hl_tcl::addingColors [pave csDarkEdit]] -> fgmark
+    lassign [::hl_tcl::addingColors] -> fgmark
     ::bt configure -fgmark $fgmark
   }
 
@@ -707,7 +701,7 @@ namespace eval t {
   proc selTab2 {TID} {
     set monf "Noto Sans Mono"
     if {$monf in [font families]} {set monf " -family {$monf}"} {set monf ""}
-    ::hl_tcl::hl_init [pave Text] -dark [pave csDarkEdit] -font \
+    ::hl_tcl::hl_init [pave Text] -dark [pave csDark] -font \
       "[pave csFontMono]$monf"
     if {[catch {set pos $::t::savedtext($TID,pos)}]} {set pos 1.0}
     pave displayText [pave Text] $::t::filetxt $pos

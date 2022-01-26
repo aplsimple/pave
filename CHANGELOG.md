@@ -1,7 +1,7 @@
 # Last changes:
 
 
-Version `3.4.7b2 (19 Jan'22)`
+Version `3.4.7 (26 Jan'22)`
 
   - NEW   : -popup attribute (command for right-click)
   - NEW   : <Home>, <End> bindings for listbox & treeview
@@ -10,6 +10,7 @@ Version `3.4.7b2 (19 Jan'22)`
   - NEW   : 'selection clear' at button/key pressing treeview & listbox
   - NEW   : 'padchar' argument of setTextIndent
   - NEW   : -debug attribute to show a widget's info while executing paveWindow
+  - CHANGE: csDarkEdit converted to csDark
   - CHANGE: at Enter on a comment (# ) checking for upper & lower lines
   - CHANGE: at Enter on a left brace checking for indentation of lower line
   - CHANGE: -com attribute to fire a spinbox' command at pressing Return/Enter
