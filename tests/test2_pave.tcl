@@ -1278,9 +1278,9 @@ where:
       {LabImgInfo LabImg T 1 1 {} {-link "
       ::t::chanTab nbk .win.fra.fra.nbk.f4 no yes; focus [::t::pave SpxMisc]@@Click to select 'Misc.'\n... and mark the link as visited\n(to test the multiple visited links).@@" -afteridle ::t::labelImaged}}
       {labklnd LabImgInfo T 1 4 {-st nswe} {-t {\nExample of calendar #1}}}
-      {daTklnd labklnd T 1 1 {-st nw} {-borderwidth 1 -relief raised -dateformat $::t::formatKlnd1 -tvar ::t::dateKlnd1 -com {puts "date1=$::t::dateKlnd1 (DMY=%d.%m.%y)"}}}
+      {daTklnd labklnd T 1 1 {-st nw} {-borderwidth 1 -relief raised -dateformat $::t::formatKlnd1 -tvar ::t::dateKlnd1 -com {puts "date1=%d.%m.%y (\$::t::dateKlnd1)"}}}
       {labklnd2 labklnd L 1 4 {-st nswe} {-t {\nExample of calendar #2}}}
-      {daTklnd2 labklnd2 T 1 1 {-st nw} {-borderwidth 1 -relief raised -dateformat $::t::formatKlnd2 -tvar ::t::dateKlnd2 -com {puts "date2=$::t::dateKlnd2 (DMY=%d.%m.%y)"} -locale en_us -hllist {2021/10/11 2021/12/12 2021/12/2}}}
+      {daTklnd2 labklnd2 T 1 1 {-st nw} {-borderwidth 1 -relief raised -dateformat $::t::formatKlnd2 -tvar ::t::dateKlnd2 -com {puts "date2=%d.%m.%y (\$::t::dateKlnd2)"} -locale en_us -hllist {2021/10/11 2021/12/12 2021/12/2}}}
     }
   }
 
@@ -1362,13 +1362,19 @@ where:
           set day2 [clock scan "$::t::year/$m/1" -format %Y/%N/%e]
           set day2 [clock format $day2 -format $::t::formatKlnd1]
           set ::t::idateKlnd$m $day2
-          set lwid [list fra.scf.daT$m $prevW $prevP 1 1 {-st nw} "-relief raised -dateformat $::t::formatKlnd1 -tvar ::t::idateKlnd$m -daylist {$daylist} -com \"puts date=\$::t::idateKlnd$m\" -popup {puts {%y/%m/%d, at (%X,%Y)}} -united yes $sel -locale en"]
+          set lwid [list fra.scf.daT$m $prevW $prevP 1 1 {-st nw} "-relief raised -dateformat $::t::formatKlnd1 -tvar ::t::idateKlnd$m -daylist {$daylist} -com {::t::putKlndVar %y/%m/%d ::t::idateKlnd$m} -popup {puts {%y/%m/%d, at (%X,%Y)}} -united yes $sel -locale en"]
           %C $lwid
           set prevW fra.scf.daT[expr {$m - ($m%2?0:1)}]
           if {$m % 2} {set prevP L} {set prevP T}
         }
       }}
     }
+  }
+
+  proc putKlndVar {date tvar} {
+    # Puts out klnd data.
+
+    puts "$date ([set $tvar])"
   }
 
 # ______________________ The test's main procedure ______________________ #
@@ -1562,7 +1568,7 @@ append ::t::opcIcon " icons  "
 set test2res [t::test2_pave]
 puts "\nResult of test2 = $test2res\n[string repeat - 77]"
 if {$::t::newCS!=[apave::cs_Non] || $test2res==100} {  ;# at restart, newCS is set
-  exec tclsh $test2script $::t::opct [::t::csCurrent] $::t::fontsz $::t::ans4 "$::t::opcIcon" $::t::hue &
+  exec [info nameofexecutable] $test2script $::t::opct [::t::csCurrent] $::t::fontsz $::t::ans4 "$::t::opcIcon" $::t::hue &
 }
 ::apave::endWM
 exit

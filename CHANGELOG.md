@@ -1,6 +1,12 @@
 # Last changes:
 
 
+Version `3.4.8a2 (2 Feb'22)`
+
+  - BUGFIX: klnd2.tcl - leading spaces at comparing months & clearance
+  - CHANGE: test2_pave.tcl
+
+
 Version `3.4.7 (26 Jan'22)`
 
   - NEW   : -popup attribute (command for right-click)
