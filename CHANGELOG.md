@@ -1,9 +1,13 @@
 # Last changes:
 
 
-Version `3.4.8a2 (2 Feb'22)`
+Version `3.4.8a4 (9 Feb'22)`
 
   - BUGFIX: klnd2.tcl - leading spaces at comparing months & clearance
+  - BUGFIX: uk.msg instead of ua.msg
+  - NEW   : apave::MODALWINDOW is a window name of last called showModal
+  - NEW   : basicSmallFont to set/get the small font
+  - CHANGE: klnd.tcl - buttons' width in Windows = in Linux
   - CHANGE: test2_pave.tcl
 
 
