@@ -99,7 +99,7 @@ namespace eval t {
     set ::t::AcknText "\n The <red>apave</red> project has received \
      \n generous support from\n\n \
         \u2022 <linkAN>Ashok P. Nadkarni</linkAN>\n \
-        \u2022 <linkDF>Donal Fellows</linkDF>\n \
+        \u2022 <linkDF>Donal K. Fellows</linkDF>\n \
         \u2022 <linkTW>Trevor Williams</linkTW>\n \
         \u2022 <linkJO>Johann Oberdorfer</linkJO>\n \
         \u2022 <linkRS>Richard Suchenwirth</linkRS>\n \
@@ -112,6 +112,7 @@ namespace eval t {
         \u2022 <linkHE>Holger Ewert</linkHE>\n \
         \u2022 <linkCM>Colin Macleod</linkCM>\n \
         \u2022 <linkRK>Roy Keene</linkRK>\n \
+        \u2022 <linkJS>Jeff Smith</linkJS>\n \
         "
     set tab2 [list Information Acknowledgements "{fra - - 1 99 {-st nsew -rw 1 -cw 1}} {.TexAckn - - - - {pack -side left -expand 1 -fill both} {-w $wmax -h 31 -rotext ::t::AcknText -tags ::t::textTags}} {.sbv .texAckn L - - {pack -side right}}"]
 
@@ -237,6 +238,7 @@ namespace eval t {
       [list "linkCN" "::apave::openDoc %t@@https://www.nemethi.de/@@"] \
       [list "linkSH" "::apave::openDoc %t@@https://wiki.tcl-lang.org/page/Steve+Huntley@@"] \
       [list "linkHE" "::apave::openDoc %t@@https://wiki.tcl-lang.org/page/HE@@"] \
+      [list "linkJS" "::apave::openDoc %t@@https://wiki.tcl-lang.org/page/Jeff+Smith@@"] \
       [list "linkRD" "::apave::openDoc %t@@https://github.com/rdbende@@"] \
       [list "linkRS" "::apave::openDoc %t@@http://wiki.tcl-lang.org/page/Richard+Suchenwirth@@"] \
       [list "linkAN" "::apave::openDoc %t@@https://www.magicsplat.com/@@"] \
@@ -675,7 +677,7 @@ namespace eval t {
 
   proc getTabFile {TID} {
     set label [::bts $TID cget -text]
-    set i [lsearch -index 0 $::t::tclfiles $label]
+    set i [lsearch -exact -index 0 $::t::tclfiles $label]
     return [lindex $::t::tclfiles $i 1]
   }
 
