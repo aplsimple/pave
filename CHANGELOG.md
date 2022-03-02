@@ -1,7 +1,7 @@
 # Last changes:
 
 
-Version `3.4.8a5 (10 Feb'22)`
+Version `3.4.8b2 (28 Feb'22)`
 
   - BUGFIX: klnd2.tcl - leading spaces at comparing months & clearance
   - BUGFIX: uk.msg instead of ua.msg
@@ -11,6 +11,7 @@ Version `3.4.8a5 (10 Feb'22)`
   - CHANGE: tiny-ups with lsearch & switch
   - CHANGE: klnd.tcl - buttons' width in Windows = in Linux
   - CHANGE: test2_pave.tcl
+  - CHANGE: hl_tcl package
 
 
 Version `3.4.7 (26 Jan'22)`

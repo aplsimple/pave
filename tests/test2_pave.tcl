@@ -1530,8 +1530,8 @@ where:
       ::t::putsResult3
     }
     destroy .win
-    pave destroy
-    pdlg destroy
+#    pave destroy
+#    pdlg destroy
     return $res
   }
 
