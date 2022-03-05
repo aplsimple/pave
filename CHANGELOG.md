@@ -1,10 +1,11 @@
 # Last changes:
 
 
-Version `3.4.8b2 (28 Feb'22)`
+Version `3.4.8b3 (5 Mar'22)`
 
   - BUGFIX: klnd2.tcl - leading spaces at comparing months & clearance
   - BUGFIX: uk.msg instead of ua.msg
+  - NEW   : frames scrolled by the mouse wheel (in Linux)
   - NEW   : apave::InitTheme
   - NEW   : apave::MODALWINDOW is a window name of last called showModal
   - NEW   : basicSmallFont to set/get the small font
