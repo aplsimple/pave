@@ -1,7 +1,7 @@
 # Last changes:
 
 
-Version `3.4.8b3 (5 Mar'22)`
+Version `3.4.8 (8 Mar'22)`
 
   - BUGFIX: klnd2.tcl - leading spaces at comparing months & clearance
   - BUGFIX: uk.msg instead of ua.msg
