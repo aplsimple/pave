@@ -1574,4 +1574,4 @@ if {$::t::newCS!=[apave::cs_Non] || $test2res==100} {  ;# at restart, newCS is s
 }
 ::apave::endWM
 exit
-#ARGS1: alt 20 9 12 "small icons"
+#-ARGS1: alt 24 9 12 "small icons"

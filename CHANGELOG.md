@@ -9,6 +9,7 @@ Version `3.4.8 (8 Mar'22)`
   - NEW   : apave::InitTheme
   - NEW   : apave::MODALWINDOW is a window name of last called showModal
   - NEW   : basicSmallFont to set/get the small font
+  - CHANGE: klnd: bg of frames & buttons
   - CHANGE: tiny-ups with lsearch & switch
   - CHANGE: klnd.tcl - buttons' width in Windows = in Linux
   - CHANGE: test2_pave.tcl
