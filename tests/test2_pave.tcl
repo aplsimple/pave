@@ -1273,7 +1273,7 @@ where:
       {fraflb.butEdit - - - - {pack -side right -anchor nw -padx 9} {-t "Edit the file" -com t::viewfile -tooltip "Opens a stand-alone editor of the file\nthe listbox' data are taken from." -image ICN31-small -compound left}}
       {fraflb.lab - - - - {pack -side left -anchor nw} {-t "Listbox of file content:\n\nSee also:\nGeneral/Misc. tab" -link "
       ::t::chanTab nbk .win.fra.fra.nbk.f4 no yes; focus [::t::pave SpxMisc]@@Click to select 'Misc.'\n... and mark the link as visited.@@"}}
-      {fraflb.flb - - - - {pack -side left -fill x -expand 1} {-lvar ::t::lv1 -lbxsel Cont -ALL 1 -w 50 -h 5 -tooltip "The 'flb' listbox contains:\n 1)  four literal lines\n  2) data from 'test2_fco.dat' file" -values {@@-div1 " \[" -div2 "\] " test2_fco.dat@@   INFO: @@-pos 22 -ret 1 -list {{Content of test2_fco.dat} {another item} trunk DOC} test2_fco.dat@@ Code of test2_pave.tcl: @@-RE {^(\s*)([^#]+)$} ./test2_pave.tcl@@}}}
+      {fraflb.flb - - - - {pack -side left -fill x -expand 1} {-lvar ::t::lv1 -lbxsel Cont -ALL 1 -w 50 -h 5 -tooltip "The 'flb' listbox contains:\n  1) four literal lines\n  2) data from 'test2_fco.dat' file" -values {@@-div1 " \[" -div2 "\] " test2_fco.dat@@   INFO: @@-pos 22 -ret 1 -list {{Content of test2_fco.dat} {another item} trunk DOC} test2_fco.dat@@ Code of test2_pave.tcl: @@-RE {^(\s*)([^#]+)$} ./test2_pave.tcl@@}}}
       {fraflb.sbv fraflb.flb L - - {pack -side left -after %w}}
       {fraflb.sbh fraflb.flb T - - {pack -side left -before %w}}
       {LabImg fraflb T 1 1 {} {-link "::t::goWiki@@Click to enter the bird's wiki@@"}}
