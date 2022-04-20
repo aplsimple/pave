@@ -1,6 +1,11 @@
 # Last changes:
 
 
+Version `3.4.9 (20 Apr'22)`
+
+  - BUGFIX: line numbers in the gutter are updated only for mapped texts
+
+
 Version `3.4.8 (8 Mar'22)`
 
   - BUGFIX: klnd2.tcl - leading spaces at comparing months & clearance
