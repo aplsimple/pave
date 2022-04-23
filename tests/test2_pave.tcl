@@ -1521,7 +1521,7 @@ where:
     ::apave::obj progress_End
     set ::t::curTab ""
     chanTab nbk
-    set res [pave showModal .win -decor 1 -onclose t::exitProc]
+    set res [pave showModal .win -decor 1 -onclose t::exitProc -focus [pave Text]]
     if {$::t::newCS==[apave::cs_Non]} { ;# at restart, newCS is set
       # getting result and clearance
       set res [pave res .win]
