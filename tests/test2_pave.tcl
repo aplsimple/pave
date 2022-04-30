@@ -105,8 +105,8 @@ namespace eval t {
         \u2022 <linkRS>Richard Suchenwirth</linkRS>\n \
         \u2022 <linkCN>Csaba Nemethi</linkCN>\n \
         \u2022 <linkSH>Steve Huntley</linkSH>\n \
+        \u2022 <linkPW>Paul Walton</linkPW>\n \
         \u2022 <linkRD>rdbende</linkRD>\n \
-        \u2022 Paul Walton\n \
         \n Special thanks also to\n\n \
         \u2022 <linkPO>Paul Obermeier</linkPO>\n \
         \u2022 <linkHE>Holger Ewert</linkHE>\n \
@@ -244,6 +244,7 @@ namespace eval t {
       [list "linkAN" "::apave::openDoc %t@@https://www.magicsplat.com/@@"] \
       [list "linkDF" "::apave::openDoc %t@@https://wiki.tcl-lang.org/page/Donal+Fellows@@"] \
       [list "linkPO" "::apave::openDoc %t@@https://wiki.tcl-lang.org/page/Paul+Obermeier@@"] \
+      [list "linkPW" "::apave::openDoc %t@@https://wiki.tcl-lang.org/page/PW@@"] \
       [list "linkJO" "::apave::openDoc %t@@https://www.johann-oberdorfer.eu/@@"] \
       [list "linkTW" "::apave::openDoc %t@@https://github.com/phase1geo@@"] \
       [list "linkRK" "::apave::openDoc %t@@https://rkeene.org/projects/info@@"] \

@@ -1,9 +1,11 @@
 # Last changes:
 
 
-Version `3.4.9 (20 Apr'22)`
+Version `3.4.9 (30 Apr'22)`
 
   - BUGFIX: line numbers in the gutter are updated only for mapped texts
+  - CHANGE: test2_pave.tcl
+  - CHANGE: klnd package
 
 
 Version `3.4.8 (8 Mar'22)`
