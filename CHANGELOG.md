@@ -1,6 +1,11 @@
 # Last changes:
 
 
+Version `3.4.10 (13 May'22)`
+
+  - CHANGE: get file/dir chooser geometry from 2nd chooser, if no geometry for current one
+
+
 Version `3.4.9 (30 Apr'22)`
 
   - BUGFIX: line numbers in the gutter are updated only for mapped texts
