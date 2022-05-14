@@ -1,8 +1,9 @@
 # Last changes:
 
 
-Version `3.4.10 (13 May'22)`
+Version `3.4.10 (14 May'22)`
 
+  - CHANGE: duplicate a current line (by Ctrl+D) "properly", if it is last in the text
   - CHANGE: get file/dir chooser geometry from 2nd chooser, if no geometry for current one
 
 
