@@ -1,6 +1,11 @@
 # Last changes:
 
 
+Version `3.4.11 (20 May'22)`
+
+  - CHANGE: bartabs package
+
+
 Version `3.4.10 (14 May'22)`
 
   - CHANGE: duplicate a current line (by Ctrl+D) "properly", if it is last in the text
