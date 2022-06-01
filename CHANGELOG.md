@@ -1,6 +1,15 @@
 # Last changes:
 
 
+Version `3.4.12 (1 Jun'22)`
+
+  - BUGFIX: (avoiding bugs) apave::setTextBinds: bindToEvent instead of "bind"
+  - BUGFIX: (avoiding bugs) my set_highlight_matches: check for existing text
+  - NEW   : apave::iconImage: "doit" argument to force the initialization
+  - CHANGE: Control-a/A to select all of text
+  - CHANGE: baltip package
+
+
 Version `3.4.11 (20 May'22)`
 
   - CHANGE: bartabs package

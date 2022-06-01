@@ -93,7 +93,7 @@ destroy $win
 {fraM - - - - {pack -fill x}}
 {fra2 - - - - {pack -fill both -expand 1}}
 {fra3 - - - - {pack -fill x} {-relief raised}}
-{fraM.lab0 - - - - {pack -pady 10} 
+{fraM.lab0 - - - - {pack -pady 10}
   {-t {  Demo for $\::fil0 and $\::fil1 values (and $ as dollar)  }}}
 {fraM.labent1 - - - - {pack -side left} {-t "Enter file name:"}}
 {fraM.Ent1 - - - - {pack -side right -expand 1 -fill x} {-tvar ::fil0}}

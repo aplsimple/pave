@@ -312,7 +312,7 @@ namespace eval t {
       }
       if {$tab in {nb4 nb5 nb6 nb7}} {
         lassign [pave csGet] - fg - bg
-        ::apave::blinkWidget .win.fra.fra.$tab.labB $fg $bg $bg $fg 100 7        
+        ::apave::blinkWidget .win.fra.fra.$tab.labB $fg $bg $bg $fg 100 7
       }
     }
   }
