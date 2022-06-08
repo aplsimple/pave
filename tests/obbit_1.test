@@ -1,12 +1,10 @@
-# doctests for ObjectUtils (to be sourced in obbit.tcl)
+# doctests for parseOptionsFile (to be sourced in obbit.tcl)
 
 #--------------------------------------------------------------------
 # strict: -d, -opt, -all options, -all=yes
 
-#% apave::ObjectUtils create obj -NONE <NONE>
-#% lassign [obj parseOptionsFile 1 {-d mydir -all myfile with spaces} \
-#%     -d /home/me -opt some -all <NONE>] optvals1 filename1
-#% obj destroy
+#% lassign [apave::parseOptionsFile 1 {-d mydir -all myfile with spaces} \
+#%     -d /home/me -opt some -all =NONE=] optvals1 filename1
 #% array set opts $optvals1
 #% set a "$opts(-d) $opts(-opt) $opts(-all) FILE1=$filename1"
    #> mydir some yes FILE1=myfile with spaces
@@ -15,50 +13,40 @@
 #--------------------------------------------------------------------
 # strict: -d option with spaces and \", -all="=NONE=", used --
 
-#% apave::ObjectUtils create obj -NONE <NONE>
-#% lassign [obj parseOptionsFile 1 \
+#% lassign [apave::parseOptionsFile 1 \
 #%   {-opt new -d "dir with spaces and \"" -- -all the rest} \
 #%     -d /home/me -opt some -all =NONE=] optvals2 filename2
-#% obj destroy
 #% set a "$optvals2 FILE2=$filename2"
    #> -d {dir with spaces and "} -opt new -all =NONE= FILE2=-all the rest
 
 #--------------------------------------------------------------------
 # not strict: skip -opt and -f options; no file name
 
-#% apave::ObjectUtils create obj
-#% lassign [obj parseOptionsFile 0 \
+#% lassign [apave::parseOptionsFile 0 \
 #%   {-opt new -d "dir with spaces and \"" -f myfile} -d some] optvals3
-#% obj destroy
 #% set a "$optvals3"
    #> -d {dir with spaces and "}
 
 #--------------------------------------------------------------------
 # 'args' options replace 'args1', rest unchanged; no file name
 
-#% apave::ObjectUtils create obj
-#% lassign [obj parseOptionsFile 2 \
+#% lassign [apave::parseOptionsFile 2 \
 #%   {-opt new -d "dir with spaces and \"" -f myfile} -d some] optvals4
-#% obj destroy
 #% set a "$optvals4"
    #> -opt new -d some -f myfile
 
 #--------------------------------------------------------------------
 # -old option ignored
 
-#% apave::ObjectUtils create obj
-#% lassign [obj parseOptionsFile 2 {-opt opt-new5 \
+#% lassign [apave::parseOptionsFile 2 {-opt opt-new5 \
 #%   -d "-d for test5" -new} -opt some -old 1 -new =NONE=] optvals5
-#% obj destroy
 #% set a "$optvals5"
    #> -opt some -d {-d for test5} -new yes
 
 #--------------------------------------------------------------------
 # -old option not ignored
 
-#% apave::ObjectUtils create obj
-#% lassign [obj parseOptionsFile 1 \
+#% lassign [apave::parseOptionsFile 1 \
 #%   {-new -opt opt-new5 -d "test 5"} -new =NONE= -opt some -old 1] optvals6
-#% obj destroy
 #% set a "$optvals6"
    #> -new yes -opt opt-new5 -old 1
