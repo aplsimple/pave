@@ -107,12 +107,22 @@ namespace eval t {
         \u2022 <linkSH>Steve Huntley</linkSH>\n \
         \u2022 <linkPW>Paul Walton</linkPW>\n \
         \u2022 <linkRD>rdbende</linkRD>\n \
+        \u2022 <linkNB>Nicolas Bats</linkNB>\n \
         \n Special thanks also to\n\n \
         \u2022 <linkPO>Paul Obermeier</linkPO>\n \
         \u2022 <linkHE>Holger Ewert</linkHE>\n \
         \u2022 <linkCM>Colin Macleod</linkCM>\n \
+        \u2022 <linkCW>Christian Werner</linkCW>\n \
         \u2022 <linkRK>Roy Keene</linkRK>\n \
         \u2022 <linkJS>Jeff Smith</linkJS>\n \
+        \u2022 <linkDB>D. Bohdan</linkDB>\n \
+        \u2022 <linkDG>Detlef Groth</linkDG>\n \
+        \u2022 <linkPY>Nathan Coulter</linkPY>\n \
+        \u2022 <linkAK>Andreas Kupries</linkAK>\n \
+        \u2022 <linkRH>D. Richard Hipp</linkRH>\n \
+        \u2022 <linkMH>Matthias Hoffmann</linkMH>\n \
+        \u2022 <linkAG>Andy Goth</linkAG>\n \
+        \u2022 <linkDA>Danilo Chang</linkDA>\n \
         "
     set tab2 [list Information Acknowledgements "{fra - - 1 99 {-st nsew -rw 1 -cw 1}} {.TexAckn - - - - {pack -side left -expand 1 -fill both} {-w $wmax -h 31 -rotext ::t::AcknText -tags ::t::textTags}} {.sbv .texAckn L - - {pack -side right}}"]
 
@@ -249,6 +259,16 @@ namespace eval t {
       [list "linkTW" "::apave::openDoc %t@@https://github.com/phase1geo@@"] \
       [list "linkRK" "::apave::openDoc %t@@https://rkeene.org/projects/info@@"] \
       [list "linkCM" "::apave::openDoc %t@@https://colin-macleod.blogspot.com/@@"] \
+      [list "linkNB" "::apave::openDoc %t@@https://github.com/sl1200mk2@@"] \
+      [list "linkCW" "::apave::openDoc %t@@https://wiki.tcl-lang.org/page/chw@@"] \
+      [list "linkDB" "::apave::openDoc %t@@https://wiki.tcl-lang.org/page/dbohdan"] \
+      [list "linkDG" "::apave::openDoc %t@@https://wiki.tcl-lang.org/page/Detlef+Groth"] \
+      [list "linkPY" "::apave::openDoc %t@@https://wiki.tcl-lang.org/page/Poor+Yorick"] \
+      [list "linkMH" "::apave::openDoc %t@@https://wiki.tcl-lang.org/page/Matthias+Hoffmann"] \
+      [list "linkAK" "::apave::openDoc %t@@https://wiki.tcl-lang.org/page/Andreas+Kupries@@"] \
+      [list "linkAG" "::apave::openDoc %t@@https://wiki.tcl-lang.org/page/Andy+Goth@@"] \
+      [list "linkDA" "::apave::openDoc %t@@https://github.com/ray2501@@"] \
+      [list "linkRH" "::apave::openDoc %t@@http://www.hwaci.com/drh/@@"] \
       ]
     if {$t::ans4==12} {
       set ::t::restart 0
@@ -1196,6 +1216,7 @@ namespace eval t {
   proc pave_Nbk1_Tab4 {} {
 
     return {
+      {after idle}
       {can - - - - {pack} {-h 130 -w 360 -afteridle ::t::TextConfigPie}}
       {seh - - - - {pack -pady 7 -fill x}}
       {lab - - - - {pack} {-tvar t::sc2}}
@@ -1258,6 +1279,7 @@ where:
     set ::t::dateKlnd1 [clock format $sec -format $::t::formatKlnd1]
     set ::t::dateKlnd2 10/30/2021
     return {
+      {after idle}
       ####################################################################
       # {#               TABS OF VIEW (JUST TO BE PRESENT)               }
       ####################################################################
@@ -1386,7 +1408,7 @@ where:
 
     variable pdlg
     variable pave
-    ::apave::obj progress_Begin {} .win Starting {Wait a little...} {} 1280 -length 250
+    ::apave::obj progress_Begin {} .win Starting {Wait a little...} {} 1130 -length 250
     set firstin [expr {$::t::newCS==[apave::cs_Non]}]
     apave::APaveInput create pdlg .win
     set ::t::paveobj [apave::APaveInput create pave .win $::t::newCS]

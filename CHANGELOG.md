@@ -1,6 +1,15 @@
 # Last changes:
 
 
+Version `3.4.13 (14 Jun'22)`
+
+  - BUGFIX: (avoiding bugs) check "source baltip.tcl"
+  - BUGFIX: (avoiding bugs) catch "configure splash widgets"
+  - NEW   : {after idle} or {after ms} can be 1st item of widget list
+  - CHANGE: up to 5 tabs in -tab2 option
+  - CHANGE: test2_pave.tcl: About/Acknowledgements
+
+
 Version `3.4.12 (8 Jun'22)`
 
   - BUGFIX: (avoiding bugs) apave::setTextBinds: bindToEvent instead of "bind"
