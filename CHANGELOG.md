@@ -1,11 +1,12 @@
 # Last changes:
 
 
-Version `3.4.13 (14 Jun'22)`
+Version `3.4.14 (18 Jun'22)`
 
   - BUGFIX: (avoiding bugs) check "source baltip.tcl"
   - BUGFIX: (avoiding bugs) catch "configure splash widgets"
   - NEW   : {after idle} or {after ms} can be 1st item of widget list
+  - CHANGE: up to 16 levels for [info level] in ::apave::logMessage
   - CHANGE: up to 5 tabs in -tab2 option
   - CHANGE: test2_pave.tcl: About/Acknowledgements
 
