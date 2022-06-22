@@ -1,6 +1,12 @@
 # Last changes:
 
 
+Version `3.4.15 (22 Jun'22)`
+
+  - CHANGE: remove accompanying files of baltip & bartabs packages
+  - CHANGE: bartabs package
+
+
 Version `3.4.14 (18 Jun'22)`
 
   - BUGFIX: (avoiding bugs) check "source baltip.tcl"
