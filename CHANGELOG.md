@@ -1,8 +1,18 @@
 # Last changes:
 
 
-Version `3.4.15 (22 Jun'22)`
+Version `3.4.17 (27 Jun'22)`
 
+  - NEW   : -titleHELP option for 'input' dialogue (its 'result value' is a command)
+  - CHANGE: CS: SunValleyDark from old Dracula, new SunValleyDeep from old SunValleyDark
+            - best fit to sun-valley-dark theme, meaning two (lighter/darker) CS for it
+
+
+Version `3.4.16 (23 Jun'22)`
+
+  - NEW   : widget names for "input" can be uppercased (or include -method option)
+  - CHANGE: VarName method renamed to varName for public access
+  - CHANGE: makePopup checks also for -state = disabled
   - CHANGE: remove accompanying files of baltip & bartabs packages
   - CHANGE: bartabs package
 
