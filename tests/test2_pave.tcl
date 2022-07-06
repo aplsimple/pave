@@ -1363,11 +1363,11 @@ where:
       {fra - - - - {-st nsew -cw 1 -rw 1}}
       {fra.scf - - 1 1  {pack -fill both -expand 1}}
       {fra.scf.fra - - 1 2 {-st ew}}
-      {.buT1 - - - - {pack -side left} {-image ICN43 -compound left -com {::t::yearNext -50} -t {Prior 50}}}
-      {.buT12 - - - - {pack -side left} {-image ICN41 -compound left -com {::t::yearNext -1} -t {Prior 1}}}
+      {.buT1 - - - - {pack -side left} {-image ICN43-small -compound left -com {::t::yearNext -50} -t {Prior 50}}}
+      {.buT12 - - - - {pack -side left} {-image ICN41-small -compound left -com {::t::yearNext -1} -t {Prior 1}}}
       {.ButKlndYear - - - - {pack -side left -anchor center -expand 1} {-com ::t::yearCurr -t $::t::year -style TButtonBold -tip "Click to set\nthe current."}}
-      {.buT22 - - - - {pack -side left} {-image ICN42 -compound right -com {::t::yearNext 1} -t {Next 1}}}
-      {.buT2 - - - - {pack -side left} {-image ICN44 -compound right -com {::t::yearNext 50} -t {Next 50}}}
+      {.buT22 - - - - {pack -side left} {-image ICN42-small -compound right -com {::t::yearNext 1} -t {Next 1}}}
+      {.buT2 - - - - {pack -side left} {-image ICN44-small -compound right -com {::t::yearNext 50} -t {Next 50}}}
       {tcl {
         set day1 [clock scan "$::t::year/5/1" -format %Y/%N/%e]
         set day1 [clock format $day1 -format $::t::formatKlnd1]

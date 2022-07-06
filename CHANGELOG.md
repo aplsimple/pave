@@ -1,8 +1,19 @@
 # Last changes:
 
 
-Version `3.4.17 (27 Jun'22)`
+Version `3.5.0a1 (4 Jul'22)`
 
+  - BUGFIX: font chooser (linux): color of selection
+  - BUGFIX: after calling and theming choosers (linux), combobox's colors affected
+  - NEW   : dlgPath method to get apave dialogue's path
+  - CHANGE: sframe.tcl refactored: checking mouse pointer in text, listbox etc.
+  - CHANGE: res method: if *win* argument is {}, it's set as current dialogue's path
+  - CHANGE: CS: Quiverly modified to quiver a little less
+
+
+Version `3.4.18 (3 Jul'22)`
+
+  - NEW   : menuTips method and -indexedtips to set tips for menu & opc items
   - NEW   : -titleHELP option for 'input' dialogue (its 'result value' is a command)
   - CHANGE: CS: SunValleyDark from old Dracula, new SunValleyDeep from old SunValleyDark
             - best fit to sun-valley-dark theme, meaning two (lighter/darker) CS for it
