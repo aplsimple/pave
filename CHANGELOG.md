@@ -1,13 +1,14 @@
 # Last changes:
 
 
-Version `3.5.0a2 (13 Jul'22)`
+Version `3.5.0a3 (15 Jul'22)`
 
   - BUGFIX: font chooser (linux): color of selection
   - BUGFIX: after calling and theming choosers (linux), combobox's colors affected
   - NEW   : -clearcom option for entry-like widgets (adds "Clear" to popup menu)
+  - NEW   : -help option for dialogues (to create "Help" button)
   - NEW   : apave::InitAwThemesPath to set awthemes' path
-  - NEW   : dlgPath method to get apave dialogue's path
+  - NEW   : dlgPath method & proc to get apave dialogue's path
   - CHANGE: value of combobox' variable in input dialogue
   - CHANGE: sframe.tcl refactored: checking mouse pointer in text, listbox etc.
   - CHANGE: res method: if *win* argument is {}, it's set as current dialogue's path
