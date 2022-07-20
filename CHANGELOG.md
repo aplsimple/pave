@@ -1,7 +1,7 @@
 # Last changes:
 
 
-Version `3.5.0a3 (15 Jul'22)`
+Version `3.5.0a4 (20 Jul'22)`
 
   - BUGFIX: font chooser (linux): color of selection
   - BUGFIX: after calling and theming choosers (linux), combobox's colors affected
@@ -13,6 +13,7 @@ Version `3.5.0a3 (15 Jul'22)`
   - CHANGE: sframe.tcl refactored: checking mouse pointer in text, listbox etc.
   - CHANGE: res method: if *win* argument is {}, it's set as current dialogue's path
   - CHANGE: CS: Quiverly modified to quiver a little less
+  - CHANGE: baltip 1.3.8
 
 
 Version `3.4.18 (3 Jul'22)`
