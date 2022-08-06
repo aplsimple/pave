@@ -1,19 +1,24 @@
 # Last changes:
 
 
-Version `3.5.0a4 (20 Jul'22)`
+Version `3.5.1 (6 Aug'22)`
 
-  - BUGFIX: font chooser (linux): color of selection
+  - BUGFIX: colorWindow for "after idle/ms" item of widget list
+  - BUGFIX: font chooser (Linux): color of selection
   - BUGFIX: after calling and theming choosers (linux), combobox's colors affected
+  - NEW   : apave::autoexec imitates Tcl's auto_execok
+  - NEW   : apave::lsearchFile to search normalized file names in lists
+  - NEW   : apave::InitAwThemesPath to set awthemes' path
+  - NEW   : bind for transpops package if any (to hide its message by Control-Alt-0)
   - NEW   : -clearcom option for entry-like widgets (adds "Clear" to popup menu)
   - NEW   : -help option for dialogues (to create "Help" button)
-  - NEW   : apave::InitAwThemesPath to set awthemes' path
   - NEW   : dlgPath method & proc to get apave dialogue's path
   - CHANGE: value of combobox' variable in input dialogue
   - CHANGE: sframe.tcl refactored: checking mouse pointer in text, listbox etc.
   - CHANGE: res method: if *win* argument is {}, it's set as current dialogue's path
   - CHANGE: CS: Quiverly modified to quiver a little less
-  - CHANGE: baltip 1.3.8
+  - CHANGE: CS: AzureLight, AzureDark, SunValleyLight
+  - CHANGE: baltip 1.4.0, hl_tcl 0.9.42
 
 
 Version `3.4.18 (3 Jul'22)`
