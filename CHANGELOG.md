@@ -1,7 +1,7 @@
 # Last changes:
 
 
-Version `3.5.1 (6 Aug'22)`
+Version `3.5.1 (10 Aug'22)`
 
   - BUGFIX: colorWindow for "after idle/ms" item of widget list
   - BUGFIX: font chooser (Linux): color of selection
@@ -17,7 +17,7 @@ Version `3.5.1 (6 Aug'22)`
   - CHANGE: sframe.tcl refactored: checking mouse pointer in text, listbox etc.
   - CHANGE: res method: if *win* argument is {}, it's set as current dialogue's path
   - CHANGE: CS: Quiverly modified to quiver a little less
-  - CHANGE: CS: AzureLight, AzureDark, SunValleyLight
+  - CHANGE: CS: AzureLight, AzureDark, SunValleyLight, SunValleyDeep
   - CHANGE: baltip 1.4.0, hl_tcl 0.9.42
 
 
