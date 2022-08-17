@@ -1,6 +1,12 @@
 # Last changes:
 
 
+Version `3.5.2 (15 Aug'22)`
+
+  - NEW   : apave::_CS_(HUE) to hold a current tint of CS
+  - CHANGE: CS: SunValleyDeep
+
+
 Version `3.5.1 (10 Aug'22)`
 
   - BUGFIX: colorWindow for "after idle/ms" item of widget list
@@ -17,7 +23,7 @@ Version `3.5.1 (10 Aug'22)`
   - CHANGE: sframe.tcl refactored: checking mouse pointer in text, listbox etc.
   - CHANGE: res method: if *win* argument is {}, it's set as current dialogue's path
   - CHANGE: CS: Quiverly modified to quiver a little less
-  - CHANGE: CS: AzureLight, AzureDark, SunValleyLight, SunValleyDeep
+  - CHANGE: CS: AzureLight, AzureDark, SunValleyLight
   - CHANGE: baltip 1.4.0, hl_tcl 0.9.42
 
 
