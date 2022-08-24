@@ -1,6 +1,11 @@
 # Last changes:
 
 
+Version `3.5.3 (24 Aug'22)`
+
+  - CHANGE: text widget's attributes (-exportselection, -inactiveselectbackground)
+
+
 Version `3.5.2 (15 Aug'22)`
 
   - NEW   : apave::_CS_(HUE) to hold a current tint of CS
