@@ -1,9 +1,16 @@
 # Last changes:
 
 
-Version `3.5.3 (24 Aug'22)`
+Version `3.5.4 (31 Aug'22)`
+
+  - NEW   : chooserGeomVars method to restore a full geometry of dir/file choosers (Linux)
+            e.g. used in alited editor
+
+
+Version `3.5.3 (25 Aug'22)`
 
   - CHANGE: text widget's attributes (-exportselection, -inactiveselectbackground)
+  - CHANGE: UpdateSelectAttrs not called for text widget
 
 
 Version `3.5.2 (15 Aug'22)`
