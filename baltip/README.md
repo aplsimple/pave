@@ -106,11 +106,23 @@ To get all or specific settings of *baltip*:
       # or this way:
       ::baltip cget ?-option?
 
+To get a specific widget's tip option:
+
+      ::baltip::cget widgetpath -option
+      # or this way:
+      ::baltip cget widgetpath -option
+
 To set some options:
 
       ::baltip::configure -option value ?-option value?
       # or this way:
       ::baltip config -option value ?-option value?
+
+To set a specific widget's tip option:
+
+      ::baltip::configure widgetpath -option value ?-option value?
+      # or this way:
+      ::baltip config widgetpath -option value ?-option value?
 
 **Note**: the options set with `configure` command are *global*, i.e. active for all tips.
 The options set with `tip` command are *local*, i.e. active for the specific tip.

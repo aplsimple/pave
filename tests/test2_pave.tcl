@@ -1352,7 +1352,7 @@ where:
     if {$year>$yearmax} {set year $yearmax}
     $wy configure -text $year
     foreach month {1 2 3 4 5 6 7 8 9 10 11 12} {
-      ::klnd::update [expr {$month+2}] $year $month
+      ::klnd::update $month $year $month
     }
     .win.fra.fra.nbk2 tab .win.fra.fra.nbk2.f3 -text "< Calendar $year >"
     update
@@ -1518,10 +1518,11 @@ where:
     }
 
     # icons of top toolbar etc.
+    if {{small} in $::t::opcIcon} {set und {}} {set und \n}
     for {set i 0} {$i<[llength $imgl]} {incr i} {
       set ico [lindex $imgl $i]
       [pave BuT_ICN$i] configure -command \
-        [list ::t::msg info " This is just a demo.\n\n Icon$i was clicked:\n <link3></link3> $ico" -tags ::t::textTags -my "after idle {::t::textIco %w $ico}" -text 1 -scroll 0 -g pointer+-10+10]
+        [list ::t::msg info " This is just a demo.\n\n Icon$i was clicked:\n <link3></link3> $ico$und" -tags ::t::textTags -my "after idle {::t::textIco %w $ico}" -text 1 -scroll 0 -g pointer+-10+10]
     }
     [pave Labstat3] configure -text "System encoding: [encoding system]"
 
