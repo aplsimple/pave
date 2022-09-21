@@ -1569,12 +1569,11 @@ set ::t::opct clam
 if {$::argc>=5} {
   lassign $::argv ::t::opct ::t::newCS ::t::fontsz ::t::ans4 ::t::opcIcon ::t::hue
   set ::t::transpopsFile "transpops2.txt"
-  set ::t::btsbd 0
 } else {
   set ::t::newCS 27 ;# ForestDark CS
   set ::t::opcIcon "small"
-  set ::t::btsbd 1
 }
+set ::t::btsbd 0
 set ::t::opcThemes [list default clam classic alt]
 if {$::t::newCS!=-2 && ![catch {
 package require awthemes

@@ -1,11 +1,11 @@
 # Last changes:
 
 
-Version `3.5.5 (14 Sep'22)`
+Version `3.5.5 (21 Sep'22)`
 
   - NEW   : apave::undoIn / apave::undoOut to frame undo / redo block
   - CHANGE: test2_pave.tcl
-  - CHANGE: baltip 1.4.1
+  - CHANGE: baltip 1.4.1, bartabs 1.5.8
 
 
 Version `3.5.4 (31 Aug'22)`

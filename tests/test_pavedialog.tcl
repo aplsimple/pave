@@ -194,7 +194,7 @@ puts "pavedoc = [t::test9 -g +575+375]"
 # show dialogs with checkboxes, in cycle
 lassign {0 0 0 0 0 0 0 0} r1 r2 r3 r4 r5 r6 r7 r8 r9
 set clrsc 0
-set clrscdark [list 23 24 25 26 27 28 29 30 31 32 33 34 36 35 37 38 39 40]
+set clrscdark [list 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41]
 while 1 {
   set cs [lindex $clrscdark $clrsc]
   set ::csN " / CS:$cs"
