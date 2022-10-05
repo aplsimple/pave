@@ -1,6 +1,11 @@
 # Last changes:
 
 
+Version `3.5.6 (5 Oct'22)`
+
+  - BUGFIX: dir chooser: -initialdir option need no quoting
+
+
 Version `3.5.5 (21 Sep'22)`
 
   - NEW   : apave::undoIn / apave::undoOut to frame undo / redo block
