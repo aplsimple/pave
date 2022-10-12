@@ -1,6 +1,13 @@
 # Last changes:
 
 
+Version `3.5.7 (10 Oct'22)`
+
+  - CHANGE: *input* method: *-values* option added for all default widgets
+  - CHANGE: ::apave::autoexec got *ext* argument, for Windows
+  - CHANGE: baltip 1.5
+
+
 Version `3.5.6 (5 Oct'22)`
 
   - BUGFIX: dir chooser: -initialdir option need no quoting
