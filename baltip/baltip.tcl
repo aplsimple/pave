@@ -6,7 +6,7 @@
 # License: MIT.
 ###########################################################
 
-package provide baltip 1.5
+package provide baltip 1.5.1
 
 package require Tk
 
@@ -310,6 +310,8 @@ proc ::baltip::clear {w args} {
   # Removes tip bindings for a widget.
   #   w - widget's path
 
+  variable my::ttdata
+  catch {unset my::ttdata(optvals,$w)}
   catch {hide $w}
   foreach ev {Any-Leave Any-KeyPress Any-Button Motion Any-Enter Leave Enter} {
     catch {bind Tooltip$w <$ev> {}}
