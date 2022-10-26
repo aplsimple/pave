@@ -5,6 +5,7 @@ Version `3.5.9 (25 Oct'22)`
 
   - NEW   : "-buttons" option for "input" method
   - NEW   : commands for buttons of dialogues (along with old "returned result")
+  - CHANGE: -resizable & -checkgeometry options and other geometry things
   - CHANGE: AzureLight CS (selection bg)
   - CHANGE: hl_tcl 0.9.43
 
