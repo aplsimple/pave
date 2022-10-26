@@ -1,6 +1,21 @@
 # Last changes:
 
 
+Version `3.5.9 (25 Oct'22)`
+
+  - NEW   : "-buttons" option for "input" method
+  - NEW   : commands for buttons of dialogues (along with old "returned result")
+  - CHANGE: AzureLight CS (selection bg)
+  - CHANGE: hl_tcl 0.9.43
+
+
+Version `3.5.8 (23 Oct'22)`
+
+  - NEW   : apave::eventOnText - cut & copy for multiple selections
+  - NEW   : Query method: -stay option
+  - CHANGE: Query method: "wm geometry" instead of "winfo ..."
+
+
 Version `3.5.7 (19 Oct'22)`
 
   - CHANGE: *input* method: *-values* option added for all default widgets
