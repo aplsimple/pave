@@ -7,6 +7,19 @@
 
 set tcltk_version "Tcl/Tk [package require Tk]"
 
+# ______________________ Remove installed (perhaps) packages ____________________ #
+
+foreach _ {apave baltip bartabs hl_tcl ttk::theme::awlight ttk::theme::awdark awthemes} {
+  set __ [package version $_]
+  catch {
+    package forget $_
+    namespace delete ::$_
+    puts "alited: clearing $_ $__"
+  }
+  unset __
+}
+# ___________________________ Initialize variables _____________________________ #
+
 # to get TCLLIBPATH variable when run from tclkit
 if {[info exists ::env(TCLLIBPATH)]} {lappend ::auto_path {*}$::env(TCLLIBPATH)}
 

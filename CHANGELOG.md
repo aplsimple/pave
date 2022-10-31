@@ -1,6 +1,18 @@
 # Last changes:
 
 
+Version `3.5.10a3 (31 Oct'22)`
+
+  - BUGFIX: erroneous combination CS=-1 & Tint!=0
+  - NEW   : rootModalWindow to get modal parent window
+  - NEW   : deiconify / withdraw / iconifyOption procs
+  - NEW   : getShowOption / setShowOption for default options of showModal
+  - CHANGE: klnd* procs, to highlight days (esp. for Windows)
+  - CHANGE: centering & showing windows, with new procs
+  - CHANGE: -resizable option may be boolean
+  - CHANGE: highlightbackground for main toolbar buttons + overrelief (esp. for Windows)
+
+
 Version `3.5.9 (25 Oct'22)`
 
   - NEW   : "-buttons" option for "input" method

@@ -117,10 +117,10 @@ proc ::klnd::my::ShowMonth2 {obj m y {doenter yes} {dopopup no}} {
     set bg $p(bg1)
     set wbut [$p($obj) BuT$obj-${i}KLND]
     if {$i<=$i0 || $iday>=$lday} {
-      set att "-takefocus 0 -text {    } -activebackground $p(bg1)"
+      set att "-takefocus 0 -text {    } -activebackground $p(bg1) -overrelief flat"
       set script {}
     } else {
-      set att "-takefocus 0 -text {[incr iday]} -activeforeground $p(fg0) -activebackground $p(bg0)"
+      set att "-takefocus 0 -text {[incr iday]} -activeforeground $p(fg0) -activebackground $p(bg0) -overrelief raised"
       if {$doenter && ($iday==$p(dvis$obj) || ($iday==$lday && $iday<$p(dvis$obj)))} {
         catch {after cancel $p(after$obj)}
         set p(after$obj) [after idle "::klnd::my::Enter2 $obj $i"]
@@ -146,7 +146,7 @@ proc ::klnd::my::ShowMonth2 {obj m y {doenter yes} {dopopup no}} {
     }
     # as last refuge: highlighting fg by hllist
     set fg [fgMayHL $obj $fg $y $m $iday]
-    $wbut configure {*}$att -relief flat -overrelief flat -fg $fg -bg $bg
+    $wbut configure {*}$att -relief flat -fg $fg -bg $bg
   }
   set p(mvis$obj) $m  ;# month & year currently visible
   set p(yvis$obj) $y
@@ -355,7 +355,7 @@ proc ::klnd::my::MainWidgets2 {obj ownname} {
         if {\$i<8} { \
           set lwid \"\$cur \$pw \$p 1 1 {-st ew} {-anchor center -foreground $::klnd::my::p(fgh) -background $::klnd::my::p(bg1)}\" \
         } else { \
-          set lwid \"\$cur \$pw \$p 1 1 {-st ew} {-relief flat -overrelief flat -bd 0 -takefocus 0  -padx 8 -pady 4 -font {$::apave::FONTMAIN} -com {::klnd::my::Enter2 $obj \[expr {\$i-7}\]} $::klnd::TMPTIP -highlightthickness 0 -w 3 -background $::klnd::my::p(bg1)}\" \
+          set lwid \"\$cur \$pw \$p 1 1 {-st ew} {-relief flat -overrelief raised -takefocus 0  -padx 8 -pady 4 -font {$::apave::FONTMAIN} -com {::klnd::my::Enter2 $obj \[expr {\$i-7}\]} $::klnd::TMPTIP -highlightthickness 0 -w 3 -background $::klnd::my::p(bg1)}\" \
         } ; \
         %C \$lwid ; \
         set pr \$cur \

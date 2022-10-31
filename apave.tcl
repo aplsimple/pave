@@ -125,7 +125,7 @@ namespace eval ::apave {
     h_ {{-sticky ew -csz 3 -padx 3} {}} \
     v_ {{-sticky ns -rsz 3 -pady 3} {}}]
 
-# _______________________ Helpers _____________________ #
+  ## _______________________ Helpers _____________________ ##
 
   proc obj {com args} {
     # Calls a method of APaveInput class.
@@ -303,7 +303,7 @@ namespace eval ::apave {
     return [string map {Control Ctrl - + bracketleft [ bracketright ]} $acc]
   }
 
-# _______________________ Text little procs _________________________ #
+  ## _______________________ Text little procs _________________________ ##
 
   proc eventOnText {w ev} {
     # Generates an event on a text, saving its current index in hl_tcl.
@@ -379,7 +379,9 @@ namespace eval ::apave {
     set _AP_VARS(INDENT) [string repeat $padchar $len]
   }
 
-}  ;# ::apave
+  ## ________________________ EONS ::apave _________________________ ##
+
+}
 
 # ________________________ source *.tcl _________________________ #
 
@@ -391,7 +393,7 @@ if {[info commands ::baltip::configure] eq {}} {
   source [file join $::apave::apaveDir baltip baltip.tcl]
 }
 
-# ________________________ Creating APave oo::class _________________________ #
+# ________________________ APave oo::class _________________________ #
 
 oo::class create ::apave::APave {
 
@@ -753,7 +755,7 @@ oo::class create ::apave::APave {
       } else {
         set retval {}
         foreach ln [split [::apave::readTextFile $fname {} 1] \n] {
-          set ln [string map [list \\ \\\\ \{ \\\{ \} \\\}] $ln]
+          # probably, it's bad idea to have braces in the file of contents
           if {$ln ne {}} {lappend retval $ln}
         }
       }
@@ -952,7 +954,9 @@ oo::class create ::apave::APave {
     }
     set nam3 [string tolower [string index $name 0]][string range $name 1 2]
     if {[string index $nam3 1] eq "_"} {set k [string range $nam3 0 1]} {set k $nam3}
-    lassign [dict get $::apave::_Defaults $k] defopts defattrs
+    if {[catch {lassign [dict get $::apave::_Defaults $k] defopts defattrs}]} {
+      set defopts [set defattrs {}]
+    }
     set options "[subst $defopts] $options"
     set attrs "[subst $defattrs] $attrs"
     switch -glob -- $nam3 {
@@ -1173,7 +1177,9 @@ oo::class create ::apave::APave {
     #   - else: a list of updated options and attributes of the widget type
 
     if {$typ eq {}} {return $::apave::_Defaults}
-    set def1 [subst [dict get $::apave::_Defaults $typ]]
+    if {[catch {set def1 [subst [dict get $::apave::_Defaults $typ]]}]} {
+      return {}
+    }
     if {"$opt$atr" eq {}} {return $def1}
     lassign $def1 defopts defattrs
     set newval [list "$defopts $opt" "$defattrs $atr"]
@@ -1852,7 +1858,7 @@ oo::class create ::apave::APave {
     }
     set com "[self] chooser $chooser \{$vv\} $addopt $wpar $addattrs2 $entname"
     if {$view ne {}} {set anc n} {set anc center}
-    set butf [list [my Transname buT $name] - - - - "pack -side right -anchor $anc -in $inname -padx 2" "-com \{$com\} -compound none -image [::apave::iconImage $icon small] -font \{-weight bold -size 5\} -fg $_pav(fgbut) -bg $_pav(bgbut) $takefocus"]
+    set butf [list [my Transname buT $name] - - - - "pack -side right -anchor $anc -in $inname -padx 2" "-com \{$com\} -compound none -relief flat -overrelief raised -highlightthickness 0 -image [::apave::iconImage $icon small] -font \{-weight bold -size 5\} -fg $_pav(fgbut) -bg $_pav(bgbut) $takefocus"]
     if {$view ne {}} {
       set scrolh [list [my Transname sbh $name] $txtnam T - - "pack -in $inname" {}]
       set scrolv [list [my Transname sbv $name] $txtnam L - - "pack -in $inname" {}]
@@ -1992,15 +1998,14 @@ oo::class create ::apave::APave {
             } else {
               set but BuT
             }
-            lassign [my csGet] - fg - bg
+            lassign [my csGet] fga fg bga bg
             if {[string match _* $v1]} {
               set font [my boldTextFont 16]
-              set img "-font {$font} -foreground $fg -background $bg -width 2 -bd 0 -pady 0 -padx 2"
-              set v1 _untouch_$v1
+              set img "-font {$font} -foreground $fg -background $bg -width 2 -pady 0 -padx 2"
             } else {
               set img "-image $v1 -background $bg"
             }
-            set v2 "$img -command $v2 -relief flat -highlightthickness 0 -takefocus 0"
+            set v2 "$img -command $v2 -relief flat -overrelief raised -activeforeground $fga -activebackground $bga -highlightthickness 0 -takefocus 0"
             lassign [::apave::extractOptions v2 -method {}] ismeth
             set v1 [my Transname $but _$v1]
             if {[string is true -strict $ismeth]} {
@@ -3174,6 +3179,35 @@ oo::class create ::apave::APave {
   }
   #_______________________
 
+  method ShowOption {name} {
+    # Gets a default show option, used in showModal.
+    #   name - name of option
+    # See also: getShowOption, setShowOption
+
+    return "_SHOWMODAL_$name"
+  }
+  #_______________________
+
+  method getShowOption {name {defval ""}} {
+    # Gets a default show option, used in showModal.
+    #   name - name of option
+    #   defval - default value
+    # See also: showModal
+
+    ::apave::getProperty [my ShowOption $name] $defval
+  }
+  #_______________________
+
+  method setShowOption {name args} {
+    # Sets / gets a default show option, used in showModal.
+    #   name - name of option
+    #   args - value of option
+    # See also: showModal
+
+    ::apave::setProperty [my ShowOption $name] {*}$args
+  }
+  #_______________________
+
   method Window {w inplists} {
     # Paves the window with widgets.
     #   w - window's name (path)
@@ -3394,11 +3428,7 @@ oo::class create ::apave::APave {
     #   minsize - list {minwidth minheight} or {}
 
     ::apave::InfoWindow [expr {[::apave::InfoWindow] + 1}] $win $modal $var yes
-    if {[::iswindows]} {
-      if {[wm attributes $win -alpha] < 0.1} {wm attributes $win -alpha 1.0}
-    } else {
-      catch {wm deiconify $win ; raise $win}
-    }
+    ::apave::deiconify $win
     if {$minsize eq {}} {
       set minsize [list [winfo width $win] [winfo height $win]]
     }
@@ -3458,8 +3488,11 @@ oo::class create ::apave::APave {
     }
     set minsize [::apave::getOption -minsize {*}$args]
     set args [::apave::removeOptions $args -centerme -ontop -modal -minsize -themed]
-    array set opt [list -focus {} -onclose {} -geometry {} -decor 1 \
-      -root $root -resizable {} -variable {} -escape 1 -checkgeometry 1 {*}$args]
+    foreach {o v} [list -focus {} -onclose {} -geometry {} -decor 1 \
+    -root $root -resizable {} -variable {} -escape 1 -checkgeometry 1] {
+      lappend defargs $o [my getShowOption $o $v]
+    }
+    array set opt [list {*}$defargs {*}$args]
     lassign [::apave::splitGeometry [wm geometry $root]] rw rh rx ry
     if {[winfo parent $win] ni {{} .}} {
       set opt(-decor) 0
@@ -3507,10 +3540,12 @@ oo::class create ::apave::APave {
     set w [winfo width $win]
     set h [winfo height $win]
     if {$inpgeom eq {}} {  ;# final geometrizing with actual sizes
-      if {($h/2-$ry-$rh/2)>30 && $root ne "."} {
+      set geo [my CenteredXY $rw $rh $rx $ry $w $h]
+      set y [lindex [split $geo +] end]
+      if {$root ne {.} && (($h/2-$ry-$rh/2)>30 || [::iswindows] && $y>0)} {
         # ::tk::PlaceWindow needs correcting in rare cases, namely:
         # when 'root' is of less sizes than 'win' and at screen top
-        wm geometry $win [my CenteredXY $rw $rh $rx $ry $w $h]
+        wm geometry $win $geo
       } else {
         ::tk::PlaceWindow $win widget $root
       }
@@ -3579,11 +3614,7 @@ oo::class create ::apave::APave {
     }
     catch {destroy $wtop}
     toplevel $wtop {*}$args
-    if {[::iswindows]} { ;# maybe nice to hide all windows manipulations
-      wm attributes $wtop -alpha 0.0
-    } else {
-      wm withdraw $wtop
-    }
+    ::apave::withdraw $wtop ;# nice to hide all windows manipulations
     if {$withfr} {
       pack [ttk::frame $w] -expand 1 -fill both
     }
