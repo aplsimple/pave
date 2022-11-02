@@ -1,13 +1,18 @@
 # Last changes:
 
 
-Version `3.5.10a3 (31 Oct'22)`
+Version `3.6.0a1 (2 Nov'22)`
 
   - BUGFIX: erroneous combination CS=-1 & Tint!=0
+  - BUGFIX: in Windows: shimmering white in embedded calendar (klnd2)
+  - BUGFIX: APave object: omit some commands of popup menu for text widget
+  - NEW   : apave::BUTTOOL variable of attributes of tool buttons
   - NEW   : rootModalWindow to get modal parent window
   - NEW   : deiconify / withdraw / iconifyOption procs
   - NEW   : getShowOption / setShowOption for default options of showModal
-  - CHANGE: klnd* procs, to highlight days (esp. for Windows)
+  - NEW   : initStyle & clearing code
+  - CHANGE: less sizes of calendars (klnd & klnd2)
+  - CHANGE: highlight days in klnd & klnd2 (esp. for Windows)
   - CHANGE: centering & showing windows, with new procs
   - CHANGE: -resizable option may be boolean
   - CHANGE: highlightbackground for main toolbar buttons + overrelief (esp. for Windows)
