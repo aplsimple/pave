@@ -29,6 +29,7 @@ cd $::testdirname
 set ::test2dirs [list "$::testdirname/.." "$::testdirname" "$::testdirname/../baltip" "$::testdirname/../bartabs" "$::testdirname/../hl_tcl" "$::testdirname/../../screenshooter" "$::testdirname/../../aloupe" "$::testdirname/../.bak/fsdialog" "$::testdirname/../.bak/tablelist"]
 lappend ::auto_path {*}$::test2dirs
 set apavever [package require apave]
+apave::withdraw .
 set pkg_versions0 "\n  <red>apave $apavever</red>\n\n"
 append pkg_versions0 "  <red>e_menu $apavever</red>\n\n"
 append pkg_versions0 "  <red>bartabs [package require bartabs]</red>\n\n"
@@ -405,7 +406,9 @@ namespace eval t {
     $m add command -label "Find..." -command {::t::findTclFirst yes} -accelerator Ctrl+F
     $m add command -label "Find Next" -command {::t::findTclNext yes} -accelerator F3
     $m add separator
-    $m add command -label "Reload the bar of tabs" -command {::t::RefillBar}
+    $m add command -label "Run e_menu" -command ::t::e_menu -accelerator F4
+    $m add separator
+    $m add command -label "Reload the bar of tabs" -command ::t::RefillBar
     set m .win.menu.help
     $m add command -label "About" -command ::t::helpAbout
   }
@@ -479,7 +482,7 @@ namespace eval t {
   }
 
   proc labelImaged {} {
-    foreach f {1 2 3 4} {append files [file join $::testdirname $f-small.png] " "}
+    foreach f {1 2 3 4} {lappend files [file join $::testdirname $f-small.png]}
     pave labelFlashing [pave LabImg] [pave LabImgInfo] 1 -file $files \
       -label {"Cisticola exilis" "Titmouse" "Wheatear" "Eurasian wren"} \
       ;# -squeeze 2
@@ -636,7 +639,7 @@ namespace eval t {
     set ::t::ansSelTab [set ::t::ansSwBta 0]
     set wbase [pave LfrB]
     set bar1Opts [list -wbar $wframe -wbase $wbase -lablen 16 -tiplen 20 \
-      -csel {::t::selTab %t} -csel2 {::t::selTab2 %t} -bd $::t::btsbd -expand 1 \
+      -csel {::t::selTab %t} -csel2 {::t::selTab2 %t} -bd $::t::btsbd -expand 8 \
       -cdel {::t::delTab %t} -redraw $::BTS_REDRAW -popuptip ::t::popupTip \
       -menu [list \
       sep \
@@ -646,7 +649,7 @@ namespace eval t {
       "com {View selected} {::t::ViewSelTabs %b} {} {{!\[::bt isTab %t\]} ICN19-small}" \
       {com {Unselect all} {::bt unselectTab} {} {{![::bt isTab %t]}}} \
       sep \
-      {com {Run %l} {::t::e_menu [::t::getTabFile %t]} {} {{![::bt isTab %t]} ICN13-small {} F5}} \
+      {com {Run %l} {::t::e_menu [::t::getTabFile %t]} {} {{![::bt isTab %t]} ICN13-small {} F4}} \
       sep \
       "mnu {Options} {} menusw {0 ICN22-small}" \
       "com {Switch ::multiline option} {::t::switchBts %b %t ::multiline} menusw ::t::switchAtt" \
@@ -696,7 +699,7 @@ namespace eval t {
     }
     bind [pave Text] <Control-Left> "::bt scrollLeft ; break"
     bind [pave Text] <Control-Right> "::bt scrollRight ; break"
-    bind .win <F5> "::t::e_menu; break"
+    bind .win <F4> "::t::e_menu; break"
     colorBar
   }
 
@@ -967,18 +970,18 @@ namespace eval t {
       {frat.toolTop2 - - - - {pack -side top} {-relief flat -borderwidth 0 -array {$::t::toolList2}}}
       {fral frat T 8 1 {-st nws -rw 1}}
       {.ButHome - - 1 1 {-st we} {-t "General" -com "t::chanTab nbk" -style TButtonWest}}
-      {.but2 fral.butHome T 1 1 {-st we} {-t "View" -com "t::chanTab nbk2" -style TButtonWest}}
-      {.butChange fral.but2 T 1 1 {-st we} {-t "Editor" -com "t::chanTab nb3" -style TButtonWest}}
-      {.butFile fral.butChange T 1 1 {-st we} {-t "Files" -com "t::chanTab nb4" -style TButtonWest}}
-      {.but5 fral.butFile T 1 1 {-st we} {-t "Tools" -com "t::chanTab nb5" -style TButtonWest}}
-      {.butConfig fral.but5 T 1 1 {-st we} {-t "Keys" -com "t::chanTab nb6" -style TButtonWest}}
-      {.butMisc fral.butConfig T 1 1 {-st we} {-t "Misc" -com "t::chanTab nb7" -style TButtonWest}}
-      {.fra  fral.butMisc T 1 1 {-st we -rw 10} {-h 30.m}}
+      {.but2 + T 1 1 {-st we} {-t "View" -com "t::chanTab nbk2" -style TButtonWest}}
+      {.butChange + T 1 1 {-st we} {-t "Editor" -com "t::chanTab nb3" -style TButtonWest}}
+      {.butFile + T 1 1 {-st we} {-t "Files" -com "t::chanTab nb4" -style TButtonWest}}
+      {.but5 + T 1 1 {-st we} {-t "Tools" -com "t::chanTab nb5" -style TButtonWest}}
+      {.butConfig + T 1 1 {-st we} {-t "Keys" -com "t::chanTab nb6" -style TButtonWest}}
+      {.butMisc + T 1 1 {-st we} {-t "Misc" -com "t::chanTab nb7" -style TButtonWest}}
+      {.fra  + T 1 1 {-st we -rw 10} {-h 30.m}}
       {buth fral T 1 1 {-st we} {-t "Help" -com t::helpAbout}}
-      {frau buth L 1 1 {-st nswe -cw 10} {-w 60.m}}
-      {butApply frau L 1 1 {-st e} {-t "Apply"  -com t::applyProc}}
-      {butCancel butApply L 1 1 {-st e} {-t "Cancel" -com t::cancelProc}}
-      {butOK butCancel L 1 1 {-st e} {-t "OK"     -com t::okProc}}
+      {frau + L 1 1 {-st nswe -cw 10} {-w 60.m}}
+      {butApply + L 1 1 {-st e} {-t "Apply"  -com t::applyProc}}
+      {butCancel + L 1 1 {-st e} {-t "Cancel" -com t::cancelProc}}
+      {butOK + L 1 1 {-st e} {-t "OK"     -com t::okProc}}
       {#fra2 fral L 8 9 {-st nsew}}
       {fra fral L 8 9 {-st nsew}}
       {fra.Nbk - - - - {pack -side top} {
@@ -1022,22 +1025,22 @@ namespace eval t {
             Help "&Help (wordy)"
       }} ::t::fillMenu}
       {labB1 - - 1 1   {-st es}  {-t "First option:"}}
-      {ent1 labB1 L 1 9 {-st wes -cw 1} {-tvar t::en1}}
+      {ent1 + L 1 9 {-st wes -cw 1} {-tvar t::en1}}
       {labB2 labB1 T 1 1 {-st es}  {-t "Second option:"}}
-      {ent2 labB2 L 1 9 {-st wes} {-tvar t::en2}}
+      {ent2 + L 1 9 {-st wes} {-tvar t::en2}}
       {h_0 labB2 T 1 9}
-      {labBA h_0 T 1 1 {-st ws}  {-t "Default find mode: "}}
-      {radA labBA L 1 1 {-st ws}  {-t "Exact" -var t::v2 -value 1}}
-      {radB radA L 1 1 {-st ws}  {-t "Glob" -var t::v2 -value 2}}
-      {radC radB L 1 1 {-st ws}  {-t "RE" -var t::v2 -value 3}}
+      {labBA + T 1 1 {-st ws}  {-t "Default find mode: "}}
+      {radA + L 1 1 {-st ws}  {-t "Exact" -var t::v2 -value 1}}
+      {radB + L 1 1 {-st ws}  {-t "Glob" -var t::v2 -value 2}}
+      {radC + L 1 1 {-st ws}  {-t "RE" -var t::v2 -value 3}}
       {v_1 labBA T 1 9 }
       {labBfil1 v_1 T 1 1 {-st e} {-t "Pick a file:"}}
-      {labBfis1 labBfil1 T 1 1 {-st e} {-t "Pick a file to save as:"}}
-      {labBdir1 labBfis1 T 1 1 {-st e} {-t "Pick a directory:"}}
-      {labBfon1 labBdir1 T 1 1 {-st e} {-t "Pick a font:"}}
-      {labBdat1 labBfon1 T 1 1 {-st e} {-t "Pick a date:"}}
-      {labBclr1 labBdat1 T 1 1 {-st e} {-t "Pick a color:"}}
-      {labBftx1 labBclr1 T 1 1 {-st ne -ipady 8}
+      {labBfis1 + T 1 1 {-st e} {-t "Pick a file to save as:"}}
+      {labBdir1 + T 1 1 {-st e} {-t "Pick a directory:"}}
+      {labBfon1 + T 1 1 {-st e} {-t "Pick a font:"}}
+      {labBdat1 + T 1 1 {-st e} {-t "Pick a date:"}}
+      {labBclr1 + T 1 1 {-st e} {-t "Pick a color:"}}
+      {labBftx1 + T 1 1 {-st ne -ipady 8}
         {-t "Pick a file to view:\n\n\n\nBut the first 'view'\nmay be modified!"}}
       {fil1 labBfil1 L 1 9 {} {-tvar t::fil1 -title {Pick a file}
         -filetypes {{{Tcl scripts} .tcl} {{All files} .* }}}}
@@ -1047,7 +1050,7 @@ namespace eval t {
       {fon1 labBfon1 L 1 9 {} {-tvar t::fon1 -title {Pick a font}}}
       {Dat1 labBdat1 L 1 9 {} {-tvar t::dat1 -title {Pick a date} -dateformat %Y.%m.%d}}
       {clr1 labBclr1 L 1 9 {} {-tvar t::clr1 -title {Pick a color}}}
-      {Ftx1 labBftx1 L 1 9 {} {-h 7 -ro 0 -tvar ::t::ftx1 -title {Pick a file to view} -filetypes {{{Tcl scripts} .tcl} {{Text files} {.txt .test}}} -wrap word -tooltip "After choosing a file\nthe text will be read-only." -tabnext "[t::pave Opc1]"}}
+      {Ftx1 labBftx1 L 1 9 {} {-h 7 -ro 0 -tvar ::t::ftx1 -title {Pick a file to view} -filetypes {{{Tcl scripts} .tcl} {{Text files} {.txt .test}}} -wrap word -tip "After choosing a file\nthe text will be read-only." -tabnext "[t::pave Opc1]"}}
       {labOpc labBftx1 T 2 1 {-st ens} {-t "tk_optionCascade:"}}
       {frAopc labOpc L 1 9 {-st w -pady 9}}
       ###############____opc1____good_way
@@ -1064,7 +1067,7 @@ namespace eval t {
         {set _ {-background %a -activeforeground %a}} else {set _ {}} } \
         -command {puts "2nd way ::t::opcvar = [set ::t::opcvar]"} }}
       {labtbl1 labOpc T 1 1 {-st e} {-t "Tablelist widget:\n\n(click on titles\nto sort)"}}
-      {frAT labtbl1 L 1 9 {-st ew}}
+      {frAT + L 1 9 {-st ew}}
       {frAT.TblWid1 - - - - {pack -side left -fill x -expand 1} {-h 5 -lvar ::t::tbllist  -lbxsel buT -columns {$::t::tblcols} -ALL yes}}
       {frAT.sbv frAT.tblWid1 L - - {pack}}
       {labB4 labtbl1 T 3 9 {-st ewns -rw 1} {-t "Some others options can be below"}}
@@ -1082,40 +1085,40 @@ namespace eval t {
       # {#               2ND TAB (DEMO OF ttk::panewindow)               }
       ####################################################################
       {tool - - - - {pack -side top} {-array {
-            IMG_1 {{::t::toolBut 1} -state disabled -tooltip \
+            IMG_1 {{::t::toolBut 1} -state disabled -tip \
               "Start progress\n(and, for fun, enable some menu items)@@ -under 5"}
             h_ 3
-            IMG_2 {{::t::toolBut 2} -tooltip \
+            IMG_2 {{::t::toolBut 2} -tip \
               "Stop progress\n(and, for fun, disable some menu items)@@ -under 5"}
             sev 7
             h_ 1
-            IMG_5 {{::t::e_menu} -tooltip "Run e_menu@@-under 5"}
+            IMG_5 {{::t::e_menu} -tip "Run e_menu\nF4@@-under 5"}
             h_ 1
-            IMG_6 {{::t::screenshooter} -tooltip "Run screenshooter@@ -under 5"}
+            IMG_6 {{::t::screenshooter} -tip "Run screenshooter@@ -under 5"}
             h_ 1
-            IMG_7 {{::t::aloupe} -tooltip "Run aloupe@@ -under 5"}
+            IMG_7 {{::t::aloupe} -tip "Run aloupe@@ -under 5"}
             sev 7
             h_ 1
-            opcTheme {::t::opct ::t::opcThemes {-width 7} {} -command ::t::opcToolPost -tooltip {Current ttk theme\n\nNOTE: awthemes are active only\nif a color scheme isn't "-2 None".@@ -under 3}}
+            opcTheme {::t::opct ::t::opcThemes {-width 7} {} -command ::t::opcToolPost -tip {Current ttk theme\n\nNOTE: awthemes are active only\nif a color scheme isn't "-2 None".@@ -under 3}}
             {# h_ 1}
             {IMG_3 {{::t::toolBut 3 \[set ::t::prevcs\]}}}
             h_ 1
-            opcTool {::t::opcc ::t::opcColors {-width 16} {::t::opcToolPre %a} -command ::t::opcToolPost -tooltip "Current color scheme@@ -under 3"}
+            opcTool {::t::opcc ::t::opcColors {-width 16} {::t::opcToolPre %a} -command ::t::opcToolPost -tip "Current color scheme@@ -under 3"}
             {# h_ 1}
             {IMG_4 {{::t::toolBut 4 \[set ::t::nextcs\]}}}
             h_ 4
             ChbRestart {-var ::t::restart -t "Restart" -command {::t::toolBut 0 -2 no no} \
-              -tooltip "To restart test2_pave.tcl\nwhen theme / CS changes\n\nlike File/Restart menu item@@ -under 3"}
+              -tip "To restart test2_pave.tcl\nwhen theme / CS changes\n\nlike File/Restart menu item@@ -under 3"}
             sev 4
             lab1 {" Hue:"}
-            Spx_Hue  {-tvar ::t::hue -command {::t::hueCheck} -from -7 -to 7 -w 3 -justify center -tooltip "Color hues:\n- enabled if 'Color scheme' is chosen@@ -under 3"}
+            Spx_Hue  {-tvar ::t::hue -command {::t::hueCheck} -from -7 -to 7 -w 3 -justify center -tip "Color hues:\n- enabled if 'Color scheme' is chosen@@ -under 3"}
             lab2 {"  Zoom:"}
-            Spx_FS  {-tvar ::t::fontsz -command {::t::fontszCheck} -from 8 -to 16 -w 3 -justify center -tooltip "Font size:\n- enabled if 'Restart' is off@@ -under 3" -myown {
+            Spx_FS  {-tvar ::t::fontsz -command {::t::fontszCheck} -from 8 -to 16 -w 3 -justify center -tip "Font size:\n- enabled if 'Restart' is off@@ -under 3" -myown {
               puts "\nA local/global configuration may be set with -myown attribute, e.g.\
               \n  %w configure -bg yellow -font {-weight bold}\
               \n  ::NS::GLOBAL_CONFIG %w"}}
             h_ 4
-            opcIconSet {::t::opcIcon ::t::opcIconSet {} {} -command ::t::opcIconSetPost -tooltip "With this option selected\nand 'Restart' option on,\nthe test would be restarted."}
+            opcIconSet {::t::opcIcon ::t::opcIconSet {} {} -command ::t::opcIconSetPost -tip "With this option selected\nand 'Restart' option on,\nthe test would be restarted."}
       }}}
       {# remove this comment to view another way to make a statusbar:
        stat - - - - {pack -side bottom} {-array {
@@ -1130,7 +1133,7 @@ namespace eval t {
       {fra.pan - - - - {pack -side bottom -fill both -expand 1} {-orient horizontal}}
       {fra.pan.panL - - - - {add} {-orient vertical}}
       {.lfrT - - - - {add} {-t Button}}
-      {.lfrT.but - - - - {pack -fill both -expand 1} {-t "Press Me" -com "t::pdlg ok info {Button Pressed} {That hurt...} -root .win -head {Ouch! Wow!\nMiau!} -weight bold -timeout {5 Lab1}" -tooltip "Shows a message with 5 sec. timeout"}}
+      {.lfrT.but - - - - {pack -fill both -expand 1} {-t "Press Me" -com "t::pdlg ok info {Button Pressed} {That hurt...} -root .win -head {Ouch! Wow!\nMiau!} -weight bold -timeout {5 Lab1}" -tip "Shows a message with 5 sec. timeout"}}
       {.Lframe - - - - {add} {-t Clocks}}
       {fra.pan.panR - - - - {add} {-orient vertical}}
       {.lfrT - - - - {add} {-t Progress}}
@@ -1164,28 +1167,28 @@ namespace eval t {
       ####################################################################
       {fra1 - - 1 1 {-st w}}
       {.laB0  - - 1 1 {-st w} {-t "Enabled widgets"}}
-      {.laB  fra1.laB0 T 1 1 {-st w -pady 1} {-t "label" -font "-weight bold -size 11"}}
-      {.buTRun fra1.laB T 1 1 {-st w} {-t "button" -com ::t::Pressed}}
-      {.chB fra1.buTRun T 1 1 {-st w -pady 5} {-t "  checkbutton"}}
-      {.frAE fra1.chB T 1 1 {-st w}}
+      {.laB + T 1 1 {-st w -pady 1} {-t "label" -font "-weight bold -size 11"}}
+      {.buTRun + T 1 1 {-st w} {-t "button" -com ::t::Pressed}}
+      {.chB + T 1 1 {-st w -pady 5} {-t "  checkbutton"}}
+      {.frAE + T 1 1 {-st w}}
       {.frAE.laB - - 1 1 {-st w} {-t "entry "}}
-      {.frAE.enT fra1.frAE.laB L 1 1 {-st w -pady 5} {-tvar t::tv2}}
-      {.frA fra1.frAE T 1 1 {-st w}}
+      {.frAE.enT + L 1 1 {-st w -pady 5} {-tvar t::tv2}}
+      {.frA .frAE T 1 1 {-st w}}
       {.frA.laB - - 1 1 {-st w -ipady 5} {-t "label in frame" -font "-weight bold -size 11"}}
-      {.frAS fra1.frA T 1 1 {-st w -pady 5}}
+      {.frAS .frA T 1 1 {-st w -pady 5}}
       {.frAS.laB - - - - {pack -side left -anchor w} {-t "spinbox 1 through 9 "}}
       {.frAS.spX - - - - {pack} {-tvar t::tv -from 1 -to 9 -w 5 -justify center}}
-      {.frAsc fra1.frAS T 1 1 {-st ew -pady 5}}
+      {.frAsc .frAS T 1 1 {-st ew -pady 5}}
       {.frAsc.laBsc - - - - {pack -side left} {-t "scale 0 through 100 "}}
       {.frAsc.scA - - - - {pack -side right} {-orient horizontal -w 12 -sliderlength 20 -length 238 -var t::sc}}
-      {.frALB fra1.frAsc T 1 1}
+      {.frALB .frAsc T 1 1}
       {.frALB.laB - - - - {pack -side left -anchor nw} {-t "listbox of colors  "}}
       {.frALB.lbx - - - - {pack -side left -fill x -expand 1} {-lvar t::lvar -h 4 -w 30 -lbxsel dark -ALL yes}}
-      {.frALB.sbV fra1.frALB.lbx L - - {pack}}
-      {.lfR fra1.frALB T 1 1 {-st w} {-t "labeled frame" -font "-weight bold -size 11"}}
+      {.frALB.sbV + L - - {pack}}
+      {.lfR .frALB T 1 1 {-st w} {-t "labeled frame" -font "-weight bold -size 11"}}
       {.lfR.raD1 - - 1 1 {-st w -pady 5} {-t "read-only text" -var t::v2 -value 1
         -com ::t::highlighting_others}}
-      {.lfR.raD2 fra1.lfR.raD1 L 1 1 {-st w -padx 7} {-t "editable text" -var t::v2 -value 2 -com {::t::highlighting_others 0}}}
+      {.lfR.raD2 + L 1 1 {-st w -padx 7} {-t "editable text" -var t::v2 -value 2 -com {::t::highlighting_others 0}}}
 
       ####################################################################
       # {#                   DISABLED NON_TTK WIDGETS                    }
@@ -1193,36 +1196,36 @@ namespace eval t {
       {labFR # # # # # {-t "labeled frame" -font "-weight bold -size 11" -state disabled -foreground gray}}
       {lfR1 fra1 L 1 1 {-st we -cw 1} {-t "Disabled counterparts"}}
       {.laB - - 1 1 {-st w -pady 5} {-t "label" -font "-weight bold -size 11" -state disabled}}
-      {.BuTRun lfR1.laB T 1 1 {-st w} {-t "button" -state disabled}}
-      {.chB lfR1.BuTRun T 1 1 {-st w -pady 5} {-t " checkbutton" -state disabled}}
-      {.frAE lfR1.chB T 1 1 {-st w} {-state disabled}}
+      {.BuTRun .laB T 1 1 {-st w} {-t "button" -state disabled}}
+      {.chB + T 1 1 {-st w -pady 5} {-t " checkbutton" -state disabled}}
+      {.frAE + T 1 1 {-st w} {-state disabled}}
       {.frAE.laB - - 1 1 {-st w} {-t "entry " -state disabled}}
-      {.frAE.enT lfR1.frAE.laB L 1 1 {-st w -pady 5} {-tvar t::tv2 -state disabled}}
-      {.frA lfR1.frAE T 1 1 {-st w} {-state disabled}}
+      {.frAE.enT + L 1 1 {-st w -pady 5} {-tvar t::tv2 -state disabled}}
+      {.frA .frAE T 1 1 {-st w} {-state disabled}}
       {.frA.laB - - 1 1 {-st w -ipady 5} {-t "label in frame" -font "-weight bold -size 11" -state disabled}}
-      {.frAS lfR1.frA T 1 1 {-st w -pady 5} {-state disabled}}
+      {.frAS .frA T 1 1 {-st w -pady 5} {-state disabled}}
       {.frAS.laB - - - - {pack -side left -anchor w} {-t "spinbox 1 through 9 "  -state disabled}}
       {.frAS.spX - - - - {pack} {-tvar t::tv -from 1 -to 9 -w 5 -justify center -state disabled}}
-      {.frAsc lfR1.frAS T 1 1 {-st ew -pady 5} {-state disabled}}
+      {.frAsc .frAS T 1 1 {-st ew -pady 5} {-state disabled}}
       {.frAsc.laBsc - - - - {pack -side left} {-t "scale 0 through 100 " -state disabled}}
       {.frAsc.scA - - - - {pack} {-orient horizontal -w 12 -sliderlength 20 -length 238 -state disabled -var t::sc}}
-      {.frALB lfR1.frAsc T 1 1 {-st ew -pady 5} {-state disabled}}
+      {.frALB .frAsc T 1 1 {-st ew -pady 5} {-state disabled}}
       {.frALB.laB - - - - {pack -side left -anchor nw} {-t "listbox of colors  " -state disabled}}
       {.frALB.lbx - - - - {pack -side left -fill x -expand 1} {-lvar t::lvar -h 4 -w 30 -state disabled}}
-      {.frALB.sbV lfR1.frALB.lbx L - - {pack -side left}}
-      {.lfR lfR1.frALB T 1 1 {-st w} {-labelwidget .win.fra.fra.nbk.f3.labFR -font "-weight bold -size 11" -state disabled}}
+      {.frALB.sbV + L - - {pack -side left}}
+      {.lfR .frALB T 1 1 {-st w} {-labelwidget .win.fra.fra.nbk.f3.labFR -font "-weight bold -size 11" -state disabled}}
       {.lfR.raD1 - - 1 1 {-st w -pady 5} {-t "read-only text" -var t::v2 -value 1 -state disabled}}
-      {.lfR.raD2 lfR1.lfR.raD1 L 1 1 {-st w -padx 7} {-t "editable text" -var t::v2 -value 2 -state disabled}}
+      {.lfR.raD2 .lfR.raD1 L 1 1 {-st w -padx 7} {-t "editable text" -var t::v2 -value 2 -state disabled}}
 
       ####################################################################
       # {#           FRAME FOR TEXT WIDGET OF NON-TTK WIDGET TAB         }
       ####################################################################
       {frAT fra1 T 1 2 {-st nsew -rw 1 -pady 7}}
-      {frAT.LaBNT - - - - {pack -side left -anchor nw} {-t "text & scrollbars \
+      {.LaBNT - - - - {pack -side left -anchor nw} {-t "text & scrollbars \
 \n\nas above, i.e.\nnot  ttk::scrollbar\n\ntext is read-only"}}
-      {frAT.TextNT - - - - {pack -side left -expand 1 -fill both} {-h 5 -wrap none -rotext ::t::filetxt -tabnext .win.fra.fral.butHome}}
-      {frAT.sbV frAT.textNT L - - {pack}}
-      {frAT.sbH frAT.textNT T - - {pack -before %w}}
+      {.TextNT - - - - {pack -side left -expand 1 -fill both} {-h 5 -wrap none -rotext ::t::filetxt -tabnext .win.fra.fral.butHome}}
+      {.sbV + L - - {pack}}
+      {.sbH .textNT T - - {pack -before %w}}
     }
   }
 
@@ -1256,7 +1259,7 @@ where:
       -ret - if set to yes, means that the field is returned instead of full string
   If there is only a single data set and no TEXT, the @@ marks may be omitted. The @@ marks are configured."}}
       {v_3 - - - - {pack} {-h 3}}
-      {fco - - - - {pack} {-tvar t::cb3 -w 88 -tooltip "This 'fco' combobox contains: \
+      {fco - - - - {pack} {-tvar t::cb3 -w 88 -tip "This 'fco' combobox contains: \
       \n  1) four literal lines\n  2) data from 'test2_fco.dat' file" -values {COMMIT: @@-div1 " \[" -div2 "\] " -ret yes test2_fco.dat@@   INFO: @@-pos 22 -list {{Content of test2_fco.dat} {another item} trunk DOC} test2_fco.dat@@}}}
       {siz - - - - {pack -side bottom -anchor se}}
     }
@@ -1269,13 +1272,12 @@ where:
       # {#                TAB-5: COLOR SCHEMES                           }
       ####################################################################
       {BuTClrN  - - 1 2 {-st nsew -rw 1 -cw 1} {-com {::t::toolBut 4 -2} -text "CS -2: Default"}}
-      {BuTClrB  BuTClrN L 1 2 {-st nsew -rw 1 -cw 1} {-com {::t::toolBut 4 -1} -text "CS -1: Basic"}}
+      {BuTClrB + L 1 2 {-st nsew -rw 1 -cw 1} {-com {::t::toolBut 4 -1} -text "CS -1: Basic"}}
       {tcl {
         set prt BuTClrN
         for {set i 0} {$i<48} {incr i} {
           set cur "BuTClr$i"
-          if {$i%4} {set n $pr; set p L} {set n $prt; set p T; set prt $cur}
-          set pr $cur
+          if {$i%4} {set n +; set p L} {set n $prt; set p T; set prt $cur}
           set lwid "$cur $n $p 1 1 {-st nsew -rw 1 -cw 1} {-com \
            {::t::toolBut 4 $i} -t \"CS [t::pave csGetName $i]\"}"
           %C $lwid
@@ -1297,41 +1299,42 @@ where:
       # {#               TABS OF VIEW (JUST TO BE PRESENT)               }
       ####################################################################
       {labB  -   - 1 1 {-st w} {-t "Defaults"}}
-      {chb1 labB T 1 2 {-st w} {-t "Match whole word only" -var t::c1}}
-      {chb2 chb1 T 1 2 {-st w} {-t "Match case"  -var t::c2}}
-      {chb3 chb2 T 1 2 {-st w} {-t "Wrap around" -var t::c3}}
+      {chb1 + T 1 2 {-st w} {-t "Match whole word only" -var t::c1}}
+      {chb2 + T 1 2 {-st w} {-t "Match case"  -var t::c2}}
+      {chb3 + T 1 2 {-st w} {-t "Wrap around" -var t::c3}}
       {sev1 chb1 L 3 1 }
-      {labB3 sev1 L 1 1 {-st w} {-t "Direction:"}}
-      {rad1 labB3 T 1 1 {-st w} {-t "Down" -var t::v -value 1}}
-      {rad2 rad1 L 1 1 {-st w} {-t "Up"   -var t::v -value 2}}
+      {labB3 + L 1 1 {-st w} {-t "Direction:"}}
+      {rad1 + T 1 1 {-st w} {-t "Down" -var t::v -value 1}}
+      {rad2 + L 1 1 {-st w} {-t "Up"   -var t::v -value 2}}
       {v_ chb3 T 1 5}
       {fraflb v_ T 1 5 {-st ew -pady 10} {}}
-      {fraflb.butEdit - - - - {pack -side right -anchor nw -padx 9} {-t "Edit the file" -com t::viewfile -tooltip "Opens a stand-alone editor of the file\nthe listbox' data are taken from." -image ICN31-small -compound left}}
-      {fraflb.lab - - - - {pack -side left -anchor nw} {-t "Listbox of file content:\n\nSee also:\nGeneral/Misc. tab" -link "
+      {.btt1 - - - - {pack -side right -anchor nw -padx 9} {-t "Edit" -com t::viewfile -image ICN31 -tip "Does the same as the button nearby,\njust to demo a user widget type.\n\nTo have the widget type themed,\nit should be customized beforehand."}}
+      {.butEdit - - - - {pack -side right -anchor nw -padx 9} {-t "Edit the file" -com t::viewfile -tip "Opens a stand-alone editor of the file\nthe listbox' data are taken from." -image ICN31-small -compound left}}
+      {.lab - - - - {pack -side left -anchor nw} {-t "Listbox of file content:\n\nSee also:\nGeneral/Misc. tab" -link "
       ::t::chanTab nbk .win.fra.fra.nbk.f4 no yes; focus [::t::pave SpxMisc]@@Click to select 'Misc.'\n... and mark the link as visited.@@"}}
-      {fraflb.flb - - - - {pack -side left -fill x -expand 1} {-lvar ::t::lv1 -lbxsel Cont -ALL 1 -w 50 -h 5 -tooltip "The 'flb' listbox contains:\n  1) four literal lines\n  2) data from 'test2_fco.dat' file" -values {@@-div1 " \[" -div2 "\] " test2_fco.dat@@   INFO: @@-pos 22 -ret 1 -list {{Content of test2_fco.dat} {another item} trunk DOC} test2_fco.dat@@ Code of test1_pave.tcl: @@-RE {^(\s*)([^#]+)$} ./test1_pave.tcl@@}}}
-      {fraflb.sbv fraflb.flb L - - {pack -side left -after %w}}
-      {fraflb.sbh fraflb.flb T - - {pack -side left -before %w}}
+      {.flb - - - - {pack -side left -fill x -expand 1} {-lvar ::t::lv1 -lbxsel Cont -ALL 1 -w 50 -h 5 -tip "The 'flb' listbox contains:\n  1) four literal lines\n  2) data from 'test2_fco.dat' file" -values {@@-div1 " \[" -div2 "\] " test2_fco.dat@@   INFO: @@-pos 22 -ret 1 -list {{Content of test2_fco.dat} {another item} trunk DOC} test2_fco.dat@@ Code of test1_pave.tcl: @@-RE {^(\s*)([^#]+)$} ./test1_pave.tcl@@}}}
+      {.sbv + L - - {pack -side left -after %w}}
+      {fraflb.sbh .flb T - - {pack -side left -before %w}}
       {LabImg fraflb T 1 1 {} {-link "::t::goWiki@@Click to enter the bird's wiki@@"}}
-      {LabImgInfo LabImg T 1 1 {} {-link "
+      {LabImgInfo + T 1 1 {} {-link "
       ::t::chanTab nbk .win.fra.fra.nbk.f4 no yes; focus [::t::pave SpxMisc]@@Click to select 'Misc.'\n... and mark the link as visited\n(to test the multiple visited links).@@" -afteridle ::t::labelImaged}}
-      {labklnd LabImgInfo T 1 4 {-st nswe} {-t {\nExample of calendar #1}}}
-      {daTklnd labklnd T 1 1 {-st nw} {-borderwidth 1 -relief raised -dateformat $::t::formatKlnd1 -tvar ::t::dateKlnd1 -com {puts "date1=%d.%m.%y (\$::t::dateKlnd1)"}}}
+      {labklnd + T 1 4 {-st nswe} {-t {\nExample of calendar #1}}}
+      {daTklnd + T 1 1 {-st nw} {-borderwidth 1 -relief raised -dateformat $::t::formatKlnd1 -tvar ::t::dateKlnd1 -com {puts "date1=%d.%m.%y (\$::t::dateKlnd1)"}}}
       {labklnd2 labklnd L 1 4 {-st nswe} {-t {\nExample of calendar #2}}}
-      {daTklnd2 labklnd2 T 1 1 {-st nw} {-borderwidth 1 -relief raised -dateformat $::t::formatKlnd2 -tvar ::t::dateKlnd2 -com {puts "date2=%d.%m.%y (\$::t::dateKlnd2)"} -locale en_us -hllist {2021/10/11 2021/12/12 2021/12/2}}}
+      {daTklnd2 + T 1 1 {-st nw} {-borderwidth 1 -relief raised -dateformat $::t::formatKlnd2 -tvar ::t::dateKlnd2 -com {puts "date2=%d.%m.%y (\$::t::dateKlnd2)"} -locale en_us -hllist {2021/10/11 2021/12/12 2021/12/2}}}
     }
   }
 
   proc pave_Nbk2_Tab2 {} {
     return {
       {v_ - - 1 1}
-      {ftx v_ T 1 9 {} {-h 7 -w 77 -ro 1 -tvar ::t::ftx2 -title {Pick a file to view} -filetypes {{{Tcl scripts} .tcl} {{Text files} {.txt .test}}} -wrap word -tooltip {Just for demo} -tabnext .win.fra.fral.butHome}}
-      {fra ftx T 1 1 {-st nsew -cw 1 -rw 1}}
+      {ftx + T 1 9 {} {-h 7 -w 77 -ro 1 -tvar ::t::ftx2 -title {Pick a file to view} -filetypes {{{Tcl scripts} .tcl} {{Text files} {.txt .test}}} -wrap word -tip {Just for demo} -tabnext .win.fra.fral.butHome}}
+      {fra + T 1 1 {-st nsew -cw 1 -rw 1}}
       {fra.scf - - 1 1  {pack -fill both -expand 1}}
       {tcl {
         set ftx Ftx2
         set pr fra.scf.ftx2
-        set lwid ".$ftx - - 1 9 {} {-h 7 -w 77 -ro 1 -tvar ::t::ftx3 -title {Pick a file to view} -filetypes {{{Tcl scripts} .tcl} {{Text files} {.txt .test}}} -wrap word -tooltip {Just for demo} -tabnext .win.fra.fral.butHome}"
+        set lwid ".$ftx - - 1 9 {} {-h 7 -w 77 -ro 1 -tvar ::t::ftx3 -title {Pick a file to view} -filetypes {{{Tcl scripts} .tcl}} -wrap word -tip {Just for demo} -tabnext .win.fra.fral.butHome}"
         %C $lwid
         set values {a b c d}
         for {set i 0} {$i<40} {incr i} {
@@ -1340,7 +1343,7 @@ where:
           set cbx "CbxKey$i"
           set lwid ".$lab $pr T 1 1 {-st w -pady 1 -padx 3} {-t \"Label $i\"}"
           %C $lwid
-          set lwid ".$cbx fra.scf.$lab L 1 1 {-st we} {-tvar ::t::scfvar$i -values {$values} -state readonly}"
+          set lwid ".$cbx + L 1 1 {-st we} {-tvar ::t::scfvar$i -values {$values} -state readonly}"
           %C $lwid
           set pr fra.scf.$lab
         }
@@ -1349,14 +1352,14 @@ where:
   }
 
   proc yearCurr {} {
-    set wy [pave ButKlndYear]
+    set wy [pave BttKlndYear]
     set year [$wy cget -text]
     set to [expr {[lindex [::klnd::currentYearMonthDay] 0] - $year}]
     yearNext $to
   }
 
   proc yearNext {to} {
-    set wy [pave ButKlndYear]
+    set wy [pave BttKlndYear]
     set year [$wy cget -text]
     incr year $to
     set yearmin [::klnd::minYear]
@@ -1376,11 +1379,11 @@ where:
       {fra - - - - {-st nsew -cw 1 -rw 1}}
       {fra.scf - - 1 1  {pack -fill both -expand 1}}
       {fra.scf.fra - - 1 2 {-st ew}}
-      {.buT1 - - - - {pack -side left} {-image ICN43-small -compound left -com {::t::yearNext -50} -t {Prior 50}}}
-      {.buT12 - - - - {pack -side left} {-image ICN41-small -compound left -com {::t::yearNext -1} -t {Prior 1}}}
-      {.ButKlndYear - - - - {pack -side left -anchor center -expand 1} {-com ::t::yearCurr -t $::t::year -style TButtonBold -tip "Click to set\nthe current."}}
-      {.buT22 - - - - {pack -side left} {-image ICN42-small -compound right -com {::t::yearNext 1} -t {Next 1}}}
-      {.buT2 - - - - {pack -side left} {-image ICN44-small -compound right -com {::t::yearNext 50} -t {Next 50}}}
+      {.blt - - - - {pack -side left} {-image ICN43 -w -9 -compound left -com {::t::yearNext -50} -t {Prior 50}}}
+      {.blt2 - - - - {pack -side left -padx 10} {-image ICN41 -w -8 -compound left -com {::t::yearNext -1} -t {Prior 1}}}
+      {.BttKlndYear - - - - {pack -side left -anchor center -expand 1} {-com ::t::yearCurr -t $::t::year -image ICN8 -tip "Click to set\nthe current."}}
+      {.brt22 - - - - {pack -side left -padx 10} {-image ICN42 -w -8 -com {::t::yearNext 1} -t {Next 1}}}
+      {.brt2 - - - - {pack -side left} {-image ICN44 -w -9 -com {::t::yearNext 50} -t {Next 50}}}
       {tcl {
         set day1 [clock scan "$::t::year/5/1" -format %Y/%N/%e]
         set day1 [clock format $day1 -format $::t::formatKlnd1]
@@ -1464,12 +1467,14 @@ where:
         image create photo $img -data [::apave::iconData none]
       }
       catch {image create photo $img-small -data [::apave::iconData $icon small]}
-      set tta " $img {{} -tooltip { Icon $i \n $icon @@ -under 4 -image $img -per10 5000}}"
+      set tta " $img {{} -tip { Icon $i \n $icon @@ -under 4 -image $img -per10 5000}}"
       if {$i<$llen/2} {append ::t::toolList $tta} {append ::t::toolList2 $tta}
     }
     set ::bgst [ttk::style lookup TScrollbar -troughcolor]
     ttk::style conf TLabelframe -labelmargins {5 10 1 1} -padding 3
     trace add variable t::sc write "::t::tracer ::t::sc"
+
+    ::apave::ttkToolbutton
     pave defaultAttrs chB {} {-padx 11 -pady 3}  ;# to test defaultAttrs
     source [file join $::pavedirname pickers klnd klnd.tcl]
     lassign [::klnd::currentYearMonthDay] ::t::year ::t::month
@@ -1578,12 +1583,12 @@ where:
 
 puts "\nThis is just a demo. Take it easy."
 set test2script $::t::ftx1
-set ::t::opct clam
+set ::t::opct alt
 if {$::argc>=5} {
   lassign $::argv ::t::opct ::t::newCS ::t::fontsz ::t::ans4 ::t::opcIcon ::t::hue
   set ::t::transpopsFile "transpops2.txt"
 } else {
-  set ::t::newCS 27 ;# ForestDark CS
+  set ::t::newCS 2 ;# Forest CS
   set ::t::opcIcon "small"
 }
 set ::t::btsbd 0
@@ -1595,7 +1600,7 @@ package require ttk::theme::awdark
 }]} then {
   set ::t::opcThemes [list default clam classic alt -- {{light / dark} awlight awdark}]
 }
-if {[catch {apave::initWM -theme $::t::opct}]} apave::initWM
+if {[catch {apave::initWM -theme $::t::opct -cs $::t::newCS}]} apave::initWM
 if {![info exists ::t::hue] || ![string is integer -strict $::t::hue]} {set ::t::hue 0}
 # check for CloudTk by Jeff Smith (on wiki.tcl-lang.org)
 set ::noRestart [expr {[string match "/home/tclhttp*" $::t::ftx1]}]

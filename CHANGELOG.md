@@ -1,21 +1,28 @@
 # Last changes:
 
 
-Version `3.6.0a1 (2 Nov'22)`
+Version `3.6.0b1 (9 Nov'22)`
 
   - BUGFIX: erroneous combination CS=-1 & Tint!=0
   - BUGFIX: in Windows: shimmering white in embedded calendar (klnd2)
   - BUGFIX: APave object: omit some commands of popup menu for text widget
+  - BUGFIX: "+" as L/T neighbor in widget list didn't work for mega-widgets (dir,ftx...)
+  - NEW   : apave::ttkToolbutton to theme Toolbutton widgets: btt brt blt
+  - NEW   : -cs argument for initWM, to initialize CS before any GUI visible
+  - NEW   : apave::defaultAttrs sets a user defined widget (demoed by test2_pave.tcl)
   - NEW   : apave::BUTTOOL variable of attributes of tool buttons
   - NEW   : rootModalWindow to get modal parent window
   - NEW   : deiconify / withdraw / iconifyOption procs
   - NEW   : getShowOption / setShowOption for default options of showModal
   - NEW   : initStyle & clearing code
+  - CHANGE: at Windows' themes: -focusfill for TCombobox
   - CHANGE: less sizes of calendars (klnd & klnd2)
   - CHANGE: highlight days in klnd & klnd2 (esp. for Windows)
   - CHANGE: centering & showing windows, with new procs
   - CHANGE: -resizable option may be boolean
   - CHANGE: highlightbackground for main toolbar buttons + overrelief (esp. for Windows)
+  - CHANGE: test2_pave.tcl
+  - CHANGE: hl_tcl 0.9.44, bartabs 1.5.9
 
 
 Version `3.5.9 (25 Oct'22)`
