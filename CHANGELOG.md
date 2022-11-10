@@ -1,20 +1,23 @@
 # Last changes:
 
 
-Version `3.6.0b1 (9 Nov'22)`
+Version `3.6.0b2 (10 Nov'22)`
 
   - BUGFIX: erroneous combination CS=-1 & Tint!=0
   - BUGFIX: in Windows: shimmering white in embedded calendar (klnd2)
   - BUGFIX: APave object: omit some commands of popup menu for text widget
+  - NEW   : btT type of toolbuttons (non-ttk)
+  - NEW   : apave::ttkToolbutton for ttk Toolbutton widgets: btt brt blt
   - BUGFIX: "+" as L/T neighbor in widget list didn't work for mega-widgets (dir,ftx...)
-  - NEW   : apave::ttkToolbutton to theme Toolbutton widgets: btt brt blt
   - NEW   : -cs argument for initWM, to initialize CS before any GUI visible
   - NEW   : apave::defaultAttrs sets a user defined widget (demoed by test2_pave.tcl)
-  - NEW   : apave::BUTTOOL variable of attributes of tool buttons
   - NEW   : rootModalWindow to get modal parent window
   - NEW   : deiconify / withdraw / iconifyOption procs
   - NEW   : getShowOption / setShowOption for default options of showModal
   - NEW   : initStyle & clearing code
+  - CHANGE: hovering color for buttons = mild magenta
+  - CHANGE: check for using csToned before csSet
+  - CHANGE: iconA & AddButtonIcon: -compound option (esp. for toolbuttons named by icons)
   - CHANGE: at Windows' themes: -focusfill for TCombobox
   - CHANGE: less sizes of calendars (klnd & klnd2)
   - CHANGE: highlight days in klnd & klnd2 (esp. for Windows)
