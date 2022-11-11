@@ -369,7 +369,7 @@ namespace eval t {
   # update the hue
   proc hueUpdate {} {
     if {[set cs [::t::csCurrent]] ==-2} return
-    pave csToned $cs [expr {$::t::hue*5}]  ;# the hue is changed by 5% step
+    pave csToned $cs [expr {$::t::hue*5}] yes ;# the hue is changed by 5% step
     puts "\nNew hues of \"$::t::opcc\" in CS-[pave csCurrent]:\n[pave csGet]"
   }
 

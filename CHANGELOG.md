@@ -1,11 +1,12 @@
 # Last changes:
 
 
-Version `3.6.0b2 (10 Nov'22)`
+Version `3.6.0b3 (11 Nov'22)`
 
   - BUGFIX: erroneous combination CS=-1 & Tint!=0
   - BUGFIX: in Windows: shimmering white in embedded calendar (klnd2)
   - BUGFIX: APave object: omit some commands of popup menu for text widget
+  - NEW   : -parent option of chooser method
   - NEW   : btT type of toolbuttons (non-ttk)
   - NEW   : apave::ttkToolbutton for ttk Toolbutton widgets: btt brt blt
   - BUGFIX: "+" as L/T neighbor in widget list didn't work for mega-widgets (dir,ftx...)
