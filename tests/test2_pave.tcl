@@ -6,6 +6,7 @@
 # _______________________________________________________________________ #
 
 set tcltk_version "Tcl/Tk [package require Tk]"
+wm withdraw .
 
 # ______________________ Remove installed (perhaps) packages ____________________ #
 
@@ -28,8 +29,8 @@ set ::pavedirname [file normalize [file join $::testdirname ..]]
 cd $::testdirname
 set ::test2dirs [list "$::testdirname/.." "$::testdirname" "$::testdirname/../baltip" "$::testdirname/../bartabs" "$::testdirname/../hl_tcl" "$::testdirname/../../screenshooter" "$::testdirname/../../aloupe" "$::testdirname/../.bak/fsdialog" "$::testdirname/../.bak/tablelist"]
 lappend ::auto_path {*}$::test2dirs
+catch {package require aloupe}
 set apavever [package require apave]
-apave::withdraw .
 set pkg_versions0 "\n  <red>apave $apavever</red>\n\n"
 append pkg_versions0 "  <red>e_menu $apavever</red>\n\n"
 append pkg_versions0 "  <red>bartabs [package require bartabs]</red>\n\n"
@@ -40,7 +41,6 @@ set pkg_versions [string map {<red> "" </red> "" \n\n , \n ""} $pkg_versions0]
 set ::e_menu_dir [file normalize [file join $::pavedirname ../e_menu]]
 catch {source [file join $::e_menu_dir e_menu.tcl]}
 catch {package require screenshooter}
-catch {package require aloupe}
 catch {source [file join $::pavedirname ../transpops/transpops.tcl]}
 
 namespace eval t {
@@ -1600,7 +1600,7 @@ package require ttk::theme::awdark
 }]} then {
   set ::t::opcThemes [list default clam classic alt -- {{light / dark} awlight awdark}]
 }
-if {[catch {apave::initWM -theme $::t::opct -cs $::t::newCS}]} apave::initWM
+if {[catch {::apave::initWM -theme $::t::opct -cs $::t::newCS}]} ::apave::initWM
 if {![info exists ::t::hue] || ![string is integer -strict $::t::hue]} {set ::t::hue 0}
 # check for CloudTk by Jeff Smith (on wiki.tcl-lang.org)
 set ::noRestart [expr {[string match "/home/tclhttp*" $::t::ftx1]}]
@@ -1610,7 +1610,7 @@ set ::t::opcIcon [lindex $::t::opcIcon 0]
 append ::t::opcIcon " icons  "
 set test2res [t::test2_pave]
 puts "\nResult of test2 = $test2res\n[string repeat - 77]"
-if {$::t::newCS!=[apave::cs_Non] || $test2res==100} {  ;# at restart, newCS is set
+if {$::t::newCS!=[::apave::cs_Non] || $test2res==100} {  ;# at restart, newCS is set
   exec [info nameofexecutable] $test2script $::t::opct [::t::csCurrent] $::t::fontsz $::t::ans4 "$::t::opcIcon" $::t::hue &
 }
 ::apave::endWM

@@ -1,21 +1,23 @@
 # Last changes:
 
 
-Version `3.6.0b3 (11 Nov'22)`
+Version `3.6.0b4 (12 Nov'22)`
 
+  - BUGFIX: (esp. for Windows) fire entry's invalidation after choice from choosers
   - BUGFIX: erroneous combination CS=-1 & Tint!=0
   - BUGFIX: in Windows: shimmering white in embedded calendar (klnd2)
   - BUGFIX: APave object: omit some commands of popup menu for text widget
+  - BUGFIX: "+" as L/T neighbor in widget list didn't work for mega-widgets (dir,ftx...)
   - NEW   : -parent option of chooser method
   - NEW   : btT type of toolbuttons (non-ttk)
   - NEW   : apave::ttkToolbutton for ttk Toolbutton widgets: btt brt blt
-  - BUGFIX: "+" as L/T neighbor in widget list didn't work for mega-widgets (dir,ftx...)
   - NEW   : -cs argument for initWM, to initialize CS before any GUI visible
   - NEW   : apave::defaultAttrs sets a user defined widget (demoed by test2_pave.tcl)
   - NEW   : rootModalWindow to get modal parent window
   - NEW   : deiconify / withdraw / iconifyOption procs
   - NEW   : getShowOption / setShowOption for default options of showModal
   - NEW   : initStyle & clearing code
+  - CHANGE: colorWindow args
   - CHANGE: hovering color for buttons = mild magenta
   - CHANGE: check for using csToned before csSet
   - CHANGE: iconA & AddButtonIcon: -compound option (esp. for toolbuttons named by icons)
