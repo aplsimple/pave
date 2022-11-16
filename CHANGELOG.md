@@ -1,13 +1,14 @@
 # Last changes:
 
 
-Version `3.6.0b4 (12 Nov'22)`
+Version `3.6.0b6 (16 Nov'22)`
 
   - BUGFIX: (esp. for Windows) fire entry's invalidation after choice from choosers
   - BUGFIX: erroneous combination CS=-1 & Tint!=0
   - BUGFIX: in Windows: shimmering white in embedded calendar (klnd2)
   - BUGFIX: APave object: omit some commands of popup menu for text widget
   - BUGFIX: "+" as L/T neighbor in widget list didn't work for mega-widgets (dir,ftx...)
+  - BUGFIX: empty widget list (lwidgets) in Window method
   - NEW   : -parent option of chooser method
   - NEW   : btT type of toolbuttons (non-ttk)
   - NEW   : apave::ttkToolbutton for ttk Toolbutton widgets: btt brt blt
@@ -17,6 +18,9 @@ Version `3.6.0b4 (12 Nov'22)`
   - NEW   : deiconify / withdraw / iconifyOption procs
   - NEW   : getShowOption / setShowOption for default options of showModal
   - NEW   : initStyle & clearing code
+  - CHANGE: frame instead of ttk::frame for paving $win.fra => no shimmering of bg, when dark themes are used
+  - CHANGE: ttk::combobox is included in navigation by Return/Enter key
+  - CHANGE: color chooser got -geometry option to be placed under mouse pointer or entry
   - CHANGE: colorWindow args
   - CHANGE: hovering color for buttons = mild magenta
   - CHANGE: check for using csToned before csSet

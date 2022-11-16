@@ -1440,7 +1440,7 @@ where:
       0 Id right \
       0 Msc right
     }
-    foreach {k v} [pave defaultAttrs] {
+    foreach {k v} [::apave::defaultAttrs] {
       incr itbll
       lappend ::t::tbllist [list $k [lindex [pave widgetType $k {} {}] 0] \
         $itbll [string range $k [expr {$itbll%3}] end]]
@@ -1475,7 +1475,7 @@ where:
     trace add variable t::sc write "::t::tracer ::t::sc"
 
     ::apave::ttkToolbutton
-    pave defaultAttrs chB {} {-padx 11 -pady 3}  ;# to test defaultAttrs
+    ::apave::defaultAttrs chB {} {-padx 11 -pady 3}  ;# to test defaultAttrs
     source [file join $::pavedirname pickers klnd klnd.tcl]
     lassign [::klnd::currentYearMonthDay] ::t::year ::t::month
     set ::t::restart 1
