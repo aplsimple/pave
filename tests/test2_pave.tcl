@@ -122,6 +122,7 @@ namespace eval t {
         \u2022 <linkPW>Paul Walton</linkPW>\n \
         \u2022 <linkRD>rdbende</linkRD>\n \
         \u2022 <linkNB>Nicolas Bats</linkNB>\n \
+        \u2022 Alexis Martin\n \
         \n Special thanks also to\n\n \
         \u2022 <linkPO>Paul Obermeier</linkPO>\n \
         \u2022 <linkHE>Holger Ewert</linkHE>\n \
@@ -1577,7 +1578,10 @@ where:
     return $res
   }
 
-} ;# end of ::t namespace
+
+# ________________________  EONS ::t _________________________ #
+
+}
 
 # __________________________ Running the test ___________________________ #
 

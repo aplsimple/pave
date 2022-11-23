@@ -1,7 +1,7 @@
 # Last changes:
 
 
-Version `3.6.0b6 (16 Nov'22)`
+Version `3.6.0 (22 Nov'22)`
 
   - BUGFIX: (esp. for Windows) fire entry's invalidation after choice from choosers
   - BUGFIX: erroneous combination CS=-1 & Tint!=0
@@ -9,6 +9,10 @@ Version `3.6.0b6 (16 Nov'22)`
   - BUGFIX: APave object: omit some commands of popup menu for text widget
   - BUGFIX: "+" as L/T neighbor in widget list didn't work for mega-widgets (dir,ftx...)
   - BUGFIX: empty widget list (lwidgets) in Window method
+  - BUGFIX: removeOptions method to remove all instances of options
+  - NEW   : touchWidgets method
+  - NEW   : FG FG2 BG BG2 tags among link tags (defining colors)
+  - NEW   : apave::isKDE, apave::repaintWindow
   - NEW   : -parent option of chooser method
   - NEW   : btT type of toolbuttons (non-ttk)
   - NEW   : apave::ttkToolbutton for ttk Toolbutton widgets: btt brt blt
@@ -18,7 +22,11 @@ Version `3.6.0b6 (16 Nov'22)`
   - NEW   : deiconify / withdraw / iconifyOption procs
   - NEW   : getShowOption / setShowOption for default options of showModal
   - NEW   : initStyle & clearing code
+  - CHANGE: untouchWidgets: additional attributes
+  - CHANGE: themeWindow: scrollbars active/disabled
+  - CHANGE: remove the old loaded aw* themes before loading the new ones
   - CHANGE: frame instead of ttk::frame for paving $win.fra => no shimmering of bg, when dark themes are used
+  - CHANGE: themeWindow: colors of scrollbar at hovering
   - CHANGE: ttk::combobox is included in navigation by Return/Enter key
   - CHANGE: color chooser got -geometry option to be placed under mouse pointer or entry
   - CHANGE: colorWindow args

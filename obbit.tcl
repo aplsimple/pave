@@ -9,8 +9,6 @@
 #
 # _______________________________________________________________________ #
 
-package require Tk
-
 namespace eval ::apave {
 
 # ________________________ apave's global variables _________________________ #
@@ -183,15 +181,25 @@ namespace eval ::apave {
 # _____________________________ Common procs ________________________________ #
 
 proc ::iswindows {} {
+  # Checks for "platform is MS Windows".
 
-  # Checks if the platform is MS Windows.
   return [expr {$::tcl_platform(platform) eq "windows"} ? 1: 0]
 }
 
 proc ::islinux {} {
+  # Checks for "platform is Linux".
 
-  # Checks if the platform is Linux.
   return [expr {$::tcl_platform(platform) eq "unix"} ? 1: 0]
+}
+#_______________________
+
+proc ::isKDE {} {
+  # Checks for "desktop is KDE".
+
+  if {[info exists ::env(XDG_CURRENT_DESKTOP)] && $::env(XDG_CURRENT_DESKTOP) eq {KDE}} {
+    return yes
+  }
+  return no
 }
 #_______________________
 
@@ -411,6 +419,31 @@ proc ::apave::focusFirst {w {dofocus yes} {res {}}} {
   }
   return $res
 }
+#_______________________
+
+proc ::apave::repaintWindow {win {wfoc ""}} {
+  # Shows a window and, optionally, focuses on a widget of it.
+  #   win - the window's path
+  #   wfoc - the widget's path or a command to get it
+  # Returns yes, if the window is shown successfully.
+
+  if {[winfo exists $win]} {
+    # esp. for KDE
+    if {[isKDE]} {
+      wm withdraw $win
+      wm deiconify $win
+      # KDE is KDE, Tk is Tk, and never the twain shall meet
+      wm attributes $win -topmost [wm attributes $win -topmost]
+    }
+    update
+    if {$wfoc ne {}} {
+      catch {set wfoc [{*}$wfoc]}
+      focus $wfoc
+    }
+    return yes
+  }
+  return no
+}
 
 ## ________________________ Inits _________________________ ##
 
@@ -599,6 +632,10 @@ proc ::apave::InitTheme {intheme libdir} {
       set lbd 0
     }
     awdark - awlight {
+      catch {package forget ttk::theme::$intheme}
+      catch {namespace delete ttk::theme::$intheme}
+      catch {package forget awthemes}
+      catch {namespace delete awthemes}
       InitAwThemesPath $libdir
       package require awthemes
       package require ttk::theme::$intheme
@@ -936,16 +973,20 @@ proc ::apave::removeOptions {options args} {
   # To remove an "alone" option, `key` should be a glob pattern with `*`.
 
   foreach key $args {
-    if {[set i [lsearch -exact $options $key]]>-1} {
-      catch {
-        # remove a pair "option value"
+    while {[incr maxi]<99} {
+      if {[set i [lsearch -exact $options $key]]>-1} {
+        catch {
+          # remove a pair "option value"
+          set options [lreplace $options $i $i]
+          set options [lreplace $options $i $i]
+        }
+      } elseif {[string first * $key]>=0 && \
+        [set i [lsearch -glob $options $key]]>-1} {
+        # remove an option only
         set options [lreplace $options $i $i]
-        set options [lreplace $options $i $i]
+      } else {
+        break
       }
-    } elseif {[string first * $key]>=0 && \
-      [set i [lsearch -glob $options $key]]>-1} {
-      # remove an option only
-      set options [lreplace $options $i $i]
     }
   }
   return $options
@@ -1979,11 +2020,12 @@ oo::class create ::apave::ObjectTheming {
       my Ttk_style map $ts -foreground [list {selected !active} $tfgS {!selected !active} $tfgM active $aclr {selected active} $aclr]
       my Ttk_style map $ts -background [list {selected !active} $tbgS {!selected !active} $tbgM {!selected active} $tbg2 {selected active} $tbg2]
     }
-    foreach ts {TEntry Treeview TSpinbox TCombobox TCombobox.Spinbox TMatchbox TNotebook.Tab TScrollbar TScale} {
+    foreach ts {TEntry Treeview TSpinbox TCombobox TCombobox.Spinbox TMatchbox TNotebook.Tab TScale} {
       my Ttk_style map $ts -lightcolor [list focus $bclr active $bclr]
       my Ttk_style map $ts -darkcolor [list focus $bclr active $bclr]
     }
     my Ttk_style map TScrollbar -troughcolor [list !active $tbg1 active $tbg2]
+    my Ttk_style map TScrollbar -background [list !active $tbg1 disabled $tbg1 {!selected !disabled active} $tbgS]
     my Ttk_style map TProgressbar -troughcolor [list !active $tbg2 active $tbg1]
     my Ttk_style configure TProgressbar -background $tbgS
     if {[set cs [my csCurrent]]<20} {
@@ -2066,9 +2108,9 @@ oo::class create ::apave::ObjectTheming {
           set ::apave::_C_($ts,7) "-selectcolor $tbg1"
           set ::apave::_C_($ts,8) "-highlightbackground $tbg1"
         }
-        frame - scrollbar - scale - tframe - tnotebook {
+        frame - scrollbar - scale {
           set ::apave::_C_($ts,0) 8
-          set ::apave::_C_($ts,4) "-activebackground $bclr"
+          set ::apave::_C_($ts,4) "-activebackground $tbgS"
           set ::apave::_C_($ts,7) "-troughcolor $tbg1"
           set ::apave::_C_($ts,8) "-elementborderwidth 2"
         }
@@ -2188,14 +2230,37 @@ oo::class create ::apave::ObjectTheming {
     # Makes non-ttk widgets to be untouched by coloring or gets their list.
     #   args - list of widget globs (e.g. {.em.fr.win.* .em.fr.h1 .em.fr.h2})
     # If args not set, returns the list of untouched widgets.
-    #
+    # Items of *args* can have 2 components:
+    #   - widget glob
+    #   - list of option+value pairs, e.g. "*.textWidget {-fg white -bg black}"
+    # 2nd component defines additional attributes that override the defaults.
     # See also:
+    #   touchWidgets
     #   themeNonThemed
 
     if {[llength $args]==0} {return $::apave::_CS_(untouch)}
     foreach u $args {
       if {[lsearch -exact $::apave::_CS_(untouch) $u]==-1} {
         lappend ::apave::_CS_(untouch) $u
+      }
+    }
+  }
+  #_______________________
+
+  method touchWidgets {args} {
+
+    # Makes non-ttk widgets to be touched again.
+    #   args - list of widget globs (e.g. {.em.fr.win.* .em.fr.h1 .em.fr.h2})
+    # If args not set, returns the list of untouched widgets.
+    # See also:
+    #   untouchWidgets
+    #   themeNonThemed
+
+    if {[llength $args]==0} {return $::apave::_CS_(untouch)}
+    foreach u $args {
+      set u [lindex $u 0]
+      if {[set i [lsearch -index 0 -exact $::apave::_CS_(untouch) $u]]>-1} {
+        set ::apave::_CS_(untouch) [lreplace $::apave::_CS_(untouch) $i $i]
       }
     }
   }
@@ -2231,16 +2296,24 @@ oo::class create ::apave::ObjectTheming {
       }
       set tch 1
       foreach u $::apave::_CS_(untouch) {
+        lassign $u u addopts
         if {[string match $u $w1]} {set tch 0; break}
       }
-      if {$tch && [info exist ::apave::_C_($ts,0)] && \
-      [lsearch -exact $wtypes $ts]>-1} {
+      if {[info exist ::apave::_C_($ts,0)] && [lsearch -exact $wtypes $ts]>-1} {
         set i 0
-        while {[incr i] <= $::apave::_C_($ts,0)} {
+        if {$tch} {
+          set tch $::apave::_C_($ts,0)
+          set addopts {}
+        } else {
+          if {$addopts ne {}} {
+            set tch $::apave::_C_($ts,0)
+          }
+        }
+        while {[incr i] <= $tch} {
           lassign $::apave::_C_($ts,$i) opt val
           catch {
             if {[string first __tooltip__.label $w1]<0} {
-              $w1 configure $opt $val
+              $w1 configure $opt $val {*}$addopts
               switch -exact -- [$w1 cget -state] {
                 disabled {
                   $w1 configure {*}[my NonTtkStyle $w1 1]
