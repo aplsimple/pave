@@ -1,7 +1,7 @@
 # Last changes:
 
 
-Version `3.6.0 (22 Nov'22)`
+Version `3.6.0 (28 Nov'22)`
 
   - BUGFIX: (esp. for Windows) fire entry's invalidation after choice from choosers
   - BUGFIX: erroneous combination CS=-1 & Tint!=0
@@ -40,7 +40,7 @@ Version `3.6.0 (22 Nov'22)`
   - CHANGE: -resizable option may be boolean
   - CHANGE: highlightbackground for main toolbar buttons + overrelief (esp. for Windows)
   - CHANGE: test2_pave.tcl
-  - CHANGE: hl_tcl 0.9.44, bartabs 1.5.9
+  - CHANGE: hl_tcl 0.9.44, bartabs 1.6.0
 
 
 Version `3.5.9 (25 Oct'22)`
