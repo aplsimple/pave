@@ -1,7 +1,7 @@
 # Last changes:
 
 
-Version `3.6.0 (28 Nov'22)`
+Version `3.6.0 (7 Dec'22)`
 
   - BUGFIX: (esp. for Windows) fire entry's invalidation after choice from choosers
   - BUGFIX: erroneous combination CS=-1 & Tint!=0
