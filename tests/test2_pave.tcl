@@ -66,7 +66,7 @@ namespace eval t {
   proc fillclock {w} {
     # Fill the clocks pane
     set i 0
-    proc ::every {delay script} {
+  ; proc ::every {delay script} {
       uplevel #0 $script
       after $delay [list every $delay $script]
     }
@@ -448,7 +448,7 @@ namespace eval t {
   proc TextConfigPie {} {
     ##################################################################
     # This code is taken from Tk's demos/ctext.tcl
-    proc mkTextConfigPie {w x y i0 a option value color} {
+  ; proc mkTextConfigPie {w x y i0 a option value color} {
       set arcid [$w create arc $x $y [expr {$x+90}] [expr {$y+90}] \
         -start [expr {$a-15}] -extent 30 -fill $color]
       $w addtag ArcTag[incr i0] withtag $arcid
@@ -1261,7 +1261,7 @@ where:
   If there is only a single data set and no TEXT, the @@ marks may be omitted. The @@ marks are configured."}}
       {v_3 - - - - {pack} {-h 3}}
       {fco - - - - {pack} {-tvar t::cb3 -w 88 -tip "This 'fco' combobox contains: \
-      \n  1) four literal lines\n  2) data from 'test2_fco.dat' file" -values {COMMIT: @@-div1 " \[" -div2 "\] " -ret yes test2_fco.dat@@   INFO: @@-pos 22 -list {{Content of test2_fco.dat} {another item} trunk DOC} test2_fco.dat@@}}}
+      \n  1. four literal lines\n  2. data from 'test2_fco.dat' file" -values {COMMIT: @@-div1 " \[" -div2 "\] " -ret yes test2_fco.dat@@   INFO: @@-pos 22 -list {{Content of test2_fco.dat} {another item} trunk DOC} test2_fco.dat@@}}}
       {siz - - - - {pack -side bottom -anchor se}}
     }
   }
@@ -1313,7 +1313,7 @@ where:
       {.butEdit - - - - {pack -side right -anchor nw -padx 9} {-t "Edit the file" -com t::viewfile -tip "Opens a stand-alone editor of the file\nthe listbox' data are taken from." -image ICN31-small -compound left}}
       {.lab - - - - {pack -side left -anchor nw} {-t "Listbox of file content:\n\nSee also:\nGeneral/Misc. tab" -link "
       ::t::chanTab nbk .win.fra.fra.nbk.f4 no yes; focus [::t::pave SpxMisc]@@Click to select 'Misc.'\n... and mark the link as visited.@@"}}
-      {.flb - - - - {pack -side left -fill x -expand 1} {-lvar ::t::lv1 -lbxsel Cont -ALL 1 -w 50 -h 5 -tip "The 'flb' listbox contains:\n  1) four literal lines\n  2) data from 'test2_fco.dat' file" -values {@@-div1 " \[" -div2 "\] " test2_fco.dat@@   INFO: @@-pos 22 -ret 1 -list {{Content of test2_fco.dat} {another item} trunk DOC} test2_fco.dat@@ Code of test1_pave.tcl: @@-RE {^(\s*)([^#]+)$} ./test1_pave.tcl@@}}}
+      {.flb - - - - {pack -side left -fill x -expand 1} {-lvar ::t::lv1 -lbxsel Cont -ALL 1 -w 50 -h 5 -tip "The 'flb' listbox contains:\n  1. four literal lines\n  2. data from 'test2_fco.dat' file" -values {@@-div1 " \[" -div2 "\] " test2_fco.dat@@   INFO: @@-pos 22 -ret 1 -list {{Content of test2_fco.dat} {another item} trunk DOC} test2_fco.dat@@ Code of test1_pave.tcl: @@-RE {^(\s*)([^#]+)$} ./test1_pave.tcl@@}}}
       {.sbv + L - - {pack -side left -after %w}}
       {fraflb.sbh .flb T - - {pack -side left -before %w}}
       {LabImg fraflb T 1 1 {} {-link "::t::goWiki@@Click to enter the bird's wiki@@"}}

@@ -1,6 +1,15 @@
 # Last changes:
 
 
+Version `3.6.1 (14 Dec'22)`
+
+  - NEW   : -tabnext option can be 2 item list, 2nd (omittable) is "widget" for Shift+Tab
+  - NEW   : focus fg/bg of TButton
+  - NEW   : apave::FGMAIN2 / BGMAIN2 for field colors
+  - NEW   : TreeNoHL style for treeview not highlighted
+  - CHANGE: Treeview colors: selected focus / not focus
+
+
 Version `3.6.0 (7 Dec'22)`
 
   - BUGFIX: (esp. for Windows) fire entry's invalidation after choice from choosers
