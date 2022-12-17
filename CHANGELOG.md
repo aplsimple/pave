@@ -1,6 +1,11 @@
 # Last changes:
 
 
+Version `3.6.2 (17 Dec'22)`
+
+  - DELETE: tests directory (separated into apave_tests repo)
+
+
 Version `3.6.1 (14 Dec'22)`
 
   - NEW   : -tabnext option can be 2 item list, 2nd (omittable) is "widget" for Shift+Tab
