@@ -1,9 +1,10 @@
 # Last changes:
 
 
-Version `3.6.2 (17 Dec'22)`
+Version `3.6.2 (28 Dec'22)`
 
   - DELETE: tests directory (separated into apave_tests repo)
+  - NEW   : TMenubutton arrow: disabled color
 
 
 Version `3.6.1 (14 Dec'22)`
