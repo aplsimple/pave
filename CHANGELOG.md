@@ -1,6 +1,17 @@
 # Last changes:
 
 
+Version `3.6.4 (11 Jan'23)`
+
+  - BUGFIX: Dark* themes: corrected "actfg" color
+  - BUGFIX: initialize basic CS of tuned CS
+  - BUGFIX: Replace_chooser: horizontal scrollbar for "ftx" widget
+  - NEW   : Replace_chooser: grid/pack options for expanding "mega-widgets"
+  - CHANGE: initWM: "default" theme by default, instead of "clam"
+  - CHANGE: little clearance
+  - CHANGE: bartabs 1.6.1
+
+
 Version `3.6.3 (4 Jan'23)`
 
   - NEW   : TMenubutton arrow: disabled color
