@@ -1,7 +1,7 @@
 # Last changes:
 
 
-Version `3.6.4 (11 Jan'23)`
+Version `3.6.4 (12 Jan'23)`
 
   - BUGFIX: Dark* themes: corrected "actfg" color
   - BUGFIX: initialize basic CS of tuned CS
@@ -9,7 +9,7 @@ Version `3.6.4 (11 Jan'23)`
   - NEW   : Replace_chooser: grid/pack options for expanding "mega-widgets"
   - CHANGE: initWM: "default" theme by default, instead of "clam"
   - CHANGE: little clearance
-  - CHANGE: bartabs 1.6.1
+  - CHANGE: bartabs 1.6.2
 
 
 Version `3.6.3 (4 Jan'23)`
