@@ -1,11 +1,12 @@
 # Last changes:
 
 
-Version `3.6.4 (12 Jan'23)`
+Version `3.6.4 (18 Jan'23)`
 
   - BUGFIX: Dark* themes: corrected "actfg" color
   - BUGFIX: initialize basic CS of tuned CS
   - BUGFIX: Replace_chooser: horizontal scrollbar for "ftx" widget
+  - NEW   : -tabnext option: may be a call of procedure
   - NEW   : Replace_chooser: grid/pack options for expanding "mega-widgets"
   - CHANGE: initWM: "default" theme by default, instead of "clam"
   - CHANGE: little clearance
