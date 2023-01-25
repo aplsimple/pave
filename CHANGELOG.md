@@ -1,6 +1,17 @@
 # Last changes:
 
 
+Version `3.6.5 (25 Jan'23)`
+
+  - BUGFIX: setting "theme" variable in InitTheme
+  - NEW   : handle plastik, radiance and darkbrown themes in InitTheme
+  - NEW   : -encoding and -translation options of readTextFile / writeTextFile
+  - DELETE: all shadowing stuff (shadowAllowed etc.)
+  - CHANGE: in text dialogues: popup's "Save and Exit" and Ctrl+W both return "1"
+  - CHANGE: CS: Radiance & DarkBrown instead of Yellowstone & Dark3
+  - CHANGE: bartabs 1.6.3, hl_tcl 0.9.46
+
+
 Version `3.6.4 (18 Jan'23)`
 
   - BUGFIX: Dark* themes: corrected "actfg" color
