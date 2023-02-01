@@ -1,6 +1,26 @@
 # Last changes:
 
 
+Version `3.7.0a1 (1 Feb'23)`
+
+  - NEW   : apave::InitBaltip, -isbaltip option of apave::initWM (to dismiss baltip)
+  - NEW   : apave::SRCDIR to hold apave's source directory
+  - CHANGE: LightBrown & DarkBrown moved in the CS list
+
+
+Version `3.6.7 (29 Jan'23)`
+
+  - NEW   : gutterContents method: gets a gutter's current contents
+  - CHANGE: lightbrown theme & LightBrown CS instead of old ones
+
+
+Version `3.6.6 (27 Jan'23)`
+
+  - BUGFIX: -tabnext option: when it's set as "[command]"
+  - NEW   : highlight_matches_real: for real highlighting words (esp. for Windows)
+  - CHANGE: Radiance CS
+
+
 Version `3.6.5 (25 Jan'23)`
 
   - BUGFIX: setting "theme" variable in InitTheme
