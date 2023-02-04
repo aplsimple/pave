@@ -1,10 +1,11 @@
 # Last changes:
 
 
-Version `3.7.0a1 (1 Feb'23)`
+Version `3.7.0a2 (4 Feb'23)`
 
   - NEW   : apave::InitBaltip, -isbaltip option of apave::initWM (to dismiss baltip)
   - NEW   : apave::SRCDIR to hold apave's source directory
+  - NEW   : -centerme option can be a caller's geometry (WxH+X+Y)
   - CHANGE: LightBrown & DarkBrown moved in the CS list
 
 
