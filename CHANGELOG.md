@@ -1,12 +1,15 @@
 # Last changes:
 
 
-Version `3.7.0a2 (4 Feb'23)`
+Version `3.7.0 (8 Feb'23)`
 
   - NEW   : apave::InitBaltip, -isbaltip option of apave::initWM (to dismiss baltip)
   - NEW   : apave::SRCDIR to hold apave's source directory
   - NEW   : -centerme option can be a caller's geometry (WxH+X+Y)
+  - NEW   : misc method's buttons argument: "result" can be or a command to get the result
+  - NEW   : Query method: 5 buttons added to "buttons" (possible total 7)
   - CHANGE: LightBrown & DarkBrown moved in the CS list
+  - CHANGE: hl_tcl 0.9.48
 
 
 Version `3.6.7 (29 Jan'23)`
