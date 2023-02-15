@@ -1,6 +1,13 @@
 # Last changes:
 
 
+Version `4.0.0b4 (13 Feb'23)`
+
+  - NEW   : ::apave::traceRemove
+  - NEW   : input method: radiobutton names may be "Names"
+  - CHANGE: klnd: -width option to change days' width; -locale initialized
+
+
 Version `3.7.0 (8 Feb'23)`
 
   - NEW   : apave::InitBaltip, -isbaltip option of apave::initWM (to dismiss baltip)

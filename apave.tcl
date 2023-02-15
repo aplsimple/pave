@@ -2670,10 +2670,7 @@ oo::class create ::apave::APave {
       }
       foreach {lst vars} [array get ::apave::_AP_VARS "_TRACED_${wr}*"] {
         foreach v $vars {
-          foreach t [trace info variable $v] {
-            lassign $t o c
-            trace remove variable $v $o $c
-          }
+          ::apave::traceRemove $v
         }
         set ::apave::_AP_VARS($lst) [list]
       }
@@ -3924,5 +3921,3 @@ oo::class create ::apave::APave {
 }
 
 # _____________________________ EOF _____________________________________ #
-#-RUNF1: ../../../src/alited.tcl LOG=~/TMP/alited-DEBUG.log DEBUG
-#RUNF1: ~/PG/github/pave/tests/test2_pave.tcl alt 2 11 12 "middle icons"

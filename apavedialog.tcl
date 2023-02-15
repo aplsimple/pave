@@ -1404,5 +1404,3 @@ oo::class create ::apave::APaveDialog {
 }
 
 # _____________________________ EOF _____________________________________ #
-#RUNF: ~/PG/github/pave/tests/test2_pave.tcl alt 27 11 12 "middle icons"
-#RUNF: ~/PG/github/alited/src/alited.tcl LOG=~/TMP/alited-DEBUG.log DEBUG
