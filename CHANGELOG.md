@@ -1,11 +1,27 @@
 # Last changes:
 
 
-Version `4.0.0b4 (13 Feb'23)`
+Version `4.0.0 (22 Feb'23)`
 
-  - NEW   : ::apave::traceRemove
+  - BUGFIX: closing non-modal windows in arbitrary order
+  - BUGFIX: input method: text fields containing "\", "{", "}"
+  - NEW   : showModal: by default, "-modal 0" only shows a non-modal window
+  - NEW   : showModal: "-waitvar 1" option to force "tkwait variable" at "-modal 0"
+  - NEW   : showWindow: "waitvar" argument to force "tkwait variable" at "-modal 0"
+  - NEW   : -onclose option of dialogues: may be "destroy" (useful for non-modals)
+  - NEW   : handler of dialogue's buttons may be "destroy" (useful for non-modals)
   - NEW   : input method: radiobutton names may be "Names"
+  - NEW   : input method: -comOK option (OK button's command)
+  - NEW   : OK dialogue may be "-modal 0" (nothing to choose, only viewing)
+  - NEW   : apave::traceRemove proc: cancel tracing of a variable
+  - NEW   : apave::InsertChar proc: insert characters into a text at cursor's position
+  - NEW   : dlgPath method: get dialogues' window path
+  - NEW   : thDark method: check if a theme is dark/light/neutral
+  - CHANGE: APave => APaveBase, apave.tcl => apavebase.tcl, APaveInput => APave, apaveinput.tcl => apave.tcl
+  - CHANGE: ::islinux => ::isunix
+  - CHANGE: DarkBrown CS
   - CHANGE: klnd: -width option to change days' width; -locale initialized
+  - CHANGE: hl_tcl 0.9.49
 
 
 Version `3.7.0 (8 Feb'23)`
