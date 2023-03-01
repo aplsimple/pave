@@ -1,11 +1,10 @@
 # Last changes:
 
 
-Version `4.0.0 (22 Feb'23)`
+Version `4.0.0 (1 Mar'23)`
 
   - BUGFIX: closing non-modal windows in arbitrary order
   - BUGFIX: input method: text fields containing "\", "{", "}"
-  - NEW   : showModal: by default, "-modal 0" only shows a non-modal window
   - NEW   : showModal: "-waitvar 1" option to force "tkwait variable" at "-modal 0"
   - NEW   : showWindow: "waitvar" argument to force "tkwait variable" at "-modal 0"
   - NEW   : -onclose option of dialogues: may be "destroy" (useful for non-modals)
@@ -17,11 +16,13 @@ Version `4.0.0 (22 Feb'23)`
   - NEW   : apave::InsertChar proc: insert characters into a text at cursor's position
   - NEW   : dlgPath method: get dialogues' window path
   - NEW   : thDark method: check if a theme is dark/light/neutral
+  - NEW   : BWidget::place ----> apave::place, used in initWM
+  - CHANGE: winfo vrootwidth / vrootheight
   - CHANGE: APave => APaveBase, apave.tcl => apavebase.tcl, APaveInput => APave, apaveinput.tcl => apave.tcl
   - CHANGE: ::islinux => ::isunix
   - CHANGE: DarkBrown CS
   - CHANGE: klnd: -width option to change days' width; -locale initialized
-  - CHANGE: hl_tcl 0.9.49
+  - CHANGE: hl_tcl 0.9.49, baltip 1.5.2, bartabs 1.6.4
 
 
 Version `3.7.0 (8 Feb'23)`
