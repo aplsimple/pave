@@ -1,6 +1,17 @@
 # Last changes:
 
 
+Version `4.0.1 (8 Mar'23)`
+
+  - NEW   : -com of dialogue's buttons can be integer (as returned result)
+  - NEW   : -initialdir of file choosers can be "-$path" to return a rootname only
+  - CHANGE: dlgPath methods
+  - CHANGE: cursor at entry's end after choosing from dialogues
+  - CHANGE: -rotext of text dialogues to disable "\\n -> \n" mapping
+  - CHANGE: some CS's tip colors
+  - CHANGE: bartabs 1.6.5
+
+
 Version `4.0.0 (1 Mar'23)`
 
   - BUGFIX: closing non-modal windows in arbitrary order
