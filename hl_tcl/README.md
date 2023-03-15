@@ -23,7 +23,7 @@ Below is a line that brings most (not *hl_tcl*, as seen in [Reference](https://a
       regsub -all {(([^A-Z@]|\\@)[.?!]("|'|'')?([])])?) } $fieldText {\1  } fieldText
 
 Good luck for a highlighter when the second line (or similar) follows the first, giving it a matching quote and thus bringing it out of the stupor.
- 
+
 Those orphan quotes are often used in `regexp` and `regsub` Tcl commands, so that when a honest Tcl highlighter (like <a href="https://www.geany.org" title="Geany IDE">Geany</a>) stumbles upon an orphan quote, it tries its best to highlight the rest of code as a string, till the next unmatched quote.
 
 Thus, we have
@@ -85,7 +85,7 @@ It seems *hl_tcl* got close to this compromise. Specifically, it provides:
   * highlighting viewable/editable *Tk text* widget and static html pages
   * good performance at editing 1000-4000 LOC and rather acceptable for 4000-9000 LOC
   * even monstrous 10000 LOC and more are handled fast at the "tricky" mode a-la Gedit
-	
+
 The *hl_tcl* doesn't provide the following:
 
   * highlighting *numbers*
@@ -111,13 +111,13 @@ The code below:
 
 sets an example of *hl_tcl* usage. Here are the details:
 
-  * **`::stub`** is a procedure to watch the text editing; here it simply puts out the text's last index;
+  * **::stub** is a procedure to watch the text editing; here it simply puts out the text's last index;
 
-  * **`hl_init`** is called *before* filling the text widget with a Tcl code; it sets the highlighting options and disables the highlighting till *hl_text* runs;
+  * **hl_init** is called *before* filling the text widget with a Tcl code; it sets the highlighting options and disables the highlighting till *hl_text* runs;
 
-  * **`hl_text`** runs to highlight the Tcl code of the text widget and to view/edit it.
+  * **hl_text** runs to highlight the Tcl code of the text widget and to view/edit it.
 
-The **`hl_init`** takes arguments:
+The **hl_init** takes arguments:
 
    * *txt* is the text widget's path
    * *args* contains options of text widget (omittable)
@@ -134,21 +134,26 @@ The *args* is a list of *-option "value"* where *-option* may be:
    * *-seen* - number of first lines seen at start (default 500)
    * *-optRE* - flag "use a regular expression to highlight options" (default "yes")
    * *-keywords* - additional commands to highlight (as Tk ones)
+   * *-dobind* - if `true`, forces keys binding at repeating calls of hl_init
+   * *-plaintext* - `true` for plain texts with no highlighting
+   * *-plaincom* - a command for plain highlighting line by line
 
 **Note**: `-seen 500` and `-multiline no` can improve the performance a lot. It's recommended to use `-seen 500` (or any other reasonable limit, e.g. `-seen 200`) at any rate, except for static html pages.
 
+A command for *-plaincom* option has two arguments: a current text's path and a current line's number. It should highlight the current line and return `true`, otherwise (if the current line is Tcl code) it returns `false`. An example of its usage is presented by [alited editor](https://github.com/aplsimple/alited) (`lib/addon` directory).
+
 The rest of *hl_tcl* procedures are:
 
-   *  **`hl_all `** updates all highlighted existing text widgets, e.g. at changing a color scheme of application
-   *  **`hl_readonly`** gets/sets a read-only mode and/or a command to watch a text widget at viewing/editing it
-   *  **`hl_colors`** gets a list of colors for highlighting
+   *  **hl_all** updates all highlighted existing text widgets, e.g. at changing a color scheme of application
+   *  **hl_readonly** gets/sets a read-only mode and/or a command to watch a text widget at viewing/editing it
+   *  **hl_colors** gets a list of colors for highlighting
 
 See details in [Reference](https://aplsimple.github.io/en/tcl/hl_tcl/hl_tcl.html).
 
 
 ## Use for static html
 
-In the [hl_tcl.zip](https://chiselapp.com/user/aplsimple/repository/hl_tcl/download), there is a Tcl script named *tcl_html.tcl* that highlights Tcl snippets of static html page(s). 
+In the [hl_tcl.zip](https://chiselapp.com/user/aplsimple/repository/hl_tcl/download), there is a Tcl script named *tcl_html.tcl* that highlights Tcl snippets of static html page(s).
 
 It runs as follows:
 

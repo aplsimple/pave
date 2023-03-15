@@ -1,12 +1,20 @@
 # Last changes:
 
 
+Version `4.0.2 (15 Mar'23)`
+
+  - CHANGE: "file" icon
+  - CHANGE: "Close" icons instead "Exit", in dialogues
+  - CHANGE: DarkBrown CS: bg1 & selection colors
+  - CHANGE: hl_tcl 1.0.0
+
+
 Version `4.0.1 (8 Mar'23)`
 
-  - NEW   : -com of dialogue's buttons can be integer (as returned result)
-  - NEW   : -initialdir of file choosers can be "-$path" to return a rootname only
+  - NEW   : -com of "but" (button) can be integer (a returned result)
+  - NEW   : -initialdir of "fil" and "fis" (file chooser) can be "-$path" to return a rootname only
   - CHANGE: dlgPath methods
-  - CHANGE: cursor at entry's end after choosing from dialogues
+  - CHANGE: cursor at entry's end after choosing from choosers
   - CHANGE: -rotext of text dialogues to disable "\\n -> \n" mapping
   - CHANGE: some CS's tip colors
   - CHANGE: bartabs 1.6.5
