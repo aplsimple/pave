@@ -1,6 +1,12 @@
 # Last changes:
 
 
+Version `4.0.3 (22 Mar'23)`
+
+  - CHANGE: -decor option of showModal initialized properly
+  - CHANGE: ButtonTip of klnd2.tcl: provide %D wildcard as specified (%Y/%m/%d)
+
+
 Version `4.0.2 (15 Mar'23)`
 
   - CHANGE: "file" icon
