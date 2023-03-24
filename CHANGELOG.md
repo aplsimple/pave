@@ -1,6 +1,14 @@
 # Last changes:
 
 
+Version `4.0.4 (24 Mar'23)`
+
+  - CHANGE: "fillGutter $txt" to clear data of $txt
+  - CHANGE: -decor option of showModal initialized properly
+  - CHANGE: ButtonTip of klnd2.tcl: provide %D wildcard as specified (%Y/%m/%d)
+  - CHANGE: hl_tcl 1.0.2, bartabs 1.6.6
+
+
 Version `4.0.3 (23 Mar'23)`
 
   - CHANGE: -decor option of showModal initialized properly
