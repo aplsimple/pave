@@ -1,7 +1,17 @@
 # Last changes:
 
 
-Version `4.0.4 (24 Mar'23)`
+Version `4.0.6 (5 Apr'23)`
+
+  - BUGFIX: spinbox' tips (not for blank "from..to")
+  - NEW   : -minsize option for dialogues
+  - NEW   : msgcatDialogs proc to localize apave's messages
+  - CHANGE: check for {#commented item of widlist}
+  - CHANGE: indentation at inserting braces
+  - CHANGE: hl_tcl 1.0.3, bartabs 1.6.7
+
+
+Version `4.0.4 (25 Mar'23)`
 
   - CHANGE: "fillGutter $txt" to clear data of $txt
   - CHANGE: -decor option of showModal initialized properly
