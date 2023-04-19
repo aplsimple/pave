@@ -1,6 +1,18 @@
 # Last changes:
 
 
+Version `4.0.8 (19 Apr'23)`
+
+  - NEW   : initLinkFont method allows setting -foreground/-background
+
+
+Version `4.0.7 (14 Apr'23)`
+
+  - NEW   : -labelwidget attribute (of lfr/lfR) can be a path method
+  - CHANGE: findInText method: 'dobell' argument
+  - CHANGE: hl_tcl 1.0.4
+
+
 Version `4.0.6 (5 Apr'23)`
 
   - BUGFIX: spinbox' tips (not for blank "from..to")
