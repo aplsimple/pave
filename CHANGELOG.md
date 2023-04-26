@@ -1,6 +1,15 @@
 # Last changes:
 
 
+Version `4.1.0 (26 Apr'23)`
+
+  - NEW   : klnd::clearup - clearance for klnd data 
+  - DELETE: dlgPath & Pdg methods
+  - CHANGE: get rid of arrays or their vars (Moveall instead of _pav(moveall) etc.)
+  - CHANGE: untouchWidgets: if 1st item of *args* is "clear", clears items by glob patterns
+  - CHANGE: hl_tcl 1.0.5
+
+
 Version `4.0.8 (19 Apr'23)`
 
   - NEW   : initLinkFont method allows setting -foreground/-background
