@@ -1,9 +1,14 @@
 # Last changes:
 
 
+Version `4.1.1 (21 Jun'23)`
+
+  - NEW   : csSet method: colors can be passed in args as -clrtitf "color" etc...
+
+
 Version `4.1.0 (26 Apr'23)`
 
-  - NEW   : klnd::clearup - clearance for klnd data 
+  - NEW   : klnd::clearup - clearance for klnd data
   - DELETE: dlgPath & Pdg methods
   - CHANGE: get rid of arrays or their vars (Moveall instead of _pav(moveall) etc.)
   - CHANGE: untouchWidgets: if 1st item of *args* is "clear", clears items by glob patterns
