@@ -1,6 +1,13 @@
 # Last changes:
 
 
+Version `4.1.2 (30 Aug'23)`
+
+  - BUGFIX: display Tk core file/dir choosers in KDE & Fluxbox WM
+  - CHANGE: default -decor option
+  - NEW   : method waitWinVar
+
+
 Version `4.1.1 (21 Jun'23)`
 
   - NEW   : csSet method: colors can be passed in args as -clrtitf "color" etc...
