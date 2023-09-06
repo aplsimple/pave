@@ -1,6 +1,6 @@
-# pave
+# apave
 
-The *pave* is sort of wrapper around the grid and pack Tcl/Tk geometry managers.
+A library for GUI development with Tcl/Tk.
 
 Docs:
 

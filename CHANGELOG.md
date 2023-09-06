@@ -1,6 +1,11 @@
 # Last changes:
 
 
+Version `4.1.3 (6 Sep'23)`
+
+  - CHANGE: method waitWinVar
+
+
 Version `4.1.2 (30 Aug'23)`
 
   - BUGFIX: display Tk core file/dir choosers in KDE & Fluxbox WM
