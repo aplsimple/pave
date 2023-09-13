@@ -1,6 +1,11 @@
 # Last changes:
 
 
+Version `4.1.4 (7 Sep'23)`
+
+  - DELETE: "grab release $wgr" in showWindow (why it's set? maybe in a paroxysm of idiocy)
+
+
 Version `4.1.3 (6 Sep'23)`
 
   - CHANGE: method waitWinVar
