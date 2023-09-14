@@ -1,9 +1,15 @@
 # Last changes:
 
 
+Version `4.1.5 (14 Sep'23)`
+
+  - BUGFIX: setting geom variable in AuxSetChooserGeometry method (potential bug)
+  - NEW   : "-container $win" option for showModal method
+
+
 Version `4.1.4 (7 Sep'23)`
 
-  - DELETE: "grab release $wgr" in showWindow (why it's set? maybe in a paroxysm of idiocy)
+  - DELETE: "grab release $wgr" in showWindow method (why it's set? a paroxysm of idiocy?)
 
 
 Version `4.1.3 (6 Sep'23)`

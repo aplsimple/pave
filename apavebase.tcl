@@ -1572,6 +1572,7 @@ oo::class create ::apave::APaveBase {
     # Returns a path to the chooser to be open.
 
     set wchooser [lindex $parent 1].$widname
+    set geom {}
     if {[catch {lassign [set $vargeo] -> geom}] || $geom eq {}} {
       # no saved geometry with *vargeo*, so get it with *vargeo2*
       catch {lassign [set $vargeo2] -> geom}
@@ -3664,8 +3665,8 @@ oo::class create ::apave::APaveBase {
     ::apave::setAppIcon $win
     set root [winfo parent $win]
     lassign [::apave::extractOptions args -centerme {} -ontop 0 -modal yes \
-      -minsize {} -themed {} -input 0 -variable {} -waitvar {}] \
-      centerme ontop modal minsize themed input varname waitvar
+      -minsize {} -themed {} -input 0 -variable {} -waitvar {} -container -] \
+      centerme ontop modal minsize themed input varname waitvar container
     $win configure -bg [lindex [my csGet] 3]  ;# removes blinking by default bg
     if {$themed in {{} {0}} && [my csCurrent] != [apave::cs_Non]} {
       my colorWindow $win
@@ -3712,7 +3713,9 @@ oo::class create ::apave::APaveBase {
     if {$rooted} {
       lassign [::apave::splitGeometry [wm geometry [winfo toplevel $root]]] rw rh rx ry
     }
-    if {!$opt(-decor)} {
+    if {$container ne {-}} {
+      wm transient $win $container
+    } elseif {!$opt(-decor)} {
       wm transient $win $root
     }
     if {[set destroy [expr {$opt(-onclose) eq {destroy}}]]} {
