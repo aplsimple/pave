@@ -182,6 +182,15 @@ namespace eval ::apave {
   }
   #_______________________
 
+  proc mainWindowOfApp {{win ""}} {
+    # Sets/gets a main window of application.
+    #   win - window's path
+    # This should be run at application start, before opening any window.
+
+    return [WindowStatus . MAIN_WINDOW_OF_APP $win]
+  }
+  #_______________________
+
   proc IntStatus {w {name "status"} {val ""}} {
     # Sets/gets a status of window. The status is an integer assigned to a name.
     #   w - window's path
@@ -3602,24 +3611,31 @@ oo::class create ::apave::APaveBase {
     if {![winfo viewable $win]} {
       tkwait visibility $win
     }
+    set wmain [::apave::mainWindowOfApp]
     if {$modal} {      ;# for modal, grab the window
       set wgr [grab current]
-      if {[catch {grab set $win}]} {
-        catch {tkwait visibility $win}  ;# 2nd attempt to get the window visible, by force
-        catch {grab set $win}           ;# (not sure, where it can fire, still let it be)
-        puts stderr "\napave::waitWinVar - please send a note to apave developers on this catch."
-        catch {puts stderr "apave::waitWinVar - [info level -1]\n"}
+      if {$wmain ne {} && $wmain ne $win} {
+        if {[catch {grab set $win}]} {
+          catch {tkwait visibility $win}  ;# 2nd attempt to get the window visible, by force
+          catch {grab set $win}           ;# (not sure, where it can fire, still let it be)
+          puts stderr "\napave::waitWinVar - please send a note to apave developers on this catch."
+          catch {puts stderr "apave::waitWinVar - [info level -1]\n"}
+        }
       }
     }
     # at need, wait till the window associated variable be changed
     if {$var ne {}} {
       tkwait variable $var
     }
-    if {$modal} {      ;# for modal, release the grab
+    if {$modal} {      ;# for modal, release the grab and restore the old one
       catch {grab release $win}
       if {$wgr ne {}} {
-        catch {grab set $wgr}  ;# restore the old grab
+        catch {grab set $wgr}
       }
+    }
+    if {$wmain eq {}} {
+      # if not set beforehand, let the main window of application be the current one
+      ::apave::mainWindowOfApp $win
     }
   }
   #_______________________
@@ -3647,6 +3663,10 @@ oo::class create ::apave::APaveBase {
       ::apave::InfoWindow [expr {[::apave::InfoWindow] - 1}] $win $modal $var
     } else {
       # non-modal window:
+      if {[set wgr [grab current]] ne {}} {
+        # otherwise the non-modal window is irresponsive (in Windows even at WM level):
+        grab release $wgr
+      }
       if {$waitvar && $var ne {}} {
         my waitWinVar $win $var $modal ;# show and wait for closing the window
       } else {

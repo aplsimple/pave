@@ -1,6 +1,12 @@
 # Last changes:
 
 
+Version `4.1.6 (27 Sep'23)`
+
+  - NEW   : mainWindowOfApp method
+  - CHANGE: hl_tcl 1.0.6, baltip 1.5.4
+
+
 Version `4.1.5 (14 Sep'23)`
 
   - BUGFIX: setting geom variable in AuxSetChooserGeometry method (potential bug)
@@ -9,7 +15,7 @@ Version `4.1.5 (14 Sep'23)`
 
 Version `4.1.4 (7 Sep'23)`
 
-  - DELETE: "grab release $wgr" in showWindow method (why it's set? a paroxysm of idiocy?)
+  - DELETE: "grab release $wgr" in showWindow method
 
 
 Version `4.1.3 (6 Sep'23)`
