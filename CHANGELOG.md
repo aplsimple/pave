@@ -1,6 +1,13 @@
 # Last changes:
 
 
+Version `4.1.7 (2 Oct'23)`
+
+  - CHANGE: the -container option of showModal method is changed to -transient
+  - CHANGE: "-root $w" and "-parent $w" are the same as (recommended) "-centerme $w"
+  - CHANGE: APaveDialog's dialogues delegate the -transient option to showModal
+
+
 Version `4.1.6 (27 Sep'23)`
 
   - NEW   : mainWindowOfApp method
