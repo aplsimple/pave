@@ -1,6 +1,12 @@
 # Last changes:
 
 
+Version `4.1.8 (25 Oct'23)`
+
+  - CHANGE: chooserGeomVars method: sets/gets variables for file/dir choosers' geometry
+  - CHANGE: AuxSetChooserGeometry method: default geometry of file/dir choosers
+
+
 Version `4.1.7 (2 Oct'23)`
 
   - CHANGE: the -container option of showModal method is changed to -transient
