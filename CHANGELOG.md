@@ -1,6 +1,21 @@
 # Last changes:
 
 
+Version `4.2.0 (8 Nov'23)`
+
+  - BUGFIX: for klnd & klnd2: disable clicks on empty cells
+  - NEW   : de.msg, es.msg for pickers
+  - NEW   : ::tk::dialog::color::GetOptions
+  - NEW   : for clr: -validatecommand option
+  - NEW   : for klnd: -popup option, wildcards %d,%m,%y in -command option
+  - NEW   : combine showModal's options: "-centerme .win -geometry WxH" (without +X+Y)
+  - CHANGE: validateColorChoice method: "entry selection clear" 
+  - CHANGE: "Close" button of klnd localized
+  - CHANGE: "::apave::mainWindowOfApp ." initializes "main window of app" setting
+  - CHANGE: "CleanUps $win" after closing modal/waited windows
+  - CHANGE: unnecessary decorative comments removed
+
+
 Version `4.1.8 (25 Oct'23)`
 
   - CHANGE: chooserGeomVars method: sets/gets variables for file/dir choosers' geometry
