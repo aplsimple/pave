@@ -1,6 +1,13 @@
 # Last changes:
 
 
+Version `4.2.1 (15 Nov'23)`
+
+  - BUGFIX: env(TCLLIBPATH) cleared wrongly in apavebase.tcl
+  - BUGFIX: highlighting a word at beginning of line (e.g. "namespace")
+  - CHANGE: color picker
+
+
 Version `4.2.0 (8 Nov'23)`
 
   - BUGFIX: for klnd & klnd2: disable clicks on empty cells
