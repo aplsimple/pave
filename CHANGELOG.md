@@ -1,6 +1,13 @@
 # Last changes:
 
 
+Version `4.2.2 (22 Nov'23)`
+
+  - NEW   : baltip package's option *-eternal*
+  - NEW   : date picker: OK button picks selected day, F3 key goes to current day
+  - CHANGE: date pickers cleared a little
+
+
 Version `4.2.1 (15 Nov'23)`
 
   - BUGFIX: env(TCLLIBPATH) cleared wrongly in apavebase.tcl
