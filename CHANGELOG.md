@@ -1,6 +1,11 @@
 # Last changes:
 
 
+Version `4.3.0 (29 Nov'23)`
+
+  - NEW   : way to Tcl 9.0
+
+
 Version `4.2.2 (22 Nov'23)`
 
   - NEW   : baltip package's option *-eternal*
