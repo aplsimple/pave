@@ -1,9 +1,20 @@
 # Last changes:
 
 
-Version `4.3.0 (29 Nov'23)`
+Version `4.3.2 (5 Dec'23)`
+
+  - BUGFIX: Tcl 9.0 bug making Alt+key unusable (-underline option of menubar items)
+
+
+Version `4.3.1 (1 Dec'23)`
+
+  - CHANGE: checking "namespace exists ::tablelist:"
+
+
+Version `4.3.0 (30 Nov'23)`
 
   - NEW   : way to Tcl 9.0
+  - CHANGE: geometry stuff checked
 
 
 Version `4.2.2 (22 Nov'23)`
