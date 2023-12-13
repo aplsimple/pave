@@ -1,6 +1,13 @@
 # Last changes:
 
 
+Version `4.3.3 (13 Dec'23)`
+
+  - NEW   : method chooserPath: path to chooser's entry/label
+  - CHANGE: method Replace_chooser: restored -validatecommand
+  - CHANGE: proc splitGeometry: check result for x, y
+
+
 Version `4.3.2 (5 Dec'23)`
 
   - BUGFIX: Tcl 9.0 bug making Alt+key unusable (-underline option of menubar items)
@@ -39,7 +46,7 @@ Version `4.2.0 (8 Nov'23)`
   - NEW   : for clr: -validatecommand option
   - NEW   : for klnd: -popup option, wildcards %d,%m,%y in -command option
   - NEW   : combine showModal's options: "-centerme .win -geometry WxH" (without +X+Y)
-  - CHANGE: validateColorChoice method: "entry selection clear" 
+  - CHANGE: validateColorChoice method: "entry selection clear"
   - CHANGE: "Close" button of klnd localized
   - CHANGE: "::apave::mainWindowOfApp ." initializes "main window of app" setting
   - CHANGE: "CleanUps $win" after closing modal/waited windows
