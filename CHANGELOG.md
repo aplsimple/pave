@@ -1,6 +1,11 @@
 # Last changes:
 
 
+Version `4.3.4 (20 Dec'23)`
+
+  - CHANGE: *-undeline* options for menu and notebook (Tk 9.0 fixed)
+
+
 Version `4.3.3 (13 Dec'23)`
 
   - NEW   : method chooserPath: path to chooser's entry/label
