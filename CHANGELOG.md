@@ -1,6 +1,13 @@
 # Last changes:
 
 
+Version `4.3.5 (27 Dec'23)`
+
+  - NEW   : Ctrl+B / Ctrl+E to move the cursor to real beginning / end of wrapped line
+  - CHANGE: method themeWindow: *-arrowcolor* option (for "Tk 9.0 + dark CS" case)
+  - CHANGE: method AddButtonIcon: correct `res` call for *-com integer* option
+
+
 Version `4.3.4 (20 Dec'23)`
 
   - CHANGE: *-undeline* options for menu and notebook (Tk 9.0 fixed)
@@ -9,13 +16,13 @@ Version `4.3.4 (20 Dec'23)`
 Version `4.3.3 (13 Dec'23)`
 
   - NEW   : method chooserPath: path to chooser's entry/label
-  - CHANGE: method Replace_chooser: restored -validatecommand
+  - CHANGE: method Replace_chooser: restored *-validatecommand*
   - CHANGE: proc splitGeometry: check result for x, y
 
 
 Version `4.3.2 (5 Dec'23)`
 
-  - BUGFIX: Tcl 9.0 bug making Alt+key unusable (-underline option of menubar items)
+  - BUGFIX: Tcl 9.0 bug making Alt+key unusable (*-underline* option of menubar items)
 
 
 Version `4.3.1 (1 Dec'23)`
