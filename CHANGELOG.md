@@ -1,6 +1,12 @@
 # Last changes:
 
 
+Version `4.3.6 (3 Jan'24)`
+
+  - BUGFIX: *plastic* ttk theme + *-2. Default* CS => error (-fg / -bg / $Fgbut / $Bgbut)
+  - CHANGE: -highlightcolor of "." for *classic* ttk theme
+
+
 Version `4.3.5 (27 Dec'23)`
 
   - NEW   : Ctrl+B / Ctrl+E to move the cursor to real beginning / end of wrapped line
