@@ -1,6 +1,13 @@
 # Last changes:
 
 
+Version `4.3.7 (17 Jan'24)`
+
+  - BUGFIX: edit text dialog: asking "Save changes" fails at 2nd run
+  - NEW   : %w wildcard (current window) in *-onclose* option
+  - CHANGE: *-onclose* command added to dialog buttons' handlers
+
+
 Version `4.3.6 (3 Jan'24)`
 
   - BUGFIX: *plastic* ttk theme + *-2. Default* CS => error (-fg / -bg / $Fgbut / $Bgbut)
