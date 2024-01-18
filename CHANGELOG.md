@@ -1,11 +1,12 @@
 # Last changes:
 
 
-Version `4.3.7 (17 Jan'24)`
+Version `4.3.8 (18 Jan'24)`
 
   - BUGFIX: edit text dialog: asking "Save changes" fails at 2nd run
   - NEW   : %w wildcard (current window) in *-onclose* option
   - CHANGE: *-onclose* command added to dialog buttons' handlers
+  - CHANGE: more rigorous checking *-onclose* and *-ch* used together ("string match destroy")
 
 
 Version `4.3.6 (3 Jan'24)`
