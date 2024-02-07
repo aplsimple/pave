@@ -1,6 +1,12 @@
 # Last changes:
 
 
+Version `4.3.9 (7 Feb'24)`
+
+  - NEW   : proc blinkWidgetImage to flash icons
+  - NEW   : method askForSave to set/get flag "ask for saving"
+
+
 Version `4.3.8 (18 Jan'24)`
 
   - BUGFIX: edit text dialog: asking "Save changes" fails at 2nd run
