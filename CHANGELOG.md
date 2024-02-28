@@ -1,6 +1,11 @@
 # Last changes:
 
 
+Version `4.3.10 (28 Feb'24)`
+
+  - BUGFIX: *-initialdir* of file chooser: fails at dir with spaces
+
+
 Version `4.3.9 (7 Feb'24)`
 
   - NEW   : proc blinkWidgetImage to flash icons
