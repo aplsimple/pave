@@ -1,6 +1,13 @@
 # Last changes:
 
 
+Version `4.4.0 (6 Mar'24)`
+
+  - NEW   : apave.tcl: batch of procs moved from alited project
+  - NEW   : -focus option of showModal: if set as "Tab", try to focus 1st widget Tabbed
+  - CHANGE: hl_tcl 1.1.1, bartabs 1.6.8
+
+
 Version `4.3.10 (28 Feb'24)`
 
   - BUGFIX: *-initialdir* of file chooser: fails at dir with spaces
