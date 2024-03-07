@@ -1,7 +1,7 @@
 # Last changes:
 
 
-Version `4.4.0 (6 Mar'24)`
+Version `4.4.0 (7 Mar'24)`
 
   - NEW   : apave.tcl: batch of procs moved from alited project
   - NEW   : -focus option of showModal: if set as "Tab", try to focus 1st widget Tabbed
