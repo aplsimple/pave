@@ -1,12 +1,12 @@
 # Last changes:
 
 
-Version `4.4.0 (13 Mar'24)`
+Version `4.4.0 (27 Mar'24)`
 
   - NEW   : apave.tcl: batch of procs moved from alited project
   - NEW   : -focus option of showModal: if set as "Tab", try to focus 1st widget Tabbed
   - CHANGE: refactoring code
-  - CHANGE: hl_tcl 1.1.2, bartabs 1.6.8
+  - CHANGE: hl_tcl 1.1.3, bartabs 1.6.9, baltip 1.6.2
 
 
 Version `4.3.10 (28 Feb'24)`

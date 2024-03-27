@@ -1,4 +1,4 @@
-package ifneeded baltip 1.6.0 [list source [file join $dir baltip.tcl]]
+package ifneeded baltip 1.6.2 [list source [file join $dir baltip.tcl]]
 
 namespace eval ::baltip {
   variable _ruff_preamble {
@@ -315,6 +315,7 @@ The following options are special:
  * `-reset` - "-reset true" may be useful to set a new tip (callback or text) for listbox and treeview;
  * `-command` - a command to be executed, with `%t` (tip's text) and `%w` (widget's path) wildcards;
  * `-maxexp` - maximum number of tip's expositions.
+ * `-focus` - path to widget to set focus on, after showing a tip
 
 If `-global yes` option is used alone, it applies all global options to all registered tips. If `-global yes` option is used along with other options, only those options are applied to all registered tips.
 
