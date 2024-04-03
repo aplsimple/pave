@@ -354,6 +354,19 @@ namespace eval ::apave {
       }
     }
   }
+  #_______________________
+
+  proc focusApp {} {
+    # Restores app's focus: if app loses focus, restoring it
+    # focuses main window, ignores modal toplevel, locks keyboard.
+
+    catch {
+      focus -force $::apave::FOCUSED
+      if {[focus] eq $::apave::FOCUSED} {
+        event generate $::apave::FOCUSED <Tab> ;# enter a field
+      }
+    }
+  }
 
   ## _______________________ Text little procs _________________________ ##
 
@@ -1584,13 +1597,13 @@ oo::class create ::apave::APaveBase {
       # chooser's default geometry centered in parent
       if {![winfo exists $wp]} {set wp .}
       set geom [set W 640]x[set H 470]
-      append geom [my CenteredXY {*}[split [wm geometry $wp] x+] $W $H]
+      catch {append geom [my CenteredXY {*}[split [wm geometry $wp] x+] $W $H]}
     }
     if {[::isunix]} {
       # the below equilibristics provides the smooth display
       after idle "catch {wm withdraw $wchooser; wm geometry $wchooser 1x1}"
       after 0 [list after idle \
-        "catch {wm withdraw $wchooser; wm geometry $wchooser $geom; wm deiconify $wchooser}; wm geometry $wchooser $geom"]
+        "catch {wm withdraw $wchooser; wm geometry $wchooser $geom; wm deiconify $wchooser; wm geometry $wchooser $geom}"]
     }
     return $wchooser
   }
@@ -1738,7 +1751,7 @@ oo::class create ::apave::APaveBase {
         focus $bname
       }
       focus $tname
-      after idle "$tname selection range 0 end ; $tname icursor end"
+      after idle "catch {$tname selection range 0 end ; $tname icursor end}"
     }
     return $res
   }
@@ -3774,6 +3787,10 @@ oo::class create ::apave::APaveBase {
       append opt(-onclose) "; ::apave::obj EXPORT CleanUps $win"
     }
     wm protocol $win WM_DELETE_WINDOW $opt(-onclose)
+    if {$modal} {
+      set ::apave::FOCUSED $win
+      wm protocol $win WM_TAKE_FOCUS ::apave::focusApp
+    }
     # get the window's geometry from its requested sizes
     set inpgeom $opt(-geometry)
     if {$inpgeom eq {}} {

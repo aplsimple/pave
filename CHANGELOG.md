@@ -1,10 +1,12 @@
 # Last changes:
 
 
-Version `4.4.0 (27 Mar'24)`
+Version `4.4.1 (3 Apr'24)`
 
   - NEW   : apave.tcl: batch of procs moved from alited project
   - NEW   : -focus option of showModal: if set as "Tab", try to focus 1st widget Tabbed
+  - NEW   : calendars: -weeks option shows (1, 2) or hides (0) week numbers
+  - NEW   : focusApp: restore app's focused toplevel after focusing app
   - CHANGE: refactoring code
   - CHANGE: hl_tcl 1.1.3, bartabs 1.6.9, baltip 1.6.2
 
