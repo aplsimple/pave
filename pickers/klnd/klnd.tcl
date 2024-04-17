@@ -395,9 +395,10 @@ proc ::klnd::my::MainWidgets {} {
     set ::klnd::TMPTIP "-tip {$tip}"
   }
   if {$p(weeks)} {set ::klnd::TMPPACKW {}} {set ::klnd::TMPPACKW forget}
-  set ::klnd::TMPATTW "-font {$::apave::FONTMAIN} -padx 0 -pady 1 \
+  if {[::iswindows]} {set pady 2} {set pady 1}
+  set ::klnd::TMPATTW "-font {$::apave::FONTMAIN} -padx 0 -pady $pady \
     -activeforeground $p(fgh) -activebackground $p(bg1) -foreground $p(fgh) \
-    -relief flat -overrelief flat -takefocus 0 -highlightthickness 0"
+    -relief flat -overrelief flat -takefocus 0 -highlightthickness 0 -width 2"
   return {
     {fra - - 1 7 {-st new} {}} \
     {.frATool - - 1 7 {-st new} {-bg $::klnd::my::p(bg1)}}
@@ -411,13 +412,13 @@ proc ::klnd::my::MainWidgets {} {
       }}}
     {.frAW .frATool T - - {-padx 0} {-bg $::klnd::my::p(bg1) -w 0 -borderwidth 0}}
     {.frAW.labw - - 1 1 {pack -pady 1}}
-    {.frAW.BuTW1 + T 1 1 {pack $::klnd::TMPPACKW -pady 1} {$::klnd::TMPATTW -t 11}}
+    {.frAW.BuTW1 + T 1 1 {pack $::klnd::TMPPACKW -pady 1} {$::klnd::TMPATTW}}
     {.frAW.BuTW2 + T 1 1 {pack $::klnd::TMPPACKW -pady 1} {$::klnd::TMPATTW}}
     {.frAW.BuTW3 + T 1 1 {pack $::klnd::TMPPACKW -pady 1} {$::klnd::TMPATTW}}
     {.frAW.BuTW4 + T 1 1 {pack $::klnd::TMPPACKW -pady 1} {$::klnd::TMPATTW}}
     {.frAW.BuTW5 + T 1 1 {pack $::klnd::TMPPACKW -pady 1} {$::klnd::TMPATTW}}
     {.frAW.BuTW6 + T 1 1 {pack $::klnd::TMPPACKW -pady 1} {$::klnd::TMPATTW}}
-    {.frADays .frAW L - - {-st nsew} {-bg $::klnd::my::p(bg1)}}
+    {.frADays .frAW L 1 1 {-st nsew} {-bg $::klnd::my::p(bg1)}}
     {.frADays.tcl {
       # make headers and buttons of days
       if {$::tcl_platform(platform) eq {windows}} {

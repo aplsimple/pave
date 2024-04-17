@@ -1,10 +1,22 @@
 # Last changes:
 
 
+Version `4.4.2 (17 Apr'24)`
+
+  - NEW   : `-waitme` option of showModal: wait var/idle/time before `deiconify`
+  - NEW   : namespace export: obj openDoc
+  - NEW   : checkGeometry: check window's geometry
+  - CHANGE: focusApp: restore widget's focus as well
+  - CHANGE: pavedPath: Modalwin variable
+  - CHANGE: tk_optionCascade: `after idle optionCascade_add` for better performance
+  - CHANGE: klnd: Windows' issues & clearance
+  - CHANGE: umbrella icon
+
+
 Version `4.4.1 (3 Apr'24)`
 
   - NEW   : apave.tcl: batch of procs moved from alited project
-  - NEW   : -focus option of showModal: if set as "Tab", try to focus 1st widget Tabbed
+  - NEW   : `-focus` option of showModal: if "Tab", try to focus 1st widget Tabbed
   - NEW   : calendars: -weeks option shows (1, 2) or hides (0) week numbers
   - NEW   : focusApp: restore app's focused toplevel after focusing app
   - CHANGE: refactoring code

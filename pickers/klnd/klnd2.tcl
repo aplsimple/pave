@@ -313,17 +313,6 @@ proc ::klnd::my::ButtonTip {obj tipcom w} {
   }
   return $res
 }
-#_______________________
-
-proc ::klnd::my::SwitchWeeks2 {obj} {
-
-  variable p
-  if {$p(weeks)} {set forget {}} {set forget forget}
-  for {set i 1} {$i<7} {incr i} {
-    set wbut [$p($obj) BuTW$i]
-    pack {*}$forget $wbut
-  }
-}
 
 ## ________________________ Widgets _________________________ ##
 
@@ -362,13 +351,13 @@ proc ::klnd::my::MainWidgets2 {obj ownname} {
   }
   set ::klnd::TMPATTW "-font {$::apave::FONTMAIN} -padx 0 -pady 0 \
     -activeforeground $p(fgh) -activebackground $p(bg1) -foreground $p(fgh) \
-    -relief flat -overrelief flat -takefocus 0 -highlightthickness 0"
+    -relief flat -overrelief flat -takefocus 0 -highlightthickness 0 -width 2"
   if {$p(weeks)} {set ::klnd::TMPPACKW {}} {set ::klnd::TMPPACKW forget}
   lappend res "$ownname.frAW $ownname.laB T - - {-padx 0} {-bg $p(bg1) -w 0 -borderwidth 0}"
   lappend res "$ownname.frAW.labw - - 1 1 {pack $::klnd::TMPPACKW -pady 0}"
   # 1st day of the month's first week:
   for {set i 1} {$i<7} {incr i} {
-    lappend res "$ownname.frAW.BuTW$i + T 1 1 {pack $::klnd::TMPPACKW -pady 1} {$::klnd::TMPATTW -t 11}"
+    lappend res "$ownname.frAW.BuTW$i + T 1 1 {pack $::klnd::TMPPACKW -pady 1} {$::klnd::TMPATTW}"
   }
   lappend res "$ownname.laBDays $ownname.frAW L - - {-st nsew} {-bg $p(bg1)}"
   lappend res \
