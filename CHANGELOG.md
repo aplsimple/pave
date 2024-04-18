@@ -1,7 +1,7 @@
 # Last changes:
 
 
-Version `4.4.2 (17 Apr'24)`
+Version `4.4.2 (18 Apr'24)`
 
   - NEW   : `-waitme` option of showModal: wait var/idle/time before `deiconify`
   - NEW   : namespace export: obj openDoc
