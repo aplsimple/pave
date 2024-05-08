@@ -1,10 +1,27 @@
 # Last changes:
 
+Version `4.4.5 (3 May'24)`
 
-Version `4.4.2 (18 Apr'24)`
+  - NEW   : allow uppercased frame for nbk tab (resulting in method of same name)
+  - NEW   : allow additional attributes for toolbar items, e.g. -font
+  - NEW   : proc DefaultCS: gets default color scheme
+  - NEW   : proc InvertBg: inverted color
+  - NEW   : method onTop: -topmost attribute
+  - CHANGE: "23: Dusk" color scheme be close to Tk 8.7+ dark palette
+  - CHANGE: `-takefocus 0` as default for some widgets
+
+
+Version `4.4.4 (24 Apr'24)`
+
+  - BUGFIX: mistaken "split $centerme", replaced by apave::splitGeometry
+  - NEW   : namespace export: textsplit, focusByForce & Option's
+  - CHANGE: tk_optionCascade: reverted to v4.4.1
+
+
+Version `4.4.3 (22 Apr'24)`
 
   - NEW   : `-waitme` option of showModal: wait var/idle/time before `deiconify`
-  - NEW   : namespace export: obj openDoc
+  - NEW   : namespace export: obj openDoc readTextFile writeTextFile undoIn undoOut
   - NEW   : checkGeometry: check window's geometry
   - CHANGE: focusApp: restore widget's focus as well
   - CHANGE: pavedPath: Modalwin variable

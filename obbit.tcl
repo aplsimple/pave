@@ -126,7 +126,7 @@ namespace eval ::apave {
 
 {{22: Notebook3}      "#000000" #000000 #c2baa1 #a6a08c #793333 #cb9365 #000 #682800 #505050 #973d20 #000 #d59d6f - #b3ad99 #000 #dada76 #b2aa91 #7b1010 #76b2f1 #005 #006 #007}
 
-{{23: Dusk}           "#ececec" #ececec #1a1f21 #262b2d #9fc99f #217346 #FFF #f4f49f #585d5f #99c399 #fff #225c3b - #363b3d #000 #9d9d60 #23282a #ffc341 #99dd99 #005 #006 #007}
+{{23: Dusk}           "#ececec" #ececec #1a1f21 #262b2d #90afca #4a6984 #FFF #f4f49f #585d5f #7897b2 #fff #41607b - #363b3d #000 #9d9d60 #23282a #ffc341 #8cabc6 #005 #006 #007}
 
 {{24: SunValleyDeep} "#dfdfdf" #dddddd #131313 #323232 #aae2ff #2a627f #FFF #f4f49f #6f6f6f #7db5d2 #fff #245c79 - #3e3e3e #000 #9d9d60 #2a2a2a #efaf6f #4273eb #005 #006 #007}
 
@@ -397,7 +397,7 @@ proc ::apave::InitTheme {intheme libdir} {
       set lbd 1
     }
   }
-  return [list $theme $lbd]
+  list $theme $lbd
 }
 #_______________________
 
@@ -531,7 +531,7 @@ proc ::apave::cs_Min {} {
 proc ::apave::cs_Max {} {
   # Gets a maximum index of available color schemes
 
-  return [expr {[llength $::apave::_CS_(ALL)] - 1}]
+  expr {[llength $::apave::_CS_(ALL)] - 1}
 }
 
 proc ::apave::cs_MaxBasic {} {
@@ -618,7 +618,7 @@ proc ::apave::parseOptionsFile {strict inpargs args} {
       append retfile $parg " "
     }
   }
-  return [list $retlist [string trimright $retfile]]
+  list $retlist [string trimright $retfile]
 }
 #_______________________
 
@@ -689,33 +689,33 @@ proc ::apave::putOption {optname optvalue args} {
 }
 #_______________________
 
-proc ::apave::removeOptions {options args} {
+proc ::apave::removeOptions {opts args} {
   # Removes some options from a list of options.
-  #   options - list of options and values
+  #   opts - list of options and values
   #   args - list of option names to remove
-  # The `options` may contain "key value" pairs and "alone" options
+  # The `opts` may contain "key value" pairs and "alone" options
   # without values.
   # To remove "key value" pairs, `key` should be an exact name.
   # To remove an "alone" option, `key` should be a glob pattern with `*`.
 
   foreach key $args {
     while {[incr maxi]<99} {
-      if {[set i [lsearch -exact $options $key]]>-1} {
+      if {[set i [lsearch -exact $opts $key]]>-1} {
         catch {
           # remove a pair "option value"
-          set options [lreplace $options $i $i]
-          set options [lreplace $options $i $i]
+          set opts [lreplace $opts $i $i]
+          set opts [lreplace $opts $i $i]
         }
       } elseif {[string first * $key]>=0 && \
-        [set i [lsearch -glob $options $key]]>-1} {
+        [set i [lsearch -glob $opts $key]]>-1} {
         # remove an option only
-        set options [lreplace $options $i $i]
+        set opts [lreplace $opts $i $i]
       } else {
         break
       }
     }
   }
-  return $options
+  return $opts
 }
 
 ## ________________________ Text file _________________________ ##
@@ -1022,6 +1022,19 @@ proc ::apave::CursorToBEOL {wt where} {
   set idx [$wt index insert]
   ::tk::TextSetCursor $wt [$wt index "$idx $where"]
 }
+#_______________________
+
+proc ::apave::DefaultCS {} {
+  # Gets default color scheme counting current background of Tk root window.
+
+  if {[catch {set ib [ttk::style config . -background]}] ||
+  [lindex [InvertBg $ib B] 0] eq {B}} {
+    set res 5  ;# light
+  } else {
+    set res 23 ;# dark
+  }
+  return $res
+}
 
 # ________________________ ObjectProperty _________________________ #
 #
@@ -1124,7 +1137,6 @@ oo::class create ::apave::ObjectTheming {
       my untouchWidgets *_untouch_*
       set ::apave::_CS_(initall) 0
     }
-    return
   }
 
   ## ________________________ Fonts _________________________ ##
@@ -1141,7 +1153,7 @@ oo::class create ::apave::ObjectTheming {
     catch {font delete $name2}
     font create $name1 -family $::apave::_CS_(defFont) -size $::apave::_CS_(fs) {*}$args
     font create $name2 -family $::apave::_CS_(textFont) -size $::apave::_CS_(fs) {*}$args
-    return [list $name1 $name2]
+    list $name1 $name2
   }
   #_______________________
 
@@ -1226,7 +1238,7 @@ oo::class create ::apave::ObjectTheming {
 
     if {$fs == 0} {set fs [my basicFontSize]}
     set bf [font actual basicDefFont]
-    return [dict replace $bf -family [my basicDefFont] -weight bold -size $fs]
+    dict replace $bf -family [my basicDefFont] -weight bold -size $fs
   }
   #_______________________
 
@@ -1236,7 +1248,7 @@ oo::class create ::apave::ObjectTheming {
 
     if {$fs == 0} {set fs [expr {2+[my basicFontSize]}]}
     set bf [font actual TkFixedFont]
-    return [dict replace $bf -family [my basicTextFont] -weight bold -size $fs]
+    dict replace $bf -family [my basicTextFont] -weight bold -size $fs
   }
 
   ## ________________________ Color schemes _________________________ ##
@@ -1255,14 +1267,14 @@ oo::class create ::apave::ObjectTheming {
   method csFontMono {} {
     # Returns attributes of CS monotype font.
 
-    return [my csFont apaveFontMono]
+    my csFont apaveFontMono
   }
   #_______________________
 
   method csFontDef {} {
     # Returns attributes of CS default font.
 
-    return [my csFont apaveFontDef]
+    my csFont apaveFontDef
   }
   #_______________________
 
@@ -1273,7 +1285,7 @@ oo::class create ::apave::ObjectTheming {
     if {$cs eq {} || $cs==-3} {set cs [my csCurrent]}
     lassign $::apave::_CS_(TONED) csbasic cstoned
     if {$cs==$cstoned} {set cs $csbasic}
-    return [expr {$cs>22}]
+    expr {$cs>22}
   }
   #_______________________
 
@@ -1309,7 +1321,7 @@ oo::class create ::apave::ObjectTheming {
     } elseif {$ncolor == $::apave::_CS_(MINCS)} {
       return "-1: Basic"
     }
-    return [lindex [my ColorScheme $ncolor] 0]
+    lindex [my ColorScheme $ncolor] 0
   }
   #_______________________
 
@@ -1319,7 +1331,7 @@ oo::class create ::apave::ObjectTheming {
     #   ncolor - index of color scheme
 
     if {$ncolor eq ""} {set ncolor [my csCurrent]}
-    return [lrange [my ColorScheme $ncolor] 1 end]
+    lrange [my ColorScheme $ncolor] 1 end
   }
   #_______________________
 
@@ -1404,7 +1416,7 @@ oo::class create ::apave::ObjectTheming {
     catch {
       if {[my csDark $ncolor]} {::baltip::configure -relief groove}
     }
-    return [list $fg $bg $fE $bE $fS $bS $hh $grey $cc $ht $tfgI $tbgI $fM $bM $tfgW $tbgW $tHL2 $tbHL $chkHL $res5 $res6 $res7]
+    list $fg $bg $fE $bE $fS $bS $hh $grey $cc $ht $tfgI $tbgI $fM $bM $tfgW $tbgW $tHL2 $tbHL $chkHL $res5 $res6 $res7
   }
   #_______________________
 
@@ -1437,7 +1449,7 @@ oo::class create ::apave::ObjectTheming {
       set found [expr {$maxcs+1}]
     }
     if {$setnew} {set ::apave::_CS_(index) [set ::apave::_CS_(old) $found]}
-    return [my csCurrent]
+    my csCurrent
   }
   #_______________________
 
@@ -1497,7 +1509,7 @@ oo::class create ::apave::ObjectTheming {
     # Returns a list of main colors' indices of CS.
     # See also: csMapTheme
 
-    return [list 0 1 2 3 5 10 11 13 16]
+    list 0 1 2 3 5 10 11 13 16
   }
   #_______________________
 
@@ -1506,14 +1518,14 @@ oo::class create ::apave::ObjectTheming {
     # The map is a list of indices in CS corresponding to themeWindow's args.
     # See also: themeWindow
 
-    return [list 1 3 0 2 6 5 8 3 7 9 4 10 11 1 13 14 15 16 17 18 19 20 21]
+    list 1 3 0 2 6 5 8 3 7 9 4 10 11 1 13 14 15 16 17 18 19 20 21
   }
   #_______________________
 
   method csNewIndex {} {
     # Gets a next available CS's index.
 
-    return [expr {[::apave::cs_Max]+1}]
+    expr {[::apave::cs_Max]+1}
   }
   #_______________________
 
@@ -1561,7 +1573,7 @@ oo::class create ::apave::ObjectTheming {
            $fg    $fg     $bA    $bg     $fg2    $bS     $fS    #444  grey   #4f6379 $fS $bS - $bg $fW $bW $bg2 #a20000 #76b2f1 #005 #006 #007]
       # clrtitf clrinaf clrtitb clrinab clrhelp clractb clractf clrcurs clrgrey clrhotk fI  bI fM bM fW bW
     }
-    return [lindex $::apave::_CS_(ALL) $ncolor]
+    lindex $::apave::_CS_(ALL) $ncolor
   }
 
 # ________________________ Theming _________________________ #
@@ -1573,7 +1585,7 @@ oo::class create ::apave::ObjectTheming {
     #   theme - a theme to be checked (if omitted, a current ttk theme)
 
     if {$theme eq {}} {set theme [ttk::style theme use]}
-    return [expr {$theme in {clam alt classic default awdark awlight plastik}}]
+    expr {$theme in {clam alt classic default awdark awlight plastik}}
   }
   #_______________________
 
@@ -1585,7 +1597,6 @@ oo::class create ::apave::ObjectTheming {
     lassign [lrange [my csGet] 14 15] fW bW
     ::baltip config -fg $fW -bg $bW -global yes
     ::baltip config {*}$args
-    return
   }
   #_______________________
 
@@ -1597,7 +1608,7 @@ oo::class create ::apave::ObjectTheming {
     if {$theme in {alt classic default clam}} {
       return -1
     }
-    return [string match -nocase *dark* $theme]
+    string match -nocase *dark* $theme
   }
 
   ## ________________________ Theme methods _________________________ ##
@@ -1865,7 +1876,6 @@ oo::class create ::apave::ObjectTheming {
       set ::apave::_C_($ts,2) "-background $tbg1"
     }
     my themeMandatory $win {*}$args
-    return
   }
   #_______________________
 
@@ -1892,7 +1902,6 @@ oo::class create ::apave::ObjectTheming {
         }
       }
     }
-    return
   }
   #_______________________
 
@@ -1947,7 +1956,6 @@ oo::class create ::apave::ObjectTheming {
     }
     ::apave::initStyles
     my ThemeChoosers
-    return
   }
   #_______________________
 
@@ -2065,7 +2073,6 @@ oo::class create ::apave::ObjectTheming {
         }
       }
     }
-    return
   }
   #_______________________
 
@@ -2115,7 +2122,6 @@ oo::class create ::apave::ObjectTheming {
          $::apave::_C_(.,tHL2)] \
          false {*}$::apave::_C_(.,args)
     }
-    return
   }
   #_______________________
 
@@ -2217,7 +2223,6 @@ oo::class create ::apave::ObjectTheming {
     lassign [::apave::parseOptions [ttk::style configure .] $f $fD $b $bD] fS bS
     ::apave::bindToEvent $w <FocusIn>  $w configure $f $fS $b $bS
     ::apave::bindToEvent $w <FocusOut> $w configure $f $fD $b $bD
-    return
   }
 
   ## ________________________ Popup menus _________________________ ##

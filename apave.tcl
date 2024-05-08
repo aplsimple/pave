@@ -7,7 +7,7 @@
 ###########################################################
 
 package require Tk
-package provide apave 4.4.2
+package provide apave 4.4.5
 
 source [file join [file dirname [info script]] apavedialog.tcl]
 
@@ -31,11 +31,16 @@ proc ::isKDE {} {
   expr {[info exists ::env(XDG_CURRENT_DESKTOP)] && $::env(XDG_CURRENT_DESKTOP) eq {KDE}}
 }
 
+proc ::asKDE {} {
+  # Checks for DE behaving as weird as KDE.
+
+  expr {[::isKDE] && ![package vsatisfies [package require Tcl] 8.6.11-]}
+}
 # ________________________ apave NS _________________________ #
 
 namespace eval ::apave {
 
-  namespace export obj openDoc
+  namespace export obj openDoc textsplit focusByForce *TextFile undo* *Option*
 
   mainWindowOfApp .
 
@@ -237,7 +242,7 @@ namespace eval ::apave {
     #   i1 - integer to compare
     #   i2 - integer to be compared (rounded) to i1
 
-    return [expr {$i1>($i2-3) && $i1<($i2+3)}]
+    expr {$i1>($i2-3) && $i1<($i2+3)}
   }
 
   ## _______________________ Lists, arrays _______________________ ##
@@ -315,8 +320,8 @@ namespace eval ::apave {
     #   geo - the geometry
     # Returns a "normalized" geometry (+0+0 if input not correct).
 
-    if {![regexp {^\d+x\d+$} $geo] && ![regexp {^\+-?\d+\+-?\d+$} $geo] \
-    && ![regexp {^\d+x\d+\+-?\d+\+-?\d+$} $geo]} {
+    if {!([regexp {^\d+x\d+\+-?\d+\+-?\d+$} $geo] ||
+    [regexp {^\+-?\d+\+-?\d+$} $geo] || [regexp {^\d+x\d+$} $geo])} {
       set geo +0+0
     }
     return $geo
@@ -331,10 +336,9 @@ namespace eval ::apave {
 
     if {[winfo exists $win]} {
       # esp. for KDE
-      if {[isKDE]} {
+      if {[isKDE]} { ;# KDE is KDE, Tk is Tk, and never the twain shall meet
         wm withdraw $win
         wm deiconify $win
-        # KDE is KDE, Tk is Tk, and never the twain shall meet
         wm attributes $win -topmost [wm attributes $win -topmost]
       }
       update
@@ -377,7 +381,7 @@ namespace eval ::apave {
     }
     if {$x ne {}} {set x +[expr {max(0,$x)}]}
     if {$y ne {}} {set y +[expr {max(0,$y)}]}
-    return [list $w $h $x $y]
+    list $w $h $x $y
   }
   #_______________________
 
@@ -445,12 +449,12 @@ namespace eval ::apave {
   }
   #_______________________
 
-  proc FocusByForce {foc {cnt 10}} {
+  proc focusByForce {foc {cnt 10}} {
     # Focuses a widget.
     #   foc - widget's path
 
     if {[incr cnt -1]>0} {
-      after idle after 5 ::apave::FocusByForce $foc $cnt
+      after idle after 5 ::apave::focusByForce $foc $cnt
     } else {
       catch {focus -force [winfo toplevel $foc]; focus $foc}
     }
@@ -462,7 +466,28 @@ namespace eval ::apave {
     #   acc - key name, may contain 2 items (e.g. Control-D Control-d)
 
     set acc [lindex $acc 0]
-    return [string map {Control Ctrl - + bracketleft [ bracketright ]} $acc]
+    string map {Control Ctrl - + bracketleft [ bracketright ]} $acc
+  }
+  #_______________________
+
+  proc InvertBg {clr {B #000000} {W #FFFFFF}} {
+    # Gets a "inverted" color (white/black) for an color.
+    #   clr - color (#hhh or #hhhhhh)
+    #   B - "black" color
+    #   W - "white" color
+    # Returns a list of "black/white" and normalized input color
+
+    if {[string length $clr]==4} {
+      lassign [split $clr {}] -> r g b
+      set clr #$r$r$g$g$b$b
+    }
+    lassign [winfo rgb . $clr] r g b
+    if {($r%256+$b%256)<15 && ($g%256)>180 || $r+1.5*$g+0.5*$b > 100000} {
+      set res $B
+    } else {
+      set res $W
+    }
+    return [list $res $clr]
   }
 
   ### ________________________ Blinking widgets _________________________ ###
@@ -543,7 +568,7 @@ namespace eval ::apave {
 
     set path [string trim $path "\{\}"]  ;# possibly braced if contains spaces
     set path [string map [list \\ / %H [HomeDir]] $path]
-    return [checkHomeDir $path]
+    checkHomeDir $path
   }
   #_______________________
 
@@ -551,7 +576,7 @@ namespace eval ::apave {
     # Removes spec.characters from a name (sort of normalizing it).
     #   name - the name
 
-    return [string map [list \\ {} \{ {} \} {} \[ {} \] {} \t {} \n {} \r {} \" {}] $name]
+    string map [list \\ {} \{ {} \} {} \[ {} \] {} \t {} \n {} \r {} \" {}] $name
   }
   #_______________________
 
@@ -560,9 +585,9 @@ namespace eval ::apave {
     #   name - the name of file/dir
 
     set name [string trim $name]
-    return [string map [list \
+    string map [list \
       * _ ? _ ~ _ / _ \\ _ \{ _ \} _ \[ _ \] _ \t _ \n _ \r _ \
-      | _ < _ > _ & _ , _ : _ \; _ \" _ ' _ ` _] $name]
+      | _ < _ > _ & _ , _ : _ \; _ \" _ ' _ ` _] $name
   }
   #_______________________
 
@@ -814,7 +839,6 @@ oo::class create ::apave::APave {
     }
     set _savedvv [list]
     set Widgetopts [list]
-    return
   }
   #_______________________
 
@@ -1079,7 +1103,7 @@ oo::class create ::apave::APave {
     # It's a sort of stub for calling *editfile* method.
     # See also: editfile
 
-    return [my editfile $fname {} {} {} $prepcom {*}$args]
+    my editfile $fname {} {} {} $prepcom {*}$args
   }
   #_______________________
 
@@ -1126,6 +1150,30 @@ oo::class create ::apave::APave {
       set res [::apave::writeTextFile $fname data]
     } elseif {$newfile} {
       file delete $fname
+    }
+    return $res
+  }
+  #_______________________
+
+  method onTop {wpar top {wtoplist -} {res ""}} {
+    # Sets -topmost attribute for windows or gets a list of topmost windows.
+    #   wpar - parent window's path
+    #   top - -topmost attribute's value
+    #   wtoplist - list of windows to process
+    #   res - used to get the result
+    # Returns a list of "topmost=$top" windows found on $wpar path.
+
+    if {$wtoplist ne "-"} {
+      # sets the attribute
+      foreach w $wtoplist {wm attributes $w -topmost $top}
+    } else {
+      # gets a list of topmost windows
+      if {$wpar ne {}} {
+        set res [my onTop [winfo parent $wpar] $top - $res]
+        catch {
+          if {[wm attributes $wpar -topmost]==$top} {lappend res $wpar}
+        }
+      }
     }
     return $res
   }
