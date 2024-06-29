@@ -1,5 +1,11 @@
 # Last changes:
 
+Version `4.4.6 (29 Jun'24)`
+
+  - NEW   : Enter key for treeview = Return key
+  - CHANGE: hl_tcl 1.1.4
+
+
 Version `4.4.5 (3 May'24)`
 
   - NEW   : allow uppercased frame for nbk tab (resulting in method of same name)
