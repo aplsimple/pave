@@ -1,5 +1,11 @@
 # Last changes:
 
+Version `4.4.7 (17 Jul'24)`
+
+  - NEW   : ent & cbx widgets for toolbar
+  - CHANGE: apave::splitGeometry: handle X,Y coordinates as is
+
+
 Version `4.4.6 (29 Jun'24)`
 
   - NEW   : Enter key for treeview = Return key
