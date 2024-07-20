@@ -1,9 +1,9 @@
 # Last changes:
 
-Version `4.4.7 (17 Jul'24)`
+Version `4.4.8 (20 Jul'24)`
 
   - NEW   : ent & cbx widgets for toolbar
-  - CHANGE: apave::splitGeometry: handle X,Y coordinates as is
+  - CHANGE: apave::splitGeometry: handle X,Y coordinates as is; neg coordinates flag
 
 
 Version `4.4.6 (29 Jun'24)`
