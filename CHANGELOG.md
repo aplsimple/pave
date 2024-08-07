@@ -1,5 +1,10 @@
 # Last changes:
 
+Version `4.4.9 (7 Aug'24)`
+
+  - NEW   : method bindGutter makes bindings for a text and its gutter
+
+
 Version `4.4.8 (24 Jul'24)`
 
   - NEW   : ent & cbx widgets for toolbar
