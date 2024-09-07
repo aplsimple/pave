@@ -1,5 +1,11 @@
 # Last changes:
 
+
+Version `4.4.10 (7 Sep'24)`
+
+  - CHANGE: method fillGutter: more simple in use: less "after" (thanks to George)
+
+
 Version `4.4.9 (7 Aug'24)`
 
   - NEW   : method bindGutter makes bindings for a text and its gutter
