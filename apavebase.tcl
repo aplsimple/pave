@@ -1684,7 +1684,8 @@ oo::class create ::apave::APaveBase {
     } elseif {$choosname in {tk_getOpenFile tk_getSaveFile}} {
       set vargeo $filvar
       set widname [my AuxSetChooserGeometry $vargeo $dirvar $parent __tk_filedialog]
-      if {[set fn [set $tvar]] eq {}} {
+      if {[catch {set fn [set $tvar]}]} {set fn {}}
+      if {$fn eq {}} {
         set dn [pwd]
       } else {
         set dn [file dirname $fn]
@@ -3066,7 +3067,7 @@ oo::class create ::apave::APaveBase {
           return -code break
         }
       }
-    braceright {
+    braceright - "\}" {
         # right brace pressed: shift the brace to left
         set idx1 [$w index insert]
         set st [$w get "$idx1 linestart" "$idx1 lineend"]
