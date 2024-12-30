@@ -1,6 +1,12 @@
 # Last changes:
 
 
+Version `4.4.11 (30 Dec'24)`
+
+  - NEW   : -onevent attribute (list of event+commands pairs)
+  - CHANGE: package bartabs 1.6.10
+
+
 Version `4.4.10 (7 Sep'24)`
 
   - CHANGE: method fillGutter: more simple in use: less "after" (thanks to George)
