@@ -1,9 +1,12 @@
 # Last changes:
 
 
-Version `4.4.11 (30 Dec'24)`
+Version `4.4.11 (4 Jan'25)`
 
   - NEW   : -onevent attribute (list of event+commands pairs)
+  - NEW   : %w wildcard in tool bar commands
+  - CHANGE: attributes of status bar labels - for values only
+  - CHANGE: icon for calender's today
   - CHANGE: package bartabs 1.6.10
 
 
