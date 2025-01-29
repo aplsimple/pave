@@ -1,6 +1,15 @@
 # Last changes:
 
 
+Version `4.5 (29 Jan'25)`
+
+  - DELETE: in showWindow / showModal: initialization of *minsize* by current sizes
+  - NEW   : -takefocus 0 as default for *siz* (sizegrip)
+  - NEW   : *-wrap* option for text dialogs
+  - CHANGE: Main_Style: ". config -bg"
+  - CHANGE: logMessage: index of message
+
+
 Version `4.4.11 (4 Jan'25)`
 
   - NEW   : -onevent attribute (list of event+commands pairs)
