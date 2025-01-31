@@ -1,13 +1,15 @@
 # Last changes:
 
 
-Version `4.5 (29 Jan'25)`
+Version `4.5 (31 Jan'25)`
 
   - DELETE: in showWindow / showModal: initialization of *minsize* by current sizes
   - NEW   : -takefocus 0 as default for *siz* (sizegrip)
   - NEW   : *-wrap* option for text dialogs
+  - NEW   : *GEO* in clr & dat widget names disables positioning under entry field
   - CHANGE: Main_Style: ". config -bg"
   - CHANGE: logMessage: index of message
+  - CHANGE: package hl_tcl 1.2
 
 
 Version `4.4.11 (4 Jan'25)`

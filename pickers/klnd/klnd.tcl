@@ -544,7 +544,7 @@ proc ::klnd::calendar {args} {
   # if no geometry option, show the calendar under the mouse pointer
   if {$geo ne {}} {
     set geo "-geometry $geo"
-  } elseif {$entry ne {}} {
+  } elseif {$entry ne {} && [string first GEO $entry]<0} {
     set x [winfo rootx $entry]
     set y [expr {[winfo rooty $entry]+32}]
     set geo "-geometry +$x+$y"
