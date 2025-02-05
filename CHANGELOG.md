@@ -1,6 +1,11 @@
 # Last changes:
 
 
+Version `4.5.1 (5 Feb'25)`
+
+  - NEW   : klnd: -hllist & -hlweeks options to highlight days & weeks
+
+
 Version `4.5 (31 Jan'25)`
 
   - DELETE: in showWindow / showModal: initialization of *minsize* by current sizes
