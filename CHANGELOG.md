@@ -1,6 +1,11 @@
 # Last changes:
 
 
+Version `4.5.2 (12 Feb'25)`
+
+  - CHANGE: *lamp* icon instead of *light*
+
+
 Version `4.5.1 (5 Feb'25)`
 
   - NEW   : klnd: -hllist & -hlweeks options to highlight days & weeks
