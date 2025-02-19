@@ -1,6 +1,12 @@
 # Last changes:
 
 
+Version `4.5.3 (19 Feb'25)`
+
+  - BUGFIX: klnd2: fgMayHL2 not replacing fgMayHL
+  - CHANGE: *-checkvar, -radiovar* options in separate items of *opc* widget
+
+
 Version `4.5.2 (12 Feb'25)`
 
   - CHANGE: *lamp* icon instead of *light*
