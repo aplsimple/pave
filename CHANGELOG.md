@@ -1,6 +1,11 @@
 # Last changes:
 
 
+Version `4.5.4 (26 Feb'25)`
+
+  - CHANGE: *hamburger* icon instead of *umbrella*
+
+
 Version `4.5.3 (19 Feb'25)`
 
   - BUGFIX: klnd2: fgMayHL2 not replacing fgMayHL
