@@ -1,6 +1,20 @@
 # Last changes:
 
 
+Version `4.5.6 (12 Mar'25)`
+
+  - BUGFIX: klnd.tcl: highlighthing weeks with data (on other years)
+  - NEW   : "-orient vertical" option for "too ", toolbar (thanks to George)
+  - DELETE: underlying separator for multiline toolbars
+
+
+Version `4.5.5 (4 Mar'25)`
+
+  - NEW   : -initialdir option of file choosers may be a command
+  - CHANGE: LightBrown CS's brownish colors made darker
+  - CHANGE: klnd: color of highlighted weeks
+
+
 Version `4.5.4 (26 Feb'25)`
 
   - CHANGE: *hamburger* icon instead of *umbrella*
