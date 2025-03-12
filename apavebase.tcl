@@ -2168,10 +2168,20 @@ oo::class create ::apave::APaveBase {
             }
           }
         }
-        if {$orvert} {set side {}} {set side {-side left}}
-        set wid1 [list $name.$v1 - - - - "pack $side $packreq" $v2]
-        set lwidgets [linsert $lwidgets [incr itmp] $wid1]
-        continue
+        if {$orvert} {
+          set wid1 [list $name.$v1 - - - - "pack $packreq" $v2]
+          set lwidgets [linsert $lwidgets [incr itmp] $wid1]
+          continue
+        }
+        set wid1 [list $name.$v1 - - - - "pack -side left $packreq" $v2]
+        if {[incr wasseh]==1} {
+          ;# horiz.separator for multiline toolbar
+          set wid2 [list [my Transname seh $name$j] - - - - "pack -side top -fill x"]
+        } else {
+          ;# 1st line of toolbar
+          set lwidgets [linsert $lwidgets [incr itmp] $wid1]
+          continue
+        }
       } elseif {$typ eq {menuBar}} {
         ;# menubar: making it here; filling it outside of 'pave window'
         if {[incr wasmenu]==1} {
