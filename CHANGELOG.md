@@ -1,10 +1,30 @@
 # Last changes:
 
 
+Version `4.6.0 (2 Apr'25)`
+
+  - CHANGE: indenting in main scripts
+  - CHANGE: ParentOpt & onTop method: catch possible errors
+
+
+Version `4.5.8 (27 Mar'25)`
+
+  - NEW: method Create_Font to check for -family in font options
+
+
+Version `4.5.7 (23 Mar'25)`
+
+  - BUGFIX: "-initialdir ." for file choosers
+  - NEW   : "nbk add" command: frame, ttk::frame, label, ttk::label as underlying widgets
+  - NEW   : "nbk add" command: *-Attrs $options* for underlying widget
+  - NEW   : input method: *-modal* option allowed
+  - NEW   : support of highlighting for readonly texts
+
+
 Version `4.5.6 (12 Mar'25)`
 
   - BUGFIX: klnd.tcl: highlighthing weeks with data (on other years)
-  - NEW   : "-orient vertical" option for "too ", toolbar (thanks to George)
+  - NEW   : "-orient vertical" option for "too", toolbar (thanks to George)
 
 
 Version `4.5.5 (4 Mar'25)`
