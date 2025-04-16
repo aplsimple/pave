@@ -1,6 +1,11 @@
 # Last changes:
 
 
+Version `4.6.1 (16 Apr'25)`
+
+  - NEW   : styling -rowheight for Treeview
+
+
 Version `4.6.0 (2 Apr'25)`
 
   - CHANGE: indenting in main scripts
