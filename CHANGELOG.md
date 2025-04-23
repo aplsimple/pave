@@ -1,9 +1,10 @@
 # Last changes:
 
 
-Version `4.6.1 (16 Apr'25)`
+Version `4.6.1 (23 Apr'25)`
 
   - NEW   : styling -rowheight for Treeview
+  - CHANGE: some evals passed to Eval
 
 
 Version `4.6.0 (2 Apr'25)`
