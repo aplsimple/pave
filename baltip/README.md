@@ -278,40 +278,41 @@ For example:
 
 Below are listed the *baltip* options that are set with `tip` and `configure` and got with `cget`:
 
- * `-on` - switches all tips on/off;
- * `-per10` - a time of exposition per 10 characters (in millisec.);
- * `-fade` - a time of fading (in millisec.);
- * `-pause` - a pause before displaying tips (in millisec.);
- * `-alpha` - an opacity (from 0.0 to 1.0);
- * `-fg` - foreground of tip;
- * `-bg` - background of tip;
- * `-bd` - borderwidth of tip;
- * `-font` - font attributes;
- * `-padx` - X padding for text;
- * `-pady` - Y padding for text;
- * `-padding` - padding for pack;
- * `-under` - if >= 0, sets the tip under the widget, else under the pointer;
+ * `-on` - switches all tips on/off
+ * `-per10` - a time of exposition per 10 characters (in millisec.)
+ * `-fade` - a time of fading (in millisec.)
+ * `-pause` - a pause before displaying tips (in millisec.)
+ * `-alpha` - an opacity (from 0.0 to 1.0)
+ * `-fg` - foreground of tip
+ * `-bg` - background of tip
+ * `-bd` - borderwidth of tip
+ * `-font` - font attributes
+ * `-padx` - X padding for text
+ * `-pady` - Y padding for text
+ * `-padding` - padding for pack
+ * `-under` - if >= 0, sets the tip under the widget, else under the pointer
  * `-shiftX` - a horizontal shift relative to the mouse pointer
  * `-shiftY` - a vertical shift relative to the mouse pointer
- * `-image` - image option;
- * `-compound` - compound option;
- * `-relief` - relief option;
- * `-bell` - if true, rings at displaying;
- * `-eternal` - if true, makes a tip "eternal", i.e. visible till clicking.
+ * `-image` - image option
+ * `-compound` - compound option
+ * `-relief` - relief option
+ * `-bell` - if true, rings at displaying
+ * `-eternal` - if true, makes a tip "eternal", i.e. visible till clicking
 
 The following options are special:
 
- * `-global` - if true, applies the settings to all registered tips;
- * `-force` - if true, forces the display by 'tip' command;
- * `-index` - index of menu item to tip;
- * `-tag` - name of text tag to tip;
- * `-ctag` - name of canvas tag to tip;
- * `-nbktab` - path to ttk::notebook tab to tip;
- * `-geometry` - geometry (+X+Y) of the balloon;
- * `-reset` - "-reset true" may be useful to set a new tip (callback or text) for listbox and treeview;
- * `-command` - a command to be executed, with `%t` (tip's text) and `%w` (widget's path) wildcards;
- * `-maxexp` - maximum number of tip's expositions.
+ * `-global` - if true, applies the settings to all registered tips
+ * `-force` - if true, forces the display by 'tip' command
+ * `-index` - index of menu item to tip
+ * `-tag` - name of text tag to tip
+ * `-ctag` - name of canvas tag to tip
+ * `-nbktab` - path to ttk::notebook tab to tip
+ * `-geometry` - geometry (+X+Y) of the balloon
+ * `-reset` - "-reset true" may be useful to set a new tip (callback or text) for listbox and treeview
+ * `-command` - a command to be executed, with `%t` (tip's text) and `%w` (widget's path) wildcards
+ * `-maxexp` - maximum number of tip's expositions
  * `-focus` - path to widget to set focus on, after showing a tip
+ * `-onmouse` - a command to be executed at clicking the balloon, with `%b` (mouse button number) and alike wildcards
 
 If `-global yes` option is used alone, it applies all global options to all registered tips. If `-global yes` option is used along with other options, only those options are applied to all registered tips.
 
