@@ -258,6 +258,7 @@ method progress_Begin {type wprn ttl msg1 msg2 maxvalue args} {
 
   set ::apave::_AP_VARS(win) .proSplashScreen
   set qdlg $::apave::_AP_VARS(win)
+  lassign [::apave::extractOptions args -modal 0 -ontop 1] modal ontop
   set atr1 "-maximum 100 -value 0 -mode determinate -length 300 -orient horizontal"
   set widlist [list \
     "fra - - - - pack {-h 10}" \
@@ -268,7 +269,7 @@ method progress_Begin {type wprn ttl msg1 msg2 maxvalue args} {
   set win [my makeWindow $qdlg.fra $ttl]
   set widlist [my paveWindow $qdlg.fra $widlist]
   ::tk::PlaceWindow $win widget $wprn
-  my showWindow $win 0 1
+  my showWindow $win $modal $ontop
   update
   set ::apave::_AP_VARS(ProSplash,type) $type
   set ::apave::_AP_VARS(ProSplash,win) $win

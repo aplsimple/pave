@@ -1,6 +1,17 @@
 # Last changes:
 
 
+Version `4.6.3 (3 Jul'25)`
+
+  - NEW   : method progress_Begin: -modal and -ontop options of window, thanks to George Yashin
+
+
+Version `4.6.2 (29 May'25)`
+
+  - NEW   : method themeDefaultCS: theming for default CS
+  - CHANGE: some crearance
+
+
 Version `4.6.1 (23 Apr'25)`
 
   - NEW   : styling -rowheight for Treeview
