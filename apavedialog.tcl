@@ -270,6 +270,7 @@ method progress_Begin {type wprn ttl msg1 msg2 maxvalue args} {
   set widlist [my paveWindow $qdlg.fra $widlist]
   ::tk::PlaceWindow $win widget $wprn
   my showWindow $win $modal $ontop
+  if {$modal} {grab set $win}
   update
   set ::apave::_AP_VARS(ProSplash,type) $type
   set ::apave::_AP_VARS(ProSplash,win) $win
