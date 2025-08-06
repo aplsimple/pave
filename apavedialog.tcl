@@ -1051,9 +1051,9 @@ method Query {icon ttl msg buttons defb inopts argdia {precom ""} args} {
       }
       -savetext {set savetext $val}
       default {
-        append optsFont " $opt $val"
+        append optsFont " $opt [list $val]"
         if {$opt ne "-family"} {
-          append optsFontM " $opt $val"
+          append optsFontM " $opt [list $val]"
         }
       }
     }
@@ -1069,7 +1069,7 @@ method Query {icon ttl msg buttons defb inopts argdia {precom ""} args} {
   set optsFont [string trim $optsFont]
   set optsHeadFont $optsFont
   set fs [my basicFontSize]
-  set textfont "-family {[my basicTextFont]}"
+  set textfont [my basicTextFont]
   if {$optsFont ne {}} {
     if {[string first "-size " $optsFont]<0} {
       append optsFont " -size $fs"
@@ -1080,7 +1080,7 @@ method Query {icon ttl msg buttons defb inopts argdia {precom ""} args} {
     if {[string first "-family " $optsFont]>=0} {
       set optsFont "-font \{$optsFont"
     } else {
-      set optsFont "-font \{$optsFont -family {[my basicDefFont]}"
+      set optsFont "-font \{$optsFont [my basicDefFont]"
     }
     append optsFont "\}"
   } else {
@@ -1089,7 +1089,7 @@ method Query {icon ttl msg buttons defb inopts argdia {precom ""} args} {
   }
   set msgonly [expr {$readonly || $hidefind || $chmsg ne {}}]
   if {!$textmode || $msgonly} {
-    set textfont "-family {[my basicDefFont]}"
+    set textfont [my basicDefFont]
     if {!$textmode} {
       set msg [string map [list \\ \\\\ \{ \\\\\{ \} \\\\\}] $msg]
     }

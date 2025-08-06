@@ -56,8 +56,8 @@ set _CS_(isActive) 1
 set _CS_(!FG) #000000
 set _CS_(!BG) #b7b7b7 ;#a8bcd2 #c3c3c3 #9cb0c6 #4a6984
 set _CS_(expo,tfg1) "-"
-set _CS_(defFont) [font actual TkDefaultFont -family]
-set _CS_(textFont) [font actual TkFixedFont -family]
+set _CS_(defFont) [font actual TkDefaultFont]
+set _CS_(textFont) [font actual TkFixedFont]
 set _CS_(smallFont) [font actual TkSmallCaptionFont]
 set _CS_(fs) [font actual TkDefaultFont -size]
 set _CS_(untouch) [list]
@@ -1253,7 +1253,7 @@ method boldDefFont {{fs 0}} {
 
   if {$fs == 0} {set fs [my basicFontSize]}
   set bf [font actual basicDefFont]
-  dict replace $bf -family [my basicDefFont] -weight bold -size $fs
+  dict replace $bf {*}[my basicDefFont] -weight bold -size $fs
 }
 #_______________________
 
@@ -1263,7 +1263,7 @@ method boldTextFont {{fs 0}} {
 
   if {$fs == 0} {set fs [expr {2+[my basicFontSize]}]}
   set bf [font actual TkFixedFont]
-  dict replace $bf -family [my basicTextFont] -weight bold -size $fs
+  dict replace $bf {*}[my basicTextFont] -weight bold -size $fs
 }
 
 ## ________________________ Color schemes _________________________ ##

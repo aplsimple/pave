@@ -1,6 +1,16 @@
 # Last changes:
 
 
+Version `4.6.5 (2 Aug'25)`
+
+  - BUGFIX: aftershocks of previous
+
+
+Version `4.6.4 (27 Jul'25)`
+
+  - CHANGE: method chooser: focusByForce i/o focus (issues with some Windows' Tk)
+
+
 Version `4.6.3 (3 Jul'25)`
 
   - NEW   : method progress_Begin: -modal and -ontop options of window, thanks to George Yashin
