@@ -1,6 +1,12 @@
 # Last changes:
 
 
+Version `4.6.6 (15 Aug'25)`
+
+  - CHANGE: input method: focus widget's path is matched with "-nocase"
+  - CHANGE: input method: if "-focus" option is set, butOK isn't focused (though, "-focus butOK" or "-focus ." resets this)
+
+
 Version `4.6.5 (2 Aug'25)`
 
   - BUGFIX: aftershocks of previous
