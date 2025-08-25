@@ -1,6 +1,11 @@
 # Last changes:
 
 
+Version `4.7.0 (25 Aug'25)`
+
+  - CHANGE: check for possible incorrect blank options of dialogs
+
+
 Version `4.6.6 (15 Aug'25)`
 
   - CHANGE: input method: focus widget's path is matched with "-nocase"
