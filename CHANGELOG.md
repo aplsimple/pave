@@ -1,6 +1,11 @@
 # Last changes:
 
 
+Version `4.7.1 (10 Sep'25)`
+
+  - NEW   : default font options for input & misc dialogues' tiltle (thanks to George)
+
+
 Version `4.7.0 (25 Aug'25)`
 
   - CHANGE: check for possible incorrect blank options of dialogs
