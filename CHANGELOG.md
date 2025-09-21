@@ -1,6 +1,11 @@
 # Last changes:
 
 
+Version `4.7.2 (21 Sep'25)`
+
+  - BUGFIX: proper place of enhanceTitle method
+
+
 Version `4.7.1 (10 Sep'25)`
 
   - NEW   : default font options for input & misc dialogues' title (thanks to George)
