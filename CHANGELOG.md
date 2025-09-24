@@ -1,6 +1,11 @@
 # Last changes:
 
 
+Version `4.7.3 (24 Sep'25)`
+
+  - CHANGE: Tcl's error messages are most informative
+
+
 Version `4.7.2 (21 Sep'25)`
 
   - BUGFIX: proper place of enhanceTitle method
