@@ -1838,28 +1838,32 @@ method dateChooser {tvar args} {
 }
 #_______________________
 
-method Replace_Tcl {r1 r2 r3 args} {
+method Replace_Tcl {r1 r2 args} {
   # Replaces Tcl code with its resulting items in *lwidgets* list.
   #   r1 - variable name for a current index in *lwidgets* list
-  #   r2 - variable name for a length of *lwidgets* list
-  #   r3 - variable name for *lwidgets* list
-  #   args - "tcl" and "tcl code" for "tcl" type of widget
-  # The code should use the wildcard that goes first at a line:
-  #   %C - a command for inserting an item into lwidgets list.
-  # The "tcl" widget type can be useful to automate the inserting
-  # a list of similar widgets to the list of widgets.
-  # See tests/test2_pave.tcl where the "tcl" fills "Color schemes" tab.
+  #   r2 - variable name for *lwidgets* list
+  #   args - "tcl code" for "tcl", "prc name args" for "prc" type of widget
+  # Examples of "tcl" and "prc" types - in alited and expagog applications.
 
   lassign $args _name _code
-  if {[my ownWName $_name] ne {tcl}} {return $args}
-  upvar 1 $r1 _ii $r2 _lwlen $r3 _lwidgets
-; proc lwins {lwName i w} {
-    upvar 2 $lwName lw
-    set lw [linsert $lw $i $w]
+  switch -exact -- [my ownWName $_name] {
+    tcl {
+      upvar 1 $r1 _i $r2 _lwidgets
+      ; proc lwins {lwName i w} {
+        upvar 2 $lwName lw
+        set lw [linsert $lw $i $w]
+      }
+      set _lwidgets [lreplace $_lwidgets $_i $_i]
+      set _inext [expr {$_i-1}]
+      eval [string map {%C {lwins $r2 [incr _inext] }} $_code]
+    }
+    prc {
+      upvar 1 $r1 _i $r2 _lwidgets
+      set _lwidgets [lreplace $_lwidgets $_i $_i]
+      set _lwidgets [{*}$_code $_lwidgets [incr _i -1]]
+    }
+    default {return $args}
   }
-  set _lwidgets [lreplace $_lwidgets $_ii $_ii]  ;# removes tcl item
-  set _inext [expr {$_ii-1}]
-  eval [string map {%C {lwins $r3 [incr _inext] }} $_code]
   return {}
 }
 #_______________________
@@ -1903,7 +1907,7 @@ method Replace_chooser {r0 r1 r2 r3 args} {
       set lwlen2 [llength $lwidgets2]
       for {set i2 0} {$i2 < $lwlen2} {} {
         set lst2 [lindex $lwidgets2 $i2]
-        if {[my Replace_Tcl i2 lwlen2 lwidgets2 {*}$lst2] ne {}} {incr i2}
+        if {[my Replace_Tcl i2 lwidgets2 {*}$lst2] ne {}} {incr i2}
       }
       incr lwlen [llength $lwidgets2]
       set lwidgets [linsert $lwidgets [expr {$i+1}] {*}$lwidgets2]
@@ -1934,7 +1938,7 @@ method Replace_chooser {r0 r1 r2 r3 args} {
       return $args
     }
   }
-  set inname [my MakeWidgetName $w $name $an]
+  set inname [my makeWidgetMethod $w $name $an]
   set name $n
   if {$view ne {}} {
     set tvname $inname
@@ -2056,7 +2060,7 @@ method Replace_bar {r0 r1 r2 r3 args} {
     return $args
   }
   lassign $args name neighbor posofnei rowspan colspan options1 attrs1
-  my MakeWidgetName $w $name
+  my makeWidgetMethod $w $name
   set name [lindex [my LowercaseWidgetName $name] 0]
   set wpar {}
   switch -glob -- [my ownWName $name] {
@@ -2168,7 +2172,7 @@ method Replace_bar {r0 r1 r2 r3 args} {
           set v1 [my Transname $but _$v1]
           if {[string is true -strict $ismeth]} {
             # -method option forces making "WidgetName" method from "widgetName"
-            my MakeWidgetName $w.$name [string totitle $v1 0 0]
+            my makeWidgetMethod $w.$name [string totitle $v1 0 0]
           }
         }
       }
@@ -2189,10 +2193,10 @@ method Replace_bar {r0 r1 r2 r3 args} {
     } elseif {$typ eq {menuBar}} {
       ;# menubar: making it here; filling it outside of 'pave window'
       if {[incr wasmenu]==1} {
-        set menupath [my MakeWidgetName $winname $name]
+        set menupath [my makeWidgetMethod $winname $name]
         menu $menupath -tearoff 0
       }
-      set menuitem [my MakeWidgetName $menupath $v1]
+      set menuitem [my makeWidgetMethod $menupath $v1]
       menu $menuitem -tearoff 0
       set ampos [string first & [string trimleft $v2  \{]]
       if {$ampos>=0} {append v2 " -underline $ampos"}
@@ -2297,7 +2301,7 @@ method LowercaseWidgetName {name} {
   # means that the appropriate methods will be created to access
   # their full pathes with a command `my Name`.
   # This method gets a "normal" name of widget accepted by Tk.
-  # See also: MakeWidgetName
+  # See also: makeWidgetMethod
 
   set root [my ownWName $name]
   list [string range $name 0 [string last . $name]][string tolower $root 0 0] $root
@@ -2372,14 +2376,14 @@ method DiaWidgetName {w} {
   # the current dialogue's frame path.
   # Useful in "input" dialogue when -method option is present
   # or widget names are uppercased.
-  # See also: MakeWidgetName, input
+  # See also: makeWidgetMethod, input
 
   if {[string index $w 0] eq {.}} {return $w}
   return $Dlgpath.fra.$w
 }
 #_______________________
 
-method MakeWidgetName {w name {an {}}} {
+method makeWidgetMethod {w name {an {}}} {
   # Makes an exported method named after root widget, if it's uppercased.
   #   w - name of root widget
   #   name - name of widget
@@ -2390,6 +2394,7 @@ method MakeWidgetName {w name {an {}}} {
   #   => method Entry1 {} {...}
   #   ...
   #   my Entry1  ;# instead of .win.fra1.fra2.fra3.Entry1
+  # Returns: full widget path.
 
   if {$an eq {-}} {
     set wnamefull "\[my DiaWidgetName $w\]"
@@ -2634,7 +2639,7 @@ method Post {w attrs} {
             set attr [subst $attr]
             lassign [::apave::extractOptions attr -tip {} -tooltip {} \
               -Attrs {}] tip t2 Attrs
-            set wt [my MakeWidgetName $w $fr]
+            set wt [my makeWidgetMethod $w $fr]
             if {[string match lab* $fr]} {
               set wid ttk::label
             } elseif {[string match laB* $fr]} {
@@ -3502,7 +3507,7 @@ method Window {w inplists} {
   }
   for {set i 0} {$i < $lwlen} {} {
     set lst1 [lindex $lwidgets $i]
-    if {[my Replace_Tcl i lwlen lwidgets {*}$lst1] ne {}} {incr i}
+    if {[my Replace_Tcl i lwidgets {*}$lst1] ne {}} {incr i}
   }
   # firstly, normalize all names that are "subwidgets" (.lab for fra.lab)
   # also, "+" for previous neighbors
@@ -3531,7 +3536,7 @@ method Window {w inplists} {
     }
     lassign $lst1 name neighbor posofnei rowspan colspan options1 attrs1
     lassign [my NormalizeName name i lwidgets] name wname
-    set wname [my MakeWidgetName $w $wname]
+    set wname [my makeWidgetMethod $w $wname]
     if {$colspan eq {} || $colspan eq {-}} {
       set colspan 1
       if {$rowspan eq {} || $rowspan eq {-}} {

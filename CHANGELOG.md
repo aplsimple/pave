@@ -1,6 +1,11 @@
 # Last changes:
 
 
+Version `4.8.0 (19 Nov'25)`
+
+  - NEW   : *prc* type for widget list
+
+
 Version `4.7.3 (24 Sep'25)`
 
   - CHANGE: Tcl's error messages are most informative
