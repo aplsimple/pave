@@ -1,6 +1,12 @@
 # Last changes:
 
 
+Version `4.8.1 (3 Dec'25)`
+
+  - NEW   : -tooltip of *spx* widget drops ranges in its tooltip, while -tip not
+  - CHANGE: package baltip 1.6.4
+
+
 Version `4.8.0 (19 Nov'25)`
 
   - NEW   : *prc* type for widget list

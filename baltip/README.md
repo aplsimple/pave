@@ -67,7 +67,7 @@ The `ttk::treeview` can have tips per item and/or column as well as for a whole 
 
  <img src="https://aplsimple.github.io/en/tcl/baltip/files/btip15.png" class="media" alt="">
 
-The `-command` option allows to display tips in a status bar instead of a balloon.
+The `-command` option allows to display tips in a status bar instead of a balloon. Or to display texts / images according to the tipped widgets.
 
  <img src="https://aplsimple.github.io/en/tcl/baltip/files/btip16.png" class="media" alt="">
 
@@ -247,6 +247,29 @@ For example:
     ::baltip::tip .menu "File actions" -index 0 -command {::Status %t}
     ::baltip::tip .menu "Help, hints, Q&A, about etc." -index 1 -command {::Status %t}
 
+For the notebook tabs, the command must include the *%a* argument which will be replaced by *baltip* with the pair of pathes - the notebook's and the tipped tab's. For example:
+
+    # This example is taken from apave_tests' test2_pave.tcl
+
+    proc ::ns::ChangeTab5Tip {args} {
+      lassign $args tabpath tabname
+      switch $tabname {
+        f5 {
+          # handle only 5th tab's tip
+          set tip "Color schemes\
+            \n  NOTE: at each exposition - new tip for this tab\
+            \n  which may depend on the app's current state:\
+            \n  $tabname: TIP #[incr ::Tab5_tipcnt]"
+        }
+        default {
+          # others remain unchanged
+          set tip [::baltip cget $tabpath -text]
+        }
+      }
+      return $tip
+    }
+    ::baltip tip .notebook.tab5 {Default tip} -command "::ns::ChangeTab5Tip %a"
+
 Also, this option can be used if you need to fire some code when the mouse pointer enters or leaves a GUI object.
 
 **Note**: the *baltip* is available for a few of GUI objects that have not &lt;Enter&gt; nor &lt;Leave&gt; bindings.
@@ -265,10 +288,11 @@ For example:
         puts "$::OBJsaved object ID=[set ::IDsaved] is left... unhighlighted..."
         unset ::OBJsaved
       }
-      if {$obj eq {}} return
-      set ::OBJsaved $obj
-      set ::IDsaved $ID
-      puts "Now processing $obj object with ID=$ID column=$column"
+      if {$obj ne {}} {
+        set ::OBJsaved $obj
+        set ::IDsaved $ID
+        puts "Now processing $obj object with ID=$ID column=$column"
+      }
       return {}  ;# means the proc executed and no tip needed
     }
     ::baltip::tip .listbox {Listbox %i} -command {::SomeProc {%t}}
@@ -312,7 +336,8 @@ The following options are special:
  * `-command` - a command to be executed, with `%t` (tip's text) and `%w` (widget's path) wildcards
  * `-maxexp` - maximum number of tip's expositions
  * `-focus` - path to widget to set focus on, after showing a tip
- * `-onmouse` - a command to be executed at clicking the balloon, with `%b` (mouse button number) and alike wildcards
+ * `-onmouse` - option of `baltip::showBalloon`: command to be executed at clicking the balloon, with `%b` (mouse button number) and alike wildcards
+ * `-balloonwindow` - option of `baltip::showBalloon`: path to window that is attached to the balloon ("." is default)
 
 If `-global yes` option is used alone, it applies all global options to all registered tips. If `-global yes` option is used along with other options, only those options are applied to all registered tips.
 
@@ -331,6 +356,7 @@ There may be useful to define options in *text* argument of *::baltip::tip*.
 For this, provide the *text* argument as a list of pairs of uppercased options' name / value including *-BALTIP* option for *tip*. For example:
 
     ::baltip tip .text "-BALTIP {Sort of diary, todos etc.} -MAXEXP 1"
+    ::baltip tip .notebook.tab5 {-BALTIP {} -COMMAND "::ns::ChangeTab5Tip %w %a"}
 
 As seen in the above examples, *baltip* can be used as Tcl ensemble, so that the commands may be shortened.
 
