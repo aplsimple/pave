@@ -206,9 +206,11 @@ The *normal* tip has no `-geometry` option because it's calculated by *baltip*, 
 
 By means of `-geometry` option you get a balloon message unrelated to any visible widget: it's parented by the toplevel window. The `-geometry` option has +X+Y form where X and Y are coordinates of the balloon.
 
+Though `::baltip::tip` can show balloons, there is a specific `::baltip::showBalloon` command for this.
+
 For example:
 
-    ::baltip::tip .win "It's a balloon at +1+100 (+X+Y) coordinates" \
+    ::baltip::showBalloon "It's a balloon at +1+100 (+X+Y) coordinates" \
       -geometry +1+100 -font {-weight bold -size 12} \
       -alpha 0.8 -fg white -bg black -per10 3000 -pause 1500 -fade 1500
 
@@ -225,7 +227,7 @@ For example:
     lassign [split [winfo geometry .win] x+] w h x y
     set geom "+([expr {$w+$x}]-W-4)+$y"
     set text "The balloon at the right edge of the window"
-    ::baltip tip .win $text -geometry $geom -pause 2000 -fade 2000
+    ::baltip showBalloon $text -geometry $geom -pause 2000 -fade 2000
 
 To show a balloon under the mouse pointer, e.g. on clicking, timeout, processing etc., the following call is used:
 
@@ -233,6 +235,7 @@ To show a balloon under the mouse pointer, e.g. on clicking, timeout, processing
 
 By default, `::baltip::showBalloon` displays the balloon under the mouse pointer. At that it regards `-geometry` option and ignores `-under, -shiftX, -shiftY` options.
 
+There may be problems with displaying balloons, mostly caused by their parent window. By default the parent window is ".". This can be changed with `-balloonwindow` option of `baltip::showBalloon` which sets a path to a window containing the balloon (e.g. `-balloonwindow .mywin`).
 
 ## Command
 
@@ -341,7 +344,7 @@ The following options are special:
  * `-maxexp` - maximum number of tip's expositions
  * `-focus` - path to widget to set focus on, after showing a tip
  * `-onmouse` - option of `baltip::showBalloon`: command to be executed at clicking the balloon, with `%b` (mouse button number) and alike wildcards
- * `-balloonwindow` - option of `baltip::showBalloon`: path to window that is attached to the balloon ("." is default)
+ * `-balloonwindow` - option of `baltip::showBalloon`: path to a window containing the balloon ("." is default)
 
 If `-global yes` option is used alone, it applies all global options to all registered tips. If `-global yes` option is used along with other options, only those options are applied to all registered tips.
 
