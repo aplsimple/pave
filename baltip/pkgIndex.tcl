@@ -235,7 +235,7 @@ To show a balloon under the mouse pointer, e.g. on clicking, timeout, processing
 
 By default, `::baltip::showBalloon` displays the balloon under the mouse pointer. At that it regards `-geometry` option and ignores `-under, -shiftX, -shiftY` options.
 
-There may be problems with displaying balloons, mostly caused by their parent window. By default the parent window is ".". This can be changed with `-balloonwindow` option of `baltip::showBalloon` which sets a path to a window containing the balloon (e.g. `-balloonwindow .mywin`).
+There may be problems with displaying a balloon, mostly caused by its parent window. By default the parent window is ".". This can be changed with `-balloonwindow` option of `baltip::showBalloon` which sets a path to a window containing the balloon (e.g. `-balloonwindow .mywin`).
 
 ## Command
 
