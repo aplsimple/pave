@@ -1,6 +1,11 @@
 # Last changes:
 
 
+Version `4.8.2 (10 Dec'25)`
+
+  - CHANGE: DiaWidgetName method (using Dlgpath variable)
+
+
 Version `4.8.1 (4 Dec'25)`
 
   - NEW   : -tooltip of *spx* widget drops ranges in its tooltip, while -tip not
