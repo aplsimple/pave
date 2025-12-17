@@ -1,6 +1,11 @@
 # Last changes:
 
 
+Version `4.8.3 (17 Dec'25)`
+
+  - CHANGE: package baltip 1.6.5
+
+
 Version `4.8.2 (10 Dec'25)`
 
   - CHANGE: DiaWidgetName method (using Dlgpath variable)

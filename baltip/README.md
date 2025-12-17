@@ -231,7 +231,9 @@ To show a balloon under the mouse pointer, e.g. on clicking, timeout, processing
 
 By default, `::baltip::showBalloon` displays the balloon under the mouse pointer. At that it regards `-geometry` option and ignores `-under, -shiftX, -shiftY` options.
 
-There may be problems with displaying a balloon, mostly caused by its parent window. By default the parent window is ".". This can be changed with `-balloonwindow` option of `baltip::showBalloon` which sets a path to a window containing the balloon (e.g. `-balloonwindow .mywin`).
+There may be problems with displaying a balloon, mostly caused by its parent window. By default the parent window is ".". This can be changed with `-balloonwindow` option of `baltip::showBalloon` (e.g. `-balloonwindow .mywin`). Also, `baltip::showBalloon` can mimic `baltip::tip` and be called as 
+
+    ::baltip::showBalloon parentwindow text ?options?
 
 # Command
 
@@ -340,7 +342,7 @@ The following options are special:
  * `-maxexp` - maximum number of tip's expositions
  * `-focus` - path to widget to set focus on, after showing a tip
  * `-onmouse` - option of `baltip::showBalloon`: command to be executed at clicking the balloon, with `%b` (mouse button number) and alike wildcards
- * `-balloonwindow` - option of `baltip::showBalloon`: path to a window containing the balloon ("." is default)
+ * `-balloonwindow` - option of `baltip::showBalloon`: path to a parent window of the balloon ("." is default)
 
 If `-global yes` option is used alone, it applies all global options to all registered tips. If `-global yes` option is used along with other options, only those options are applied to all registered tips.
 
