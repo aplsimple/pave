@@ -1,9 +1,10 @@
 # Last changes:
 
 
-Version `4.8.3 (17 Dec'25)`
+Version `4.8.4 (24 Dec'25)`
 
-  - CHANGE: package baltip 1.6.5
+  - DELETE: README.md of 3 subpackages, as available in their GH repos
+  - CHANGE: package baltip 1.6.6
 
 
 Version `4.8.2 (10 Dec'25)`

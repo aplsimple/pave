@@ -1,4 +1,4 @@
-package ifneeded baltip 1.6.5 [list source [file join $dir baltip.tcl]]
+package ifneeded baltip 1.6.6 [list source [file join $dir baltip.tcl]]
 
 namespace eval ::baltip {
   variable _ruff_preamble {
@@ -380,6 +380,8 @@ The *baltip* package has been developed with help of these kind people:
   * [Nicolas Bats](https://github.com/sl1200mk2) prompted to add canvas tags' tips, baltip::show procedure and tested *baltip* in MacOS
 
   * [Csaba Nemethi](https://www.nemethi.de/) sent several bug fixes and advices, especially on listbox, treeview and menu tips
+
+  * [Alexis Martin](https://en.wikipedia.org/wiki/Argentina) prompted to add error messages and helped to detect some issues
 
 ## Links
 
