@@ -1,4 +1,4 @@
-package ifneeded baltip 1.6.6 [list source [file join $dir baltip.tcl]]
+package ifneeded baltip 1.6.7 [list source [file join $dir baltip.tcl]]
 
 namespace eval ::baltip {
   variable _ruff_preamble {
@@ -235,7 +235,7 @@ To show a balloon under the mouse pointer, e.g. on clicking, timeout, processing
 
 By default, `::baltip::showBalloon` displays the balloon under the mouse pointer. At that it regards `-geometry` option and ignores `-under, -shiftX, -shiftY` options.
 
-There may be problems with displaying a balloon, mostly caused by its parent window. By default the parent window is ".". This can be changed with `-balloonwindow` option of `baltip::showBalloon` (e.g. `-balloonwindow .mywin`). Also, `baltip::showBalloon` can mimic `baltip::tip` and be called as 
+There may be problems with displaying a balloon, mostly caused by its parent window. By default the parent window is ".". This can be changed with `-balloonwindow` option of `baltip::showBalloon` (e.g. `-balloonwindow .mywin`). Also, `baltip::showBalloon` can mimic `baltip::tip` and be called as
 
     ::baltip::showBalloon parentwindow text ?options?
 
@@ -256,7 +256,7 @@ For example:
     ::baltip::tip .menu "File actions" -index 0 -command {::Status %t}
     ::baltip::tip .menu "Help, hints, Q&A, about etc." -index 1 -command {::Status %t}
 
-For the notebook tabs, the command must include the *%a* argument which will be replaced by *baltip* with the pair of pathes - the notebook's and the tipped tab's. For example:
+For the notebook tabs, the command must include the *%a* argument which will be replaced by *baltip* with the pair of paths - the notebook's and the tipped tab's. For example:
 
     # This example is taken from apave_tests' test2_pave.tcl
 

@@ -1,11 +1,11 @@
 # Last changes:
 
 
-Version `4.8.4 (27 Dec'25)`
+Version `4.8.4 (21 Jan'26)`
 
   - DELETE: README.md of 3 subpackages, as available in their GH repos
   - CHANGE: clearance (of transpops)
-  - CHANGE: package baltip 1.6.6
+  - CHANGE: package baltip 1.6.7
 
 
 Version `4.8.2 (10 Dec'25)`
