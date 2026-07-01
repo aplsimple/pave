@@ -1,6 +1,12 @@
 # Last changes:
 
 
+Version `4.9.0 (1 Jul'26)`
+
+  - BUGFIX: klnd: highlighting week numbers at weeks shared by years
+  - CHANGE: klnd.tcl: clock functions moved to obbit.tcl
+
+
 Version `4.8.4 (21 Jan'26)`
 
   - DELETE: README.md of 3 subpackages, as available in their GH repos
