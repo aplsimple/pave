@@ -1,10 +1,11 @@
 # Last changes:
 
 
-Version `4.9.0 (1 Jul'26)`
+Version `4.9.1 (8 Jul'26)`
 
-  - BUGFIX: klnd: highlighting week numbers at weeks shared by years
+  - BUGFIX: klnd: highlight week numbers at weeks shared by years
   - CHANGE: klnd.tcl: clock functions moved to obbit.tcl
+  - CHANGE: add catches for safe closing windows, when it's tardy
 
 
 Version `4.8.4 (21 Jan'26)`
