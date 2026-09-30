@@ -1276,7 +1276,7 @@ method SpanConfig {w rcnam rc rcspan opt val} {
   # row/column for their *span* options.
 
   for {set i $rc} {$i < ($rc + $rcspan)} {incr i} {
-    eval [grid ${rcnam}configure $w $i $opt $val]
+    grid ${rcnam}configure $w $i $opt $val
   }
 }
 #_______________________
@@ -1447,7 +1447,7 @@ method OptionCascade_add {w vname argl precom args} {
       if {$precom eq {}} {
         set adds {}
       } else {
-        set adds [eval {*}[string map [list \$ \\\$ \[ \\\[] \
+        set adds [my Eval {*}[string map [list \$ \\\$ \[ \\\[] \
           [string map [list %a $label] $precom]]]
       }
       set il [string last -checkvar $label]
@@ -1854,7 +1854,7 @@ method Replace_Tcl {r1 r2 args} {
       }
       set _lwidgets [lreplace $_lwidgets $_i $_i]
       set _inext [expr {$_i-1}]
-      eval [string map {%C {lwins $r2 [incr _inext] }} $_code]
+      my Eval [string map {%C {lwins $r2 [incr _inext] }} $_code]
     }
     prc {
       upvar 1 $r1 _i $r2 _lwidgets
@@ -2463,7 +2463,7 @@ method makePopup {w {isRO no} {istext no} {tearoff no} {addpop ""} {clearcom ""}
     $pop add command {*}[my iconA copy] -accelerator Ctrl+C -label Copy \
       -command "event generate $w <<Copy>>"
     if {$istext} {
-      eval [my popupHighlightCommands $pop $w]
+      my Eval [my popupHighlightCommands $pop $w]
       after idle "catch {[self] set_highlight_matches $w}"
     }
   } else {
@@ -2482,11 +2482,11 @@ method makePopup {w {isRO no} {istext no} {tearoff no} {addpop ""} {clearcom ""}
       $pop add command {*}[my iconA redo] -accelerator Ctrl+Shift+Z -label Redo \
         -command "::apave::eventOnText $w <<Redo>>"
       catch {
-        eval [my popupBlockCommands $pop $w]
-        eval [my popupHighlightCommands $pop $w]
+        my Eval [my popupBlockCommands $pop $w]
+        my Eval [my popupHighlightCommands $pop $w]
         if {$addpop ne {}} {
           lassign $addpop com par1 par2
-          eval [my $com $pop $w {*}$par1 {*}$par2]
+          my Eval [my $com $pop $w {*}$par1 {*}$par2]
         }
         after idle "catch {[self] set_highlight_matches $w}"
         after idle [list catch [my setTextBinds $w]]
@@ -3623,8 +3623,10 @@ method Window {w inplists} {
 #_______________________
 
 method Eval {args} {
+  # Attempt to diminish eval's costs.
+  #   args - Tcl command and arguments (uplevel's level can precede them)
 
-  eval {*}$args
+  uplevel {*}$args
 }
 #_______________________
 

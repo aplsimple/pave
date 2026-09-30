@@ -1,6 +1,11 @@
 # Last changes:
 
 
+Version `4.9.2 (30 Sep'26)`
+
+  - NEW   : Eval method (attempt to diminish eval's costs)
+
+
 Version `4.9.1 (8 Jul'26)`
 
   - BUGFIX: klnd: highlight week numbers at weeks shared by years
