@@ -1,10 +1,11 @@
 # Last changes:
 
 
-Version `4.9.3 (7 Oct'26)`
+Version `4.9.4 (11 Nov'26)`
 
-  - CHANGE : Eval method -> apave::Eval proc
-  - CHANGE : VisitedLab, HoverLab -> visitedLab, hoverLab methods
+  - CHANGE: Eval method -> apave::Eval proc
+  - CHANGE: VisitedLab, HoverLab -> visitedLab, hoverLab methods
+  - CHANGE: package baltip 1.7.0
 
 
 Version `4.9.2 (30 Sep'26)`

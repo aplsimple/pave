@@ -6,7 +6,7 @@
 # License: MIT.
 ###########################################################
 
-package provide baltip 1.6.7
+package provide baltip 1.7.0
 
 # ________________________ Variables _________________________ #
 
@@ -612,12 +612,13 @@ proc ::baltip::my::ShowWindow {win} {
   set w [winfo parent $win]
   set px [winfo pointerx .]
   set py [winfo pointery .]
+  set py0 $py
   set width [winfo reqwidth $win.label]
   set height [winfo reqheight $win.label]
   set ady 0
-  if {[catch {set wheight [winfo height $w]}]} {
-    set wheight 0
-  } else {
+  # the widget's bottom matters only for a tip under the widget (or a balloon):
+  # for a tip under the pointer, it costs a "winfo containing" per pixel for nothing
+  if {($geo ne {} || $under>=0) && ![catch {set wheight [winfo height $w]}]} {
     for {set i 0} {$i<$wheight} {incr i} {  ;# find the widget's bottom
       incr py
       incr ady
@@ -628,7 +629,7 @@ proc ::baltip::my::ShowWindow {win} {
     if {$shiftX ne {}} {
       set x [expr {$px + $shiftX}]
     } else {
-      set x [expr {max(1,$px - round($width / 2.0))}]
+      set x [expr {$px - round($width / 2.0)}]
     }
     set y [expr {$under>=0 ? ($py + $under) : ($py - $under - $ady)}]
     if {$shiftY ne {}} {incr y $shiftY}
@@ -637,13 +638,27 @@ proc ::baltip::my::ShowWindow {win} {
     set x [expr [string map "W $width" $x]]  ;# W to shift horizontally
     set y [expr [string map "H $height" $y]] ;# H to shift vertically
   }
-  # check for edges of screen incl. decors
-  set scrw [winfo vrootwidth .]
-  set scrh [winfo vrootheight .]
-  if {($x + $width) > $scrw}  {set x [expr {$scrw - $width - 1}]}
-  if {($y + $height) > $scrh} {set y [expr {$py - $height - 16}]}
-  set x [expr {max(0,$x)}]
-  set y [expr {max(0,$y)}]
+  # check for edges of screen incl. decors; the virtual root may not cover all
+  # monitors (on macOS, it's the main screen only): outside of it, the screen's
+  # edges are unknown to Tk
+  set vx [winfo vrootx .]
+  set vy [winfo vrooty .]
+  set scrw [expr {$vx + [winfo vrootwidth .]}]
+  set scrh [expr {$vy + [winfo vrootheight .]}]
+  if {$geo ne {} || ($px>=$vx && $px<$scrw && $py0>=$vy && $py0<$scrh)} {
+    if {($x + $width) > $scrw}  {set x [expr {$scrw - $width - 1}]}
+    if {($y + $height) > $scrh} {set y [expr {$py - $height - 16}]}
+    set x [expr {max($vx,$x)}]
+    set y [expr {max($vy,$y)}]
+  } elseif {![catch {set top [winfo toplevel $w]}]} {
+    # the host's toplevel stands for the pointer's screen
+    set tx [winfo rootx $top]
+    set tr [expr {$tx + [winfo width $top]}]
+    set tb [expr {[winfo rooty $top] + [winfo height $top]}]
+    if {($x + $width) > $tr} {set x [expr {$tr - $width - 1}]}
+    set x [expr {max($tx,$x)}]
+    if {($y + $height) > $tb} {set y [expr {$py - $height - 16}]}
+  }
   wm geometry $win [join  "$width x $height + $x + $y" {}]
   catch {wm deiconify $win ; raise $win}
 }
@@ -697,6 +712,10 @@ proc ::baltip::my::DoShow {w text force geo optvals} {
   }
   if {!$force && $geo eq {}} {
     if {![info exists ttdata(on,$w)] || !$ttdata(on,$w)} return
+    if {$widgetclass ne {Menu} && [winfo exists $win] && ![winfo ismapped $win]} {
+      # a tip never shown (its pending show was cancelled) mustn't block this one
+      catch {destroy $win}
+    }
     if {$widgetclass ne {Menu} && \
     ([winfo exists $win] || ![string match $w* [winfo containing $px $py]])} {
       return
@@ -722,6 +741,7 @@ proc ::baltip::my::DoShow {w text force geo optvals} {
   set ttdata(REGISTERED) $w
   if {$data(-fg) eq {}} {set data(-fg) black}
   if {$data(-bg) eq {}} {set data(-bg) #FBFB95}
+  catch {after cancel $ttdata(fading,$win)}  ;# the fading of the tip being replaced
   catch {destroy $win}
   toplevel $win -bg $data(-bg) -class Tooltip$w
   catch {wm withdraw $win}
@@ -814,10 +834,14 @@ proc ::baltip::my::Fade {win aint fint icount Un alpha show geo {geos ""} {w {}}
     [string is integer -strict $ttdata(maxexp,$w)]} {
       incr ttdata(maxexp,$w) -1
     }
-    update
-    catch {after cancel $ttdata(after)}
-    set ttdata(after) [after idle [list after $aint \
-      [list ::baltip::my::${Un}FadeNext $win $aint $fint $icount $alpha $show $geo $geos]]]
+    # idle tasks only: a full update would run pending events (clicks, <Enter>
+    # on other widgets...) from inside this timer
+    update idletasks
+    # a timer of its own per tip: ttdata(after) holds the pending show of the
+    # hovered widget, which a fading tip (e.g. an eternal one) mustn't cancel
+    catch {after cancel $ttdata(fading,$win)}
+    set ttdata(fading,$win) [after $aint \
+      [list ::baltip::my::${Un}FadeNext $win $aint $fint $icount $alpha $show $geo $geos]]
   }
 }
 #_______________________
@@ -835,6 +859,7 @@ proc ::baltip::my::FadeNext {w aint fint icount alpha show geo {geos ""}} {
   # See also: Fade
 
   variable ttdata
+  unset -nocomplain ttdata(fading,$w)
   incr icount -1
   if {$show} {ShowWindow $w}
   set show 0
@@ -877,6 +902,8 @@ proc ::baltip::my::UnFadeNext {w aint fint icount alpha show geo {geos ""}} {
   #   geos - not used (here just for compliance with Fade)
   # See also: Fade
 
+  variable ttdata
+  unset -nocomplain ttdata(fading,$w)
   incr icount
   set al [expr {min($alpha,$icount*1.5/$fint)}]
   if {$al<$alpha && [catch {wm attributes $w -alpha $al}]} {set al 1}
